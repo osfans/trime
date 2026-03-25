@@ -53,8 +53,7 @@ class GeneralStyleTest :
                     generalStyle.autoCaps shouldBe ""
                     generalStyle.candidateBorder shouldBe 0
                     generalStyle.candidateFont shouldBe emptyList()
-                    generalStyle.commentPosition shouldBe GeneralStyle.CommentPosition.UNKNOWN
-
+                    generalStyle.commentPosition shouldBe GeneralStyle.CommentPosition.RIGHT
                     generalStyle.enterLabel shouldNotBe null
                     generalStyle.enterLabel.go shouldBe "go"
                 }
