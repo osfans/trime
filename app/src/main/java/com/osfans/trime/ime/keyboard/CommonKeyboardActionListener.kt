@@ -240,7 +240,7 @@ class CommonKeyboardActionListener {
             private fun handleTheme(arg: String) {
                 if (arg.isEmpty()) {
                     // 参数为空时，刷新当前主题
-                    ThemeManager.selectTheme(ThemeManager.activeTheme.configId)
+                    ThemeManager.selectTheme(ThemeManager.prefs.selectedTheme.getValue())
                 } else {
                     // 通过主题名称查找对应的配置ID并切换主题
                     ThemeManager.getAllThemes()

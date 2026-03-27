@@ -251,7 +251,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 }
             is RimeMessage.DeployMessage -> {
                 if (it.data == RimeMessage.DeployMessage.State.Success) {
-                    ThemeManager.selectTheme(ThemeManager.activeTheme.configId)
+                    ThemeManager.selectTheme(ThemeManager.prefs.selectedTheme.getValue())
                 }
             }
             else -> {}

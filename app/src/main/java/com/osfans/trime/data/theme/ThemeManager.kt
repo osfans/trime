@@ -1,14 +1,19 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2026 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.data.theme
 
 import android.content.res.Configuration
+import com.charleskorn.kaml.yamlMap
+import com.osfans.trime.core.Rime
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.ime.symbol.LiquidData
 import com.osfans.trime.util.WeakHashSet
+import timber.log.Timber
+import java.io.File
 
 object ThemeManager {
     fun interface OnThemeChangeListener {
@@ -47,8 +52,17 @@ object ThemeManager {
 
     val prefs = AppPrefs.defaultInstance().registerProvider(::ThemePrefs)
 
+    private fun getThemeById(id: String): Theme {
+        if (!Rime.deployRimeConfigFile(id, "config_version")) {
+            Timber.w("Failed to deploy theme config file '$id.yaml'")
+        }
+        val file = File(DataManager.resolveDeployedResourcePath(id))
+        val node = ThemeFilesManager.yaml.parseToYamlNode(file.readText()).yamlMap
+        return Theme.decode(node)
+    }
+
     private fun evaluateActiveTheme(): Theme {
-        val newTheme = Theme.decodeByConfigId(prefs.selectedTheme.getValue())
+        val newTheme = getThemeById(prefs.selectedTheme.getValue())
         KeyActionManager.resetCache()
         FontManager.resetCache(newTheme)
         ColorManager.switchTheme(newTheme)
@@ -62,12 +76,12 @@ object ThemeManager {
     }
 
     fun selectTheme(configId: String) {
-        val theme = Theme.decodeByConfigId(configId)
+        val theme = getThemeById(configId)
         KeyActionManager.resetCache()
         FontManager.resetCache(theme)
         ColorManager.switchTheme(theme)
         LiquidData.init(theme)
         activeTheme = theme
-        prefs.selectedTheme.setValue(theme.configId)
+        prefs.selectedTheme.setValue(configId)
     }
 }

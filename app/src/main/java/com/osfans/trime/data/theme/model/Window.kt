@@ -1,15 +1,16 @@
 /*
- * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-FileCopyrightText: 2015 - 2026 Rime community
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 package com.osfans.trime.data.theme.model
 
 import android.os.Parcelable
+import com.charleskorn.kaml.YamlMap
+import com.osfans.trime.util.getFloat
+import com.osfans.trime.util.getInt
 import kotlinx.parcelize.Parcelize
-import kotlinx.serialization.Serializable
 
-@Serializable
 @Parcelize
 data class Window(
     val insets: Padding = Padding(4, 4),
@@ -20,18 +21,46 @@ data class Window(
     val foreground: Foreground = Foreground(),
 ) : Parcelable {
 
-    @Serializable
     @Parcelize
     data class Padding(
         val vertical: Int = 0,
         val horizontal: Int = 0,
-    ) : Parcelable
+    ) : Parcelable {
+        companion object {
+            fun decode(node: YamlMap?): Padding = Padding(
+                vertical = node.getInt("vertical"),
+                horizontal = node.getInt("horizontal"),
+            )
+        }
+    }
 
-    @Serializable
     @Parcelize
     data class Foreground(
         val labelFontSize: Float = 20f,
         val textFontSize: Float = 20f,
         val commentFontSize: Float = 20f,
-    ) : Parcelable
+    ) : Parcelable {
+        companion object {
+            fun decode(node: YamlMap?): Foreground = Foreground(
+                labelFontSize = node.getFloat("label_font_size", 20f),
+                textFontSize = node.getFloat("text_font_size", 20f),
+                commentFontSize = node.getFloat("comment_font_size", 20f),
+            )
+        }
+    }
+
+    companion object {
+        fun decode(node: YamlMap?): Window = Window(
+            insets = node?.get<YamlMap>("insets")?.let {
+                Padding.decode(it)
+            } ?: Padding(4, 4),
+            itemPadding = node?.get<YamlMap>("item_padding")?.let {
+                Padding.decode(it)
+            } ?: Padding(2, 4),
+            minWidth = node.getInt("min_width"),
+            cornerRadius = node.getFloat("corner_radius"),
+            alpha = node.getFloat("alpha", 1f),
+            foreground = Foreground.decode(node?.get<YamlMap>("foreground")),
+        )
+    }
 }
