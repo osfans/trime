@@ -1,26 +1,19 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2026 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.data.soundeffect
 
-import com.charleskorn.kaml.Yaml
-import com.charleskorn.kaml.YamlConfiguration
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.util.FileUtils
+import com.osfans.trime.util.yaml.Yaml
 import timber.log.Timber
 import java.io.File
 
 object SoundEffectManager {
-    private val yaml =
-        Yaml(
-            configuration =
-            YamlConfiguration(
-                strictMode = false,
-            ),
-        )
 
     private val userDir: File
         get() {
@@ -33,18 +26,18 @@ object SoundEffectManager {
         val files = userDir.listFiles { f -> f.name.endsWith("sound.yaml") }
         return files
             ?.mapNotNull decode@{ f ->
-                val effect =
-                    runCatching {
-                        val origin = yaml.decodeFromString(SoundEffect.serializer(), f.readText())
-                        if (origin.name.isEmpty()) {
-                            origin.copy(name = f.name.substringBefore('.'))
-                        } else {
-                            origin
-                        }
-                    }.getOrElse { e ->
-                        Timber.w("Failed to decode sound effect file ${f.absolutePath}: ${e.message}")
-                        return@decode null
+                val effect = try {
+                    val node = Yaml.parseToYamlNode(f.bufferedReader().readText())
+                    val result = SoundEffect.decode(node)
+                    if (result.name.isEmpty()) {
+                        result.copy(name = f.name.substringBefore("."))
+                    } else {
+                        result
                     }
+                } catch (e: Exception) {
+                    Timber.w(e, "Failed to decode sound effect descriptor '${f.absolutePath}'")
+                    null
+                }
                 return@decode effect
             }?.toMutableList() ?: mutableListOf()
     }

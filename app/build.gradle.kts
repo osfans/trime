@@ -178,7 +178,6 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.flexbox)
     implementation(libs.bravh)
-    implementation(libs.kaml)
     implementation(libs.timber)
     implementation(libs.xxpermissions)
     implementation(libs.kodein.di)

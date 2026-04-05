@@ -32,7 +32,6 @@ androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version = "1.
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version = "2.9.1" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version = "3.0.0" }
 bravh = { module = "io.github.cymchad:BaseRecyclerViewAdapterHelper4", version = "4.3.2" }
-kaml = { module = "com.charleskorn.kaml:kaml", version = "0.104.0" }
 timber = { module = "com.jakewharton.timber:timber", version = "5.0.1" }
 xxpermissions = { module = "com.github.getActivity:XXPermissions", version = "18.5" }
 iconics-core = { module = "com.mikepenz:iconics-core", version.ref = "iconics" }
