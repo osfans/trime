@@ -6,12 +6,13 @@
 package com.osfans.trime.data.theme
 
 import android.content.res.Configuration
-import com.charleskorn.kaml.yamlMap
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.ime.symbol.LiquidData
 import com.osfans.trime.util.WeakHashSet
+import com.osfans.trime.util.yaml.Yaml
+import com.osfans.trime.util.yaml.mapping
 import timber.log.Timber
 import java.io.File
 
@@ -57,8 +58,8 @@ object ThemeManager {
             Timber.w("Failed to deploy theme config file '$id.yaml'")
         }
         val file = File(DataManager.resolveDeployedResourcePath(id))
-        val node = ThemeFilesManager.yaml.parseToYamlNode(file.readText()).yamlMap
-        return Theme.decode(node)
+        val node = Yaml.parseToYamlNode(file.readText())
+        return Theme.decode(node.mapping!!)
     }
 
     private fun evaluateActiveTheme(): Theme {

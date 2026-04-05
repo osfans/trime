@@ -6,10 +6,11 @@
 package com.osfans.trime.data.theme.model
 
 import android.os.Parcelable
-import com.charleskorn.kaml.YamlMap
-import com.osfans.trime.util.getBool
-import com.osfans.trime.util.getString
-import com.osfans.trime.util.getStringList
+import com.osfans.trime.util.yaml.Node
+import com.osfans.trime.util.yaml.boolean
+import com.osfans.trime.util.yaml.get
+import com.osfans.trime.util.yaml.sequence
+import com.osfans.trime.util.yaml.string
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -32,23 +33,23 @@ data class PresetKey(
     val send: String = "",
 ) : Parcelable {
     companion object {
-        fun decode(node: YamlMap): PresetKey = PresetKey(
-            command = node.getString("command"),
-            option = node.getString("option"),
-            select = node.getString("select"),
-            toggle = node.getString("toggle"),
-            label = node.getString("label"),
-            preview = node.getScalar("preview")?.content,
-            shiftLock = node.getString("shift_lock"),
-            commit = node.getString("commit"),
-            text = node.getString("text"),
-            sticky = node.getBool("sticky"),
-            repeatable = node.getBool("repeatable"),
-            slideCursor = node.getBool("slide_cursor"),
-            slideDelete = node.getBool("slide_delete"),
-            functional = node.getBool("functional"),
-            states = node.getStringList("states") ?: emptyList(),
-            send = node.getString("send"),
+        fun decode(node: Node.Mapping): PresetKey = PresetKey(
+            command = node["command"]?.string ?: "",
+            option = node["option"]?.string ?: "",
+            select = node["select"]?.string ?: "",
+            toggle = node["toggle"]?.string ?: "",
+            label = node["label"]?.string ?: "",
+            preview = node["preview"]?.string,
+            shiftLock = node["shift_lock"]?.string ?: "",
+            commit = node["commit"]?.string ?: "",
+            text = node["text"]?.string ?: "",
+            sticky = node["sticky"]?.boolean ?: false,
+            repeatable = node["repeatable"]?.boolean ?: false,
+            slideCursor = node["slide_cursor"]?.boolean ?: false,
+            slideDelete = node["slide_delete"]?.boolean ?: false,
+            functional = node["functional"]?.boolean ?: false,
+            states = node["states"]?.sequence?.mapNotNull(Node::string) ?: emptyList(),
+            send = node["send"]?.string ?: "",
         )
     }
 }

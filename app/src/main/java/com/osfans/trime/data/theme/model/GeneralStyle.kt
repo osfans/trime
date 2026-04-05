@@ -6,13 +6,14 @@
 package com.osfans.trime.data.theme.model
 
 import android.os.Parcelable
-import com.charleskorn.kaml.YamlMap
-import com.osfans.trime.util.getBool
-import com.osfans.trime.util.getEnum
-import com.osfans.trime.util.getFloat
-import com.osfans.trime.util.getInt
-import com.osfans.trime.util.getString
-import com.osfans.trime.util.getStringList
+import com.osfans.trime.util.yaml.Node
+import com.osfans.trime.util.yaml.boolean
+import com.osfans.trime.util.yaml.enum
+import com.osfans.trime.util.yaml.float
+import com.osfans.trime.util.yaml.get
+import com.osfans.trime.util.yaml.int
+import com.osfans.trime.util.yaml.sequence
+import com.osfans.trime.util.yaml.string
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -93,78 +94,86 @@ data class GeneralStyle(
         val default: String = "default",
     ) : Parcelable {
         companion object {
-            fun decode(node: YamlMap?): EnterLabel = EnterLabel(
-                go = node.getString("go", "go"),
-                done = node.getString("done", "done"),
-                next = node.getString("next", "next"),
-                pre = node.getString("pre", "pre"),
-                search = node.getString("search", "search"),
-                send = node.getString("send", "send"),
-                default = node.getString("default", "default"),
+            fun decode(node: Node?): EnterLabel = EnterLabel(
+                go = node?.get("go")?.string ?: "go",
+                done = node?.get("done")?.string ?: "done",
+                next = node?.get("next")?.string ?: "next",
+                pre = node?.get("pre")?.string ?: "pre",
+                search = node?.get("search")?.string ?: "search",
+                send = node?.get("send")?.string ?: "send",
+                default = node?.get("default")?.string ?: "default",
             )
         }
     }
 
     companion object {
-        fun decode(node: YamlMap): GeneralStyle = GeneralStyle(
-            autoCaps = node.getBool("auto_caps"),
-            candidateBorder = node.getInt("candidate_border"),
-            candidateBorderRound = node.getFloat("candidate_border_round"),
-            candidateFont = node.getStringList("candidate_font") ?: emptyList(),
-            candidatePadding = node.getInt("candidate_padding"),
-            candidateSpacing = node.getFloat("candidate_spacing"),
-            candidateTextSize = node.getFloat("candidate_text_size", 15f),
-            candidateTextVerticalBias = node.getFloat("candidate_text_vertical_bias", 1.0f),
-            candidateViewHeight = node.getInt("candidate_view_height", 28),
-            candidateCornerRadius = node.getFloat("candidate_corner_radius"),
-            commentFont = node.getStringList("comment_font") ?: emptyList(),
-            commentHeight = node.getInt("comment_height", 12),
-            commentPosition = node.getEnum<CommentPosition>("comment_position", CommentPosition.RIGHT),
-            commentTextSize = node.getFloat("comment_text_size", 10f),
-            commentVerticalBias = node.getFloat("comment_vertical_bias", 0.0f),
-            hanbFont = node.getStringList("hanb_font") ?: emptyList(),
-            horizontalGap = node.getInt("horizontal_gap"),
-            keyboardPadding = node.getInt("keyboard_padding"),
-            keyboardPaddingLeft = node.getInt("keyboard_padding_left"),
-            keyboardPaddingRight = node.getInt("keyboard_padding_right"),
-            keyboardPaddingBottom = node.getInt("keyboard_padding_bottom"),
-            keyboardPaddingLand = node.getInt("keyboard_padding_land"),
-            keyboardPaddingLandBottom = node.getInt("keyboard_padding_land_bottom"),
-            keyFont = node.getStringList("key_font") ?: emptyList(),
-            keyBorder = node.getInt("key_border"),
-            keyHeight = node.getInt("key_height"),
-            keyLongTextSize = node.getFloat("key_long_text_size", 15f),
-            keyTextSize = node.getFloat("key_text_size", 15f),
-            keyTextOffsetX = node.getFloat("key_text_offset_x"),
-            keyTextOffsetY = node.getFloat("key_text_offset_y"),
-            keySymbolOffsetX = node.getFloat("key_symbol_offset_x"),
-            keySymbolOffsetY = node.getFloat("key_symbol_offset_y"),
-            keyHintOffsetX = node.getFloat("key_hint_offset_x"),
-            keyHintOffsetY = node.getFloat("key_hint_offset_y"),
-            keyPressOffsetX = node.getFloat("key_press_offset_x"),
-            keyPressOffsetY = node.getFloat("key_press_offset_y"),
-            keyWidth = node.getFloat("key_width"),
-            labelTextSize = node.getFloat("label_text_size"),
-            labelFont = node.getStringList("label_font") ?: emptyList(),
-            latinFont = node.getStringList("latin_font") ?: emptyList(),
-            keyboardHeight = node.getInt("keyboard_height"),
-            keyboardHeightLand = node.getInt("keyboard_height_land"),
-            popupBottomMargin = node.getInt("popup_bottom_margin"),
-            popupWidth = node.getInt("popup_width"),
-            popupHeight = node.getInt("popup_height"),
-            popupKeyHeight = node.getInt("popup_key_height"),
-            popupFont = node.getStringList("popup_font") ?: emptyList(),
-            popupTextSize = node.getFloat("popup_text_size"),
-            resetASCIIMode = node.getBool("reset_ascii_mode"),
-            roundCorner = node.getFloat("round_corner"),
-            shadowRadius = node.getFloat("shadow_radius"),
-            symbolFont = node.getStringList("symbol_font") ?: emptyList(),
-            symbolTextSize = node.getFloat("symbol_text_size"),
-            textFont = node.getStringList("text_font") ?: emptyList(),
-            verticalGap = node.getInt("vertical_gap"),
-            backgroundFolder = node.getString("background_folder", "backgrounds"),
-            enterLabelMode = node.getInt("enter_label_mode"),
-            enterLabel = EnterLabel.decode(node.get<YamlMap>("enter_labels")),
+        fun decode(node: Node): GeneralStyle = GeneralStyle(
+            autoCaps = node["auto_caps"]?.boolean ?: false,
+            candidateBorder = node["candidate_border"]?.int ?: 0,
+            candidateBorderRound = node["candidate_border_round"]?.float ?: 0f,
+            candidateFont = node["candidate_font"]?.sequence?.mapNotNull { it.string } ?: emptyList(),
+            candidatePadding = node["candidate_padding"]?.int ?: 0,
+            candidateSpacing = node["candidate_spacing"]?.float ?: 0f,
+            candidateTextSize = node["candidate_text_size"]?.float ?: 15f,
+            candidateTextVerticalBias = node["candidate_text_vertical_bias"]?.float ?: 1f,
+            candidateViewHeight = node["candidate_view_height"]?.int ?: 28,
+            candidateCornerRadius = node["candidate_corner_radius"]?.float ?: 0f,
+            commentFont = node["comment_font"]?.sequence
+                ?.mapNotNull(Node::string) ?: emptyList(),
+            commentHeight = node["comment_height"]?.int ?: 12,
+            commentPosition = node["comment_position"]?.enum<CommentPosition>() ?: CommentPosition.RIGHT,
+            commentTextSize = node["comment_text_size"]?.float ?: 10f,
+            commentVerticalBias = node["comment_vertical_bias"]?.float ?: 0f,
+            hanbFont = node["hanb_font"]?.sequence
+                ?.mapNotNull(Node::string) ?: emptyList(),
+            horizontalGap = node["horizontal_gap"]?.int ?: 0,
+            keyboardPadding = node["keyboard_padding"]?.int ?: 0,
+            keyboardPaddingLeft = node["keyboard_padding_left"]?.int ?: 0,
+            keyboardPaddingRight = node["keyboard_padding_right"]?.int ?: 0,
+            keyboardPaddingBottom = node["keyboard_padding_bottom"]?.int ?: 0,
+            keyboardPaddingLand = node["keyboard_padding_land"]?.int ?: 0,
+            keyboardPaddingLandBottom = node["keyboard_padding_land_bottom"]?.int ?: 0,
+            keyFont = node["key_font"]?.sequence
+                ?.mapNotNull(Node::string) ?: emptyList(),
+            keyBorder = node["key_border"]?.int ?: 0,
+            keyHeight = node["key_height"]?.int ?: 0,
+            keyLongTextSize = node["key_long_text_size"]?.float ?: 15f,
+            keyTextSize = node["key_text_size"]?.float ?: 15f,
+            keyTextOffsetX = node["key_text_offset_x"]?.float ?: 0f,
+            keyTextOffsetY = node["key_text_offset_y"]?.float ?: 0f,
+            keySymbolOffsetX = node["key_symbol_offset_x"]?.float ?: 0f,
+            keySymbolOffsetY = node["key_symbol_offset_y"]?.float ?: 0f,
+            keyHintOffsetX = node["key_hint_offset_x"]?.float ?: 0f,
+            keyHintOffsetY = node["key_hint_offset_y"]?.float ?: 0f,
+            keyPressOffsetX = node["key_press_offset_x"]?.float ?: 0f,
+            keyPressOffsetY = node["key_press_offset_y"]?.float ?: 0f,
+            keyWidth = node["key_width"]?.float ?: 0f,
+            labelTextSize = node["label_text_size"]?.float ?: 0f,
+            labelFont = node["label_font"]?.sequence
+                ?.mapNotNull(Node::string) ?: emptyList(),
+            latinFont = node["latin_font"]?.sequence
+                ?.mapNotNull(Node::string) ?: emptyList(),
+            keyboardHeight = node["keyboard_height"]?.int ?: 0,
+            keyboardHeightLand = node["keyboard_height_land"]?.int ?: 0,
+            popupBottomMargin = node["popup_bottom_margin"]?.int ?: 0,
+            popupWidth = node["popup_width"]?.int ?: 0,
+            popupHeight = node["popup_height"]?.int ?: 0,
+            popupKeyHeight = node["popup_key_height"]?.int ?: 0,
+            popupFont = node["popup_font"]?.sequence
+                ?.mapNotNull(Node::string) ?: emptyList(),
+            popupTextSize = node["popup_text_size"]?.float ?: 0f,
+            resetASCIIMode = node["reset_ascii_mode"]?.boolean ?: false,
+            roundCorner = node["round_corner"]?.float ?: 0f,
+            shadowRadius = node["shadow_radius"]?.float ?: 0f,
+            symbolFont = node["symbol_font"]?.sequence
+                ?.mapNotNull(Node::string) ?: emptyList(),
+            symbolTextSize = node["symbol_text_size"]?.float ?: 0f,
+            textFont = node["text_font"]?.sequence
+                ?.mapNotNull(Node::string) ?: emptyList(),
+            verticalGap = node["vertical_gap"]?.int ?: 0,
+            backgroundFolder = node["background_folder"]?.string ?: "backgrounds",
+            enterLabelMode = node["enter_label_mode"]?.int ?: 0,
+            enterLabel = EnterLabel.decode(node["enter_labels"]),
         )
     }
 }

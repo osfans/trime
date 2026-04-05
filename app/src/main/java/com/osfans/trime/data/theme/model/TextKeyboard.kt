@@ -6,16 +6,15 @@
 package com.osfans.trime.data.theme.model
 
 import android.os.Parcelable
-import com.charleskorn.kaml.YamlMap
-import com.charleskorn.kaml.yamlMap
 import com.osfans.trime.ime.keyboard.KeyBehavior
-import com.osfans.trime.util.getBool
-import com.osfans.trime.util.getEnum
-import com.osfans.trime.util.getFloat
-import com.osfans.trime.util.getInt
-import com.osfans.trime.util.getList
-import com.osfans.trime.util.getString
-import com.osfans.trime.util.getStringList
+import com.osfans.trime.util.yaml.Node
+import com.osfans.trime.util.yaml.boolean
+import com.osfans.trime.util.yaml.enum
+import com.osfans.trime.util.yaml.float
+import com.osfans.trime.util.yaml.int
+import com.osfans.trime.util.yaml.mapping
+import com.osfans.trime.util.yaml.sequence
+import com.osfans.trime.util.yaml.string
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -86,37 +85,37 @@ data class TextKeyboard(
         val behaviors: Map<KeyBehavior, String>,
     ) : Parcelable {
         companion object {
-            fun decode(node: YamlMap): TextKey = TextKey(
-                width = node.getFloat("width"),
-                height = node.getFloat("height"),
-                roundCorner = node.getFloat("round_corner", -1f),
-                keyBorder = node.getInt("key_border", -1),
-                label = node.getString("label"),
-                labelSymbol = node.getString("label_symbol"),
-                hint = node.getString("hint"),
-                click = node.getString("click"),
-                sendBindings = node.getBool("send_bindings", true),
-                keyTextSize = node.getFloat("key_text_size"),
-                symbolTextSize = node.getFloat("symbol_text_size"),
-                keyTextOffsetX = node.getFloat("key_text_offset_x"),
-                keyTextOffsetY = node.getFloat("key_text_offset_y"),
-                keySymbolOffsetX = node.getFloat("key_symbol_offset_x"),
-                keySymbolOffsetY = node.getFloat("key_symbol_offset_y"),
-                keyHintOffsetX = node.getFloat("key_hint_offset_x"),
-                keyHintOffsetY = node.getFloat("key_hint_offset_y"),
-                keyPressOffsetX = node.getFloat("key_press_offset_x"),
-                keyPressOffsetY = node.getFloat("key_press_offset_y"),
-                keyTextColor = node.getString("key_text_color"),
-                keyBackColor = node.getString("key_back_color"),
-                keySymbolColor = node.getString("key_symbol_color"),
-                hlKeyTextColor = node.getString("hilited_key_text_color"),
-                hlKeyBackColor = node.getString("hilited_key_back_color"),
-                hlKeySymbolColor = node.getString("hilited_key_symbol_color"),
-                popup = node.getStringList("popup") ?: emptyList(),
+            fun decode(node: Node.Mapping): TextKey = TextKey(
+                width = node["width"]?.float ?: 0f,
+                height = node["height"]?.float ?: 0f,
+                roundCorner = node["round_corner"]?.float ?: -1f,
+                keyBorder = node["key_border"]?.int ?: -1,
+                label = node["label"]?.string ?: "",
+                labelSymbol = node["label_symbol"]?.string ?: "",
+                hint = node["hint"]?.string ?: "",
+                click = node["click"]?.string ?: "",
+                sendBindings = node["send_bindings"]?.boolean ?: true,
+                keyTextSize = node["key_text_size"]?.float ?: 0f,
+                symbolTextSize = node["symbol_text_size"]?.float ?: 0f,
+                keyTextOffsetX = node["key_text_offset_x"]?.float ?: 0f,
+                keyTextOffsetY = node["key_text_offset_y"]?.float ?: 0f,
+                keySymbolOffsetX = node["key_symbol_offset_x"]?.float ?: 0f,
+                keySymbolOffsetY = node["key_symbol_offset_y"]?.float ?: 0f,
+                keyHintOffsetX = node["key_hint_offset_x"]?.float ?: 0f,
+                keyHintOffsetY = node["key_hint_offset_y"]?.float ?: 0f,
+                keyPressOffsetX = node["key_press_offset_x"]?.float ?: 0f,
+                keyPressOffsetY = node["key_press_offset_y"]?.float ?: 0f,
+                keyTextColor = node["key_text_color"]?.string ?: "",
+                keyBackColor = node["key_back_color"]?.string ?: "",
+                keySymbolColor = node["key_symbol_color"]?.string ?: "",
+                hlKeyTextColor = node["hilited_key_text_color"]?.string ?: "",
+                hlKeyBackColor = node["hilited_key_back_color"]?.string ?: "",
+                hlKeySymbolColor = node["hilited_key_symbol_color"]?.string ?: "",
+                popup = node["popup"]?.sequence?.mapNotNull(Node::string) ?: emptyList(),
                 behaviors =
                 buildMap {
                     KeyBehavior.entries.forEach { entry ->
-                        val action = node.getString(entry.name.lowercase())
+                        val action = node[entry.name.lowercase()]?.string ?: ""
                         if (action.isNotEmpty() || entry == KeyBehavior.CLICK) {
                             put(entry, action)
                         }
@@ -127,37 +126,37 @@ data class TextKeyboard(
     }
 
     companion object {
-        fun decode(node: YamlMap): TextKeyboard = TextKeyboard(
-            name = node.getString("name"),
-            author = node.getString("author"),
-            width = node.getFloat("width"),
-            height = node.getFloat("height"),
-            keyboardHeight = node.getInt("keyboard_height"),
-            keyboardHeightLand = node.getInt("keyboard_height_land"),
-            autoHeightIndex = node.getInt("auto_height_index", -1),
-            horizontalGap = node.getInt("horizontal_gap"),
-            verticalGap = node.getInt("vertical_gap"),
-            roundCorner = node.getFloat("round_corner", -1f),
-            keyBorder = node.getInt("key_border", -1),
-            columns = node.getInt("columns", 30),
-            asciiMode = node.getInt("ascii_mode", 1) == 1,
-            resetAsciiMode = node.getBool("reset_ascii_mode", true),
-            labelTransform = node.getEnum("label_transform", LabelTransform.NONE),
-            lock = node.getBool("lock"),
-            asciiKeyboard = node.getString("ascii_keyboard"),
-            landscapeKeyboard = node.getString("landscape_keyboard"),
-            landscapeSplitPercent = node.getInt("landscape_split_percent"),
-            keyTextOffsetX = node.getFloat("key_text_offset_x"),
-            keyTextOffsetY = node.getFloat("key_text_offset_y"),
-            keySymbolOffsetX = node.getFloat("key_symbol_offset_x"),
-            keySymbolOffsetY = node.getFloat("key_symbol_offset_y"),
-            keyHintOffsetX = node.getFloat("key_hint_offset_x"),
-            keyHintOffsetY = node.getFloat("key_hint_offset_y"),
-            keyPressOffsetX = node.getFloat("key_press_offset_x"),
-            keyPressOffsetY = node.getFloat("key_press_offset_y"),
-            importPreset = node.getString("import_preset"),
-            keys = node.getList("keys") {
-                TextKey.decode(it.yamlMap)
+        fun decode(node: Node.Mapping): TextKeyboard = TextKeyboard(
+            name = node["name"]?.string ?: "",
+            author = node["author"]?.string ?: "",
+            width = node["width"]?.float ?: 0f,
+            height = node["height"]?.float ?: 0f,
+            keyboardHeight = node["keyboard_height"]?.int ?: 0,
+            keyboardHeightLand = node["keyboard_height_land"]?.int ?: 0,
+            autoHeightIndex = node["auto_height_index"]?.int ?: -1,
+            horizontalGap = node["horizontal_gap"]?.int ?: 0,
+            verticalGap = node["vertical_gap"]?.int ?: 0,
+            roundCorner = node["round_corner"]?.float ?: -1f,
+            keyBorder = node["key_border"]?.int ?: -1,
+            columns = node["columns"]?.int ?: 30,
+            asciiMode = (node["ascii_mode"]?.int ?: 1) == 1,
+            resetAsciiMode = node["reset_ascii_mode"]?.boolean ?: true,
+            labelTransform = node["label_transform"]?.enum<LabelTransform>() ?: LabelTransform.NONE,
+            lock = node["lock"]?.boolean ?: false,
+            asciiKeyboard = node["ascii_keyboard"]?.string ?: "",
+            landscapeKeyboard = node["landscape_keyboard"]?.string ?: "",
+            landscapeSplitPercent = node["landscape_split_percent"]?.int ?: 0,
+            keyTextOffsetX = node["key_text_offset_x"]?.float ?: 0f,
+            keyTextOffsetY = node["key_text_offset_y"]?.float ?: 0f,
+            keySymbolOffsetX = node["key_symbol_offset_x"]?.float ?: 0f,
+            keySymbolOffsetY = node["key_symbol_offset_y"]?.float ?: 0f,
+            keyHintOffsetX = node["key_hint_offset_x"]?.float ?: 0f,
+            keyHintOffsetY = node["key_hint_offset_y"]?.float ?: 0f,
+            keyPressOffsetX = node["key_press_offset_x"]?.float ?: 0f,
+            keyPressOffsetY = node["key_press_offset_y"]?.float ?: 0f,
+            importPreset = node["import_preset"]?.string ?: "",
+            keys = node["keys"]?.sequence?.mapNotNull {
+                TextKey.decode(it.mapping!!)
             } ?: emptyList(),
         )
     }

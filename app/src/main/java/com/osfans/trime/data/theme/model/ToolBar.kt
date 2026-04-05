@@ -6,14 +6,12 @@
 package com.osfans.trime.data.theme.model
 
 import android.os.Parcelable
-import com.charleskorn.kaml.YamlList
-import com.charleskorn.kaml.YamlMap
-import com.charleskorn.kaml.yamlMap
-import com.charleskorn.kaml.yamlScalar
-import com.osfans.trime.util.getFloat
-import com.osfans.trime.util.getInt
-import com.osfans.trime.util.getString
-import com.osfans.trime.util.getStringList
+import com.osfans.trime.util.yaml.Node
+import com.osfans.trime.util.yaml.float
+import com.osfans.trime.util.yaml.int
+import com.osfans.trime.util.yaml.mapping
+import com.osfans.trime.util.yaml.sequence
+import com.osfans.trime.util.yaml.string
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -44,13 +42,13 @@ data class ToolBar(
             val horizontalInset: Int = 4,
         ) : Parcelable {
             companion object {
-                fun decode(node: YamlMap): Background = Background(
-                    type = node.getString("type", "rectangle"),
-                    cornerRadius = node.getFloat("corner_radius", 10f),
-                    normal = node.getString("normal"),
-                    highlight = node.getString("highlight"),
-                    verticalInset = node.getInt("vertical_inset", 4),
-                    horizontalInset = node.getInt("horizontal_inset", 4),
+                fun decode(node: Node.Mapping): Background = Background(
+                    type = node["type"]?.string ?: "rectangle",
+                    cornerRadius = node["corner_radius"]?.float ?: 10f,
+                    normal = node["normal"]?.string ?: "",
+                    highlight = node["highlight"]?.string ?: "",
+                    verticalInset = node["vertical_inset"]?.int ?: 4,
+                    horizontalInset = node["horizontal_inset"]?.int ?: 4,
                 )
             }
         }
@@ -65,39 +63,41 @@ data class ToolBar(
             val padding: Int = 4,
         ) : Parcelable {
             companion object {
-                fun decode(node: YamlMap): Foreground = Foreground(
-                    style = node.getString("style"),
-                    optionStyles = node.getStringList("option_styles") ?: emptyList(),
-                    normal = node.getString("normal"),
-                    highlight = node.getString("highlight"),
-                    fontSize = node.getFloat("font_size", 18f),
-                    padding = node.getInt("padding", 4),
+                fun decode(node: Node.Mapping): Foreground = Foreground(
+                    style = node["style"]?.string ?: "",
+                    optionStyles = node["option_styles"]?.sequence
+                        ?.mapNotNull(Node::string) ?: emptyList(),
+                    normal = node["normal"]?.string ?: "",
+                    highlight = node["highlight"]?.string ?: "",
+                    fontSize = node["font_size"]?.float ?: 18f,
+                    padding = node["padding"]?.int ?: 4,
                 )
             }
         }
 
         companion object {
-            fun decode(node: YamlMap): Button = Button(
-                background = node.get<YamlMap>("background")?.let {
+            fun decode(node: Node.Mapping): Button = Button(
+                background = node["background"]?.mapping?.let {
                     Background.decode(it)
                 } ?: Background(),
-                foreground = node.get<YamlMap>("foreground")?.let {
+                foreground = node["foreground"]?.mapping?.let {
                     Foreground.decode(it)
                 } ?: Foreground(),
-                action = node.getString("action"),
-                longPressAction = node.getString("long_press_action"),
-                size = node.get<YamlList>("size")?.items?.mapNotNull { it.yamlScalar.content.toIntOrNull() } ?: emptyList(),
+                action = node["action"]?.string ?: "",
+                longPressAction = node["long_press_action"]?.string ?: "",
+                size = node["size"]?.sequence?.mapNotNull { it.int } ?: emptyList(),
             )
         }
     }
 
     companion object {
-        fun decode(node: YamlMap?): ToolBar = ToolBar(
-            primaryButton = node?.get<YamlMap>("primary_button")?.let { Button.decode(it) },
-            buttons = node?.get<YamlList>("buttons")?.items?.map { Button.decode(it.yamlMap) } ?: emptyList(),
-            buttonSpacing = node.getInt("button_spacing", 18),
-            buttonFont = node?.getStringList("button_font") ?: emptyList(),
-            backStyle = node.getString("back_style", "ic@arrow-left"),
+        fun decode(node: Node.Mapping?): ToolBar = ToolBar(
+            primaryButton = node?.get("primary_button")?.mapping?.let { Button.decode(it) },
+            buttons = node?.get("buttons")?.sequence?.map { Button.decode(it.mapping!!) } ?: emptyList(),
+            buttonSpacing = node?.get("button_spacing")?.int ?: 18,
+            buttonFont = node?.get("button_font")?.sequence
+                ?.mapNotNull(Node::string) ?: emptyList(),
+            backStyle = node?.get("back_style")?.string ?: "ic@arrow-left",
         )
     }
 }
