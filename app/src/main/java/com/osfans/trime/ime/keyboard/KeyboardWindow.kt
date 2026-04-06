@@ -109,7 +109,7 @@ class KeyboardWindow :
         lastKeyboardId = target
 
         val config = selectKeyboardConfig(target)
-        val keyboard = currentKeyboard ?: Keyboard(theme, config)
+        val keyboard = currentKeyboard ?: Keyboard(context, theme, config)
         val view = currentKeyboardView ?: KeyboardView(context, theme, keyboard, popup, service, keyboardActionListener, enterKeyDisplay)
 
         if (currentKeyboard == null) {
