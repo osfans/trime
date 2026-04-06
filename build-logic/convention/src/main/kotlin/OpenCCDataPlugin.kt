@@ -105,7 +105,7 @@ class OpenCCDataPlugin : Plugin<Project> {
                     project.providers.exec {
                         workingDir = output
                         commandLine = listOf("python3", merge) + sources + outputFilePath
-                    }
+                    }.result.get()
                 }
 
                 fun reverse(
@@ -115,7 +115,7 @@ class OpenCCDataPlugin : Plugin<Project> {
                     project.providers.exec {
                         workingDir = output
                         commandLine = listOf("python3", reverse, source, outputFilePath)
-                    }
+                    }.result.get()
                 }
                 for (generated in DICTS_GENERATED) {
                     val outputFile = output.resolve("$generated.txt")
