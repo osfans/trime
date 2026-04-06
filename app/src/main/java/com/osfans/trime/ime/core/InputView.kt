@@ -212,9 +212,9 @@ class InputView(
 
         add(
             preedit.ui.root,
-            lParams(matchParent, wrapContent) {
+            lParams(wrapContent, wrapContent) {
                 above(keyboardView)
-                centerHorizontally()
+                startOfParent()
             },
         )
 
