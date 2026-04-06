@@ -24,7 +24,9 @@ object UserDictManager {
                 Result.failure(Exception("Failed to restore"))
             }
         } finally {
-            tempFile.delete()
+            if (tempFile.exists()) {
+                tempFile.delete()
+            }
         }
     }
 
@@ -43,7 +45,9 @@ object UserDictManager {
                 )
             }
         } finally {
-            tempFile.delete()
+            if (tempFile.exists()) {
+                tempFile.delete()
+            }
         }
     }
 
@@ -51,18 +55,22 @@ object UserDictManager {
         val tempFile = File(appContext.cacheDir, textFile)
         try {
             val count = exportUserDict(dictName, tempFile.absolutePath)
-            tempFile.inputStream().use {
-                it.copyTo(dest)
-            }
-            return if (count >= 0) {
-                Result.success(count)
+            if (count >= 0 && tempFile.exists()) {
+                tempFile.inputStream().use {
+                    it.copyTo(dest)
+                }
+                return Result.success(count)
             } else {
-                Result.failure(
+                return Result.failure(
                     Exception("Failed to export '$dictName' to '$textFile'"),
                 )
             }
+        } catch (e: Exception) {
+            return Result.failure(e)
         } finally {
-            tempFile.delete()
+            if (tempFile.exists()) {
+                tempFile.delete()
+            }
         }
     }
 
