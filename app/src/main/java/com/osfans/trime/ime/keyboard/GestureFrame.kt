@@ -116,15 +116,9 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
                 val dx = x - startX
                 val dy = y - startY
 
-                if (!isLongPressed) {
-                    if (!swipeTriggered && (abs(dx) >= swipeTravel || abs(dy) >= swipeTravel)) {
-                        swipeTriggered = true
-                    }
-                }
-
                 onMove?.invoke(x, y, isLongPressed)
 
-                if ((isSlideCursor || isSlideDelete) && onSlide != null && !isLongPressed) {
+                if ((isSlideCursor || isSlideDelete) && onSlide != null && !isLongPressed && swipeTravel > 0) {
                     if (!slideActivated) {
                         if (abs(dx) >= swipeTravel) {
                             slideActivated = true
