@@ -7,6 +7,7 @@ package com.osfans.trime.ime.bar.ui
 import android.content.Context
 import android.view.View
 import com.osfans.trime.R
+import com.osfans.trime.data.theme.Theme
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.before
 import splitties.views.dsl.constraintlayout.centerVertically
@@ -19,6 +20,7 @@ import splitties.views.dsl.core.add
 
 class CandidateUi(
     override val ctx: Context,
+    theme: Theme,
     private val compatView: View,
 ) : Ui {
     val unrollButton =
@@ -39,7 +41,7 @@ class CandidateUi(
                 compatView,
                 lParams {
                     centerVertically()
-                    startOfParent()
+                    startOfParent(dp(theme.generalStyle.candidatePadding / 2))
                     before(unrollButton)
                 },
             )

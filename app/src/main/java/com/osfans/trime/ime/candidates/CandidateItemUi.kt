@@ -35,10 +35,10 @@ import splitties.views.dsl.constraintlayout.topToBottomOf
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
-import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.view
 import splitties.views.dsl.core.wrapContent
 import splitties.views.gravityCenter
+import splitties.views.horizontalPadding
 
 class CandidateItemUi(
     override val ctx: Context,
@@ -84,7 +84,7 @@ class CandidateItemUi(
         }
 
     private val content = constraintLayout {
-
+        horizontalPadding = dp(theme.generalStyle.candidatePadding)
         when (commentPosition) {
             GeneralStyle.CommentPosition.RIGHT -> {
                 add(
@@ -154,7 +154,7 @@ class CandidateItemUi(
          */
         add(
             content,
-            lParams(matchParent, matchParent) {
+            lParams(wrapContent, wrapContent) {
                 gravity = gravityCenter
             },
         )
@@ -175,6 +175,6 @@ class CandidateItemUi(
         comment.text = (if (commentPosition == GeneralStyle.CommentPosition.RIGHT) " " else "") + item.comment
         comment.setTextColor(cColor)
         comment.isGone = item.comment.isEmpty()
-        root.background = roundedRippleDrawable(hlBackColor, cornerRadius, contentColor)
+        content.background = roundedRippleDrawable(hlBackColor, cornerRadius, contentColor)
     }
 }

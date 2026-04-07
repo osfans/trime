@@ -7,8 +7,6 @@ package com.osfans.trime.ime.candidates.compact
 
 import android.content.Context
 import android.content.res.Configuration
-import android.graphics.drawable.ShapeDrawable
-import android.graphics.drawable.shapes.RectShape
 import android.view.View
 import android.widget.PopupMenu
 import androidx.core.text.bold
@@ -28,10 +26,10 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.InputBarDelegate
 import com.osfans.trime.ime.bar.UnrollButtonStateMachine
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
-import com.osfans.trime.ime.candidates.unrolled.decoration.FlexboxVerticalDecoration
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputDependencyManager
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
+import com.osfans.trime.ime.symbol.SpacesItemDecoration
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -40,6 +38,7 @@ import org.kodein.di.instance
 import splitties.dimensions.dp
 import splitties.views.dsl.recyclerview.recyclerView
 import kotlin.math.max
+import kotlin.math.roundToInt
 
 class CompactCandidateDelegate : InputBroadcastReceiver {
     private val di = InputDependencyManager.getInstance().di
@@ -142,15 +141,9 @@ class CompactCandidateDelegate : InputBroadcastReceiver {
         }
     }
 
-    private val separatorDrawable by lazy {
-        ShapeDrawable(RectShape()).apply {
-            val spacing = theme.generalStyle.candidateSpacing
-            val intrinsicSize = max(spacing, context.dp(spacing)).toInt()
-            intrinsicWidth = intrinsicSize
-            intrinsicHeight = intrinsicSize
-            paint.color = ColorManager.getColor("candidate_separator_color")
-        }
-    }
+    private val candidateSpacing = theme.generalStyle.candidateSpacing.let {
+        max(it, context.dp(it))
+    }.roundToInt()
 
     val view by lazy {
         object : RecyclerView(context) {
@@ -158,7 +151,7 @@ class CompactCandidateDelegate : InputBroadcastReceiver {
                 super.onSizeChanged(w, h, oldw, oldh)
                 if (fillStyle == CompactCandidateMode.AUTO_FILL) {
                     val maxSpanCount = maxSpanCountPref.getValue()
-                    layoutMinWidth = w / maxSpanCount - separatorDrawable.intrinsicWidth
+                    layoutMinWidth = w / maxSpanCount - candidateSpacing
                 }
             }
         }
@@ -166,7 +159,7 @@ class CompactCandidateDelegate : InputBroadcastReceiver {
             itemAnimator = null
             adapter = this@CompactCandidateDelegate.adapter
             layoutManager = this@CompactCandidateDelegate.layoutManager
-            addItemDecoration(FlexboxVerticalDecoration(separatorDrawable))
+            addItemDecoration(SpacesItemDecoration(candidateSpacing))
         }
     }
 
@@ -182,7 +175,7 @@ class CompactCandidateDelegate : InputBroadcastReceiver {
                 secondLayoutPassNeeded = false
             }
             CompactCandidateMode.AUTO_FILL -> {
-                layoutMinWidth = view.width / maxSpanCount - separatorDrawable.intrinsicWidth
+                layoutMinWidth = view.width / maxSpanCount - candidateSpacing
                 layoutFlexGrow = if (candidates.size < maxSpanCount) 0f else 1f
                 // [^1] total candidates count < maxSpanCount
                 secondLayoutPassNeeded = candidates.size < maxSpanCount

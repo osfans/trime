@@ -156,7 +156,7 @@ class InputBarDelegate : InputBroadcastReceiver {
     }
 
     private val candidateUi by lazy {
-        CandidateUi(context, candidate.view).apply {
+        CandidateUi(context, theme, candidate.view).apply {
             unrollButton.apply {
                 onSwipe = swipeDownHideKeyboardCallback
             }

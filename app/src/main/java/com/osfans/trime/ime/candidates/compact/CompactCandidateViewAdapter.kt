@@ -17,7 +17,6 @@ import com.osfans.trime.ime.candidates.CandidateViewHolder
 import splitties.dimensions.dp
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.wrapContent
-import splitties.views.setPaddingDp
 
 open class CompactCandidateViewAdapter(
     val theme: Theme,
@@ -63,8 +62,6 @@ open class CompactCandidateViewAdapter(
         val ui = CandidateItemUi(context, theme)
         ui.root.apply {
             minimumWidth = dp(40)
-            val size = theme.generalStyle.candidatePadding
-            setPaddingDp(size, 0, size, 0)
             layoutParams = FlexboxLayoutManager.LayoutParams(wrapContent, matchParent)
         }
         return CandidateViewHolder(ui)

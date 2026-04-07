@@ -117,7 +117,7 @@ data class GeneralStyle(
             candidateTextSize = node["candidate_text_size"]?.float ?: 15f,
             candidateTextVerticalBias = node["candidate_text_vertical_bias"]?.float ?: 1f,
             candidateViewHeight = node["candidate_view_height"]?.int ?: 28,
-            candidateCornerRadius = node["candidate_corner_radius"]?.float ?: 0f,
+            candidateCornerRadius = node["candidate_corner_radius"]?.float ?: 5f,
             commentFont = node["comment_font"]?.sequence
                 ?.mapNotNull(Node::string) ?: emptyList(),
             commentHeight = node["comment_height"]?.int ?: 12,
