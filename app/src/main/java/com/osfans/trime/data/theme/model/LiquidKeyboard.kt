@@ -67,57 +67,58 @@ data class LiquidKeyboard(
                 KeyBar(position = position, keys = keys)
             } ?: KeyBar(emptyList(), KeyBar.Position.BOTTOM)
             val keyboards =
-                node?.get("keyboards")?.sequence?.mapNotNull decode@{ node ->
-                    val id = node.string!!
-                    try {
-                        val keyboardNode = node[id]?.mapping
-                        val type = keyboardNode?.get("type")?.enum<LiquidData.Type>()
-                            ?: return@decode null
-                        val name = keyboardNode["name"]?.string ?: id
-                        val keysNode = keyboardNode["keys"]
-                        val keys = arrayListOf<KeyItem>()
-                        if (keysNode is Node.Sequence) {
-                            keysNode.forEach { item ->
-                                if (item is Node.Mapping) {
-                                    val map =
-                                        item.entries.associate {
-                                            it.key.string!! to it.value.string!!
+                node?.get("keyboards")?.sequence?.asSequence()
+                    ?.mapNotNull { it.string }
+                    ?.mapNotNull decode@{ id ->
+                        try {
+                            val keyboardNode = node[id]?.mapping
+                            val type = keyboardNode?.get("type")?.enum<LiquidData.Type>()
+                                ?: return@decode null
+                            val name = keyboardNode["name"]?.string ?: id
+                            val keysNode = keyboardNode["keys"]
+                            val keys = arrayListOf<KeyItem>()
+                            if (keysNode is Node.Sequence) {
+                                keysNode.forEach { item ->
+                                    if (item is Node.Mapping) {
+                                        val map =
+                                            item.entries.associate {
+                                                it.key.string!! to it.value.string!!
+                                            }
+                                        if (map.containsKey("click")) {
+                                            val clickText = map["click"] ?: ""
+                                            val labelText = map["label"] ?: ""
+                                            keys.add(KeyItem(clickText, labelText))
+                                        } else {
+                                            map.forEach { keys.add(KeyItem(it.key, it.value)) }
                                         }
-                                    if (map.containsKey("click")) {
-                                        val clickText = map["click"] ?: ""
-                                        val labelText = map["label"] ?: ""
-                                        keys.add(KeyItem(clickText, labelText))
-                                    } else {
-                                        map.forEach { keys.add(KeyItem(it.key, it.value)) }
+                                    } else if (item is Node.Scalar) {
+                                        keys.add(KeyItem(item.string))
                                     }
-                                } else if (item is Node.Scalar) {
-                                    keys.add(KeyItem(item.string))
+                                }
+                            } else {
+                                val value = keysNode?.string ?: ""
+                                if (type == LiquidData.Type.SINGLE) { // single data
+                                    value.splitWithSurrogates().forEach {
+                                        keys.add(KeyItem(it))
+                                    }
+                                } else { // simple keyboard data
+                                    value
+                                        .split("\n+".toRegex())
+                                        .filter { it.isNotEmpty() }
+                                        .forEach { keys.add(KeyItem(it)) }
                                 }
                             }
-                        } else {
-                            val value = keysNode?.string ?: ""
-                            if (type == LiquidData.Type.SINGLE) { // single data
-                                value.splitWithSurrogates().forEach {
-                                    keys.add(KeyItem(it))
-                                }
-                            } else { // simple keyboard data
-                                value
-                                    .split("\n+".toRegex())
-                                    .filter { it.isNotEmpty() }
-                                    .forEach { keys.add(KeyItem(it)) }
-                            }
+                            return@decode Keyboard(
+                                id = id,
+                                type = type,
+                                name = name,
+                                keys = keys,
+                            )
+                        } catch (e: Exception) {
+                            Timber.w(e, "Failed to decode LiquidKeyboard property 'keyboards'")
+                            return@decode null
                         }
-                        return@decode Keyboard(
-                            id = id,
-                            type = type,
-                            name = name,
-                            keys = keys,
-                        )
-                    } catch (e: Exception) {
-                        Timber.w(e, "Failed to decode LiquidKeyboard property 'keyboards'")
-                        return@decode null
-                    }
-                } ?: emptyList()
+                    }?.toList() ?: emptyList()
             return LiquidKeyboard(
                 singleWidth = node?.get("single_width")?.int ?: 0,
                 keyHeight = node?.get("key_height")?.int ?: 0,
