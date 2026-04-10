@@ -163,11 +163,12 @@ constructor(
         val contentHeight = viewHeight - paddingTop - paddingBottom
         measureTextBounds()
         val textWidth = textBounds.width()
+        val textHeight = textBounds.height()
 
         @SuppressLint("RtlHardcoded")
         val shouldAlignLeft = gravity and Gravity.HORIZONTAL_GRAVITY_MASK == Gravity.LEFT
 
-        if (textWidth > contentWidth) {
+        if (textWidth > contentWidth || textHeight > contentHeight) {
             when (scaleMode) {
                 Mode.None -> {
                     textScaleX = 1.0f
@@ -180,7 +181,9 @@ constructor(
                     translateX = calculateTranslateX(contentWidth, textWidth, textScaleX, shouldAlignLeft)
                 }
                 Mode.Proportional -> {
-                    val textScale = contentWidth.toFloat() / textWidth.toFloat()
+                    val textXScale = contentWidth.toFloat() / textWidth.toFloat()
+                    val textYScale = contentHeight.toFloat() / textHeight.toFloat()
+                    val textScale = min(textXScale, textYScale)
                     textScaleX = textScale
                     textScaleY = textScale
                     translateX = calculateTranslateX(contentWidth, textWidth, textScaleX, shouldAlignLeft)
