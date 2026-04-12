@@ -114,7 +114,7 @@ class Keyboard(
 
     /** Keyboard default ascii mode  */
     val asciiMode = selfConfig?.asciiMode ?: false
-    val resetAsciiMode = selfConfig?.resetAsciiMode ?: true
+    val resetAsciiMode = selfConfig?.resetAsciiMode ?: theme.generalStyle.resetASCIIMode
     var lastAsciiMode: Boolean = asciiMode
 
     val landscapeKeyboard: String? = selfConfig?.landscapeKeyboard

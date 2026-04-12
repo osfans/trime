@@ -105,6 +105,13 @@ class KeyboardWindow :
     }
 
     private fun attachKeyboard(target: String) {
+        currentKeyboard?.let {
+            val mode = rime.run { statusCached }.isAsciiMode
+
+            Timber.d("Leaving $currentKeyboardId with ascii_mode $mode, switching to $target")
+            it.lastAsciiMode = mode
+        }
+
         currentKeyboardId = target
         lastKeyboardId = target
 
