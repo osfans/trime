@@ -70,6 +70,8 @@ class OpenCCDataPlugin : Plugin<Project> {
                     "STPhrases",
                     "TSCharacters",
                     "TSPhrases",
+                    "TWPhrases",
+                    "TWPhrasesRev",
                     "TWVariants",
                     "TWVariantsRevPhrases",
                     "HKVariants",
@@ -79,7 +81,7 @@ class OpenCCDataPlugin : Plugin<Project> {
                     "JPShinjitaiPhrases",
                 )
 
-            private val DICTS_GENERATED = arrayOf("TWPhrases", "TWPhrasesRev", "TWVariantsRev", "HKVariantsRev", "JPVariantsRev")
+            private val DICTS_GENERATED = arrayOf("TWVariantsRev", "HKVariantsRev", "JPVariantsRev")
         }
 
         @TaskAction
@@ -94,19 +96,7 @@ class OpenCCDataPlugin : Plugin<Project> {
                     val basename = "$raw.txt"
                     dictionary.resolve(basename).copyTo(output.resolve(basename), overwrite = true)
                 }
-
-                val merge = resolve("scripts/merge.py").absolutePath
                 val reverse = resolve("scripts/reverse.py").absolutePath
-
-                fun merge(
-                    sources: List<String>,
-                    outputFilePath: String,
-                ) {
-                    project.providers.exec {
-                        workingDir = output
-                        commandLine = listOf("python3", merge) + sources + outputFilePath
-                    }.result.get()
-                }
 
                 fun reverse(
                     source: String,
@@ -117,24 +107,11 @@ class OpenCCDataPlugin : Plugin<Project> {
                         commandLine = listOf("python3", reverse, source, outputFilePath)
                     }.result.get()
                 }
-                for (generated in DICTS_GENERATED) {
-                    val outputFile = output.resolve("$generated.txt")
-                    if (generated == "TWPhrases") {
-                        val sources =
-                            arrayOf("TWPhrasesIT", "TWPhrasesName", "TWPhrasesOther").map {
-                                dictionary.resolve("$it.txt").absolutePath
-                            }
-                        merge(sources, outputFile.name)
-                    } else {
-                        val sourceName = generated.substringBefore("Rev")
-                        val source =
-                            if (sourceName == "TWPhrases") {
-                                output
-                            } else {
-                                dictionary
-                            }.resolve("$sourceName.txt")
-                        reverse(source.absolutePath, outputFile.name)
-                    }
+                for (dict in DICTS_GENERATED) {
+                    val inputName = dict.substringBefore("Rev")
+                    val inputFile = dictionary.resolve("$inputName.txt")
+                    val outputFile = output.resolve("$dict.txt")
+                    reverse(inputFile.absolutePath, outputFile.name)
                 }
             }
         }

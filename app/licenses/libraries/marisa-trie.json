@@ -1,6 +1,6 @@
 {
     "uniqueId": "s-yata/marisa-trie",
-    "artifactVersion": "0.2.6",
+    "artifactVersion": "0.3.1",
     "description": "A static and space-efficient trie data structure",
     "name": "s-yata/marisa-trie",
     "website": "https://github.com/s-yata/marisa-trie",
