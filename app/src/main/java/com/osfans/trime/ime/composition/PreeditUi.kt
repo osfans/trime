@@ -7,7 +7,6 @@ package com.osfans.trime.ime.composition
 
 import android.content.Context
 import android.text.Spanned
-import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
 import android.view.MotionEvent
 import android.view.View
@@ -31,7 +30,6 @@ open class PreeditUi(
 ) : Ui {
     private val textColor = ColorManager.getColor("text_color")
     private val highlightTextColor = ColorManager.getColor("hilited_text_color")
-    private val highlightBackColor = ColorManager.getColor("hilited_back_color")
 
     val preedit =
         view(::PreeditTextView) {
@@ -56,7 +54,6 @@ open class PreeditUi(
         if (!preedit.isNullOrEmpty()) {
             append(preedit)
             setSpan(ForegroundColorSpan(highlightTextColor), selStart, selEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-            setSpan(BackgroundColorSpan(highlightBackColor), selStart, selEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
         }
     }
 
@@ -71,10 +68,10 @@ open class PreeditUi(
         visibility = if (visible) View.VISIBLE else View.GONE
     }
 
-    fun update(inputComposition: CompositionProto) {
-        val string = inputComposition.toSpannedString()
-        val cursorPos = inputComposition.cursorPos
-        val hasPreedit = inputComposition.length > 0
+    fun update(composition: CompositionProto) {
+        val string = composition.toSpannedString()
+        val cursorPos = composition.cursorPos
+        val hasPreedit = composition.length > 0
         visible = hasPreedit
         if (!visible) {
             updateTextView("", false)
