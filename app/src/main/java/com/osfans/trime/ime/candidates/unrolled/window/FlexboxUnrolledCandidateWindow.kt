@@ -1,6 +1,7 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2026 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.ime.candidates.unrolled.window
 
@@ -18,7 +19,6 @@ import com.osfans.trime.ime.candidates.unrolled.decoration.FlexboxHorizontalDeco
 import com.osfans.trime.ime.window.BoardWindow
 import splitties.dimensions.dp
 import splitties.views.dsl.core.wrapContent
-import splitties.views.setPaddingDp
 
 class FlexboxUnrolledCandidateWindow : BaseUnrolledCandidateWindow() {
     override fun exitAnimation(nextWindow: BoardWindow): Transition = Slide().apply {
@@ -33,11 +33,10 @@ class FlexboxUnrolledCandidateWindow : BaseUnrolledCandidateWindow() {
             ): CandidateViewHolder = super.onCreateViewHolder(parent, viewType).apply {
                 itemView.apply {
                     minimumWidth = dp(40)
-                    val size = theme.generalStyle.candidatePadding
-                    setPaddingDp(size, 0, size, 0)
+                    val itemHeight = dp(theme.generalStyle.run { candidateViewHeight + commentHeight })
                     layoutParams =
                         FlexboxLayoutManager
-                            .LayoutParams(wrapContent, dp(theme.generalStyle.run { candidateViewHeight + commentHeight }))
+                            .LayoutParams(wrapContent, itemHeight)
                             .apply { flexGrow = 1f }
                 }
             }
