@@ -26,6 +26,7 @@ import com.osfans.trime.ime.candidates.compact.CompactCandidateDelegate
 import com.osfans.trime.ime.candidates.unrolled.CandidatesPagingSource
 import com.osfans.trime.ime.candidates.unrolled.PagingCandidateViewAdapter
 import com.osfans.trime.ime.candidates.unrolled.UnrolledCandidateLayout
+import com.osfans.trime.ime.core.InputView
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.window.BoardWindow
@@ -43,6 +44,7 @@ abstract class BaseUnrolledCandidateWindow :
     protected val service: TrimeInputMethodService by di.instance()
     protected val rime: RimeSession by di.instance()
     protected val theme: Theme by di.instance()
+    private val inputView: InputView by di.instance()
     private val bar: InputBarDelegate by di.instance()
     private val windowManager: BoardWindowManager by di.instance()
     private val compactCandidate: CompactCandidateDelegate by di.instance()
@@ -127,7 +129,7 @@ abstract class BaseUnrolledCandidateWindow :
                 rime.launchOnReady { it.selectCandidate(holder.idx, global = true) }
             }
             setOnLongClickListener { view ->
-                compactCandidate.showCandidateAction(holder.idx, holder.text, view)
+                inputView.showCandidateActionMenu(holder.idx, holder.text, view, global = true)
                 true
             }
         }

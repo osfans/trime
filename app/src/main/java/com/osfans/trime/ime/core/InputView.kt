@@ -91,7 +91,7 @@ class InputView(
     private val updateWindowViewHeightJob: Job
 
     private val themedContext = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
-    private val inputDepMgr = InputDependencyManager.initialize(themedContext, theme, service, rime)
+    private val inputDepMgr = InputDependencyManager.initialize(this, themedContext, theme, service, rime)
     private val di = inputDepMgr.di
     private val broadcaster: InputBroadcaster by di.instance()
     private val popup: PopupDelegate by di.instance()

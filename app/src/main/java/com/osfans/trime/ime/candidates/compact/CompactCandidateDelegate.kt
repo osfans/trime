@@ -7,13 +7,7 @@ package com.osfans.trime.ime.candidates.compact
 
 import android.content.Context
 import android.content.res.Configuration
-import android.view.View
-import android.widget.PopupMenu
-import androidx.core.text.bold
-import androidx.core.text.buildSpannedString
-import androidx.core.text.color
 import androidx.core.view.updateLayoutParams
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.osfans.trime.R
@@ -21,19 +15,17 @@ import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.InputBarDelegate
 import com.osfans.trime.ime.bar.UnrollButtonStateMachine
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
+import com.osfans.trime.ime.core.InputView
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputDependencyManager
-import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.symbol.SpacesItemDecoration
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
 import org.kodein.di.instance
 import splitties.dimensions.dp
 import splitties.views.dsl.recyclerview.recyclerView
@@ -46,6 +38,7 @@ class CompactCandidateDelegate : InputBroadcastReceiver {
     val service: TrimeInputMethodService by di.instance()
     val rime: RimeSession by di.instance()
     val theme: Theme by di.instance()
+    private val inputView: InputView by di.instance()
     val bar: InputBarDelegate by di.instance()
 
     private val fillStyle by AppPrefs.defaultInstance().keyboard.horizontalCandidateMode
@@ -100,7 +93,7 @@ class CompactCandidateDelegate : InputBroadcastReceiver {
                 rime.launchOnReady { it.selectCandidate(position, global = true) }
             }
             setOnItemLongClickListener { _, view, position ->
-                showCandidateAction(position, items[position].text, view)
+                inputView.showCandidateActionMenu(position, items[position].text, view, global = true)
                 true
             }
         }
@@ -194,41 +187,6 @@ class CompactCandidateDelegate : InputBroadcastReceiver {
         // not sure why empty candidates won't trigger `FlexboxLayoutManager#onLayoutCompleted()`
         if (candidates.isEmpty()) {
             refreshUnrolled(0)
-        }
-    }
-
-    private var candidateActionMenu: PopupMenu? = null
-
-    fun showCandidateAction(
-        idx: Int,
-        text: String,
-        view: View,
-    ) {
-        candidateActionMenu?.dismiss()
-        candidateActionMenu = null
-        service.lifecycleScope.launch {
-            InputFeedbackManager.keyPressVibrate(view, longPress = true)
-            candidateActionMenu =
-                PopupMenu(context, view).apply {
-                    menu
-                        .add(
-                            buildSpannedString {
-                                bold {
-                                    color(ColorManager.getColor("hilited_candidate_text_color")) { append(text) }
-                                }
-                            },
-                        ).apply {
-                            isEnabled = false
-                        }
-                    menu.add(R.string.forget_this_word).setOnMenuItemClickListener {
-                        rime.runIfReady { deleteCandidate(idx, global = true) }
-                        true
-                    }
-                    setOnDismissListener {
-                        candidateActionMenu = null
-                    }
-                    show()
-                }
         }
     }
 }
