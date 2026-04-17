@@ -126,7 +126,7 @@ class InputBarDelegate : InputBroadcastReceiver {
 
     private val alwaysUi: AlwaysUi by lazy {
         AlwaysUi(context, theme) { action ->
-            if (action != null) {
+            if (action.isNotEmpty()) {
                 commonKeyboardActionListener.listener.onAction(KeyActionManager.getAction(action))
             } else {
                 windowManager.attachWindow(SwitchOptionWindow())

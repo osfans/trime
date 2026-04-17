@@ -1,6 +1,7 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2026 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.ime.bar.ui
 
@@ -10,6 +11,7 @@ import androidx.core.view.isVisible
 import com.osfans.trime.R
 import com.osfans.trime.data.theme.Theme
 import splitties.dimensions.dp
+import splitties.views.dsl.constraintlayout.after
 import splitties.views.dsl.constraintlayout.centerHorizontally
 import splitties.views.dsl.constraintlayout.centerVertically
 import splitties.views.dsl.constraintlayout.constraintLayout
@@ -24,7 +26,21 @@ class TabUi(
     override val ctx: Context,
     theme: Theme,
 ) : Ui {
-    private val backButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_back_24)
+    private val backButton: ToolButton
+
+    init {
+        val firstButtonConfig = theme.toolBar.buttons.firstOrNull()
+        val backButtonConfig = firstButtonConfig?.copy(
+            foreground = firstButtonConfig.foreground.copy(
+                style = theme.toolBar.backStyle,
+            ),
+        )
+        backButton = if (backButtonConfig != null) {
+            ToolButton(ctx, backButtonConfig)
+        } else {
+            ToolButton(ctx, R.drawable.ic_baseline_arrow_back_24)
+        }
+    }
 
     private var external: View? = null
 
@@ -62,6 +78,7 @@ class TabUi(
                 lParams(matchConstraints, size) {
                     centerVertically()
                     if (showTitle) {
+                        after(backButton, dp(8))
                         endOfParent()
                     } else {
                         centerHorizontally()

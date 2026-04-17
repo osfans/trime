@@ -36,7 +36,6 @@ class ClipboardWindow(private val initialTab: Int = 0) : BoardWindow.BarBoardWin
     private val service: TrimeInputMethodService by di.instance()
     private val windowManager: BoardWindowManager by di.instance()
     private val theme: Theme by di.instance()
-    override val showTitle: Boolean = false
 
     private lateinit var clipboardLayout: ClipboardLayout
     private lateinit var clipboardPagesAdapter: ClipboardPagesAdapter
@@ -142,9 +141,6 @@ class ClipboardWindow(private val initialTab: Int = 0) : BoardWindow.BarBoardWin
             adapter = clipboardPagesAdapter
         }
         titleUi.apply {
-            backButton.setOnClickListener {
-                windowManager.attachWindow(KeyboardWindow)
-            }
             tabLayout.onConfigureTab(viewPager) { tabUi, position ->
                 val label = when (position) {
                     0 -> R.string.clipboard

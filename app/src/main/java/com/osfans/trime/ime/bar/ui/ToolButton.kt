@@ -1,6 +1,7 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2026 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.ime.bar.ui
 
@@ -94,8 +95,8 @@ class ToolButton : GestureFrame {
     }
 
     private fun needsStyleUpdate(): Boolean = toggleKey != null ||
-        !config.foreground.style.isNullOrEmpty() ||
-        !config.foreground.optionStyles.isNullOrEmpty()
+        config.foreground.style.isNotEmpty() ||
+        config.foreground.optionStyles.isNotEmpty()
 
     private fun setupContent(
         type: ContentType,
@@ -224,8 +225,8 @@ class ToolButton : GestureFrame {
     companion object {
         private val IMAGE_PATTERN = ".*\\.(png|jpg|gif|webp)$".toRegex()
 
-        fun getContentType(style: String?): ContentType = when {
-            style.isNullOrEmpty() -> ContentType.TEXT
+        fun getContentType(style: String): ContentType = when {
+            style.isEmpty() -> ContentType.TEXT
             style.matches(IMAGE_PATTERN) -> ContentType.LOCAL_IMAGE
             style.startsWith("ic@") -> ContentType.ICON
             else -> ContentType.TEXT
