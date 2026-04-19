@@ -5,23 +5,30 @@
 
 package com.osfans.trime.ime.segments
 
+import android.content.Context
 import android.view.MotionEvent
+import android.view.ViewConfiguration
 import androidx.recyclerview.widget.RecyclerView
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
 class DragSelectTouchListener(
+    context: Context,
     private val adapter: SegmentsAdapter,
     private val onSelectionChanged: () -> Unit,
 ) : RecyclerView.OnItemTouchListener {
 
     private var isDragSelecting = false
     private var startPosition = -1
-    private var endPosition = -1
     private var lastEndPosition = -1
     private var targetState = false
 
     private var selectionSnapshot: Set<Int> = emptySet()
+
+    private var initialX = 0f
+    private var initialY = 0f
+    private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
 
     override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
         val child = rv.findChildViewUnder(e.x, e.y)
@@ -30,21 +37,48 @@ class DragSelectTouchListener(
         when (e.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 if (position != -1) {
-                    isDragSelecting = true
+                    initialX = e.x
+                    initialY = e.y
                     startPosition = position
-                    endPosition = position
-
-                    val snapshot = adapter.selectionSnapshot
-                    val state = !snapshot.contains(position)
-                    selectionSnapshot = snapshot
-                    targetState = state
-                    updateRange(rv, startPosition, startPosition)
-                    rv.parent?.requestDisallowInterceptTouchEvent(true)
-                    return true
+                    return false
                 }
             }
+            MotionEvent.ACTION_MOVE -> {
+                if (startPosition == -1) return false
+
+                if (!isDragSelecting) {
+                    val dx = abs(e.x - initialX)
+                    val dy = abs(e.y - initialY)
+
+                    if (dx > touchSlop || dy > touchSlop) {
+                        if (dx > dy) { // core condition: x offset larger than y offset
+                            isDragSelecting = true
+
+                            // disable scrolling
+                            rv.parent?.requestDisallowInterceptTouchEvent(true)
+
+                            // get the snapshot and judge the target state
+                            selectionSnapshot = adapter.selectionSnapshot
+                            targetState = !selectionSnapshot.contains(startPosition)
+
+                            // update state at start position immediately
+                            updateRange(rv, startPosition, startPosition)
+
+                            return true
+                        } else {
+                            // make scrolling still work
+                            startPosition = -1
+                            return false
+                        }
+                    }
+                }
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                startPosition = -1
+                isDragSelecting = false
+            }
         }
-        return false
+        return isDragSelecting
     }
 
     override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {
@@ -63,7 +97,6 @@ class DragSelectTouchListener(
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 isDragSelecting = false
                 startPosition = -1
-                endPosition = -1
                 lastEndPosition = -1
                 rv.parent?.requestDisallowInterceptTouchEvent(false)
                 onSelectionChanged.invoke()

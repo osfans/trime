@@ -36,11 +36,11 @@ class SegmentsWindow(private val source: String) : BoardWindow.BarBoardWindow() 
     }
 
     private val adapter by lazy {
-        SegmentsAdapter(theme)
+        SegmentsAdapter(theme) { onSelectionChanged() }
     }
 
     private val touchListener by lazy {
-        DragSelectTouchListener(adapter) {
+        DragSelectTouchListener(context, adapter) {
             onSelectionChanged()
         }
     }

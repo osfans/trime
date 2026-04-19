@@ -8,14 +8,14 @@ package com.osfans.trime.ime.segments
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.ViewGroup
-import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter4.BaseQuickAdapter
-import com.google.android.flexbox.FlexboxLayoutManager
 import com.osfans.trime.data.theme.Theme
-import splitties.dimensions.dp
 
-class SegmentsAdapter(private val theme: Theme) : BaseQuickAdapter<String, SegmentsAdapter.ViewHolder>() {
+class SegmentsAdapter(
+    private val theme: Theme,
+    private val onItemClick: () -> Unit,
+) : BaseQuickAdapter<String, SegmentsAdapter.ViewHolder>() {
 
     class ViewHolder(val ui: SegmentUi) : RecyclerView.ViewHolder(ui.root)
 
@@ -36,6 +36,14 @@ class SegmentsAdapter(private val theme: Theme) : BaseQuickAdapter<String, Segme
         holder.ui.textView.text = text
         val isSelected = selection.contains(position)
         holder.ui.update(isSelected)
+        holder.itemView.setOnClickListener {
+            val currentPos = holder.bindingAdapterPosition
+            if (currentPos != RecyclerView.NO_POSITION) {
+                val newState = !isSegmentSelected(currentPos)
+                setSegmentSelected(currentPos, newState)
+                onItemClick.invoke()
+            }
+        }
     }
 
     val selectionSnapshot: Set<Int>

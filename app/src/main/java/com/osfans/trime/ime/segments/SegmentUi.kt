@@ -8,12 +8,14 @@ package com.osfans.trime.ime.segments
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.drawable.StateListDrawable
+import android.os.Build
 import android.view.ViewOutlineProvider
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.keyboard.GestureFrame
 import splitties.dimensions.dp
+import splitties.resources.styledDrawable
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
