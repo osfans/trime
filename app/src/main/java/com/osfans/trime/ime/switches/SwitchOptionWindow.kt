@@ -28,9 +28,11 @@ import com.osfans.trime.util.AppUtils
 import kotlinx.coroutines.launch
 import org.kodein.di.instance
 import splitties.dimensions.dp
+import splitties.views.dsl.constraintlayout.centerVertically
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.lParams
 import splitties.views.dsl.core.add
-import splitties.views.dsl.core.horizontalLayout
-import splitties.views.dsl.core.lParams
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.recyclerview.gridLayoutManager
 
@@ -187,9 +189,15 @@ class SwitchOptionWindow :
     }
 
     private val barExternalView by lazy {
-        context.horizontalLayout {
+        context.constraintLayout {
             val size = dp(theme.generalStyle.run { candidateViewHeight + commentHeight })
-            add(settingsButton, lParams(size, size))
+            add(
+                settingsButton,
+                lParams(size, size) {
+                    endOfParent()
+                    centerVertically()
+                },
+            )
         }
     }
 
