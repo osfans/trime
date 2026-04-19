@@ -55,7 +55,9 @@ class AlwaysUi(
             }
         }
     } else {
-        ToolButton(ctx, icon)
+        ToolButton(ctx, icon).apply {
+            setOnClickListener { onButtonClick?.invoke("") }
+        }
     }
 
     val buttonsUi = ButtonsBarUi(ctx, theme, onButtonClick)

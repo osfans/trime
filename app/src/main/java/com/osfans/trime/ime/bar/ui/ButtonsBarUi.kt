@@ -48,7 +48,9 @@ class ButtonsBarUi(
             }
         }
     } else {
-        ToolButton(ctx, icon)
+        ToolButton(ctx, icon).apply {
+            setOnClickListener { onButtonClick?.invoke("") }
+        }
     }
 
     init {
