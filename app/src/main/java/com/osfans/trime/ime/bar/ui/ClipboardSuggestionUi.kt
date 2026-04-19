@@ -45,9 +45,16 @@ class ClipboardSuggestionUi(
     val text =
         textView {
             isSingleLine = true
-            maxWidth = dp(240)
+            maxWidth = dp(220)
             ellipsize = TextUtils.TruncateAt.END
             setTextColor(ColorManager.getColor("candidate_text_color"))
+        }
+
+    val dismiss =
+        imageView {
+            imageDrawable = drawable(R.drawable.ic_outline_cancel_24)!!.apply {
+                setTint(ColorManager.getColor("candidate_text_color"))
+            }
         }
 
     private val layout =
@@ -65,6 +72,14 @@ class ClipboardSuggestionUi(
                 text,
                 lParams(wrapContent, wrapContent) {
                     after(icon, spacing)
+                    before(dismiss)
+                    centerVertically()
+                },
+            )
+            add(
+                dismiss,
+                lParams(dp(20), dp(20)) {
+                    after(text, spacing)
                     endOfParent(spacing)
                     centerVertically()
                 },

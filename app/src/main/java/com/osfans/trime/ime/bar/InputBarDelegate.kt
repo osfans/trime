@@ -34,7 +34,6 @@ import com.osfans.trime.ime.candidates.unrolled.window.FlexboxUnrolledCandidateW
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputDependencyManager
 import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
-import com.osfans.trime.ime.keyboard.GestureFrame
 import com.osfans.trime.ime.keyboard.KeyBehavior
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.switches.SwitchOptionWindow
@@ -140,10 +139,7 @@ class InputBarDelegate : InputBroadcastReceiver {
                 setOnClickListener {
                     val content = ClipboardHelper.lastBean?.text
                     content?.let { service.commitText(it) }
-                    clipboardTimeoutJob?.cancel()
-                    clipboardTimeoutJob = null
-                    isClipboardFresh = false
-                    evalAlwaysUiState()
+                    dismissClipboardSuggestion()
                 }
                 setOnLongClickListener {
                     ClipboardHelper.lastBean?.let {
@@ -152,7 +148,17 @@ class InputBarDelegate : InputBroadcastReceiver {
                     true
                 }
             }
+            clipboardUi.dismiss.setOnClickListener {
+                dismissClipboardSuggestion()
+            }
         }
+    }
+
+    private fun dismissClipboardSuggestion() {
+        clipboardTimeoutJob?.cancel()
+        clipboardTimeoutJob = null
+        isClipboardFresh = false
+        evalAlwaysUiState()
     }
 
     private val candidateUi by lazy {
