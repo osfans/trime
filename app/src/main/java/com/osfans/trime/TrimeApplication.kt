@@ -17,7 +17,6 @@ import androidx.preference.PreferenceManager
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.soundeffect.SoundEffectManager
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.receiver.RimeIntentReceiver
 import com.osfans.trime.ui.main.LogActivity

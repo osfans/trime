@@ -28,7 +28,6 @@ import com.osfans.trime.util.AppUtils
 import kotlinx.coroutines.launch
 import org.kodein.di.instance
 import splitties.dimensions.dp
-import splitties.views.dsl.constraintlayout.centerVertically
 import splitties.views.dsl.constraintlayout.constraintLayout
 import splitties.views.dsl.constraintlayout.endOfParent
 import splitties.views.dsl.constraintlayout.lParams
@@ -195,7 +194,6 @@ class SwitchOptionWindow :
                 settingsButton,
                 lParams(size, size) {
                     endOfParent()
-                    centerVertically()
                 },
             )
         }

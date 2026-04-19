@@ -236,6 +236,7 @@ class InputBarDelegate : InputBroadcastReceiver {
         val new = view.getChildAt(index)
         if (new != tabUi.root) {
             tabUi.setBackButtonOnClickListener { }
+            tabUi.setTitle("")
             tabUi.removeExternal()
         }
         view.displayedChild = index
@@ -271,6 +272,7 @@ class InputBarDelegate : InputBroadcastReceiver {
 
     override fun onWindowAttached(window: BoardWindow) {
         if (window is BoardWindow.BarBoardWindow) {
+            tabUi.setTitle(window.title)
             window.onCreateBarView()?.let { tabUi.addExternal(it, window.showTitle) }
             tabUi.setBackButtonOnClickListener {
                 windowManager.attachWindow(KeyboardWindow)

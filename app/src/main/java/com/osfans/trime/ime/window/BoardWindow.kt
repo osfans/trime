@@ -52,6 +52,8 @@ sealed class BoardWindow {
     abstract class BarBoardWindow : BoardWindow() {
         open val showTitle: Boolean = true
 
+        open val title: String = ""
+
         open fun onCreateBarView(): View? = null
 
         override fun toString(): String = javaClass.name

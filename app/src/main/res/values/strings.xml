@@ -217,4 +217,6 @@
     <string name="inline_suggestions">Show inline autofill suggestions</string>
     <string name="update_config">Update config</string>
     <string name="share">Share</string>
+    <string name="word_segment">Word segment</string>
+    <string name="star_success">Star success</string>
 </resources>

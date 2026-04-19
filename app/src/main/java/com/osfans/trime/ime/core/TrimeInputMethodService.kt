@@ -911,7 +911,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    private fun updateComposingText(text: String) {
+    internal fun updateComposingText(text: String) {
         val ic = currentInputConnection ?: return
         ic.beginBatchEdit()
         if (composingText.isNotEmpty() || text.isNotEmpty()) {

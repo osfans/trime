@@ -6,9 +6,11 @@
 package com.osfans.trime.ime.bar.ui
 
 import android.content.Context
+import android.graphics.Typeface
 import android.view.View
 import androidx.core.view.isVisible
 import com.osfans.trime.R
+import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.after
@@ -21,6 +23,9 @@ import splitties.views.dsl.constraintlayout.matchConstraints
 import splitties.views.dsl.constraintlayout.startOfParent
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.wrapContent
+import splitties.views.gravityVerticalCenter
 
 class TabUi(
     override val ctx: Context,
@@ -42,6 +47,13 @@ class TabUi(
         }
     }
 
+    private val titleText = textView {
+        typeface = Typeface.defaultFromStyle(Typeface.BOLD)
+        gravity = gravityVerticalCenter
+        textSize = theme.generalStyle.candidateTextSize
+        setTextColor(ColorManager.getColor("key_text_color"))
+    }
+
     private var external: View? = null
 
     private val size = ctx.dp(theme.generalStyle.run { candidateViewHeight + commentHeight })
@@ -55,12 +67,23 @@ class TabUi(
                     centerVertically()
                 },
             )
+            add(
+                titleText,
+                lParams(wrapContent, size) {
+                    after(backButton, dp(8))
+                    centerVertically()
+                },
+            )
         }
 
     fun setBackButtonOnClickListener(block: () -> Unit) {
         backButton.setOnClickListener {
             block()
         }
+    }
+
+    fun setTitle(title: String) {
+        titleText.text = title
     }
 
     fun addExternal(
@@ -71,6 +94,7 @@ class TabUi(
             throw IllegalStateException("TabBar external view is already present")
         }
         backButton.isVisible = showTitle
+        titleText.isVisible = showTitle
         external = view
         root.run {
             add(
@@ -78,7 +102,7 @@ class TabUi(
                 lParams(matchConstraints, size) {
                     centerVertically()
                     if (showTitle) {
-                        after(backButton, dp(8))
+                        after(titleText, dp(8))
                         endOfParent()
                     } else {
                         centerHorizontally()

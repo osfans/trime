@@ -216,4 +216,6 @@
     <string name="inline_suggestions">显示内嵌自动填充建议</string>
     <string name="update_config">更新配置</string>
     <string name="share">分享</string>
+    <string name="word_segment">分词</string>
+    <string name="star_success">收藏成功</string>
 </resources>
