@@ -74,7 +74,7 @@ class KeyView(
 
     fun updateBounds() {
         val (x, y) = cachedLocation.also { getLocationInWindow(it) }
-        cachedBounds.set(x, y, x + width, y + height)
+        cachedBounds.set(x + key.extraWidthLeft, y, x + width - key.extraWidthRight, y + height)
         boundsValid = true
     }
 
@@ -257,7 +257,8 @@ class KeyView(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val desiredWidth = key.width + paddingLeft + paddingRight
+        val totalWidth = key.width + key.extraWidthLeft + key.extraWidthRight
+        val desiredWidth = totalWidth + paddingLeft + paddingRight
         val desiredHeight = key.height + paddingTop + paddingBottom
 
         setMeasuredDimension(

@@ -34,6 +34,7 @@
     <string name="key_long_press_timeout">长按按键的延迟时间</string>
     <string name="key_repeat_interval">重复按键的重复间隔</string>
     <string name="popup_on_key_press">按键时弹出显示字符</string>
+    <string name="expand_keypress_area_to_edge">将按键范围扩展至边缘</string>
     <string name="use_soft_cursor">预编辑区使用插入符号（^）</string>
     <string name="deploy">部署</string>
     <string name="sync_user_data_immediately">立即同步用户数据</string>

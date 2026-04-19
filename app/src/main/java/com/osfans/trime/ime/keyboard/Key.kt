@@ -45,6 +45,9 @@ class Key(
     var row = 0
     var column = 0
 
+    var extraWidthLeft = 0
+    var extraWidthRight = 0
+
     private val label = selfConfig?.label ?: ""
     private val labelSymbol = selfConfig?.labelSymbol ?: ""
     val hint: String = selfConfig?.hint ?: ""

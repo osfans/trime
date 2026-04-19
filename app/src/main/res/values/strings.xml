@@ -37,6 +37,7 @@
     <string name="key_long_press_timeout">Long key press delay</string>
     <string name="key_repeat_interval">Key repeat interval</string>
     <string name="popup_on_key_press">Popup on key press</string>
+    <string name="expand_keypress_area_to_edge">Expand keypress area to edge</string>
     <string name="use_soft_cursor">Use soft cursor (^) in preedit</string>
     <string name="deploy">Deploy</string>
     <string name="sync_user_data_immediately">Sync user data immediately</string>

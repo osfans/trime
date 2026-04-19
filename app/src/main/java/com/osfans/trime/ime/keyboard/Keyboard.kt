@@ -150,6 +150,8 @@ class Keyboard(
             getKeyboardHeightFromTheme(theme),
         ).firstOrNull { it > 0 } ?: 0
 
+    private val expandKeypressArea: Boolean by AppPrefs.defaultInstance().keyboard.expandKeypressArea
+
     init {
 
         if (selfConfig != null) {
@@ -252,6 +254,8 @@ class Keyboard(
 
             minWidth = 0
 
+            val spacers = mutableListOf<Triple<Int, Int, Int>>()
+
             // create Key objects, assign position, size, offsets
             for (textKey in keys) {
 
@@ -284,12 +288,13 @@ class Keyboard(
                     if (keyWidthWeight > 20f) {
                         widthPx += gap
                     } else {
+                        if (expandKeypressArea) spacers.add(Triple(xPos, gap, row))
                         xPos += gap
                     }
                 }
 
-                // spacer keys only move the cursor; no Key object is created
                 if (textKey.click.isEmpty()) {
+                    if (expandKeypressArea) spacers.add(Triple(xPos, widthPx, row))
                     xPos += widthPx
                     continue
                 }
@@ -323,6 +328,23 @@ class Keyboard(
 
                 if (xPos > minWidth) {
                     minWidth = xPos
+                }
+            }
+
+            // Expand keypress area to edge by distributing spacer widths to neighbors
+            if (expandKeypressArea && spacers.isNotEmpty()) {
+                for ((spacerX, spacerWidth, spacerRow) in spacers) {
+                    val (leftKeys, rightKeys) = mKeys.filter { it.row == spacerRow }.partition { it.x + it.width <= spacerX }
+                    val leftKey = leftKeys.maxByOrNull { it.x }
+                    val rightKey = rightKeys.minByOrNull { it.x }
+                    when {
+                        leftKey != null && rightKey != null -> {
+                            leftKey.extraWidthRight += spacerWidth / 2
+                            rightKey.extraWidthLeft += spacerWidth - spacerWidth / 2
+                        }
+                        leftKey != null -> leftKey.extraWidthRight += spacerWidth
+                        rightKey != null -> rightKey.extraWidthLeft += spacerWidth
+                    }
                 }
             }
 
