@@ -6,7 +6,7 @@
 package com.osfans.trime.ime.clipboard
 
 import android.app.AlertDialog
-import android.content.Context
+import android.content.Intent
 import android.graphics.Typeface
 import android.view.View
 import androidx.lifecycle.lifecycleScope
@@ -74,6 +74,11 @@ class ClipboardWindow(private val initialTab: Int = 0) : BoardWindow.BarBoardWin
                 AppUtils.launchClipEdit(context, id, ClipEditActivity.FROM_CLIPBOARD)
             }
 
+            override fun onShare(bean: DatabaseBean) {
+                val text = bean.text ?: return
+                launchTextSharing(text)
+            }
+
             override fun onCollect(bean: DatabaseBean) {
                 service.lifecycleScope.launch {
                     CollectionHelper.addNewBean(bean.text ?: "")
@@ -100,6 +105,11 @@ class ClipboardWindow(private val initialTab: Int = 0) : BoardWindow.BarBoardWin
 
             override fun onEdit(id: Int) {
                 AppUtils.launchClipEdit(context, id, ClipEditActivity.FROM_COLLECTION)
+            }
+
+            override fun onShare(bean: DatabaseBean) {
+                val text = bean.text ?: return
+                launchTextSharing(text)
             }
 
             override fun onDelete(id: Int) {
@@ -165,6 +175,17 @@ class ClipboardWindow(private val initialTab: Int = 0) : BoardWindow.BarBoardWin
                 }
             }
         }
+    }
+
+    private fun launchTextSharing(text: String) {
+        val target = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, text)
+        }
+        val chooser = Intent.createChooser(target, null).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        service.startActivity(chooser)
     }
 
     private fun promptDeleteAll(action: suspend () -> Unit) {

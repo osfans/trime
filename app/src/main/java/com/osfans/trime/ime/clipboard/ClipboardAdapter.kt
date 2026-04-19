@@ -87,6 +87,9 @@ abstract class ClipboardAdapter(
                 menu.item(R.string.edit, R.drawable.ic_baseline_edit_24, iconTint) {
                     onEdit(bean.id)
                 }
+                menu.item(R.string.share, R.drawable.ic_baseline_share_24, iconTint) {
+                    onShare(bean)
+                }
 
                 if (enableCollection) {
                     menu.item(R.string.collect, R.drawable.ic_baseline_star_24, iconTint) {
@@ -126,6 +129,8 @@ abstract class ClipboardAdapter(
     open fun onUnpin(id: Int) {}
 
     abstract fun onEdit(id: Int)
+
+    abstract fun onShare(bean: DatabaseBean)
 
     open fun onCollect(bean: DatabaseBean) {}
 
