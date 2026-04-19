@@ -71,6 +71,10 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
             }
         }
 
+    private val onUserDataDirChange = PreferenceDelegate.OnChangeListener<String> { _, newValue ->
+        findPreference<Preference>(AppPrefs.Profile.USER_DATA_DIR)?.summary = newValue
+    }
+
     private lateinit var browseLauncher: ActivityResultLauncher<Uri?>
     private var launcherResultCallback: ((path: String) -> Unit)? = null
 
@@ -80,6 +84,8 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
         super.onCreate(savedInstanceState)
         prefs.periodicBackgroundSync.registerOnChangeListener(onBackgroundSyncEnable)
         prefs.periodicBackgroundSyncInterval.registerOnChangeListener(onSyncIntervalChange)
+        prefs.userDataDir.registerOnChangeListener(onUserDataDirChange)
+
         browseLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) {
             it ?: return@registerForActivityResult
             val uri =
@@ -106,9 +112,7 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                         isIconSpaceReserved = false
                         setTitle(R.string.user_data_dir)
                         setDefaultValue(DataManager.defaultDataDir.absolutePath)
-                        summaryProvider = Preference.SummaryProvider<Preference> {
-                            prefs.userDataDir.getValue()
-                        }
+                        summary = prefs.userDataDir.getValue()
                         setOnPreferenceClickListener {
                             val dirNameText = ctx.editText {
                                 setText(prefs.userDataDir.getValue())
@@ -150,8 +154,7 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                                 .setTitle(R.string.user_data_dir)
                                 .setView(dialogContent)
                                 .setPositiveButton(android.R.string.ok) { _, _ ->
-                                    val value = dirNameText.text.toString()
-                                    prefs.userDataDir.setValue(value)
+                                    prefs.userDataDir.setValue(dirNameText.text.toString())
                                 }
                                 .setNegativeButton(android.R.string.cancel, null)
                                 .setNeutralButton(R.string.default_) { _, _ ->
@@ -247,9 +250,10 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onDestroy() {
+        super.onDestroy()
         prefs.periodicBackgroundSync.unregisterOnChangeListener(onBackgroundSyncEnable)
         prefs.periodicBackgroundSyncInterval.unregisterOnChangeListener(onSyncIntervalChange)
+        prefs.userDataDir.unregisterOnChangeListener(onUserDataDirChange)
     }
 }
