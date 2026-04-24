@@ -69,7 +69,13 @@ object ThemeManager {
         }
         return try {
             val node = Yaml.parseToYamlNode(file.readText())
-            Theme.decode(node.mapping!!)
+            val mapping = node.mapping
+            if (mapping == null) {
+                Timber.w("Failed to load theme '$id': YAML root is not a mapping")
+                null
+            } else {
+                Theme.decode(mapping)
+            }
         } catch (e: Exception) {
             Timber.w(e, "Failed to load theme '$id'")
             null
