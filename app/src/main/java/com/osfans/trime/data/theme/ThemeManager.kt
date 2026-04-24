@@ -92,16 +92,12 @@ object ThemeManager {
             }
         }
 
-        getAllThemes()
-            .asSequence()
-            .map { it.configId }
-            .distinct()
-            .forEach { fallbackId ->
-                loadThemeByIdOrNull(fallbackId)?.let {
-                    Timber.w("Theme '$id' is unavailable, fallback to available theme '$fallbackId'")
-                    return ResolvedTheme(fallbackId, it)
-                }
+        for (fallbackId in getAllThemes().map { it.configId }.distinct()) {
+            loadThemeByIdOrNull(fallbackId)?.let {
+                Timber.w("Theme '$id' is unavailable, fallback to available theme '$fallbackId'")
+                return ResolvedTheme(fallbackId, it)
             }
+        }
 
         error("No valid theme available")
     }
