@@ -282,6 +282,12 @@ class Rime :
                 statusCached = status
                 updateSchemaCached(status)
                 if (it.data.option == "ascii_mode") {
+                    if (it.data.value && status.isComposing) {
+                        getRimeRawInput().takeIf { it.isNotEmpty() }?.let {
+                            handleRimeMessage(4, arrayOf(CommitProto(it)))
+                        }
+                        lifecycleScope.launch { clearComposition() }
+                    }
                     showAsciiSwitchTips()
                 }
             }
