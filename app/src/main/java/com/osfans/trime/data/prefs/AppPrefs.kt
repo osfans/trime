@@ -10,10 +10,12 @@ import android.content.SharedPreferences
 import androidx.annotation.Keep
 import com.osfans.trime.R
 import com.osfans.trime.data.base.DataManager
+import com.osfans.trime.ime.bar.ToolbarPosition
 import com.osfans.trime.ime.candidates.compact.CompactCandidateMode
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesLayout
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.composition.PopupPosition
+import com.osfans.trime.ime.core.HideVirtualKeyboardMode
 import com.osfans.trime.ime.core.InlinePreeditMode
 import com.osfans.trime.util.InputMethodUtils
 import com.osfans.trime.util.appContext
@@ -124,6 +126,8 @@ class AppPrefs(
 
             const val USE_SOFT_CURSOR = "use_soft_cursor"
             const val HIDE_INPUT_BAR = "hide_input_bar"
+            const val TOOLBAR_POSITION = "toolbar_position"
+            const val HIDE_VIRTUAL_KEYBOARD = "hide_virtual_keyboard"
 
             const val SOUND_ON_KEYPRESS = "sound_on_keypress"
             const val KEY_SOUND_VOLUME = "sound_volume"
@@ -179,6 +183,11 @@ class AppPrefs(
         val useSoftCursor = switch(R.string.use_soft_cursor, USE_SOFT_CURSOR, true)
 
         val hideInputBar = switch(R.string.hide_input_bar, HIDE_INPUT_BAR, false)
+
+        val toolbarPosition = enum(R.string.toolbar_position, TOOLBAR_POSITION, ToolbarPosition.TOP)
+
+        val hideVirtualKeyboard =
+            enum(R.string.hide_virtual_keyboard, HIDE_VIRTUAL_KEYBOARD, HideVirtualKeyboardMode.NEVER)
 
         val soundOnKeyPress = switch(R.string.sound_on_keypress, SOUND_ON_KEYPRESS, false)
         val soundVolume = int(

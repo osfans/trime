@@ -24,6 +24,7 @@ import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.InputBarDelegate
+import com.osfans.trime.ime.bar.ToolbarPosition
 import com.osfans.trime.ime.broadcast.EnterKeyDisplayDelegate
 import com.osfans.trime.ime.broadcast.InputBroadcaster
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
@@ -104,6 +105,7 @@ class InputView(
 
     private val inlinePreeditMode by AppPrefs.defaultInstance().general.inlinePreeditMode
     private val candidatesMode by AppPrefs.defaultInstance().candidates.mode
+    private val toolbarPosition by AppPrefs.defaultInstance().keyboard.toolbarPosition
 
     private val keyboardSidePadding = theme.generalStyle.keyboardPadding
     private val keyboardSidePaddingLandscape = theme.generalStyle.keyboardPaddingLand
@@ -150,6 +152,7 @@ class InputView(
 
         keyboardBackground.imageDrawable = ColorManager.getDrawable("keyboard_background")
 
+        val isToolbarTop = toolbarPosition == ToolbarPosition.TOP
         keyboardView =
             constraintLayout {
                 isMotionEventSplittingEnabled = true
@@ -162,31 +165,50 @@ class InputView(
                 add(
                     inputBar.view,
                     lParams(matchParent, dp(inputBar.themedHeight)) {
-                        topOfParent()
                         centerHorizontally()
+                        if (isToolbarTop) {
+                            topOfParent()
+                        } else {
+                            above(bottomPaddingSpace)
+                        }
                     },
                 )
                 add(
                     leftPaddingSpace,
                     lParams {
-                        below(inputBar.view)
                         startOfParent()
-                        bottomOfParent()
+                        if (isToolbarTop) {
+                            below(inputBar.view)
+                            bottomOfParent()
+                        } else {
+                            topOfParent()
+                            above(inputBar.view)
+                        }
                     },
                 )
                 add(
                     rightPaddingSpace,
                     lParams {
-                        below(inputBar.view)
                         endOfParent()
-                        bottomOfParent()
+                        if (isToolbarTop) {
+                            below(inputBar.view)
+                            bottomOfParent()
+                        } else {
+                            topOfParent()
+                            above(inputBar.view)
+                        }
                     },
                 )
                 add(
                     windowManager.view,
                     lParams {
-                        below(inputBar.view)
-                        above(bottomPaddingSpace)
+                        if (isToolbarTop) {
+                            below(inputBar.view)
+                            above(bottomPaddingSpace)
+                        } else {
+                            topOfParent()
+                            above(inputBar.view)
+                        }
                     },
                 )
                 add(
@@ -342,6 +364,16 @@ class InputView(
 
     @RequiresApi(Build.VERSION_CODES.R)
     fun handleInlineSuggestions(response: InlineSuggestionsResponse): Boolean = inputBar.handleInlineSuggestions(response)
+
+    /**
+     * Show or hide the virtual keyboard area within the InputView while keeping the toolbar
+     * visible. Used to render a toolbar-only IME on devices with a hardware keyboard.
+     */
+    fun setKeyboardAreaVisible(visible: Boolean) {
+        val target = if (visible) View.VISIBLE else View.GONE
+        if (windowManager.view.visibility == target) return
+        windowManager.view.visibility = target
+    }
 
     override fun onDetachedFromWindow() {
         ViewCompat.setOnApplyWindowInsetsListener(this, null)

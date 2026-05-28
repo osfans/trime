@@ -173,6 +173,13 @@
     <string name="deploy_failure">Deploy failure</string>
     <string name="view_deploy_failure_log">Deploy failure. Click here to view error log.</string>
     <string name="hide_input_bar">Hide input bar</string>
+    <string name="toolbar_position">Toolbar position</string>
+    <string name="toolbar_position_top">Top</string>
+    <string name="toolbar_position_bottom">Bottom</string>
+    <string name="hide_virtual_keyboard">Hide virtual keyboard</string>
+    <string name="hide_virtual_keyboard_never">Never</string>
+    <string name="hide_virtual_keyboard_auto">Auto (detect hardware keyboard)</string>
+    <string name="hide_virtual_keyboard_always">Always</string>
     <string name="navbar_bkg_none">No background</string>
     <string name="navbar_bkg_color_only">Follow keyboard color</string>
     <string name="navbar_bkg_full">Keyboard background image</string>

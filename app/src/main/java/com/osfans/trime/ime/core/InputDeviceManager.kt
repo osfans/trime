@@ -5,6 +5,7 @@
 
 package com.osfans.trime.ime.core
 
+import android.content.res.Configuration
 import android.text.InputType
 import android.view.KeyEvent
 import android.view.MotionEvent
@@ -22,13 +23,39 @@ class InputDeviceManager(
     private var candidatesView: CandidatesView? = null
 
     private val candidatesViewMode by AppPrefs.defaultInstance().candidates.mode
+    private val hideVirtualKeyboardMode by AppPrefs.defaultInstance().keyboard.hideVirtualKeyboard
 
     private val alwaysShowCandidatesView: Boolean
         get() = candidatesViewMode == PopupCandidatesMode.ALWAYS_SHOW
 
+    private fun hasHardwareKeyboard(): Boolean {
+        val cfg = inputView?.resources?.configuration ?: return false
+        return cfg.keyboard != Configuration.KEYBOARD_NOKEYS &&
+            cfg.hardKeyboardHidden != Configuration.HARDKEYBOARDHIDDEN_YES
+    }
+
+    private fun shouldHideKeyboardArea(): Boolean =
+        when (hideVirtualKeyboardMode) {
+            HideVirtualKeyboardMode.NEVER -> false
+            HideVirtualKeyboardMode.ALWAYS -> true
+            HideVirtualKeyboardMode.AUTO -> hasHardwareKeyboard()
+        }
+
     private fun setupInputViewCallback(isVirtual: Boolean) {
-        inputView?.handleMessages = isVirtual
-        inputView?.visibility = if (isVirtual) View.VISIBLE else View.GONE
+        val v = inputView ?: return
+        v.handleMessages = isVirtual
+        val hideKeyboardArea = shouldHideKeyboardArea()
+        if (isVirtual) {
+            v.visibility = View.VISIBLE
+            v.setKeyboardAreaVisible(!hideKeyboardArea)
+        } else if (hideKeyboardArea) {
+            // Toolbar-only mode: keep InputView attached so the toolbar (and clipboard/inline
+            // suggestions) stay visible, but hide the virtual keyboard area.
+            v.visibility = View.VISIBLE
+            v.setKeyboardAreaVisible(false)
+        } else {
+            v.visibility = View.GONE
+        }
     }
 
     private fun setupCandidatesViewCallback(isVirtual: Boolean) {
