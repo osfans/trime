@@ -34,12 +34,11 @@ class InputDeviceManager(
             cfg.hardKeyboardHidden != Configuration.HARDKEYBOARDHIDDEN_YES
     }
 
-    private fun shouldHideKeyboardArea(): Boolean =
-        when (hideVirtualKeyboardMode) {
-            HideVirtualKeyboardMode.NEVER -> false
-            HideVirtualKeyboardMode.ALWAYS -> true
-            HideVirtualKeyboardMode.AUTO -> hasHardwareKeyboard()
-        }
+    private fun shouldHideKeyboardArea(): Boolean = when (hideVirtualKeyboardMode) {
+        HideVirtualKeyboardMode.NEVER -> false
+        HideVirtualKeyboardMode.ALWAYS -> true
+        HideVirtualKeyboardMode.AUTO -> hasHardwareKeyboard()
+    }
 
     private fun setupInputViewCallback(isVirtual: Boolean) {
         val v = inputView ?: return
