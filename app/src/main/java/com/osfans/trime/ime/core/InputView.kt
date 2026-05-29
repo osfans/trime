@@ -375,6 +375,14 @@ class InputView(
         windowManager.view.visibility = target
     }
 
+    /**
+     * Flip the virtual keyboard area visibility for the current input session. Does not change
+     * the persistent preference — next IME activation reverts to the configured default.
+     */
+    fun toggleKeyboardArea() {
+        setKeyboardAreaVisible(windowManager.view.visibility != View.VISIBLE)
+    }
+
     override fun onDetachedFromWindow() {
         ViewCompat.setOnApplyWindowInsetsListener(this, null)
         // cancel the notification job and clear all broadcast receivers,

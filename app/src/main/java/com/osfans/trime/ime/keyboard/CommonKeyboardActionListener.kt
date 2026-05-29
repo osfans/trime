@@ -200,6 +200,7 @@ class CommonKeyboardActionListener {
                     "apply" -> handleApplyCommand(arg)
                     "share_text" -> service.shareText()
                     "select_candidate" -> handleSelectCandidate(arg)
+                    "toggle_keyboard" -> service.toggleKeyboardArea()
                     else -> handleIntentAction(action.command, arg)
                 }
             }

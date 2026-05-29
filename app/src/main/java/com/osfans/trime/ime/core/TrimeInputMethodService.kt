@@ -781,6 +781,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
     }
 
+    fun toggleKeyboardArea() {
+        inputView?.toggleKeyboardArea()
+    }
+
     fun shareText(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val ic = currentInputConnection ?: return false
