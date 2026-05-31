@@ -169,8 +169,15 @@ class CommonKeyboardActionListener {
 
                 rime.launchOnReady { api ->
                     service.lifecycleScope.launch {
-                        val status = api.getRuntimeOption(option)
-                        api.setRuntimeOption(option, !status)
+                        val isEnabled = api.getRuntimeOption(option)
+                        val isComposing = api.statusCached.isComposing
+                        api.setRuntimeOption(option, !isEnabled)
+                        if (option == "ascii_mode" && isComposing) {
+                            api.getRawInput().takeIf { it.isNotEmpty() }?.let {
+                                service.commitText(it)
+                                api.clearComposition()
+                            }
+                        }
                     }
                 }
             }

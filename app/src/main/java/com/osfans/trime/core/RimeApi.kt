@@ -72,6 +72,8 @@ interface RimeApi {
 
     suspend fun clearComposition()
 
+    suspend fun getRawInput(): String
+
     suspend fun setRuntimeOption(
         option: String,
         value: Boolean,
