@@ -19,6 +19,14 @@ sealed class BoardWindow {
     protected val context: Context by di.instance()
 
     /**
+     * Whether this window represents the virtual keyboard area. When the user enables
+     * "hide virtual keyboard", only windows for which this is `true` are hidden, so that
+     * non-keyboard panels (option switcher, unrolled candidates, liquid keyboard, ...)
+     * remain visible when opened from the toolbar.
+     */
+    open val isKeyboardArea: Boolean = false
+
+    /**
      * Animation when the window is added to the layout
      */
     open fun enterAnimation(lastWindow: BoardWindow): Transition? = Slide().apply {

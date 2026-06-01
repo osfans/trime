@@ -71,6 +71,8 @@ class KeyboardWindow :
     override val key: ResidentWindow.Key
         get() = KeyboardWindow
 
+    override val isKeyboardArea: Boolean = true
+
     private val presetKeyboardIds = theme.presetKeyboards.keys.toList()
     private var currentKeyboardId = ""
     private var lastKeyboardId = ""
