@@ -13,8 +13,8 @@ import com.osfans.trime.ui.common.OnItemChangedListener
 import com.osfans.trime.ui.main.settings.ProgressFragment
 import com.osfans.trime.util.NaiveDustman
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SchemaListFragment :
     ProgressFragment(),
@@ -105,8 +105,8 @@ class SchemaListFragment :
         if (!dustman.dirty) return
         resetDustman()
         updateSchemaState()
-        lifecycleScope.launch(NonCancellable + Dispatchers.Default) {
-            rime.runOnReady { deploy() }
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) { rime.runOnReady { deploy() } }
         }
     }
 
