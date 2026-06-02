@@ -6,7 +6,6 @@
 package com.osfans.trime.ui.main.settings.userdict
 
 import android.content.ContentResolver
-import android.content.ContextWrapper
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
@@ -16,7 +15,6 @@ import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
@@ -25,7 +23,6 @@ import com.osfans.trime.util.importErrorDialog
 import com.osfans.trime.util.item
 import com.osfans.trime.util.toast
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -51,8 +48,11 @@ class UserDictionaryFragment : Fragment() {
                 val popup = PopupMenu(requireContext(), this)
                 val menu = popup.menu
                 menu.item(R.string.backup) {
-                    lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
-                        if (UserDictManager.backupUserDict(dictName)) {
+                    lifecycleScope.launch {
+                        val success = withContext(Dispatchers.IO) {
+                            UserDictManager.backupUserDict(dictName)
+                        }
+                        if (success) {
                             ui.showSnackBar(
                                 requireContext().getString(
                                     R.string.backed_up_x_to_sync_dir,
@@ -108,20 +108,20 @@ class UserDictionaryFragment : Fragment() {
             val cr = ctx.contentResolver
             val dictName = beingExported ?: return@registerForActivityResult
             beingExported = null
-            lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
+            lifecycleScope.launch {
                 val fileName = cr.queryFileName(uri) ?: return@launch
                 try {
-                    val outputStream = cr.openOutputStream(uri)!!
-                    val count = UserDictManager.exportUserDict(
-                        outputStream,
-                        dictName,
-                        fileName,
-                    ).getOrThrow()
+                    val count = withContext(Dispatchers.IO) {
+                        val outputStream = cr.openOutputStream(uri)!!
+                        UserDictManager.exportUserDict(
+                            outputStream,
+                            dictName,
+                            fileName,
+                        ).getOrThrow()
+                    }
                     ui.showSnackBar(ctx.getString(R.string.exported_n_entries, count))
                 } catch (e: Exception) {
-                    withContext(Dispatchers.Main.immediate) {
-                        ctx.toast(e)
-                    }
+                    ctx.toast(e)
                 }
             }
         }
@@ -130,26 +130,31 @@ class UserDictionaryFragment : Fragment() {
     private fun importFromUri(uri: Uri, merge: Boolean = false) {
         val ctx = requireContext()
         val cr = ctx.contentResolver
-        lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
+        lifecycleScope.launch {
             val fileName = cr.queryFileName(uri) ?: return@launch
             try {
-                val inputStream = cr.openInputStream(uri)!!
                 if (merge) {
-                    val result = UserDictManager.restoreUserDict(inputStream, fileName)
+                    val result = withContext(Dispatchers.IO) {
+                        cr.openInputStream(uri)!!.use { inputStream ->
+                            UserDictManager.restoreUserDict(inputStream, fileName)
+                        }
+                    }
                     if (result.isSuccess) {
                         ui.showSnackBar(ctx.getString(R.string.restored_from_x, fileName))
-                        ContextCompat.getMainExecutor(requireContext()).execute {
-                            ui.adapter.submitList(UserDictManager.getUserDictList().toList())
-                        }
+                        ui.adapter.submitList(UserDictManager.getUserDictList().toList())
                     }
                 } else {
                     val dictName = beingImported ?: return@launch
                     beingImported = null
-                    val count = UserDictManager.importUserDict(
-                        inputStream,
-                        dictName,
-                        fileName,
-                    ).getOrThrow()
+                    val count = withContext(Dispatchers.IO) {
+                        cr.openInputStream(uri)!!.use { inputStream ->
+                            UserDictManager.importUserDict(
+                                inputStream,
+                                dictName,
+                                fileName,
+                            ).getOrThrow()
+                        }
+                    }
                     ui.showSnackBar(ctx.getString(R.string.import_n_entries, count))
                 }
             } catch (e: Exception) {

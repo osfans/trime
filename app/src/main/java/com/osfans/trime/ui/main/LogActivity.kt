@@ -28,8 +28,8 @@ import com.osfans.trime.util.Logcat
 import com.osfans.trime.util.iso8601UTCDateTime
 import com.osfans.trime.util.toast
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import splitties.systemservices.clipboardManager
 
 /**
@@ -52,16 +52,18 @@ class LogActivity : AppCompatActivity() {
     private fun registerLauncher() {
         launcher =
             registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
-                lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
-                    uri
-                        ?.runCatching {
-                            contentResolver.openOutputStream(this)?.use { os ->
+                if (uri == null) return@registerForActivityResult
+                lifecycleScope.launch {
+                    runCatching {
+                        withContext(Dispatchers.IO) {
+                            contentResolver.openOutputStream(uri)!!.use { os ->
                                 os.bufferedWriter().use {
                                     it.write(DeviceInfo.get(this@LogActivity))
                                     it.write(logView.currentLog)
                                 }
                             }
-                        }?.let { toast(it) }
+                        }
+                    }.let { toast(it) }
                 }
             }
     }

@@ -17,7 +17,6 @@ import com.osfans.trime.data.db.DatabaseBean
 import com.osfans.trime.databinding.ActivityClipEditBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import splitties.systemservices.inputMethodManager
@@ -45,7 +44,7 @@ class ClipEditActivity : Activity() {
 
     private fun finishEditing() {
         val str = editText.editableText.toString()
-        scope.launch(NonCancellable) {
+        scope.launch {
             when (clipType) {
                 FROM_CLIPBOARD -> ClipboardHelper.updateText(beanId, str)
                 FROM_COLLECTION -> CollectionHelper.updateText(beanId, str)
