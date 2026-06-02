@@ -46,6 +46,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.kodein.di.instance
 import splitties.dimensions.dp
 import splitties.views.dsl.core.add
@@ -53,7 +54,6 @@ import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import java.util.concurrent.Executor
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class InputBarDelegate : InputBroadcastReceiver {
     private val di = InputDependencyManager.getInstance().di
@@ -333,7 +333,7 @@ class InputBarDelegate : InputBroadcastReceiver {
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
-    private suspend fun inflateInlineContentView(suggestion: InlineSuggestion): InlineContentView? = suspendCoroutine { c ->
+    private suspend fun inflateInlineContentView(suggestion: InlineSuggestion): InlineContentView? = suspendCancellableCoroutine { c ->
         // callback view might be null
         suggestion.inflate(context, suggestionSize, directExecutor) { v ->
             c.resume(v)
