@@ -172,16 +172,15 @@ class Rime {
     return rime->change_page(session(), backward);
   }
 
-  CandidateList getCandidates(int startIndex, int limit) {
-    CandidateList result;
+  std::vector<CandidateProto> getCandidates(int startIndex, int limit) {
+    std::vector<CandidateProto> result;
     result.reserve(limit);
     RimeCandidateListIterator iter{};
     if (rime->candidate_list_from_index(session(), &iter, startIndex)) {
       int count = 0;
       while (rime->candidate_list_next(&iter)) {
         if (count >= limit) break;
-        const CandidateItem item(iter.candidate);
-        result.emplace_back(item);
+        result.emplace_back(iter.candidate);
         ++count;
       }
       rime->candidate_list_end(&iter);
@@ -189,7 +188,7 @@ class Rime {
     return std::move(result);
   }
 
-  std::tuple<int, int, CandidateList> getBulkCandidates() {
+  std::tuple<int, int, std::vector<CandidateProto>> getBulkCandidates() {
     constexpr int limit = 16;
     auto list = getCandidates(0, limit);
     // use -1 to indicate it's not sure how many candidates now

@@ -8,25 +8,25 @@ package com.osfans.trime.ime.candidates.unrolled
 import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import com.osfans.trime.core.CandidateItem
+import com.osfans.trime.core.CandidateProto
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.candidates.CandidateItemUi
 import com.osfans.trime.ime.candidates.CandidateViewHolder
 
 open class PagingCandidateViewAdapter(
     val theme: Theme,
-) : PagingDataAdapter<CandidateItem, CandidateViewHolder>(diffCallback) {
+) : PagingDataAdapter<CandidateProto, CandidateViewHolder>(diffCallback) {
     companion object {
         private val diffCallback =
-            object : DiffUtil.ItemCallback<CandidateItem>() {
+            object : DiffUtil.ItemCallback<CandidateProto>() {
                 override fun areItemsTheSame(
-                    oldItem: CandidateItem,
-                    newItem: CandidateItem,
+                    oldItem: CandidateProto,
+                    newItem: CandidateProto,
                 ): Boolean = oldItem === newItem
 
                 override fun areContentsTheSame(
-                    oldItem: CandidateItem,
-                    newItem: CandidateItem,
+                    oldItem: CandidateProto,
+                    newItem: CandidateProto,
                 ): Boolean = oldItem == newItem
             }
     }

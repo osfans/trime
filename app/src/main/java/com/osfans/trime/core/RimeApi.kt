@@ -84,5 +84,5 @@ interface RimeApi {
     suspend fun getCandidates(
         startIndex: Int,
         limit: Int,
-    ): Array<CandidateItem>
+    ): Array<CandidateProto>
 }

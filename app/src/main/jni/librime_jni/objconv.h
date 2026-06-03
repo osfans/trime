@@ -41,24 +41,6 @@ inline std::vector<std::string> stringArrayToStringVector(JNIEnv* env,
   return std::move(result);
 }
 
-inline jobject rimeCandidateItemToJObject(JNIEnv* env,
-                                          const CandidateItem& item) {
-  return env->NewObject(GlobalRef->CandidateItem, GlobalRef->CandidateItemInit,
-                        *JString(env, item.text), *JString(env, item.comment));
-}
-
-inline jobjectArray rimeCandidateListToJObjectArray(
-    JNIEnv* env, const std::vector<CandidateItem>& list) {
-  jobjectArray array = env->NewObjectArray(static_cast<int>(list.size()),
-                                           GlobalRef->CandidateItem, nullptr);
-  int i = 0;
-  for (const auto& item : list) {
-    auto jItem = JRef(env, rimeCandidateItemToJObject(env, item));
-    env->SetObjectArrayElement(array, i++, jItem);
-  }
-  return array;
-}
-
 inline jobjectArray stringVectorToJStringArray(
     JNIEnv* env, const std::vector<std::string>& strings) {
   jobjectArray array = env->NewObjectArray(static_cast<int>(strings.size()),
@@ -79,9 +61,20 @@ inline jobject rimeCandidateToJObject(JNIEnv* env,
                                       const CandidateProto& candidate) {
   return env->NewObject(
       GlobalRef->CandidateProto, GlobalRef->CandidateProtoInit,
-      *JString(env, candidate.text),
-      candidate.comment ? *JString(env, *candidate.comment) : nullptr,
+      *JString(env, candidate.text), *JString(env, candidate.comment),
       *JString(env, candidate.label));
+}
+
+inline jobjectArray rimeCandidateListToJObjectArray(
+    JNIEnv* env, const std::vector<CandidateProto>& list) {
+  jobjectArray array = env->NewObjectArray(static_cast<int>(list.size()),
+                                           GlobalRef->CandidateProto, nullptr);
+  int i = 0;
+  for (const auto& candidate : list) {
+    auto obj = JRef(env, rimeCandidateToJObject(env, candidate));
+    env->SetObjectArrayElement(array, i++, obj);
+  }
+  return array;
 }
 
 inline jobject rimeCompositionToJObject(JNIEnv* env,

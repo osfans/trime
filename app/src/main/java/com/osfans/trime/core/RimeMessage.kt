@@ -106,7 +106,7 @@ sealed class RimeMessage<T>(
         data class Data(
             val total: Int = -1,
             val highlighted: Int = 0,
-            val candidates: Array<CandidateItem> = arrayOf(),
+            val candidates: Array<CandidateProto> = arrayOf(),
         ) {
             override fun equals(other: Any?): Boolean {
                 if (this === other) return true
@@ -196,7 +196,7 @@ sealed class RimeMessage<T>(
                     CandidateListMessage.Data(
                         params[0] as Int,
                         params[1] as Int,
-                        params[2] as Array<CandidateItem>,
+                        params[2] as Array<CandidateProto>,
                     ),
                 )
             MessageType.Key ->

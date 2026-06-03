@@ -7,7 +7,7 @@ package com.osfans.trime.ime.candidates.unrolled
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.osfans.trime.core.CandidateItem
+import com.osfans.trime.core.CandidateProto
 import com.osfans.trime.daemon.RimeSession
 import timber.log.Timber
 
@@ -15,8 +15,8 @@ class CandidatesPagingSource(
     val rime: RimeSession,
     val total: Int,
     val offset: Int,
-) : PagingSource<Int, CandidateItem>() {
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CandidateItem> {
+) : PagingSource<Int, CandidateProto>() {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CandidateProto> {
         // use candidate index for key, null means load from beginning (including offset)
         val startIndex = params.key ?: offset
         val pageSize = params.loadSize
@@ -35,5 +35,5 @@ class CandidatesPagingSource(
     }
 
     // always reload from beginning
-    override fun getRefreshKey(state: PagingState<Int, CandidateItem>) = null
+    override fun getRefreshKey(state: PagingState<Int, CandidateProto>) = null
 }
