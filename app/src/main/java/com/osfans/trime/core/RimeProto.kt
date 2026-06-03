@@ -11,7 +11,7 @@ data class CommitProto(
 
 data class CandidateProto(
     val text: String,
-    val comment: String?,
+    val comment: String,
     val label: String,
 )
 

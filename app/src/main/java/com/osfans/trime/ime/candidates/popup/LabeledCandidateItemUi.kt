@@ -66,7 +66,7 @@ class LabeledCandidateItemUi(
                 inSpanWith(labelFg, ctx.sp(labelSize), labelFont) { append(candidate.label) }
                 append(" ")
                 inSpanWith(textFg, ctx.sp(textSize), textFont) { append(candidate.text) }
-                if (!candidate.comment.isNullOrBlank()) {
+                if (candidate.comment.isNotBlank()) {
                     append(" ")
                     inSpanWith(commentFg, ctx.sp(commentSize), commentFont) { append(candidate.comment) }
                 }

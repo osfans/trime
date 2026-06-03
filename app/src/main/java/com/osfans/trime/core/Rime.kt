@@ -190,7 +190,7 @@ class Rime :
     override suspend fun getCandidates(
         startIndex: Int,
         limit: Int,
-    ): Array<CandidateItem> = withRimeContext {
+    ): Array<CandidateProto> = withRimeContext {
         getRimeCandidates(startIndex, limit)
     }
 
@@ -490,7 +490,7 @@ class Rime :
         external fun getRimeCandidates(
             startIndex: Int,
             limit: Int,
-        ): Array<CandidateItem>
+        ): Array<CandidateProto>
 
         @JvmStatic
         external fun getRimeBulkCandidates(): Array<Any>

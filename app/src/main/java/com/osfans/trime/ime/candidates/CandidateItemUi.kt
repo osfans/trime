@@ -11,7 +11,7 @@ import android.graphics.Color
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
-import com.osfans.trime.core.CandidateItem
+import com.osfans.trime.core.CandidateProto
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
@@ -160,7 +160,7 @@ class CandidateItemUi(
 
     @SuppressLint("UseKtx")
     fun update(
-        item: CandidateItem,
+        item: CandidateProto,
         highlighted: Boolean,
     ) {
         val tColor = if (highlighted) hlTextColor else textColor

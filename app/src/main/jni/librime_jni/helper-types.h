@@ -28,18 +28,6 @@ class SchemaItem {
   }
 };
 
-class CandidateItem {
- public:
-  std::string text;
-  std::string comment;
-
-  explicit CandidateItem(const RimeCandidate& candidate)
-      : text(candidate.text),
-        comment(candidate.comment ? candidate.comment : "") {}
-};
-
-using CandidateList = std::vector<CandidateItem>;
-
 class CommitProto {
  public:
   std::optional<std::string> text;
@@ -52,8 +40,12 @@ class CommitProto {
 class CandidateProto {
  public:
   std::string text;
-  std::optional<std::string> comment;
+  std::string comment;
   std::string label;
+
+  CandidateProto() = default;
+  explicit CandidateProto(const RimeCandidate& c)
+      : text(c.text), comment(c.comment ? c.comment : "") {}
 };
 
 class CompositionProto {
