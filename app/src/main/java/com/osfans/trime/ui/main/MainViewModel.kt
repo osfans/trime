@@ -14,13 +14,7 @@ class MainViewModel : ViewModel() {
 
     val topOptionsMenu = MutableLiveData<Boolean>()
 
-    private val rimeSession =
-        lazy(LazyThreadSafetyMode.NONE) {
-            RimeDaemon.createSession(javaClass.name)
-        }
-
-    val rime: RimeSession
-        get() = rimeSession.value
+    val rime = RimeDaemon.createSession(javaClass.name)
 
     val restartBackgroundSyncWork = MutableLiveData(false)
 
@@ -72,8 +66,6 @@ class MainViewModel : ViewModel() {
     }
 
     override fun onCleared() {
-        if (rimeSession.isInitialized()) {
-            RimeDaemon.destroySession(javaClass.name)
-        }
+        RimeDaemon.destroySession(javaClass.name)
     }
 }
