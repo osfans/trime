@@ -6,18 +6,21 @@ package com.osfans.trime.ui.main
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.daemon.RimeSession
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
     val toolbarTitle = MutableLiveData<String>()
 
     val topOptionsMenu = MutableLiveData<Boolean>()
 
-    val rime = RimeDaemon.createSession(javaClass.name)
+    private val rimeSession =
+        lazy(LazyThreadSafetyMode.NONE) {
+            RimeDaemon.createSession(javaClass.name)
+        }
+
+    val rime: RimeSession
+        get() = rimeSession.value
 
     val restartBackgroundSyncWork = MutableLiveData(false)
 
@@ -69,6 +72,8 @@ class MainViewModel : ViewModel() {
     }
 
     override fun onCleared() {
-        RimeDaemon.destroySession(javaClass.name)
+        if (rimeSession.isInitialized()) {
+            RimeDaemon.destroySession(javaClass.name)
+        }
     }
 }
