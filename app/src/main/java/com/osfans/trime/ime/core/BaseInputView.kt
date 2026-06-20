@@ -27,6 +27,7 @@ import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import splitties.dimensions.dp
+import splitties.views.dsl.core.withTheme
 import kotlin.math.max
 
 abstract class BaseInputView(
@@ -60,6 +61,8 @@ abstract class BaseInputView(
             }
         }
 
+    val themedContext = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
+
     private var candidateActionMenu: PopupMenu? = null
 
     fun showCandidateActionMenu(idx: Int, text: String, view: View, global: Boolean) {
@@ -74,7 +77,7 @@ abstract class BaseInputView(
         service.lifecycleScope.launch {
             InputFeedbackManager.keyPressVibrate(view, longPress = true)
             candidateActionMenu =
-                PopupMenu(context, view).apply {
+                PopupMenu(themedContext, view).apply {
                     menu.add(title).apply {
                         isEnabled = false
                     }
