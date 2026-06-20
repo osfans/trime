@@ -13,9 +13,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.jctools.queues.SpscArrayQueue
 import timber.log.Timber
 import java.util.concurrent.Executors
-import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.Semaphore
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
 
@@ -55,14 +56,6 @@ class RimeDispatcher(
         }
 
         override fun toString(): String = "WrappedRunnable[${name ?: hashCode()}]"
-
-        companion object {
-            val Empty = WrappedRunnable({}, "Empty")
-        }
-    }
-
-    companion object {
-        private const val JOB_WAITING_LIMIT = 2000L // ms
     }
 
     private val internalDispatcher =
@@ -75,9 +68,11 @@ class RimeDispatcher(
 
     private val mutex = Mutex()
 
-    private val queue = LinkedBlockingQueue<WrappedRunnable>()
+    private val queue = SpscArrayQueue<WrappedRunnable>(64)
 
     private val isRunning = AtomicBoolean(false)
+
+    private val semaphore = Semaphore(0)
 
     /**
      * Start the dispatcher
@@ -91,8 +86,11 @@ class RimeDispatcher(
                     Timber.d("nativeStartup()")
                     controller.nativeStartup()
                     while (isActive && isRunning.get()) {
-                        val block = queue.take()
-                        block.run()
+                        semaphore.acquireUninterruptibly()
+                        while (true) {
+                            val block = queue.poll() ?: break
+                            block.run()
+                        }
                     }
                     Timber.i("nativeFinalize()")
                     controller.nativeFinalize()
@@ -109,10 +107,10 @@ class RimeDispatcher(
         Timber.i("RimeDispatcher stop()")
         return if (isRunning.compareAndSet(true, false)) {
             runBlocking {
-                queue.offer(WrappedRunnable.Empty)
+                semaphore.release()
                 mutex.withLock {
-                    val rest = mutableListOf<WrappedRunnable>()
-                    queue.drainTo(rest)
+                    val rest = queue.toList()
+                    queue.clear()
                     rest
                 }
             }
@@ -129,5 +127,10 @@ class RimeDispatcher(
             throw IllegalStateException("Dispatcher is not in running state!")
         }
         queue.offer(WrappedRunnable(block))
+        semaphore.release()
+    }
+
+    companion object {
+        private const val JOB_WAITING_LIMIT = 2000L // ms
     }
 }
