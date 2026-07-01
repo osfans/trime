@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.11] - 2026-07-01
+
+### 🐛 Bug Fixes
+
+- End composition only when toggling ascii_mode
+- Defer theme initialization until rime is ready
+- Add DT_HASH for Android 5.x (API ≤22) compatibility
+
+### 🚜 Refactor
+
+- Move ascii_mode composition handling to action listener
+- Remove misused kotlinx.coroutines.NonCancellable
+- Migrate to suspendCancellableCoroutine
+- Unify CandidateProto object for paged and bulk candidates
+- Create PopupMenu with themedContext
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version to 3.3.11
+- Upgrade gradle to 9.5.1
+- Upgrade librime to 1.17.0
+- Add 3.3.11 changelog
+
 ## [3.3.10] - 2026-04-30
 
 ### 🚀 Features
