@@ -23,4 +23,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <color name="toolbarForegroundColor">#FFFFFF</color>  <!-- 工具栏前景色 -->
 
+    <color name="testInputBackground">#FFFFFF</color>
+    <color name="testInputStroke">#E0E0E0</color>
+    <color name="testInputStrokeFocused">@color/colorAccent</color>
+
 </resources>

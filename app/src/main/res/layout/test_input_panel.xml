@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ SPDX-FileCopyrightText: 2015 - 2025 Rime community
+  ~ SPDX-License-Identifier: GPL-3.0-or-later
+  -->
+
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <LinearLayout
+        android:id="@+id/test_input_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_baseline_keyboard_24"
+            app:tint="?attr/colorControlNormal" />
+
+        <TextView
+            android:id="@+id/test_input_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="@string/test_input_panel_title"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/test_input_collapse"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/collapse_test_input"
+            android:padding="6dp"
+            android:src="@drawable/ic_baseline_expand_less_24"
+            app:tint="?attr/colorControlNormal" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/test_input_hide"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/hide_test_input"
+            android:padding="6dp"
+            android:src="@drawable/ic_outline_cancel_24"
+            app:tint="?attr/colorControlNormal" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/test_input_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical">
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/input_type_pill_group"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/pill_text"
+                    style="@style/TestInputTypePill"
+                    android:text="@string/input_type_text"
+                    app:drawableStartCompat="@drawable/ic_baseline_keyboard_24"
+                    />
+
+                <TextView
+                    android:id="@+id/pill_number"
+                    style="@style/TestInputTypePill"
+                    android:text="@string/input_type_number"
+                    app:drawableStartCompat="@drawable/ic_baseline_numbers_24"
+                    />
+
+                <TextView
+                    android:id="@+id/pill_password"
+                    style="@style/TestInputTypePill"
+                    android:text="@string/input_type_password"
+                    app:drawableStartCompat="@drawable/ic_baseline_lock_24"
+                    />
+
+                <TextView
+                    android:id="@+id/pill_phone"
+                    style="@style/TestInputTypePill"
+                    android:text="@string/input_type_phone"
+                    app:drawableStartCompat="@drawable/ic_baseline_phone_24"
+                    />
+
+                <TextView
+                    android:id="@+id/pill_email"
+                    style="@style/TestInputTypePill"
+                    android:text="@string/input_type_email"
+                    app:drawableStartCompat="@drawable/ic_baseline_email_24"
+                    />
+
+                <TextView
+                    android:id="@+id/pill_url"
+                    style="@style/TestInputTypePill"
+                    android:layout_marginEnd="0dp"
+                    android:text="@string/input_type_url"
+                    app:drawableStartCompat="@drawable/ic_baseline_link_24"
+                    />
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <EditText
+                android:id="@+id/test_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_test_input_field"
+                android:cursorVisible="true"
+                android:hint="@string/test_input"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:minHeight="48dp"
+                android:paddingStart="14dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="14dp"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textColorHint="?android:attr/textColorSecondary"
+                android:textSize="16sp" />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/test_input_clear"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginEnd="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/clear"
+                android:padding="8dp"
+                android:src="@drawable/ic_outline_cancel_24"
+                android:visibility="gone"
+                app:tint="?attr/colorControlNormal" />
+        </FrameLayout>
+    </LinearLayout>
+</merge>
