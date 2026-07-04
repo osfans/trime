@@ -63,9 +63,11 @@ class MainActivity : AppCompatActivity() {
         val binding = ActivityMainBinding.inflate(layoutInflater)
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
             val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val ime = windowInsets.getInsets(WindowInsetsCompat.Type.ime())
             binding.root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = systemBars.left
                 rightMargin = systemBars.right
+                bottomMargin = maxOf(systemBars.bottom, ime.bottom)
             }
             binding.mainToolbar.root.topPadding = systemBars.top
             windowInsets
