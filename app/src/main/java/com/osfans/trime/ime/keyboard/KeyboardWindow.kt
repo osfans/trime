@@ -75,6 +75,7 @@ class KeyboardWindow :
     private var currentKeyboardId = ""
     private var lastKeyboardId = ""
     private var lastLockKeyboardId = ""
+    private var tempAsciiMode: Boolean? = null
     private val cachedKeyboards = mutableMapOf<String, Pair<Keyboard, KeyboardView>>()
     private val currentKeyboard: Keyboard? get() = cachedKeyboards[currentKeyboardId]?.first
     private val currentKeyboardView: KeyboardView? get() = cachedKeyboards[currentKeyboardId]?.second
@@ -207,22 +208,15 @@ class KeyboardWindow :
     }
 
     override fun onStartInput(info: EditorInfo) {
-        var tempAsciiMode = false
         val targetKeyboard =
             when (info.imeOptions and EditorInfo.IME_FLAG_FORCE_ASCII) {
-                EditorInfo.IME_FLAG_FORCE_ASCII -> {
-                    tempAsciiMode = true
-                    ".ascii"
-                }
+                EditorInfo.IME_FLAG_FORCE_ASCII -> ".ascii"
                 else -> {
                     when (info.inputType and InputType.TYPE_MASK_CLASS) {
                         InputType.TYPE_CLASS_NUMBER,
                         InputType.TYPE_CLASS_PHONE,
                         InputType.TYPE_CLASS_DATETIME,
-                        -> {
-                            tempAsciiMode = true
-                            "number"
-                        }
+                        -> "number"
                         InputType.TYPE_CLASS_TEXT -> {
                             when (info.inputType and InputType.TYPE_MASK_VARIATION) {
                                 InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
@@ -230,10 +224,7 @@ class KeyboardWindow :
                                 InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
                                 InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
                                 InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD,
-                                -> {
-                                    tempAsciiMode = true
-                                    ".ascii"
-                                }
+                                -> ".ascii"
                                 else -> ""
                             }
                         }
@@ -242,16 +233,26 @@ class KeyboardWindow :
                 }
             }
         switchKeyboard(targetKeyboard)
-        currentKeyboard?.let {
-            val isAsciiMode = rime.run { statusCached }.isAsciiMode
-            if (tempAsciiMode) {
-                if (!isAsciiMode) {
-                    service.postRimeJob { setRuntimeOption("ascii_mode", true) }
+        val isAsciiMode = rime.run { statusCached }.isAsciiMode
+        if (targetKeyboard == ".ascii" || targetKeyboard == "number") {
+            if (tempAsciiMode == null) {
+                tempAsciiMode = isAsciiMode
+            }
+            if (!isAsciiMode) {
+                service.postRimeJob { setRuntimeOption("ascii_mode", true) }
+            }
+        } else {
+            tempAsciiMode?.let { saved ->
+                if (isAsciiMode != saved) {
+                    service.postRimeJob { setRuntimeOption("ascii_mode", saved) }
                 }
-            } else if (theme.generalStyle.resetAsciiModeOnFocusChange) {
-                val targetMode = if (it.resetAsciiMode) it.asciiMode else it.lastAsciiMode
-                if (isAsciiMode != targetMode) {
-                    service.postRimeJob { setRuntimeOption("ascii_mode", targetMode) }
+                tempAsciiMode = null
+            } ?: currentKeyboard?.let {
+                if (theme.generalStyle.resetAsciiModeOnFocusChange) {
+                    val targetMode = if (it.resetAsciiMode) it.asciiMode else it.lastAsciiMode
+                    if (isAsciiMode != targetMode) {
+                        service.postRimeJob { setRuntimeOption("ascii_mode", targetMode) }
+                    }
                 }
             }
         }
