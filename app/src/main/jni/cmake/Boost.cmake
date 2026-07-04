@@ -30,11 +30,13 @@ set(BOOST_INCLUDE_LIBRARIES
     crc
     dll
     interprocess
+    preprocessor
     range
     regex
     scope_exit
     signals2
     utility
-    uuid)
+    uuid
+    vmd)
 
 add_subdirectory(boost EXCLUDE_FROM_ALL)
