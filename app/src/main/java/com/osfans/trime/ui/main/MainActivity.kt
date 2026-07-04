@@ -8,6 +8,7 @@ package com.osfans.trime.ui.main
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
 import android.view.ViewGroup
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -38,7 +39,6 @@ import com.osfans.trime.util.item
 import com.osfans.trime.util.parcelable
 import com.osfans.trime.util.startActivity
 import com.osfans.trime.worker.BackgroundSyncWork
-import splitties.resources.styledColor
 import splitties.views.topPadding
 
 class MainActivity : AppCompatActivity() {
@@ -47,6 +47,8 @@ class MainActivity : AppCompatActivity() {
     private val uiMode by AppPrefs.defaultInstance().advanced.uiMode
 
     private lateinit var navController: NavController
+    private lateinit var activityBinding: ActivityMainBinding
+    private var showTestInputMenuItem: MenuItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val uiMode =
@@ -73,6 +75,7 @@ class MainActivity : AppCompatActivity() {
             .isAppearanceLightStatusBars = false
 
         setContentView(binding.root)
+        activityBinding = binding
         // always show toolbar back arrow icon
         binding.mainToolbar.toolbar.navigationIcon =
             DrawerArrowDrawable(this).apply {
@@ -83,6 +86,9 @@ class MainActivity : AppCompatActivity() {
         // don't use `setSupportActionBar(binding.toolbar)` here,
         // because navController would change toolbar title, we need to control it by ourselves
         setupToolbarMenu(binding.mainToolbar.toolbar.menu)
+        binding.testInputPanel.bind { visible ->
+            showTestInputMenuItem?.isVisible = !visible
+        }
         navController = binding.navHostFragment.getFragment<NavHostFragment>().navController
         navController.graph = NavigationRoute.createGraph(navController)
         binding.mainToolbar.toolbar.setNavigationOnClickListener {
@@ -166,6 +172,16 @@ class MainActivity : AppCompatActivity() {
             // show menu item on demand
             item.isVisible = false
         }
+        showTestInputMenuItem =
+            menu.item(
+                R.string.show_test_input,
+                R.drawable.ic_baseline_keyboard_24,
+                iconTint = ContextCompat.getColor(this, R.color.toolbarForegroundColor),
+                showAsAction = true,
+            ) {
+                activityBinding.testInputPanel.showExpanded()
+            }
+        showTestInputMenuItem?.isVisible = false
     }
 
     override fun onPause() {

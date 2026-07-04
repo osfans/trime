@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ SPDX-FileCopyrightText: 2015 - 2025 Rime community
+  ~ SPDX-License-Identifier: GPL-3.0-or-later
+  -->
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/testInputBackground" />
+            <stroke
+                android:width="2dp"
+                android:color="@color/testInputStrokeFocused" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/testInputBackground" />
+            <stroke
+                android:width="1dp"
+                android:color="@color/testInputStroke" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+</selector>

@@ -13,10 +13,17 @@
 
     <include android:id="@+id/mainToolbar" layout="@layout/toolbar" />
 
+    <com.osfans.trime.ui.main.TestInputPanel
+        android:id="@+id/test_input_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp" />
+
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         app:defaultNavHost="true" />
 </LinearLayout>
