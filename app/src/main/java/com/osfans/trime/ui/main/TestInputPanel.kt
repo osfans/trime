@@ -34,7 +34,14 @@ constructor(
     attrs: AttributeSet? = null,
 ) : LinearLayout(context, attrs) {
     private val binding: TestInputPanelBinding
-    private val activity = context as FragmentActivity
+    private val activity: FragmentActivity by lazy {
+        var ctx: Context = context
+        while (ctx is android.content.ContextWrapper) {
+            if (ctx is FragmentActivity) return@lazy ctx
+            ctx = ctx.baseContext
+        }
+        throw IllegalStateException("TestInputPanel must be inflated with a FragmentActivity context.")
+    }
     private var onVisibilityChanged: ((visible: Boolean) -> Unit)? = null
 
     private data class InputTypeOption(
