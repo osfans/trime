@@ -236,7 +236,7 @@ constructor(
         @DrawableRes iconRes: Int,
     ) {
         val icon = ContextCompat.getDrawable(context, iconRes)?.mutate()
-        pill.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null)
+        pill.setCompoundDrawablesRelativeWithIntrinsicBounds(icon, null, null, null)
         TextViewCompat.setCompoundDrawableTintList(pill, pill.textColors)
     }
 
