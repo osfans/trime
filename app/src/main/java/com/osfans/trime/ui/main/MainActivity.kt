@@ -8,8 +8,8 @@ package com.osfans.trime.ui.main
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
-import android.view.MenuItem
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -21,6 +21,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.forEach
+import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -47,8 +48,7 @@ class MainActivity : AppCompatActivity() {
     private val uiMode by AppPrefs.defaultInstance().advanced.uiMode
 
     private lateinit var navController: NavController
-    private lateinit var activityBinding: ActivityMainBinding
-    private var showTestInputMenuItem: MenuItem? = null
+    private var testInputPanel: TestInputPanel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val uiMode =
@@ -77,7 +77,6 @@ class MainActivity : AppCompatActivity() {
             .isAppearanceLightStatusBars = false
 
         setContentView(binding.root)
-        activityBinding = binding
         // always show toolbar back arrow icon
         binding.mainToolbar.toolbar.navigationIcon =
             DrawerArrowDrawable(this).apply {
@@ -88,9 +87,6 @@ class MainActivity : AppCompatActivity() {
         // don't use `setSupportActionBar(binding.toolbar)` here,
         // because navController would change toolbar title, we need to control it by ourselves
         setupToolbarMenu(binding.mainToolbar.toolbar.menu)
-        binding.testInputPanel.bind { visible ->
-            showTestInputMenuItem?.isVisible = !visible
-        }
         navController = binding.navHostFragment.getFragment<NavHostFragment>().navController
         navController.graph = NavigationRoute.createGraph(navController)
         binding.mainToolbar.toolbar.setNavigationOnClickListener {
@@ -102,6 +98,15 @@ class MainActivity : AppCompatActivity() {
             // "minimize" the activity if we can't go back
             navController.navigateUp() || onSupportNavigateUp() || moveTaskToBack(false)
         }
+        onBackPressedDispatcher.addCallback {
+            if (binding.testInputPanel.isVisible) {
+                binding.testInputPanel.dismiss()
+            } else {
+                isEnabled = false
+                onBackPressedDispatcher.onBackPressed()
+            }
+        }
+        testInputPanel = binding.testInputPanel
         viewModel.toolbarTitle.observe(this) {
             binding.mainToolbar.toolbar.title = it
         }
@@ -144,6 +149,9 @@ class MainActivity : AppCompatActivity() {
             menu.item(R.string.deploy, R.drawable.ic_baseline_refresh_reversed_24, showAsAction = true) {
                 viewModel.rime.launchOnReady { it.deploy() }
             },
+            menu.item(R.string.test_input, R.drawable.ic_baseline_keyboard_24, showAsAction = true) {
+                testInputPanel?.show(window)
+            },
             menu.item(R.string.developer) {
                 navController.navigate(NavigationRoute.Developer)
             },
@@ -174,16 +182,6 @@ class MainActivity : AppCompatActivity() {
             // show menu item on demand
             item.isVisible = false
         }
-        showTestInputMenuItem =
-            menu.item(
-                R.string.show_test_input,
-                R.drawable.ic_baseline_keyboard_24,
-                iconTint = ContextCompat.getColor(this, R.color.toolbarForegroundColor),
-                showAsAction = true,
-            ) {
-                activityBinding.testInputPanel.showExpanded()
-            }
-        showTestInputMenuItem?.isVisible = false
     }
 
     override fun onPause() {
@@ -199,6 +197,16 @@ class MainActivity : AppCompatActivity() {
         if (isStorageAvailable()) {
             SoundEffectManager.init()
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        testInputPanel?.dismiss()
+    }
+
+    override fun onDestroy() {
+        testInputPanel = null
+        super.onDestroy()
     }
 
     private fun checkNotificationPermission() {

@@ -1,254 +1,326 @@
 /*
- * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-FileCopyrightText: 2015 - 2026 Rime community
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 package com.osfans.trime.ui.main
 
 import android.content.Context
+import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.StateListDrawable
+import android.os.Build
 import android.text.InputType
 import android.util.AttributeSet
-import android.view.LayoutInflater
-import android.view.View
-import android.view.inputmethod.InputMethodManager
+import android.view.Window
+import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
+import androidx.core.view.setPadding
 import androidx.core.widget.TextViewCompat
 import androidx.core.widget.doAfterTextChanged
-import androidx.fragment.app.FragmentActivity
 import com.osfans.trime.R
-import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.databinding.TestInputPanelBinding
+import splitties.dimensions.dp
+import splitties.resources.drawable
 import splitties.resources.styledColor
+import splitties.resources.styledDrawable
 import splitties.systemservices.inputMethodManager
+import splitties.views.dsl.constraintlayout.after
+import splitties.views.dsl.constraintlayout.before
+import splitties.views.dsl.constraintlayout.centerVertically
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.matchConstraints
+import splitties.views.dsl.constraintlayout.startOfParent
+import splitties.views.dsl.core.Ui
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.editText
+import splitties.views.dsl.core.endMargin
+import splitties.views.dsl.core.frameLayout
+import splitties.views.dsl.core.horizontalLayout
+import splitties.views.dsl.core.imageButton
+import splitties.views.dsl.core.imageView
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.verticalLayout
+import splitties.views.dsl.core.wrapContent
+import splitties.views.gravityCenter
+import splitties.views.gravityEndCenter
+import splitties.views.gravityVerticalCenter
+import splitties.views.imageDrawable
+import splitties.views.setPaddingDp
 
 class TestInputPanel
 @JvmOverloads
 constructor(
     context: Context,
     attrs: AttributeSet? = null,
-) : LinearLayout(context, attrs) {
-    private val binding: TestInputPanelBinding
-    private val activity: FragmentActivity by lazy {
-        var ctx: Context = context
-        while (ctx is android.content.ContextWrapper) {
-            if (ctx is FragmentActivity) return@lazy ctx
-            ctx = ctx.baseContext
-        }
-        throw IllegalStateException("TestInputPanel must be inflated with a FragmentActivity context.")
-    }
-    private var onVisibilityChanged: ((visible: Boolean) -> Unit)? = null
+    defStyleAttr: Int = 0,
+) : LinearLayout(context, attrs, defStyleAttr) {
 
-    private data class InputTypeOption(
-        val pill: TextView,
-        @StringRes val hintRes: Int,
-        @DrawableRes val iconRes: Int,
+    data class InputTypeOption(
+        @StringRes val label: Int,
+        @StringRes val hint: Int,
+        @DrawableRes val icon: Int,
         val inputType: Int,
     )
 
-    private lateinit var options: List<InputTypeOption>
+    inner class PillUi(val index: Int) : Ui {
+        override val ctx: Context = this@TestInputPanel.context
+
+        val option: InputTypeOption
+            get() = inputTypeOptions[index]
+
+        override val root = textView {
+            background = StateListDrawable().apply {
+                addState(
+                    intArrayOf(android.R.attr.state_selected),
+                    GradientDrawable().apply {
+                        setColor(styledColor(android.R.attr.colorControlHighlight))
+                        cornerRadius = dp(6f)
+                    },
+                )
+                addState(
+                    intArrayOf(),
+                    GradientDrawable().apply {
+                        setStroke(dp(1), styledColor(android.R.attr.colorControlNormal))
+                        cornerRadius = dp(6f)
+                    },
+                )
+            }
+            compoundDrawablePadding = dp(6)
+            gravity = gravityCenter
+            isClickable = true
+            isFocusable = true
+            textSize = 13f
+            setPaddingDp(8, 4, 8, 4)
+            setText(option.label)
+            val imageDrawable = ctx.drawable(option.icon)!!.apply {
+                setTintList(textColors)
+            }
+            setCompoundDrawablesRelativeWithIntrinsicBounds(imageDrawable, null, null, null)
+
+            setOnClickListener {
+                selectInputType(this@PillUi)
+            }
+        }
+
+        fun setActive(active: Boolean) {
+            root.isSelected = active
+            TextViewCompat.setCompoundDrawableTintList(root, root.textColors)
+        }
+    }
+
+    private var selected = -1
+
+    private val inputTypeOptions = listOf(
+        InputTypeOption(
+            R.string.text,
+            R.string.type_text,
+            R.drawable.ic_baseline_text_fields_24,
+            InputType.TYPE_CLASS_TEXT,
+        ),
+        InputTypeOption(
+            R.string.number,
+            R.string.type_number,
+            R.drawable.ic_baseline_numbers_24,
+            InputType.TYPE_CLASS_NUMBER,
+        ),
+        InputTypeOption(
+            R.string.password,
+            R.string.type_password,
+            R.drawable.ic_baseline_lock_24,
+            InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD,
+        ),
+    )
+
+    private val pills = Array(inputTypeOptions.size) {
+        PillUi(it).apply {
+            setActive(false)
+        }
+    }
+
+    private val header = horizontalLayout {
+        setPadding(dp(12))
+        add(
+            imageView {
+                imageDrawable = drawable(R.drawable.ic_input_box)!!.apply {
+                    setTint(styledColor(android.R.attr.colorControlNormal))
+                }
+            },
+            lParams(dp(20), dp(20)) {
+                gravity = gravityVerticalCenter
+            },
+        )
+        add(
+            textView {
+                gravity = gravityVerticalCenter
+                textSize = 18f
+                typeface = Typeface.DEFAULT_BOLD
+                setText(R.string.test_input)
+                setTextColor(styledColor(android.R.attr.textColorPrimary))
+            },
+            lParams(0, wrapContent, weight = 1f) {
+                gravity = gravityVerticalCenter
+                marginStart = dp(8)
+            },
+        )
+        add(
+            imageButton {
+                background = styledDrawable(android.R.attr.selectableItemBackgroundBorderless)
+                imageDrawable = drawable(R.drawable.ic_outline_cancel_24)!!.apply {
+                    setTint(styledColor(android.R.attr.colorControlNormal))
+                }
+                setPaddingDp(6)
+                setOnClickListener { dismiss() }
+            },
+            lParams(dp(36), dp(36)) {
+                gravity = gravityVerticalCenter
+            },
+        )
+    }
+
+    private val input: EditText = editText {
+        background = StateListDrawable().apply {
+            addState(
+                intArrayOf(android.R.attr.state_focused),
+                GradientDrawable().apply {
+                    setStroke(dp(2), styledColor(android.R.attr.colorAccent))
+                    cornerRadius = dp(6f)
+                },
+            )
+            addState(
+                intArrayOf(),
+                GradientDrawable().apply {
+                    setStroke(dp(1), styledColor(android.R.attr.colorControlNormal))
+                    cornerRadius = dp(6f)
+                },
+            )
+        }
+        isCursorVisible = true
+        isFocusable = true
+        isFocusableInTouchMode = true
+        inputType = InputType.TYPE_CLASS_TEXT
+        minimumHeight = dp(48)
+        textSize = 16f
+        setPadding(dp(14))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            importantForAutofill = IMPORTANT_FOR_AUTOFILL_NO
+        }
+    }.apply {
+        doAfterTextChanged {
+            clearButton.isVisible = !text.isNullOrEmpty()
+        }
+    }
+
+    private val clearButton: ImageButton = imageButton {
+        background = styledDrawable(android.R.attr.selectableItemBackgroundBorderless)
+        imageDrawable = drawable(R.drawable.ic_outline_cancel_24)!!.apply {
+            setTint(styledColor(android.R.attr.colorControlNormal))
+        }
+        setPadding(dp(8))
+        isVisible = false
+    }.apply {
+        setOnClickListener {
+            input.text.clear()
+        }
+    }
+
+    private val content = verticalLayout {
+        add(
+            constraintLayout {
+                pills.forEachIndexed { i, pillUi ->
+                    add(
+                        pillUi.root,
+                        lParams(matchConstraints, wrapContent) {
+                            centerVertically()
+                            if (i == 0) startOfParent() else after(pills[i - 1].root, dp(8))
+                            if (i == pills.size - 1) endOfParent() else before(pills[i + 1].root)
+                        },
+                    )
+                }
+            },
+            lParams(matchParent, wrapContent),
+        )
+        add(
+            frameLayout {
+                add(input, lParams(matchParent, wrapContent))
+                add(
+                    clearButton,
+                    lParams(dp(40), dp(40)) {
+                        gravity = gravityEndCenter
+                        endMargin = dp(4)
+                    },
+                )
+            },
+            lParams(matchParent, wrapContent) {
+                topMargin = dp(10)
+            },
+        )
+    }
 
     init {
         orientation = VERTICAL
-        setBackgroundResource(R.drawable.bg_test_input_panel)
-        val paddingPx = (12 * resources.displayMetrics.density).toInt()
-        setPadding(paddingPx, paddingPx, paddingPx, paddingPx)
-        binding = TestInputPanelBinding.inflate(LayoutInflater.from(context), this)
-    }
-
-    fun bind(onVisibilityChanged: (visible: Boolean) -> Unit = {}) {
-        this.onVisibilityChanged = onVisibilityChanged
-
-        options =
-            listOf(
-                InputTypeOption(
-                    binding.pillText,
-                    R.string.test_input,
-                    R.drawable.ic_baseline_keyboard_24,
-                    InputType.TYPE_CLASS_TEXT,
-                ),
-                InputTypeOption(
-                    binding.pillNumber,
-                    R.string.test_input_number,
-                    R.drawable.ic_baseline_numbers_24,
-                    InputType.TYPE_CLASS_NUMBER,
-                ),
-                InputTypeOption(
-                    binding.pillPassword,
-                    R.string.test_input_password,
-                    R.drawable.ic_baseline_lock_24,
-                    InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD,
-                ),
-                InputTypeOption(
-                    binding.pillPhone,
-                    R.string.test_input_phone,
-                    R.drawable.ic_baseline_phone_24,
-                    InputType.TYPE_CLASS_PHONE,
-                ),
-                InputTypeOption(
-                    binding.pillEmail,
-                    R.string.test_input_email,
-                    R.drawable.ic_baseline_email_24,
-                    InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
-                ),
-                InputTypeOption(
-                    binding.pillUrl,
-                    R.string.test_input_url,
-                    R.drawable.ic_baseline_link_24,
-                    InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI,
-                ),
-            )
-
-        options.forEach { option ->
-            option.pill.setOnClickListener {
-                selectInputType(option, showIme = true)
-            }
-        }
-
-        binding.testInputClear.setOnClickListener {
-            binding.testInput.text = null
-        }
-
-        binding.testInput.doAfterTextChanged { text ->
-            binding.testInputClear.visibility =
-                if (text.isNullOrEmpty()) View.GONE else View.VISIBLE
-        }
-
-        binding.testInputCollapse.setOnClickListener {
-            val currentlyExpanded = binding.testInputContent.visibility == View.VISIBLE
-            setExpanded(expanded = !currentlyExpanded)
-        }
-
-        binding.testInputHide.setOnClickListener {
-            confirmHide()
-        }
-
-        binding.testInput.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                inputMethodManager.hideSoftInputFromWindow(binding.testInput.windowToken, 0)
-            }
-        }
-
-        binding.testInputTitle.setOnClickListener {
-            if (binding.testInputContent.visibility != View.VISIBLE) {
-                setExpanded(expanded = true)
-            }
-        }
-
-        selectInputType(options.first(), showIme = false)
-
-        val prefs = AppPrefs.defaultInstance().general
-        if (!prefs.testInputVisible.getValue()) {
-            setVisible(visible = false, persist = false)
-        } else {
-            setExpanded(expanded = prefs.testInputExpanded.getValue(), persist = false)
-        }
-    }
-
-    fun showExpanded() {
-        setVisible(visible = true)
-        setExpanded(expanded = true)
-    }
-
-    private fun confirmHide() {
-        AlertDialog
-            .Builder(activity)
-            .setTitle(R.string.hide_test_input)
-            .setMessage(R.string.hide_test_input_confirm)
-            .setPositiveButton(R.string.ok) { _, _ ->
-                setVisible(visible = false)
-            }.setNegativeButton(R.string.cancel, null)
-            .show()
-    }
-
-    private fun setExpanded(
-        expanded: Boolean,
-        persist: Boolean = true,
-    ) {
-        binding.testInputContent.visibility = if (expanded) View.VISIBLE else View.GONE
-        binding.testInputCollapse.setImageResource(
-            if (expanded) {
-                R.drawable.ic_baseline_expand_less_24
-            } else {
-                R.drawable.ic_baseline_expand_more_24
+        add(
+            header,
+            lParams(matchParent, wrapContent) {
+                gravity = gravityCenter
             },
         )
-        binding.testInputCollapse.contentDescription =
-            activity.getString(
-                if (expanded) R.string.collapse_test_input else R.string.expand_test_input,
-            )
-
-        if (!expanded && binding.testInput.hasFocus()) {
-            inputMethodManager.hideSoftInputFromWindow(binding.testInput.windowToken, 0)
-            binding.testInput.clearFocus()
-        }
-
-        if (persist) {
-            AppPrefs.defaultInstance().general.testInputExpanded.setValue(expanded)
-        }
+        add(
+            content,
+            lParams(matchParent, wrapContent) {
+                topMargin = dp(8)
+            },
+        )
+        selectInputType(pills[0])
     }
 
-    private fun setVisible(
-        visible: Boolean,
-        persist: Boolean = true,
-    ) {
-        visibility = if (visible) View.VISIBLE else View.GONE
-
-        if (!visible) {
-            inputMethodManager.hideSoftInputFromWindow(binding.testInput.windowToken, 0)
-            binding.testInput.clearFocus()
-        }
-
-        onVisibilityChanged?.invoke(visible)
-
-        if (persist) {
-            AppPrefs.defaultInstance().general.testInputVisible.setValue(visible)
-        }
+    fun show(window: Window) {
+        if (isVisible) return
+        isVisible = true
+        input.text.clear()
+        input.requestFocus()
+        // `inputMethodManager.showSoftInput` doesn't take effect on Android 11 or above
+        WindowCompat.getInsetsController(window, input).show(WindowInsetsCompat.Type.ime())
     }
 
-    private fun selectInputType(
-        selected: InputTypeOption,
-        showIme: Boolean,
-    ) {
-        options.forEach { option ->
-            val isSelected = option == selected
-            option.pill.isSelected = isSelected
-            updatePillIcon(option.pill, option.iconRes)
-        }
-
-        binding.testInput.inputType = selected.inputType
-        binding.testInput.setHint(selected.hintRes)
-        updateFieldIcon(selected.iconRes)
-
-        if (showIme) {
-            binding.testInput.requestFocus()
-            inputMethodManager.showSoftInput(binding.testInput, InputMethodManager.SHOW_IMPLICIT)
-        }
+    fun dismiss() {
+        if (!isVisible) return
+        input.clearFocus()
+        isVisible = false
+        inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
     }
 
-    private fun updatePillIcon(
-        pill: TextView,
-        @DrawableRes iconRes: Int,
-    ) {
-        val icon = ContextCompat.getDrawable(context, iconRes)?.mutate()
-        pill.setCompoundDrawablesRelativeWithIntrinsicBounds(icon, null, null, null)
-        TextViewCompat.setCompoundDrawableTintList(pill, pill.textColors)
+    private fun selectInputType(pillUi: PillUi) {
+        val index = pillUi.index
+        if (index == selected) return
+        if (selected >= 0) {
+            pills[selected].setActive(false)
+        }
+        pillUi.setActive(true)
+        selected = index
+
+        val option = pillUi.option
+        input.inputType = option.inputType
+        input.setHint(option.hint)
+        updateFieldIcon(option.icon)
     }
 
     private fun updateFieldIcon(
         @DrawableRes iconRes: Int,
     ) {
-        val icon =
-            ContextCompat.getDrawable(context, iconRes)?.mutate()?.also {
-                DrawableCompat.setTint(it, context.styledColor(android.R.attr.textColorSecondary))
-            }
-        binding.testInput.setCompoundDrawablesRelativeWithIntrinsicBounds(icon, null, null, null)
-        binding.testInput.compoundDrawablePadding =
-            (8 * resources.displayMetrics.density).toInt()
+        val icon = drawable(iconRes)!!.apply {
+            setTint(styledColor(android.R.attr.textColorSecondary))
+        }
+        input.setCompoundDrawablesRelativeWithIntrinsicBounds(icon, null, null, null)
+        input.compoundDrawablePadding = dp(8)
     }
 }

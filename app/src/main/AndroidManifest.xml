@@ -61,7 +61,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="true"
-            android:launchMode="singleTask" />
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".ui.setup.SetupActivity"
