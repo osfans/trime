@@ -32,7 +32,6 @@ import android.widget.FrameLayout
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.core.KeyModifiers
@@ -80,11 +79,15 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private var inputView: InputView? = null
     private var candidatesView: CandidatesView? = null
     private val navBarManager = NavigationBarManager()
-    private val inputDeviceManager =
-        InputDeviceManager onChange@{
-            val w = window.window ?: return@onChange
-            navBarManager.evaluate(w, useVirtualKeyboard = it)
+    private val inputDeviceManager = InputDeviceManager { useVirtualKeyboard, useCandidatesView ->
+        postRimeJob {
+            setRuntimeOption("paging_mode", useCandidatesView)
         }
+        currentInputConnection?.monitorCursorAnchor(useCandidatesView)
+        window.window?.let {
+            navBarManager.evaluate(it, useVirtualKeyboard)
+        }
+    }
     private val rimeIntentReceiver = RimeIntentReceiver()
 
     private var lastCommittedText: String = ""
@@ -355,7 +358,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private fun updateDecorLocation() {
         contentSize[0] = contentView.width.toFloat()
         contentSize[1] =
-            if (inputDeviceManager.isVirtualKeyboard) {
+            if (inputDeviceManager.useVirtualKeyboard) {
                 inputViewLocation[1].toFloat()
             } else {
                 contentView.height.toFloat()
@@ -459,7 +462,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private val inputViewLocation = intArrayOf(0, 0)
 
     override fun onComputeInsets(outInsets: Insets) {
-        if (inputDeviceManager.isVirtualKeyboard) {
+        if (inputDeviceManager.useVirtualKeyboard) {
             inputView?.keyboardView?.getLocationInWindow(inputViewLocation)
             outInsets.apply {
                 contentTopInsets = inputViewLocation[1]
@@ -529,13 +532,13 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreateInlineSuggestionsRequest(uiExtras: Bundle): InlineSuggestionsRequest? {
-        if (!inlineSuggestions || !inputDeviceManager.isVirtualKeyboard) return null
+        if (!inlineSuggestions || !inputDeviceManager.useVirtualKeyboard) return null
         return InlineSuggestions.createRequest(this)
     }
 
     @SuppressLint("NewApi")
     override fun onInlineSuggestionsResponse(response: InlineSuggestionsResponse): Boolean {
-        if (!inputDeviceManager.isVirtualKeyboard) return false
+        if (!inputDeviceManager.useVirtualKeyboard) return false
         return inputView?.handleInlineSuggestions(response) == true
     }
 
