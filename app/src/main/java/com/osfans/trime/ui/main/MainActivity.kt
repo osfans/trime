@@ -19,6 +19,7 @@ import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
@@ -63,15 +64,29 @@ class MainActivity : AppCompatActivity() {
         val binding = ActivityMainBinding.inflate(layoutInflater)
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
             val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            val ime = windowInsets.getInsets(WindowInsetsCompat.Type.ime())
             binding.root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = systemBars.left
                 rightMargin = systemBars.right
-                bottomMargin = maxOf(systemBars.bottom, ime.bottom)
             }
             binding.mainToolbar.root.topPadding = systemBars.top
             windowInsets
         }
+        ViewCompat.setWindowInsetsAnimationCallback(
+            binding.root,
+            object : WindowInsetsAnimationCompat.Callback(DISPATCH_MODE_STOP) {
+                override fun onProgress(
+                    insets: WindowInsetsCompat,
+                    runningAnimations: List<WindowInsetsAnimationCompat?>,
+                ): WindowInsetsCompat {
+                    val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+                    val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
+                    binding.root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        bottomMargin = maxOf(systemBars.bottom, ime.bottom)
+                    }
+                    return insets
+                }
+            },
+        )
         WindowCompat
             .getInsetsController(window, window.decorView)
             .isAppearanceLightStatusBars = false
