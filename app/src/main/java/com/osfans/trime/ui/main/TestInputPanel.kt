@@ -5,6 +5,8 @@
 
 package com.osfans.trime.ui.main
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.Context
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
@@ -285,6 +287,7 @@ constructor(
 
     fun show(window: Window) {
         if (isVisible) return
+        alpha = 1f
         isVisible = true
         input.text.clear()
         input.requestFocus()
@@ -295,7 +298,13 @@ constructor(
     fun dismiss() {
         if (!isVisible) return
         input.clearFocus()
-        isVisible = false
+        animate().alpha(0f)
+            .setDuration(200L)
+            .setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    isVisible = false
+                }
+            })
         inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
     }
 
