@@ -28,7 +28,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import splitties.dimensions.dp
 import splitties.views.dsl.core.withTheme
-import kotlin.math.max
 
 abstract class BaseInputView(
     val service: TrimeInputMethodService,
@@ -101,7 +100,7 @@ abstract class BaseInputView(
             val resId = resources.getIdentifier("navigation_bar_frame_height", "dimen", "android")
             return try {
                 resources.getDimensionPixelSize(resId)
-            } catch (e: Resources.NotFoundException) {
+            } catch (_: Resources.NotFoundException) {
                 dp(FALLBACK_NAVBAR_HEIGHT)
             }
         }
@@ -110,23 +109,26 @@ abstract class BaseInputView(
         if (navBarBackground != ThemePrefs.NavbarBackground.FULL) {
             return 0
         }
-
         val insets = WindowInsetsCompat.toWindowInsetsCompat(windowInsets)
-
-        val nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-        val tappable = insets.getInsets(WindowInsetsCompat.Type.tappableElement()).bottom
-        val mandatory = insets.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures()).bottom
-        val systemGestures = insets.getInsets(WindowInsetsCompat.Type.systemGestures()).bottom
-        val threshold = (resources.displayMetrics.density * 40).toInt()
-
-        return when {
-            nav > 0 -> nav
-            tappable > 0 -> tappable
-            mandatory > threshold -> mandatory
-            systemGestures > threshold -> systemGestures
-            else -> 0
+        val insetsBottom = insets.getInsets(
+            WindowInsetsCompat.Type.navigationBars() or
+                WindowInsetsCompat.Type.mandatorySystemGestures() or
+                WindowInsetsCompat.Type.systemGestures(),
+        ).bottom
+        return if (insetsBottom <= 0) {
+            navBarFrameHeight
+        } else {
+            insetsBottom
         }
     }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        // on API 35+, we must call requestApplyInsets() manually after replacing views,
+        // otherwise View#onApplyWindowInsets won't be called. ¯\_(ツ)_/¯
+        requestApplyInsets()
+    }
+
     override fun onDetachedFromWindow() {
         handleMessages = false
         candidateActionMenu?.dismiss()

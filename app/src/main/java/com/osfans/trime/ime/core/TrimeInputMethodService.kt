@@ -270,7 +270,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         val newInputView = InputView(this, rime, theme)
         setInputView(newInputView)
         inputDeviceManager.setInputView(newInputView)
-        navBarManager.setupInputView(newInputView)
         inputView = newInputView
         return newInputView
     }
@@ -280,13 +279,12 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         contentView.removeView(candidatesView)
         contentView.addView(newCandidatesView)
         inputDeviceManager.setCandidatesView(newCandidatesView)
-        navBarManager.setupInputView(newCandidatesView)
         candidatesView = newCandidatesView
         return newCandidatesView
     }
 
     private fun replaceInputViews(theme: Theme) {
-        navBarManager.evaluate(window.window!!)
+        navBarManager.evaluate(window.window!!, inputDeviceManager.useVirtualKeyboard)
         replaceInputView(theme)
         replaceCandidateView(theme)
         inputView?.updateEnterKeyLabel(currentInputEditorInfo)
@@ -342,12 +340,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             super.onConfigurationChanged(newConfig)
         }
         lastKnownConfig.setTo(newConfig)
-    }
-
-    override fun onWindowShown() {
-        super.onWindowShown()
-        // navbar foreground/background color would reset every time window shows
-        navBarManager.update(window.window!!)
     }
 
     private val contentSize = floatArrayOf(0f, 0f)

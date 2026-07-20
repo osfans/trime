@@ -48,7 +48,7 @@ class NavigationBarManager {
         }
     }
 
-    fun evaluate(window: Window) {
+    private fun evaluateWithVirtualKeyboard(window: Window) {
         when (navbarBackground) {
             ThemePrefs.NavbarBackground.NONE -> {
                 shouldUpdateNavbarForeground = false
@@ -81,7 +81,7 @@ class NavigationBarManager {
         useVirtualKeyboard: Boolean,
     ) {
         if (useVirtualKeyboard) {
-            evaluate(window)
+            evaluateWithVirtualKeyboard(window)
         } else {
             shouldUpdateNavbarForeground = true
             shouldUpdateNavbarBackground = true
@@ -91,7 +91,7 @@ class NavigationBarManager {
         update(window)
     }
 
-    fun update(window: Window) {
+    private fun update(window: Window) {
         val backColor =
             runCatching {
                 ColorManager.getColor("back_color")
@@ -104,11 +104,5 @@ class NavigationBarManager {
         if (shouldUpdateNavbarBackground) {
             window.setNavbarBackgroundColor(backColor)
         }
-    }
-
-    fun setupInputView(v: BaseInputView) {
-        // on API 35+, we must call requestApplyInsets() manually after replacing views,
-        // otherwise View#onApplyWindowInsets won't be called. ¯\_(ツ)_/¯
-        v.requestApplyInsets()
     }
 }
