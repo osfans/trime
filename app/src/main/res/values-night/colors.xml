@@ -9,8 +9,4 @@ SPDX-License-Identifier: GPL-3.0-or-later
 <resources>
     <color name="colorAccent">#0A7CB2</color>
     <color name="colorAccentDark">#28566d</color>
-
-    <color name="testInputBackground">#2D2F30</color>
-    <color name="testInputStroke">#616161</color>
-    <color name="testInputStrokeFocused">@color/colorAccent</color>
 </resources>
