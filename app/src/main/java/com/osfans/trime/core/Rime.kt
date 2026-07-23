@@ -68,8 +68,11 @@ class Rime :
 
     private val inlinePreeditMode by AppPrefs.defaultInstance().general.inlinePreeditMode
     private val showAsciiSwitchTips by AppPrefs.defaultInstance().general.asciiSwitchTips
-    private var lastAsciiTipsText = ""
+
     private var asciiSwitchTipsJob: Job? = null
+    private var isNullInputType = true
+    private var lastAsciiTipsText = ""
+    private var pagingMode = false
 
     init {
         if (lifecycle.currentState != RimeLifecycle.State.STOPPED) {
@@ -187,11 +190,19 @@ class Rime :
         getRimeOption(option)
     }
 
+    override suspend fun setNullInputType(value: Boolean) = withRimeContext {
+        isNullInputType = value
+    }
+
     override suspend fun getCandidates(
         startIndex: Int,
         limit: Int,
     ): Array<CandidateProto> = withRimeContext {
         getRimeCandidates(startIndex, limit)
+    }
+
+    override suspend fun setCandidatePagingMode(enabled: Boolean) = withRimeContext {
+        pagingMode = enabled
     }
 
     private fun startRime(fullCheck: Boolean) {
@@ -245,7 +256,7 @@ class Rime :
         if (context.composition.length <= 0 && lastAsciiTipsText != asciiTipsText) {
             showAsciiSwitchTips()
         }
-        if (getRimeOption("paging_mode")) {
+        if (pagingMode) {
             handleRimeMessage(7, arrayOf(context.menu))
         } else {
             val bulk = getRimeBulkCandidates()
@@ -255,7 +266,7 @@ class Rime :
     }
 
     private fun handlePreedit(composition: CompositionProto) {
-        val mode = if (getRimeOption("no_inline_preedit")) {
+        val mode = if (isNullInputType) {
             InlinePreeditMode.DISABLE
         } else {
             inlinePreeditMode

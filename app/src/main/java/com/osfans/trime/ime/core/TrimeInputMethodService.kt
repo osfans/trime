@@ -81,7 +81,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private val navBarManager = NavigationBarManager()
     private val inputDeviceManager = InputDeviceManager { useVirtualKeyboard, useCandidatesView ->
         postRimeJob {
-            setRuntimeOption("paging_mode", useCandidatesView)
+            setCandidatePagingMode(useCandidatesView)
         }
         currentInputConnection?.monitorCursorAnchor(useCandidatesView)
         window.window?.let {
@@ -516,7 +516,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 // when input restarts in the same editor, clear previous composition
                 clearComposition()
             }
-            setRuntimeOption("no_inline_preedit", isNullType)
+            setNullInputType(isNullType)
         }
     }
 

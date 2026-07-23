@@ -81,8 +81,12 @@ interface RimeApi {
 
     suspend fun getRuntimeOption(option: String): Boolean
 
+    suspend fun setNullInputType(value: Boolean)
+
     suspend fun getCandidates(
         startIndex: Int,
         limit: Int,
     ): Array<CandidateProto>
+
+    suspend fun setCandidatePagingMode(enabled: Boolean)
 }
