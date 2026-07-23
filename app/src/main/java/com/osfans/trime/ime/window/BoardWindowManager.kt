@@ -11,6 +11,7 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.osfans.trime.R
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.ime.broadcast.InputBroadcaster
 import com.osfans.trime.ime.dependency.InputDependencyManager
 import org.kodein.di.instance
@@ -28,6 +29,8 @@ class BoardWindowManager {
 
     private var currentWindow: BoardWindow? = null
     private var currentView: View? = null
+
+    private val hideVirtualKeyboard by AppPrefs.defaultInstance().keyboard.hideVirtualKeyboard
 
     private fun prepareAnimation(
         exitAnimation: Transition?,
@@ -108,6 +111,10 @@ class BoardWindowManager {
         Timber.d("Attach $window")
         window.onAttached()
         currentWindow = window
+        // Toolbar-only mode: hide the window host only while the keyboard area is shown, so that
+        // non-keyboard panels (option switcher, unrolled candidates, liquid keyboard, ...) opened
+        // from the toolbar remain visible. Returning to the keyboard hides the host again.
+        view.visibility = if (hideVirtualKeyboard && window.isKeyboardArea) View.GONE else View.VISIBLE
         broadcaster.onWindowAttached(window)
     }
 
