@@ -226,4 +226,5 @@
     <string name="share">分享</string>
     <string name="word_segment">分词</string>
     <string name="star_success">收藏成功</string>
+    <string name="ignore_system_gesture_insets">忽略系统手势边衬区</string>
 </resources>

@@ -227,4 +227,5 @@
     <string name="share">Share</string>
     <string name="word_segment">Word segment</string>
     <string name="star_success">Star success</string>
+    <string name="ignore_system_gesture_insets">Ignore system gesture insets</string>
 </resources>
