@@ -427,6 +427,7 @@ class AppPrefs(
         companion object {
             const val UI_MODE = "ui_mode"
             const val SHOW_APP_ICON = "show_app_icon"
+            const val IGNORE_SYSTEM_GESTURE_INSETS = "ignore_system_gesture_insets"
         }
 
         enum class UiMode(override val stringRes: Int) : PreferenceDelegateEnum {
@@ -441,6 +442,11 @@ class AppPrefs(
             SHOW_APP_ICON,
             true,
             R.string.only_available_on_some_roms,
+        )
+        val ignoreSystemGestureInsets = switch(
+            R.string.ignore_system_gesture_insets,
+            IGNORE_SYSTEM_GESTURE_INSETS,
+            false,
         )
     }
 }
