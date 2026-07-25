@@ -12,7 +12,6 @@ import android.view.KeyEvent
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
-import com.osfans.trime.core.KeyModifier
 import com.osfans.trime.core.KeyModifiers
 import com.osfans.trime.core.RimeApi
 import com.osfans.trime.core.RimeKeyEvent
@@ -59,8 +58,6 @@ class CommonKeyboardActionListener {
     private val liquidWindow: LiquidWindow by di.instance()
 
     private val prefs = AppPrefs.defaultInstance()
-
-    private var shouldReleaseKey: Boolean = false
 
     private fun showDialog(dialog: suspend (RimeApi) -> Dialog) {
         rime.launchOnReady { api ->
@@ -119,18 +116,6 @@ class CommonKeyboardActionListener {
                 InputFeedbackManager.run {
                     keyPressSound(keyEventCode)
                     keyPressSpeak(keyEventCode)
-                }
-            }
-
-            override fun onRelease(keyEventCode: Int) {
-                if (shouldReleaseKey) {
-                    // FIXME: 释放按键可能不对
-                    val value = RimeKeyMapping.keyCodeToVal(keyEventCode)
-                    if (value != RimeKeyMapping.RimeKey_VoidSymbol) {
-                        service.postRimeJob {
-                            processKey(value, KeyModifier.Release.modifier)
-                        }
-                    }
                 }
             }
 
@@ -370,7 +355,6 @@ class CommonKeyboardActionListener {
                 keyEventCode: Int,
                 metaState: Int,
             ) {
-                shouldReleaseKey = false
                 val value =
                     RimeKeyMapping
                         .keyCodeToVal(keyEventCode)
@@ -388,7 +372,6 @@ class CommonKeyboardActionListener {
                         return@postRimeJob
                     }
                     if (processKey(value, modifiers)) {
-                        shouldReleaseKey = true
                         Timber.d("handleKey: processKey")
                         return@postRimeJob
                     }
@@ -400,7 +383,6 @@ class CommonKeyboardActionListener {
                     if (keyEventCode == KeyEvent.KEYCODE_BACK) {
                         service.requestHideSelf(0)
                     }
-                    shouldReleaseKey = false
                 }
             }
 
@@ -433,7 +415,6 @@ class CommonKeyboardActionListener {
 
                     sequence = sequence.substring(slice.length)
                 }
-                shouldReleaseKey = false
             }
         }
     }

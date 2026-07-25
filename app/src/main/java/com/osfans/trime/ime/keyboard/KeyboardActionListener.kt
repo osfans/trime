@@ -15,14 +15,6 @@ interface KeyboardActionListener {
      */
     fun onPress(keyEventCode: Int)
 
-    /**
-     * Called when the user releases a key. This is sent after the [.onKey] is called. For
-     * keys that repeat, this is only called once.
-     *
-     * @param keyEventCode the code of the key that was released
-     */
-    fun onRelease(keyEventCode: Int)
-
     fun onAction(action: KeyAction)
 
     /**
