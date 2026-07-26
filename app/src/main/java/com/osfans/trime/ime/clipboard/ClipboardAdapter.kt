@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.osfans.trime.R
 import com.osfans.trime.data.db.DatabaseBean
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.util.DeviceUtils
 import com.osfans.trime.util.item
 import splitties.resources.styledColor
 import kotlin.math.min
@@ -111,7 +112,7 @@ abstract class ClipboardAdapter(
                 menu.item(R.string.delete, R.drawable.ic_baseline_delete_24, iconTint) {
                     onDelete(bean.id)
                 }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !DeviceUtils.isSamsungOneUI) {
                     popup.setForceShowIcon(true)
                 }
                 popup.setOnDismissListener { p ->
