@@ -121,7 +121,7 @@ class KeyAction(
     fun getText(keyboard: Keyboard): String = if (text.isNotEmpty()) {
         adjustCase(text, keyboard)
     } else if (keyboard.isShifted && code in KeyEvent.KEYCODE_A..KeyEvent.KEYCODE_Z && modifier == 0) {
-        adjustCase(label, keyboard)
+        if (rime.run { statusCached.isAsciiMode }) "" else adjustCase(label, keyboard)
     } else {
         text
     }

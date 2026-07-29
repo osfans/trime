@@ -15,7 +15,6 @@ import com.osfans.trime.R
 import com.osfans.trime.core.KeyModifiers
 import com.osfans.trime.core.RimeApi
 import com.osfans.trime.core.RimeKeyEvent
-import com.osfans.trime.core.RimeKeyMapping
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
@@ -119,15 +118,14 @@ class CommonKeyboardActionListener {
             }
 
             override fun onAction(action: KeyAction) {
+                val text = action.getText(KeyboardSwitcher.currentKeyboard)
                 val shouldHandle = when {
                     action.commit.isNotEmpty() -> {
                         service.commitText(action.commit)
                         false
                     }
-                    KeyboardSwitcher.currentKeyboard.let { keyboard ->
-                        action.getText(keyboard).isNotEmpty()
-                    } -> {
-                        onText(action.getText(KeyboardSwitcher.currentKeyboard))
+                    text.isNotEmpty() -> {
+                        onText(text)
                         false
                     }
                     else -> true
