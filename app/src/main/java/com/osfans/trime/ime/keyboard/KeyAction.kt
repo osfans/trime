@@ -168,7 +168,7 @@ class KeyAction(
                         label = ""
                     } else {
                         // match like: { x: 1 } or { x: q } ...
-                        code = KeyCode.nameToKeyCode(token.token).ordinal
+                        code = KeyCode.nameToKeyCode(token.token)
                         // match like: { x: "(){Left}" } (key sequence to simulate)
                         if (token.token.isNotEmpty() && !KeyCode.isStandardKey(code)) {
                             text = token.token

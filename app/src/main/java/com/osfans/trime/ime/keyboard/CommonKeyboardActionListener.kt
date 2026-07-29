@@ -354,11 +354,8 @@ class CommonKeyboardActionListener {
                 keyEventCode: Int,
                 metaState: Int,
             ) {
-                val value =
-                    RimeKeyMapping
-                        .keyCodeToVal(keyEventCode)
-                        .takeIf { it != RimeKeyMapping.RimeKey_VoidSymbol }
-                        ?: RimeKeyEvent.getKeycodeByName(KeyCode.codeToKeyName(keyEventCode))
+                val name = KeyCode.codeToKeyName(keyEventCode) ?: "VoidSymbol"
+                val value = RimeKeyEvent.getKeycodeByName(name)
                 val m = if (keyEventCode in KeyEvent.KEYCODE_NUMPAD_0..KeyEvent.KEYCODE_NUMPAD_EQUALS) {
                     metaState or KeyEvent.META_NUM_LOCK_ON
                 } else {
