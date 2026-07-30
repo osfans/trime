@@ -26,7 +26,6 @@ import com.osfans.trime.ime.clipboard.ClipboardWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputDependencyManager
 import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
-import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.switches.SwitchOptionWindow
 import com.osfans.trime.ime.symbol.LiquidData
 import com.osfans.trime.ime.symbol.LiquidWindow
@@ -359,7 +358,7 @@ class CommonKeyboardActionListener {
                     RimeKeyMapping
                         .keyCodeToVal(keyEventCode)
                         .takeIf { it != RimeKeyMapping.RimeKey_VoidSymbol }
-                        ?: RimeKeyEvent.getKeycodeByName(Keycode.keyNameOf(keyEventCode))
+                        ?: RimeKeyEvent.getKeycodeByName(KeyCode.codeToKeyName(keyEventCode))
                 val m = if (keyEventCode in KeyEvent.KEYCODE_NUMPAD_0..KeyEvent.KEYCODE_NUMPAD_EQUALS) {
                     metaState or KeyEvent.META_NUM_LOCK_ON
                 } else {
@@ -404,7 +403,8 @@ class CommonKeyboardActionListener {
 
                     service.postRimeJob {
                         if (value.run { startsWith('{') && endsWith('}') }) {
-                            onAction(KeyActionManager.getAction(value))
+                            val token = value.removeSurrounding("{", "}")
+                            onAction(KeyActionManager.getAction(token))
                         } else if (!value[0].isAsciiPrintable()) {
                             service.commitText(value)
                         } else {
