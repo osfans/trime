@@ -8,13 +8,15 @@ import android.view.KeyEvent
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ThemeManager
-import com.osfans.trime.ime.enums.Keycode
+import com.osfans.trime.data.theme.model.KeyActionToken
 import com.osfans.trime.util.virtualKeyCharacterMap
 
 /** [按鍵][Key]的各種事件（單擊、長按、滑動等）  */
 class KeyAction(
-    raw: String,
+    token: KeyActionToken,
 ) {
+    constructor(token: String) : this(KeyActionToken.Plain(token))
+
     var code = 0
         private set
     var modifier = 0
@@ -127,93 +129,80 @@ class KeyAction(
     fun getPreview(keyboard: Keyboard): String = preview ?: getLabel(keyboard)
 
     init {
-        val unbraced = raw.removeSurrounding("{", "}")
-        val presetKey = ThemeManager.activeTheme.presetKeys[unbraced]
-        when {
-            // match like: { x: BackSpace } -> preset_keys/BackSpace: {..., send: BackSpace }
-            presetKey != null -> {
-                command = presetKey.command
-                option = presetKey.option
-                select = presetKey.select
-                toggle = presetKey.toggle
-                label = presetKey.label
-                preview = presetKey.preview
-                shiftLock = presetKey.shiftLock
-                commit = presetKey.commit
-                text = presetKey.text
-                isSticky = presetKey.sticky
-                isRepeatable = presetKey.repeatable
-                isFunctional = presetKey.functional
-                isSlideCursor = presetKey.slideCursor
-                isSlideDelete = presetKey.slideDelete
-                states = presetKey.states
+        when (token) {
+            is KeyActionToken.Plain -> {
+                val label: String
+                // match like: { x: BackSpace } -> preset_keys/BackSpace: {..., send: BackSpace }
+                val preset = ThemeManager.activeTheme.presetKeys[token.token]
+                if (preset != null) {
+                    command = preset.command
+                    option = preset.option
+                    select = preset.select
+                    toggle = preset.toggle
+                    preview = preset.preview
+                    shiftLock = preset.shiftLock
+                    commit = preset.commit
+                    text = preset.text
+                    isSticky = preset.sticky
+                    isRepeatable = preset.repeatable
+                    isFunctional = preset.functional
+                    isSlideCursor = preset.slideCursor
+                    isSlideDelete = preset.slideDelete
+                    states = preset.states
 
-                val send = presetKey.send
-                if (send.isNotEmpty()) {
-                    val (c, m) = Keycode.parseSend(send)
-                    code = c
-                    modifier = m
-                } else if (command.isNotEmpty()) {
-                    code = KeyEvent.KEYCODE_FUNCTION
-                }
+                    label = preset.label
 
-                if (label.isEmpty()) {
-                    label =
-                        when (code) {
-                            KeyEvent.KEYCODE_SPACE -> ""
-                            KeyEvent.KEYCODE_UNKNOWN -> ""
-                            else -> Keycode.getDisplayLabel(code, modifier)
+                    val (keycode, modifiers) = KeyCode.parse(preset.send)
+                    if (keycode != 0 || modifiers != 0) {
+                        code = keycode
+                        modifier = modifiers
+                    } else if (preset.command.isNotEmpty()) {
+                        code = KeyEvent.KEYCODE_FUNCTION
+                    }
+                } else {
+                    // match like: { x: "{Control+a}" }
+                    val (keycode, modifiers) = KeyCode.parse(token.token)
+                    if (keycode != 0 || modifiers != 0) {
+                        code = keycode
+                        modifier = modifiers
+                        label = ""
+                    } else {
+                        // match like: { x: 1 } or { x: q } ...
+                        code = KeyCode.nameToKeyCode(token.token).ordinal
+                        // match like: { x: "(){Left}" } (key sequence to simulate)
+                        if (token.token.isNotEmpty() && !KeyCode.isStandardKey(code)) {
+                            text = token.token
+                            label = token.token.replace(BRACED_PATTERN, "")
+                        } else {
+                            label = ""
                         }
+                    }
+                }
+                this.label = label.ifEmpty {
+                    when (code) {
+                        KeyEvent.KEYCODE_UNKNOWN, KeyEvent.KEYCODE_SPACE -> ""
+                        else -> KeyCode.getDisplayLabel(code, modifier)
+                    }
                 }
             }
-            // match like: { x: "{Control+a}" }
-            raw.matches(BRACED_STR) -> {
-                val (c, m) = Keycode.parseSend(unbraced)
-                if (c != KeyEvent.KEYCODE_UNKNOWN || m > 0) {
-                    code = c
-                    modifier = m
-                }
-                // match: { x: { commit: a, text: b, label: c } }
-                decodeMapFromString(raw).takeIf { it.isNotEmpty() }?.let {
-                    commit = it["commit"] ?: ""
-                    text = it["text"] ?: ""
-                    label = it["label"] ?: ""
-                }
-            }
-            else -> {
-                // match like: { x: 1 } or { x: q } ...
-                code = Keycode.keyCodeOf(unbraced)
-                // match like: { x: "(){Left}" } (key sequence to simulate)
-                if (unbraced.isNotEmpty() && !Keycode.isStdKey(code)) {
-                    text = raw
-                    label = raw.replace(BRACED_STR, "")
-                } else if (label.isEmpty()) {
-                    label =
-                        when (code) {
-                            KeyEvent.KEYCODE_SPACE -> ""
-                            KeyEvent.KEYCODE_UNKNOWN -> ""
-                            else -> Keycode.getDisplayLabel(code, modifier)
-                        }
-                }
+            // match: { x: { commit: a, text: b, label: c } }
+            is KeyActionToken.Inline -> {
+                commit = token.token.commit ?: ""
+                text = token.token.text ?: ""
+                label = token.token.label ?: ""
             }
         }
         shiftLabel = label
-        if (Keycode.isStdKey(code) && virtualKeyCharacterMap.isPrintingKey(code)) {
-            virtualKeyCharacterMap.get(code, modifier or KeyEvent.META_SHIFT_ON).takeIf { it > 0 }?.let { charCode ->
+        if (KeyCode.isStandardKey(code) && virtualKeyCharacterMap.isPrintingKey(code)) {
+            val charCode = virtualKeyCharacterMap.get(code, modifier or KeyEvent.META_SHIFT_ON)
+            if (charCode != 0) {
                 shiftLabel = charCode.toChar().toString()
             }
         }
     }
 
     companion object {
-        private val BRACED_STR = Regex("""\{[^{}]+\}""")
-
-        private fun decodeMapFromString(str: String): Map<String, String> = str
-            .removeSurrounding("{", "}")
-            .split(", ")
-            .mapNotNull {
-                it.split("=").takeIf { it.size == 2 }?.let { (key, value) -> key to value }
-            }.toMap()
+        private val BRACED_PATTERN = Regex("""\{[^{}]+\}""")
 
         fun getModifierKeyOnMask(keycode: Int): Int = when (keycode) {
             KeyEvent.KEYCODE_SHIFT_LEFT, KeyEvent.KEYCODE_SHIFT_RIGHT -> KeyEvent.META_SHIFT_ON

@@ -23,11 +23,13 @@ class Key(
     var index: Int = -1
 
     val keyActions: Map<KeyBehavior, KeyAction> =
-        buildMap {
-            selfConfig?.behaviors?.forEach {
-                put(it.key, KeyActionManager.getAction(it.value))
+        selfConfig?.behaviors?.mapNotNull { (key, value) ->
+            if (value != null) {
+                key to KeyActionManager.getAction(value)
+            } else {
+                null
             }
-        }
+        }?.toMap() ?: mapOf()
     var edgeFlags = 0
     private val sendBindings: Boolean
 

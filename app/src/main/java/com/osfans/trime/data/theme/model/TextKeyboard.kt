@@ -63,7 +63,7 @@ data class TextKeyboard(
         val label: String,
         val labelSymbol: String,
         val hint: String,
-        val click: String,
+        val click: KeyActionToken?,
         val sendBindings: Boolean,
         val keyTextSize: Float,
         val symbolTextSize: Float,
@@ -82,7 +82,7 @@ data class TextKeyboard(
         val hlKeyBackColor: String,
         val hlKeySymbolColor: String,
         val popup: List<String> = emptyList(),
-        val behaviors: Map<KeyBehavior, String>,
+        val behaviors: Map<KeyBehavior, KeyActionToken?>,
     ) : Parcelable {
         companion object {
             fun decode(node: Node.Mapping): TextKey = TextKey(
@@ -93,7 +93,7 @@ data class TextKeyboard(
                 label = node["label"]?.string ?: "",
                 labelSymbol = node["label_symbol"]?.string ?: "",
                 hint = node["hint"]?.string ?: "",
-                click = node["click"]?.string ?: "",
+                click = KeyActionToken.decode(node["click"]),
                 sendBindings = node["send_bindings"]?.boolean ?: true,
                 keyTextSize = node["key_text_size"]?.float ?: 0f,
                 symbolTextSize = node["symbol_text_size"]?.float ?: 0f,
@@ -112,15 +112,15 @@ data class TextKeyboard(
                 hlKeyBackColor = node["hilited_key_back_color"]?.string ?: "",
                 hlKeySymbolColor = node["hilited_key_symbol_color"]?.string ?: "",
                 popup = node["popup"]?.sequence?.mapNotNull(Node::string) ?: emptyList(),
-                behaviors =
-                buildMap {
-                    KeyBehavior.entries.forEach { entry ->
-                        val action = node[entry.name.lowercase()]?.string ?: ""
-                        if (action.isNotEmpty() || entry == KeyBehavior.CLICK) {
-                            put(entry, action)
+                behaviors = KeyBehavior.entries
+                    .mapNotNull {
+                        val token = KeyActionToken.decode(node[it.name.lowercase()])
+                        if (token != null || it == KeyBehavior.CLICK) {
+                            it to token
+                        } else {
+                            null
                         }
-                    }
-                },
+                    }.toMap(),
             )
         }
     }

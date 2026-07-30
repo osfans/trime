@@ -1,17 +1,17 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2026 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-package com.osfans.trime.ime.enums
+package com.osfans.trime.ime.keyboard
 
 import android.view.KeyEvent
 import com.osfans.trime.util.virtualKeyCharacterMap
 import timber.log.Timber
 import java.util.EnumMap
-import kotlin.collections.HashMap
 
 @Suppress("ktlint:standard:enum-entry-name-case")
-enum class Keycode {
+enum class KeyCode {
     // 与原trime.yaml主题android_key/name小节相比，差异如下：
     // 1. 数字开头的keyName添加了下划线(在init阶段已经修复)，受到影响的按键有： 0-12，3D_MODE
     //
@@ -351,10 +351,10 @@ enum class Keycode {
 
     companion object {
         // librime keyname (x11) - trime keycode (兼容Android)
-        private val convertMap: HashMap<String, Keycode> = hashMapOf()
+        private val convertMap: HashMap<String, KeyCode> = hashMapOf()
 
         // 部分符号的 trime keycode (兼容Android) - key label
-        private val reverseMap: EnumMap<Keycode, String> = EnumMap(Keycode::class.java)
+        private val reverseMap: EnumMap<KeyCode, String> = EnumMap(KeyCode::class.java)
 
         init {
             for (type in entries) {
@@ -431,71 +431,76 @@ enum class Keycode {
             reverseMap[KP_9] = "9"
         }
 
-        fun isStdKey(keycode: Int): Boolean = keycode in SOFT_LEFT.ordinal..PROFILE_SWITCH.ordinal
+        fun isStandardKey(code: Int) = (SOFT_LEFT.ordinal..KeyCode.PROFILE_SWITCH.ordinal).contains(code)
 
         private fun hasSymbolLabel(keycode: Int): Boolean {
             if (keycode !in entries.indices) return false
             return keycode >= A.ordinal || reverseMap.containsKey(entries[keycode])
         }
 
-        fun getSymbolLabel(keycode: Keycode): String = reverseMap[keycode] ?: ""
+        fun getSymbolLabel(keycode: KeyCode): String = reverseMap[keycode] ?: ""
 
         fun getDisplayLabel(
             keyCode: Int,
             mask: Int,
-        ): String = if (isStdKey(keyCode)) {
+        ): String = if (isStandardKey(keyCode)) {
             // Android keycode区域
             if (virtualKeyCharacterMap.isPrintingKey(keyCode)) {
                 val charCode = virtualKeyCharacterMap.get(keyCode, mask)
-                Timber.d("getDisplayLabel(): keycode=$keyCode, mask=$mask, charCode=$charCode")
+                Timber.d("getDisplayLabel: keyCode=$keyCode, mask=$mask, charCode=$charCode")
                 if (charCode > 0) {
                     charCode.toChar().toString()
                 } else {
                     virtualKeyCharacterMap.getDisplayLabel(keyCode).lowercase()
                 }
             } else {
-                keyNameOf(keyCode)
+                codeToKeyName(keyCode)
             }
         } else if (hasSymbolLabel(keyCode)) { // 可見符號
-            getSymbolLabel(valueOf(keyCode))
+            getSymbolLabel(entries.getOrNull(keyCode) ?: VoidSymbol)
         } else {
             ""
         }
 
-        private val modifiers =
-            mapOf(
-                "Shift" to KeyEvent.META_SHIFT_ON,
-                "Control" to KeyEvent.META_CTRL_ON,
-                "Alt" to KeyEvent.META_ALT_ON,
-                "Meta" to KeyEvent.META_META_ON,
-                "Super" to KeyEvent.META_SYM_ON,
-            )
+        fun codeToKeyName(ordinal: Int): String = (entries.getOrNull(ordinal) ?: VoidSymbol)
+            .name.substringAfter('_')
 
-        @JvmStatic
-        fun fromString(s: String): Keycode = convertMap[s] ?: VoidSymbol
-
-        @JvmStatic
-        fun valueOf(ordinal: Int): Keycode = runCatching {
-            entries[ordinal]
-        }.getOrDefault(VoidSymbol)
-
-        @JvmStatic
-        fun keyNameOf(ordinal: Int): String = valueOf(ordinal).toString().substringAfter('_')
-
-        @JvmStatic
-        fun keyCodeOf(name: String): Int {
-            Timber.d("keyCodeOf(): name=$name")
-            return fromString(name).ordinal
+        fun nameToKeyCode(name: String): KeyCode {
+            Timber.d("keycodeByName: $name")
+            return convertMap[name] ?: VoidSymbol
         }
 
-        @JvmStatic
-        fun parseSend(str: String): IntArray {
-            val sends = intArrayOf(0, 0)
-            if (str.isEmpty()) return sends
-            val keys = str.split('+')
-            sends[0] = fromString(keys.last()).ordinal
-            sends[1] = keys.filter { modifiers.containsKey(it) }.fold(0) { acc, key -> acc or modifiers[key]!! }
-            return sends
+        fun parse(repr: String): Pair<Int, Int> {
+            if (repr.isEmpty()) return 0 to 0
+            var modifiers = 0
+            var start = 0
+            while (true) {
+                val found = repr.indexOf('+', start)
+                if (found == -1) break
+
+                val token = repr.substring(start, found)
+                val modifier = when (token) {
+                    "Shift" -> KeyEvent.META_SHIFT_ON
+                    "Control" -> KeyEvent.META_CTRL_ON
+                    "Alt" -> KeyEvent.META_ALT_ON
+                    "Lock" -> KeyEvent.META_CAPS_LOCK_ON
+                    else -> null
+                }
+                if (modifier != null) {
+                    modifiers = modifiers or modifier
+                } else {
+                    Timber.e("Unrecognized modifier '$token'")
+                    return 0 to 0
+                }
+                start = found + 1
+            }
+            val token = repr.substring(start)
+            val keycode = convertMap[token] ?: VoidSymbol
+            if (keycode == VoidSymbol) {
+                Timber.e("Unrecognized key '$token'")
+                return 0 to 0
+            }
+            return keycode.ordinal to modifiers
         }
     }
 }
