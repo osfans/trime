@@ -35,7 +35,7 @@ interface KeyboardActionListener {
     /**
      * Sends a sequence of characters to the listener.
      *
-     * @param text the sequence of characters to be displayed.
+     * @param input the sequence of characters to be displayed.
      */
-    fun onText(text: String)
+    fun onText(input: String)
 }
