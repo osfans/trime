@@ -22,15 +22,29 @@ private typealias RimeKeyVal = Int
 private typealias AndroidKeyCode = String
 private typealias KeyPair = Pair<Pair<RimeKeyName, RimeKeyVal>, AndroidKeyCode>
 
+const val SYMBOL_CODE_OFFSET = 10000
+const val UPPER_CODE_OFFSET = 20000
+
+private fun escapeStringLiteral(value: String): String = when (value) {
+    "\\" -> "\\\\"
+    "\"" -> "\\\""
+    "%" -> "%%"
+    else -> value
+}
+
 /**
  * This file has been taken from fcitx5-android project, since we have very similar key mapping with theirs.
  * Following modifications were done by TRIME to the original source code:
  * - Rename the words like `Fcitx`, `fcitx`, etc. to `Rime`, `rime`, etc. to fit in the context
  * - Add `VoidSymbol` mapping to the [pairs]
- * - Add two methods: `nameToKeyVal` and `keyValToName` to convert [RimeKeyName] to [RimeKeyVal], or vice versa
+ * - Add two methods: `nameToKeyCode` and `keyCodeToName` to convert [RimeKeyName] to the Android key code,
+ *   or vice versa, avoiding two-step conversions through [RimeKeyVal]
  * - Every methods return `RimeKey_VoidSymbol` / `KEYCODE_UNKNOWN` instead of null,
  *   representing the key code / name is unknown
  * - Add [JvmStatic] annotation to every methods to make them easy to call in Java code
+ * - Added synthetic codes for uppercase letters (20000+) and symbols (10000+),
+ *   along with table query functions like [symbolNameToCode], [symbolCodeToLabel], [upperNameToCode],
+ *   [charToCode] to look them up, with offsets exposed as `SYMBOL_CODE_OFFSET` / `UPPER_CODE_OFFSET`
  *
  * The original source code can be found at the following location:
  *  https://github.com/fcitx5-android/fcitx5-android/blob/14fe8c589ecb1546ed76445df0de658f81c4a1ed/codegen/src/main/java/org/fcitx/fcitx5/android/codegen/GenKeyMapping.kt
@@ -195,6 +209,47 @@ internal class GenKeyMappingProcessor(
             "VoidSymbol" to 0xffffff to "KEYCODE_UNKNOWN", // RimeKey_VoidSymbol
         )
 
+    private val upperPairs: List<Pair<String, Int>> =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ".mapIndexed { i, c -> c.toString() to UPPER_CODE_OFFSET + i }
+
+    private val symbolPairs: List<Triple<String, Int, String>> =
+        listOf(
+            Triple("exclam", SYMBOL_CODE_OFFSET + 0, "!"),
+            Triple("quotedbl", SYMBOL_CODE_OFFSET + 1, "\""),
+            Triple("dollar", SYMBOL_CODE_OFFSET + 2, "$"),
+            Triple("percent", SYMBOL_CODE_OFFSET + 3, "%"),
+            Triple("ampersand", SYMBOL_CODE_OFFSET + 4, "&"),
+            Triple("colon", SYMBOL_CODE_OFFSET + 5, ":"),
+            Triple("less", SYMBOL_CODE_OFFSET + 6, "<"),
+            Triple("greater", SYMBOL_CODE_OFFSET + 7, ">"),
+            Triple("question", SYMBOL_CODE_OFFSET + 8, "?"),
+            Triple("asciicircum", SYMBOL_CODE_OFFSET + 9, "^"),
+            Triple("underscore", SYMBOL_CODE_OFFSET + 10, "_"),
+            Triple("braceleft", SYMBOL_CODE_OFFSET + 11, "{"),
+            Triple("bar", SYMBOL_CODE_OFFSET + 12, "|"),
+            Triple("braceright", SYMBOL_CODE_OFFSET + 13, "}"),
+            Triple("asciitilde", SYMBOL_CODE_OFFSET + 14, "~"),
+        )
+
+    private val charToCodePairs: List<Pair<String, String>> =
+        listOf(
+            "," to "KEYCODE_COMMA",
+            "." to "KEYCODE_PERIOD",
+            "-" to "KEYCODE_MINUS",
+            "=" to "KEYCODE_EQUALS",
+            "/" to "KEYCODE_SLASH",
+            ";" to "KEYCODE_SEMICOLON",
+            "'" to "KEYCODE_APOSTROPHE",
+            "`" to "KEYCODE_GRAVE",
+            "[" to "KEYCODE_LEFT_BRACKET",
+            "]" to "KEYCODE_RIGHT_BRACKET",
+            "\\" to "KEYCODE_BACKSLASH",
+            "@" to "KEYCODE_AT",
+            "#" to "KEYCODE_POUND",
+            "*" to "KEYCODE_STAR",
+            "+" to "KEYCODE_PLUS",
+        )
+
     override fun process(resolver: Resolver): List<KSAnnotated> {
         // We don't process annotations at all
         return emptyList()
@@ -244,33 +299,151 @@ internal class GenKeyMappingProcessor(
                     """.trimMargin(),
                 ).build()
 
-        val keyValFromName =
+        val keyCodeFromName =
             FunSpec
-                .builder("nameToKeyVal")
+                .builder("nameToKeyCode")
                 .addAnnotation(JvmStatic::class)
                 .addParameter("name", String::class)
                 .returns(Int::class.asTypeName().copy(nullable = false))
                 .addCode(
                     """
                 | return when (name) {
-                |     ${pairs.joinToString(separator = "\n|     ") { (f, _) -> "\"${f.first}\" -> ${keyName(f)}" }}
-                |     else -> RimeKey_VoidSymbol
+                |     ${pairs.joinToString(separator = "\n|     ") { (f, code) -> "\"${f.first}\" -> KeyEvent.$code" }}
+                |     else -> KeyEvent.KEYCODE_UNKNOWN
                 | }
                     """.trimMargin(),
                 ).build()
 
-        val keyValToName =
+        val keyNameFromCode =
             FunSpec
-                .builder("keyValToName")
+                .builder("keyCodeToName")
                 .addAnnotation(JvmStatic::class)
-                .addParameter("val", Int::class)
-                .returns(String::class.asTypeName().copy(nullable = false))
+                .addParameter("code", Int::class)
+                .returns(String::class.asTypeName().copy(nullable = true))
                 .addCode(
                     """
-                | return when (`val`) {
-                |     ${pairs.joinToString(separator = "\n|     ") { (f, _) -> "${keyName(f)} -> \"${f.first}\"" }}
-                |     else -> "VoidSymbol"
-                | }
+                    | return when (code) {
+                    |     ${
+                        // exclude uppercase latin letter range and VoidSymbol because:
+                        // - there is not separate KeyCode for upper and lower case characters
+                        // - KEYCODE_UNKNOWN should not be mapped to "VoidSymbol"
+                        pairs.filter { it.first.second !in 0x41..0x5a && it.first.first != "VoidSymbol" }
+                            .joinToString(separator = "\n|     ") { (f, code) ->
+                                "KeyEvent.$code -> \"${f.first}\""
+                            }
+                    }
+                    |     else -> null
+                    | }
+                    """.trimMargin(),
+                ).build()
+
+        val symbolNameToCodeFun =
+            FunSpec
+                .builder("symbolNameToCode")
+                .addAnnotation(JvmStatic::class)
+                .addParameter("name", String::class)
+                .returns(Int::class.asTypeName().copy(nullable = true))
+                .addCode(
+                    """
+                    | return when (name) {
+                    |     ${symbolPairs.joinToString(separator = "\n|     ") { (name, code, _) ->
+                        "\"$name\" -> $code"
+                    }
+                    }
+                    |     else -> null
+                    | }
+                    """.trimMargin(),
+                ).build()
+
+        val symbolCodeToNameFun =
+            FunSpec
+                .builder("symbolCodeToName")
+                .addAnnotation(JvmStatic::class)
+                .addParameter("code", Int::class)
+                .returns(String::class.asTypeName().copy(nullable = true))
+                .addCode(
+                    """
+                    | return when (code) {
+                    |     ${symbolPairs.joinToString(separator = "\n|     ") { (name, code, _) ->
+                        "$code -> \"$name\""
+                    }
+                    }
+                    |     else -> null
+                    | }
+                    """.trimMargin(),
+                ).build()
+
+        val symbolCodeToLabelFun =
+            FunSpec
+                .builder("symbolCodeToLabel")
+                .addAnnotation(JvmStatic::class)
+                .addParameter("code", Int::class)
+                .returns(String::class.asTypeName().copy(nullable = true))
+                .addCode(
+                    """
+                    | return when (code) {
+                    |     ${symbolPairs.joinToString(separator = "\n|     ") { (_, code, label) ->
+                        "$code -> \"${escapeStringLiteral(label)}\""
+                    }
+                    }
+                    |     else -> null
+                    | }
+                    """.trimMargin(),
+                ).build()
+
+        val upperNameToCodeFun =
+            FunSpec
+                .builder("upperNameToCode")
+                .addAnnotation(JvmStatic::class)
+                .addParameter("name", String::class)
+                .returns(Int::class.asTypeName().copy(nullable = true))
+                .addCode(
+                    """
+                    | return when (name) {
+                    |     ${upperPairs.joinToString(separator = "\n|     ") { (name, code) ->
+                        "\"$name\" -> $code"
+                    }
+                    }
+                    |     else -> null
+                    | }
+                    """.trimMargin(),
+                ).build()
+
+        val upperCodeToNameFun =
+            FunSpec
+                .builder("upperCodeToName")
+                .addAnnotation(JvmStatic::class)
+                .addParameter("code", Int::class)
+                .returns(String::class.asTypeName().copy(nullable = true))
+                .addCode(
+                    """
+                    | return when (code) {
+                    |     ${upperPairs.joinToString(separator = "\n|     ") { (name, code) ->
+                        "$code -> \"$name\""
+                    }
+                    }
+                    |     else -> null
+                    | }
+                    """.trimMargin(),
+                ).build()
+
+        val charToCodeFun =
+            FunSpec
+                .builder("charToCode")
+                .addAnnotation(JvmStatic::class)
+                .addParameter("char", String::class)
+                .returns(Int::class.asTypeName().copy(nullable = true))
+                .addCode(
+                    """
+                    | return when (char) {
+                    |     ${symbolPairs.joinToString(separator = "\n|     ") { (_, code, label) ->
+                        "\"${escapeStringLiteral(label)}\" -> $code"
+                    }}
+                    |     ${charToCodePairs.joinToString(separator = "\n|     ") { (char, androidCode) ->
+                        "\"${escapeStringLiteral(char)}\" -> KeyEvent.$androidCode"
+                    }}
+                    |     else -> null
+                    | }
                     """.trimMargin(),
                 ).build()
 
@@ -279,9 +452,27 @@ internal class GenKeyMappingProcessor(
                 .objectBuilder("RimeKeyMapping")
                 .addFunction(keyCodeFromVal)
                 .addFunction(keyCodeToVal)
-                .addFunction(keyValFromName)
-                .addFunction(keyValToName)
+                .addFunction(keyCodeFromName)
+                .addFunction(keyNameFromCode)
+                .addFunction(symbolNameToCodeFun)
+                .addFunction(symbolCodeToNameFun)
+                .addFunction(symbolCodeToLabelFun)
+                .addFunction(upperNameToCodeFun)
+                .addFunction(upperCodeToNameFun)
+                .addFunction(charToCodeFun)
                 .apply {
+                    addProperty(
+                        PropertySpec
+                            .builder("SYMBOL_CODE_OFFSET", Int::class, KModifier.CONST)
+                            .initializer(SYMBOL_CODE_OFFSET.toString())
+                            .build(),
+                    )
+                    addProperty(
+                        PropertySpec
+                            .builder("UPPER_CODE_OFFSET", Int::class, KModifier.CONST)
+                            .initializer(UPPER_CODE_OFFSET.toString())
+                            .build(),
+                    )
                     pairs.forEach { (f, _) ->
                         val (_, `val`) = f
                         PropertySpec

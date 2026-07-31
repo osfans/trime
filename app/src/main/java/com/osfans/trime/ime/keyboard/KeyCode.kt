@@ -11,118 +11,30 @@ import com.osfans.trime.util.virtualKeyCharacterMap
 import timber.log.Timber
 
 object KeyCode {
-    private const val SYMBOL_CODE_OFFSET = 10000
-    private const val UPPER_CODE_OFFSET = 20000
-
-    private val SYMBOL_LABELS: Map<String, String> =
-        mapOf(
-            "exclam" to "!",
-            "quotedbl" to "\"",
-            "dollar" to "$",
-            "percent" to "%",
-            "ampersand" to "&",
-            "colon" to ":",
-            "less" to "<",
-            "greater" to ">",
-            "question" to "?",
-            "asciicircum" to "^",
-            "underscore" to "_",
-            "braceleft" to "{",
-            "bar" to "|",
-            "braceright" to "}",
-            "asciitilde" to "~",
-        )
-
-    private val SYMBOL_NAME_TO_CODE: Map<String, Int> =
-        SYMBOL_LABELS.keys.withIndex().associate { (i, name) ->
-            name to (SYMBOL_CODE_OFFSET + i)
-        }
-
-    private val SYMBOL_CODE_TO_NAME: Map<Int, String> =
-        SYMBOL_NAME_TO_CODE.entries.associate { it.value to it.key }
-
-    private val UPPER_NAME_TO_CODE: Map<String, Int> =
-        listOf(
-            "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
-            "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
-            "U", "V", "W", "X", "Y", "Z",
-        ).withIndex().associate { (i, name) -> name to (UPPER_CODE_OFFSET + i) }
-
-    private val UPPER_CODE_TO_NAME: Map<Int, String> =
-        UPPER_NAME_TO_CODE.entries.associate { it.value to it.key }
-
-    private val CHAR_TO_CODE: Map<String, Int> =
-        SYMBOL_LABELS.entries.associate { (name, char) ->
-            char to (SYMBOL_NAME_TO_CODE[name] ?: KeyEvent.KEYCODE_UNKNOWN)
-        }.plus(
-            mapOf(
-                "," to KeyEvent.KEYCODE_COMMA,
-                "." to KeyEvent.KEYCODE_PERIOD,
-                "-" to KeyEvent.KEYCODE_MINUS,
-                "=" to KeyEvent.KEYCODE_EQUALS,
-                "/" to KeyEvent.KEYCODE_SLASH,
-                ";" to KeyEvent.KEYCODE_SEMICOLON,
-                "'" to KeyEvent.KEYCODE_APOSTROPHE,
-                "`" to KeyEvent.KEYCODE_GRAVE,
-                "[" to KeyEvent.KEYCODE_LEFT_BRACKET,
-                "]" to KeyEvent.KEYCODE_RIGHT_BRACKET,
-                "\\" to KeyEvent.KEYCODE_BACKSLASH,
-                "@" to KeyEvent.KEYCODE_AT,
-                "#" to KeyEvent.KEYCODE_POUND,
-                "*" to KeyEvent.KEYCODE_STAR,
-                "+" to KeyEvent.KEYCODE_PLUS,
-            ),
-        )
-
-    private fun rimeNameToCode(name: String): Int {
-        val rimeVal = RimeKeyMapping.nameToKeyVal(name)
-        if (rimeVal != RimeKeyMapping.RimeKey_VoidSymbol) {
-            val code = RimeKeyMapping.valToKeyCode(rimeVal)
-            if (code != KeyEvent.KEYCODE_UNKNOWN) return code
-        }
-        return KeyEvent.KEYCODE_UNKNOWN
-    }
-
-    private fun rimeCodeToName(code: Int): String? {
-        val rimeVal = RimeKeyMapping.keyCodeToVal(code)
-        if (rimeVal != RimeKeyMapping.RimeKey_VoidSymbol) {
-            val name = RimeKeyMapping.keyValToName(rimeVal)
-            if (name != "VoidSymbol") return name
-        }
-        return null
-    }
-
-    fun isStandardKey(code: Int): Boolean = code in 1 until SYMBOL_CODE_OFFSET
-
-    fun hasSymbolLabel(code: Int): Boolean = SYMBOL_CODE_TO_NAME.containsKey(code)
-
-    fun getSymbolLabel(code: Int): String {
-        val name = SYMBOL_CODE_TO_NAME[code] ?: return ""
-        return SYMBOL_LABELS[name] ?: ""
-    }
+    fun isStandardKey(code: Int): Boolean = code in 1 until RimeKeyMapping.SYMBOL_CODE_OFFSET
 
     fun nameToKeyCode(name: String): Int {
         Timber.d("nameToKeyCode: $name")
         if (name.isEmpty()) return KeyEvent.KEYCODE_UNKNOWN
 
-        UPPER_NAME_TO_CODE[name]?.let { return it }
-        SYMBOL_NAME_TO_CODE[name]?.let { return it }
-        CHAR_TO_CODE[name]?.let { return it }
+        RimeKeyMapping.upperNameToCode(name)?.let { return it }
+        RimeKeyMapping.symbolNameToCode(name)?.let { return it }
+        RimeKeyMapping.charToCode(name)?.let { return it }
 
         val androidCode = KeyEvent.keyCodeFromString("KEYCODE_$name")
         if (androidCode > 0) return androidCode
 
-        val rimeCode = rimeNameToCode(name)
+        val rimeCode = RimeKeyMapping.nameToKeyCode(name)
         if (rimeCode != KeyEvent.KEYCODE_UNKNOWN) return rimeCode
 
         return KeyEvent.KEYCODE_UNKNOWN
     }
 
     fun codeToKeyName(code: Int): String? {
-        UPPER_CODE_TO_NAME[code]?.let { return it }
-        SYMBOL_CODE_TO_NAME[code]?.let { return it }
+        RimeKeyMapping.upperCodeToName(code)?.let { return it }
+        RimeKeyMapping.symbolCodeToName(code)?.let { return it }
 
-        val rimeName = rimeCodeToName(code)
+        val rimeName = RimeKeyMapping.keyCodeToName(code)
         if (rimeName != null) return rimeName
 
         val androidName = KeyEvent.keyCodeToString(code)
@@ -149,10 +61,8 @@ object KeyCode {
             val name = codeToKeyName(code) ?: ""
             name.removePrefix("KP_")
         }
-    } else if (hasSymbolLabel(code)) {
-        getSymbolLabel(code)
     } else {
-        codeToKeyName(code) ?: ""
+        RimeKeyMapping.symbolCodeToLabel(code) ?: codeToKeyName(code) ?: ""
     }
 
     fun parse(repr: String): Pair<Int, Int> {
