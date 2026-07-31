@@ -386,45 +386,47 @@ class CommonKeyboardActionListener {
                 }
             }
 
-            override fun onText(text: String) {
-                if (text.isEmpty()) return
+            override fun onText(input: String) {
+                if (input.isEmpty()) return
+                Timber.d("onText: $input")
                 val status = rime.run { statusCached }
-                if (!text[0].isAsciiPrintable() && status.isComposing) {
+                if (!input[0].isAsciiPrintable() && status.isComposing) {
                     service.postRimeJob { commitComposition() }
                 }
 
-                var sequence = text
-                while (sequence.isNotEmpty()) {
-                    val slice =
-                        when {
-                            UNBRACED_CHAR.matches(sequence) -> UNBRACED_CHAR.matchEntire(sequence)?.groupValues?.get(1) ?: ""
-                            BRACED_KEY_EVENT.matches(sequence) -> BRACED_KEY_EVENT.matchEntire(sequence)?.groupValues?.get(1) ?: ""
-                            else -> sequence[0].toString()
-                        }
+                val escaped = input.replace("{}", "{braceleft}{braceright}")
+                var i = 0
+                while (i < escaped.length) {
+                    val value = when (val match = TEXT_INPUT_PATTERN.matchEntire(escaped.substring(i))) {
+                        match if (match != null) -> match.groupValues[1]
+                        else -> escaped[i].toString()
+                    }
 
                     service.postRimeJob {
-                        if (slice.run { startsWith('{') && endsWith('}') }) {
-                            onAction(KeyActionManager.getAction(slice))
-                        } else if (!slice[0].isAsciiPrintable()) {
-                            service.commitText(slice)
+                        if (value.run { startsWith('{') && endsWith('}') }) {
+                            onAction(KeyActionManager.getAction(value))
+                        } else if (!value[0].isAsciiPrintable()) {
+                            service.commitText(value)
                         } else {
-                            val escapedSlice = slice.replace("{}", "{braceleft}{braceright}")
-                            simulateKeySequence(escapedSlice)
+                            simulateKeySequence(value)
                         }
                     }
 
-                    sequence = sequence.substring(slice.length)
+                    i += value.length
                 }
             }
         }
     }
 
     companion object {
-        /** Pattern for braced key event like `{Left}`, `{Right}`, etc. */
-        private val BRACED_KEY_EVENT = """^(\{[^{}]+\}).*$""".toRegex()
-
-        /** Pattern for unbraced characters (including {Escape}) like `abc`, `{Escape}jk` etc. */
-        private val UNBRACED_CHAR = """^((\{Escape\})?[^{}]+).*$""".toRegex()
+        /**
+         * Regex for combined key events.
+         * group(1) captures either:
+         *   - a plain prefix (optionally preceded by {Escape}) from the left branch,
+         *   - or a standalone {xxx} block from the right branch.
+         * The trailing .* consumes the rest of the input without affecting group(1).
+         */
+        private val TEXT_INPUT_PATTERN = """^((?:\{Escape\})?[^{}]+|\{[^{}]+\}).*$""".toRegex()
 
         private val PLACEHOLDER_PATTERN = Regex(".*(%([1-4]\\$)?s).*")
     }
