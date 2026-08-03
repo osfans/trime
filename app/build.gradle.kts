@@ -4,8 +4,6 @@
  */
 @file:Suppress("UnstableApiUsage")
 
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
     id("com.osfans.trime.app-convention")
     id("com.osfans.trime.native-app-convention")
@@ -13,7 +11,6 @@ plugins {
     id("com.osfans.trime.native-cache-hash")
     id("com.osfans.trime.opencc-data")
     alias(libs.plugins.aboutlibraries)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.ksp)
@@ -21,13 +18,13 @@ plugins {
 
 android {
     namespace = "com.osfans.trime"
-    compileSdk = 35
-    buildToolsVersion = "35.0.0"
+    compileSdk = 36
+    buildToolsVersion = "36.0.0"
 
     defaultConfig {
         applicationId = "com.osfans.trime"
         minSdk = 21
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 20260901
         versionName = "3.3.12"
 
@@ -42,6 +39,12 @@ android {
     base {
         // https://www.norio.be/blog/archivesBaseName-removed-from-gradle9.html
         archivesName = "${android.defaultConfig.applicationId}-$buildVersionName"
+    }
+
+    buildFeatures {
+        buildConfig = true
+        viewBinding = true
+        resValues = true
     }
 
     buildTypes {
@@ -76,23 +79,9 @@ android {
         }
     }
 
-    buildFeatures {
-        buildConfig = true
-        viewBinding = true
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    kotlin {
-        compilerOptions {
-            // https://youtrack.jetbrains.com/issue/KT-55947
-            jvmTarget.set(JvmTarget.JVM_11)
-            // https://youtrack.jetbrains.com/issue/KT-73255/Change-defaulting-rule-for-annotations
-            freeCompilerArgs.add("-Xannotation-default-target=param-property")
-        }
     }
 
     // hack workaround lint gradle 8.0.2
@@ -125,12 +114,6 @@ android {
     }
 }
 
-kotlin {
-    sourceSets.configureEach {
-        kotlin.srcDir(layout.buildDirectory.dir("generated/ksp/$name/kotlin"))
-    }
-}
-
 aboutLibraries {
     collect {
         configPath.set(file("licenses").takeIf { it.exists() })
@@ -147,13 +130,6 @@ aboutLibraries {
 
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
-}
-
-android.applicationVariants.all {
-    val variantName = name.replaceFirstChar { it.uppercase() }
-    tasks.findByName("generateDataChecksums")?.also {
-        tasks.getByName("merge${variantName}Assets").dependsOn(it)
-    }
 }
 
 dependencies {

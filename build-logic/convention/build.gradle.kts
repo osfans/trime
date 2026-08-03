@@ -5,6 +5,7 @@
 plugins {
     `kotlin-dsl`
     kotlin("plugin.serialization") version embeddedKotlinVersion
+    `java-gradle-plugin`
 }
 
 group = "com.osfans.trime.build_logic"

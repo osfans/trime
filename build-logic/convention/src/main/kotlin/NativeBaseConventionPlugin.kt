@@ -1,19 +1,19 @@
 /*
- * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-FileCopyrightText: 2015 - 2026 Rime community
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Delete
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.register
 
 open class NativeBaseConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
-        target.pluginManager.apply("com.android.application")
-        target.extensions.configure(CommonExtension::class.java) {
+        target.extensions.configure<CommonExtension> {
             ndkVersion = target.ndkVersion
-            defaultConfig {
+            defaultConfig.apply {
                 @Suppress("UnstableApiUsage")
                 externalNativeBuild {
                     cmake {
@@ -29,7 +29,7 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
             if (target.file("prebuilt").exists()) {
                 sourceSets.getByName("main").jniLibs.srcDirs(setOf("prebuilt"))
             } else {
-                externalNativeBuild {
+                externalNativeBuild.apply {
                     cmake {
                         version = target.cmakeVersion
                         path("src/main/jni/CMakeLists.txt")
