@@ -7,6 +7,7 @@ package com.osfans.trime.ime.bar.ui
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Rect
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.ShapeDrawable
@@ -117,8 +118,14 @@ class ToolButton : GestureFrame {
             ContentType.TEXT -> {
                 text?.let { label.text = it }
                 label.textSize = foreground.fontSize
+                label.includeFontPadding = false
                 label.padding = dp(foreground.padding)
                 label.typeface = FontManager.getTypeface("toolbar_font")
+                val fm = label.paint.fontMetrics
+                val bounds = Rect()
+                label.paint.getTextBounds(label.text.toString(), 0, label.text.length, bounds)
+                val offset = (fm.ascent + fm.descent) / 2f - (bounds.top + bounds.bottom) / 2f
+                label.translationY = offset
                 add(label, lParams(wrapContent, wrapContent, gravityCenter))
             }
             ContentType.LOCAL_IMAGE -> drawable?.let { image.setImageDrawable(it) }
