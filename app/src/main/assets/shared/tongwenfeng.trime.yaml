@@ -1046,7 +1046,7 @@ tool_bar:
     foreground:
       option_styles: ["中", "En"] # 样式也可以为表，将根据 action 的 toggle 决定
       font_size: 18  # 按钮字体大小
-      padding: 10
+      padding: 0
     action: Mode_switch
 
   full_shape_button: &full_shape_button
