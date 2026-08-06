@@ -19,7 +19,6 @@ import androidx.annotation.DrawableRes
 import androidx.core.view.isVisible
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.utils.sizeDp
-import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.KeyActionManager
@@ -55,7 +54,14 @@ class ToolButton(context: Context) : GestureFrame(context) {
         scaleMode = AutoScaleTextView.Mode.Horizontal
     }
 
-    private var option: String? = null
+    var option: String? = null
+        private set
+    private var optionEnabled = false
+        set(value) {
+            if (field == value) return
+            field = value
+            updateContent()
+        }
 
     private var optionStyles: List<String> = listOf()
     private var singleStyle = ""
@@ -141,17 +147,10 @@ class ToolButton(context: Context) : GestureFrame(context) {
         image.isVisible = true
     }
 
-    fun updateStyle() {
-        updateContent()
-    }
-
-    private fun getActiveStyle(): String {
-        if (option != null && optionStyles.size == 2) {
-            val rime = RimeDaemon.getFirstSessionOrNull()!!
-            val value = rime.run { getRuntimeOption(option!!) }
-            return optionStyles[if (value) 1 else 0]
+    fun updateStyle(option: String, enabled: Boolean) {
+        if (option == this.option) {
+            optionEnabled = enabled
         }
-        return singleStyle
     }
 
     private fun backgroundStateDrawable(bg: ToolBar.Button.Background, highlight: Boolean): Drawable {
@@ -176,7 +175,11 @@ class ToolButton(context: Context) : GestureFrame(context) {
     }
 
     private fun updateContent() {
-        val style = getActiveStyle()
+        val style = if (option != null && optionStyles.size == 2) {
+            optionStyles[if (optionEnabled) 1 else 0]
+        } else {
+            singleStyle
+        }
 
         // drawable: local image or iconics
         var useLocalImage = false
