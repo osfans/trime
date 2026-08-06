@@ -34,16 +34,23 @@ data class ToolBar(
 
         @Parcelize
         data class Background(
-            val type: String = "rectangle",
+            val type: Type = Type.RECTANGLE,
             val cornerRadius: Float = 10f,
             val normal: String = "",
             val highlight: String = "",
             val verticalInset: Int = 4,
             val horizontalInset: Int = 4,
         ) : Parcelable {
+            enum class Type {
+                RECTANGLE,
+                CIRCLE,
+            }
             companion object {
                 fun decode(node: Node.Mapping): Background = Background(
-                    type = node["type"]?.string ?: "rectangle",
+                    type = runCatching {
+                        val value = node["type"]?.string ?: "RECTANGLE"
+                        Type.valueOf(value.uppercase())
+                    }.getOrDefault(Type.RECTANGLE),
                     cornerRadius = node["corner_radius"]?.float ?: 10f,
                     normal = node["normal"]?.string ?: "",
                     highlight = node["highlight"]?.string ?: "",
