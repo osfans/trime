@@ -9,6 +9,7 @@ import android.content.Context
 import android.widget.ViewAnimator
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.children
 import com.osfans.trime.R
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.model.ToolBar
@@ -116,10 +117,16 @@ class AlwaysUi(
         updateRightMostButton(State.Toolbar)
     }
 
-    fun updateButtonsStyle() {
-        leftMostButton.updateStyle()
-        buttonsUi.firstButton?.updateStyle()
-        buttonsUi.updateStyle()
+    fun updateButtonsStyle(option: String, enabled: Boolean) {
+        leftMostButton.updateStyle(option, enabled)
+        buttonsUi.firstButton?.updateStyle(option, enabled)
+        buttonsUi.updateStyle(option, enabled)
+    }
+
+    fun toggleOptions(): Set<String> = buildSet {
+        leftMostButton.option?.let { add(it) }
+        buttonsUi.firstButton?.option?.let { add(it) }
+        buttonsUi.root.children.forEach { (it as ToolButton).option?.let { add(it) } }
     }
 
     fun updateState(state: State) {

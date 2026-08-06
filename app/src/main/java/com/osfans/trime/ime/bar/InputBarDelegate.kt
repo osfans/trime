@@ -17,9 +17,12 @@ import android.widget.ViewAnimator
 import android.widget.inline.InlineContentView
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.core.RimeMessage
+import com.osfans.trime.daemon.RimeSession
+import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
@@ -63,6 +66,7 @@ class InputBarDelegate : InputBroadcastReceiver {
     private val windowManager: BoardWindowManager by di.instance()
     private val commonKeyboardActionListener: CommonKeyboardActionListener by di.instance()
     private val candidate: CompactCandidateDelegate by di.instance()
+    private val rime: RimeSession by di.instance()
 
     val themedHeight = theme.generalStyle.run { candidateViewHeight + commentHeight }
 
@@ -263,6 +267,7 @@ class InputBarDelegate : InputBroadcastReceiver {
 
             evalAlwaysUiState()
             ClipboardHelper.addOnUpdateListener(onClipboardUpdateListener)
+            syncToolbarOptionStates()
         }
     }
 
@@ -340,7 +345,25 @@ class InputBarDelegate : InputBroadcastReceiver {
         }
     }
 
+    /**
+     * Seed the toolbar toggle buttons with the current value of their rime
+     * options. Rime access stays here in the delegate: the buttons themselves
+     * are pure views and only react to [updateButtonsStyle].
+     */
+    private fun syncToolbarOptionStates() {
+        val options = alwaysUi.toggleOptions()
+        if (options.isEmpty()) return
+        rime.launchOnReady { api ->
+            val states = options.associateWith { api.getRuntimeOption(it) }
+            ContextCompat.getMainExecutor(context).execute {
+                states.forEach { (option, enabled) ->
+                    alwaysUi.updateButtonsStyle(option, enabled)
+                }
+            }
+        }
+    }
+
     override fun onRimeOptionUpdated(value: RimeMessage.OptionMessage.Data) {
-        alwaysUi.updateButtonsStyle()
+        alwaysUi.updateButtonsStyle(value.option, value.value)
     }
 }
