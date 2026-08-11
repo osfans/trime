@@ -29,6 +29,9 @@ object ThemeManager {
 
     private lateinit var _activeTheme: Theme
 
+    val isInitialized: Boolean
+        get() = ::_activeTheme.isInitialized
+
     var activeTheme: Theme
         get() = _activeTheme
         private set(value) {
