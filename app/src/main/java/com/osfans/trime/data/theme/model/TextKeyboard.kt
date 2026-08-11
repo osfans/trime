@@ -113,14 +113,15 @@ data class TextKeyboard(
                 hlKeySymbolColor = node["hilited_key_symbol_color"]?.string ?: "",
                 popup = node["popup"]?.sequence?.mapNotNull(Node::string) ?: emptyList(),
                 behaviors = KeyBehavior.entries
-                    .mapNotNull {
-                        val token = KeyActionToken.decode(node[it.name.lowercase()])
-                        if (token != null || it == KeyBehavior.CLICK) {
-                            it to token
-                        } else {
-                            null
-                        }
-                    }.toMap(),
+                    .associateWith { KeyActionToken.decode(node[it.name.lowercase()]) }
+                    .filter { (behavior, token) ->
+                        token?.let {
+                            when (it) {
+                                is KeyActionToken.Plain -> it.token.isNotEmpty()
+                                is KeyActionToken.Inline -> listOfNotNull(it.token.commit, it.token.text, it.token.label).isNotEmpty()
+                            }
+                        } ?: (behavior == KeyBehavior.CLICK)
+                    },
             )
         }
     }
