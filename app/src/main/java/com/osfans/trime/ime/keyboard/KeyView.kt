@@ -44,10 +44,6 @@ class KeyView(
 
     private val rime get() = RimeDaemon.getFirstSessionOrNull()!!
 
-    private val hookShiftArrow: Boolean by lazy {
-        AppPrefs.defaultInstance().keyboard.hookShiftArrow.getValue()
-    }
-
     private val deletedTextBuffer = ArrayDeque<String>()
 
     private var keyPressed = false
@@ -212,7 +208,7 @@ class KeyView(
 
         keyboardActionListener.onAction(action)
 
-        val hookArrow = if (hookShiftArrow) {
+        val hookArrow = if (keyboardView.hookShiftArrow) {
             when (action.code) {
                 in KeyEvent.KEYCODE_DPAD_UP..KeyEvent.KEYCODE_DPAD_RIGHT -> true
                 KeyEvent.KEYCODE_MOVE_HOME, KeyEvent.KEYCODE_MOVE_END -> true
@@ -379,11 +375,8 @@ class KeyView(
     }
 
     private fun drawSymbol(canvas: Canvas, text: String, isTop: Boolean = true) {
-        val showSymbol = rime.run { !getRuntimeOption("_hide_key_symbol") }
-        val showHint = rime.run { !getRuntimeOption("_hide_key_hint") }
-
-        if (isTop && !showSymbol) return
-        if (!isTop && !showHint) return
+        if (isTop && keyboardView.hideKeySymbol) return
+        if (!isTop && keyboardView.hideKeyHint) return
 
         val textColor = key.getSymbolColor()
         val textSize = sp(key.symbolTextSize.takeIf { it > 0f } ?: keyboardView.symbolTextSize)

@@ -1100,7 +1100,7 @@ preset_keyboards:
       - {click: BackSpace2, width: 15, key_back_color: bbs, key_text_color: tbs}
 
       - {click: Keyboard_number, long_click: Menu, width: 12.5, key_back_color: bgn, key_text_color: tgn}
-      - {click: Keyboard_bqrw, long_click: Theme_settings, swipe_down: Color_switch, swipe_up: Color_switch, width: 12.5, key_text_size: "18", key_back_color: bgn, key_text_color: tgn}
+      - {click: Keyboard_bqrw, label_symbol: "简洁", long_click: "{hide_key_symbol}{hide_key_hint}", swipe_down: Color_switch, swipe_up: Color_switch, width: 12.5, key_text_size: "18", key_back_color: bgn, key_text_color: tgn}
       - {click: ',', label: '，', long_click: '<>{Left}', key_back_color: bh4, key_text_color: th4}
       - {click: space, long_click: Mode_switch, swipe_left: "Left", swipe_right: "Right", swipe_up: Schema_switchcn, width: 30, key_back_color: bkg, key_text_color: tkg}
       - {click: '.', label: '。', long_click: clipboard_window, key_back_color: bh4, key_text_color: th4}
@@ -4043,6 +4043,8 @@ preset_keys:
   Info: {label: 关于, send: INFO}
   Menu: {label: 菜单, functional: false, send: MENU}
   Settings: {label: 设置, functional: false, send: SETTINGS}
+  hide_key_symbol: {label: 隐藏符号, send: FUNCTION, command: switch_hide_key_symbol}
+  hide_key_hint: {label: 隐藏注解, send: FUNCTION, command: switch_hide_key_hint}
   # trime命令
   Date: {label: 日期, send: FUNCTION, command: date, option: " yyyy-MM-dd "}
   Time: {label: 時間, send: FUNCTION, command: date, option: "HH:mm:ss"} #時間： date 格式

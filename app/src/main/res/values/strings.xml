@@ -180,6 +180,8 @@
     <string name="deploy_failure">Deploy failure</string>
     <string name="view_deploy_failure_log">Deploy failure. Click here to view error log.</string>
     <string name="hide_input_bar">Hide input bar</string>
+    <string name="hide_key_symbol">Hide key symbol</string>
+    <string name="hide_key_hint">Hide key hint</string>
     <string name="navbar_bkg_none">No background</string>
     <string name="navbar_bkg_color_only">Follow keyboard color</string>
     <string name="navbar_bkg_full">Keyboard background image</string>
