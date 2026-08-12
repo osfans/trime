@@ -189,6 +189,8 @@ class CommonKeyboardActionListener {
                     "apply" -> handleApplyCommand(arg)
                     "share_text" -> service.shareText()
                     "select_candidate" -> handleSelectCandidate(arg)
+                    "switch_hide_key_symbol" -> switchHideKeySymbol()
+                    "switch_hide_key_hint" -> switchHideKeyHint()
                     else -> handleIntentAction(action.command, arg)
                 }
             }
@@ -289,6 +291,16 @@ class CommonKeyboardActionListener {
                         api.selectCandidate(index, false)
                     }
                 }
+            }
+
+            private fun switchHideKeySymbol() {
+                val preference = prefs.keyboard.hideKeySymbol
+                preference.setValue(!preference.getValue())
+            }
+
+            private fun switchHideKeyHint() {
+                val preference = prefs.keyboard.hideKeyHint
+                preference.setValue(!preference.getValue())
             }
 
             private fun handleSettings(action: KeyAction) {
