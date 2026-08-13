@@ -191,7 +191,7 @@ class Keyboard(
 
                 // determine the width weight of this key
                 val keyWidthWeight =
-                    if (key.width == 0f && key.click != null) keyboardKeyWidth else key.width
+                    if (key.width == 0f && key.hasClickAction) keyboardKeyWidth else key.width
 
                 val widthPx = (keyWidthWeight * allowedWidth / MAX_TOTAL_WEIGHT).toInt()
 
@@ -212,7 +212,7 @@ class Keyboard(
                 totalKeyWidth += keyWidthWeight
 
                 // only clickable keys count toward column count
-                if (key.click != null) {
+                if (key.hasClickAction) {
                     column++
                 }
 
@@ -260,7 +260,7 @@ class Keyboard(
             for (textKey in keys) {
 
                 val keyWidthWeight =
-                    if (textKey.width == 0f && textKey.click != null) keyboardKeyWidth else textKey.width
+                    if (textKey.width == 0f && textKey.hasClickAction) keyboardKeyWidth else textKey.width
 
                 var widthPx = (keyWidthWeight * oneWeightWidthPx).toInt()
 
@@ -293,7 +293,7 @@ class Keyboard(
                     }
                 }
 
-                if (textKey.click == null) {
+                if (!textKey.hasClickAction) {
                     if (expandKeypressArea) spacers.add(Triple(xPos, widthPx, row))
                     xPos += widthPx
                     continue
