@@ -17,7 +17,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
-import com.osfans.trime.core.Candidates
 import com.osfans.trime.core.CompositionProto
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.daemon.RimeSession
@@ -316,12 +315,7 @@ class InputView(
                 broadcaster.onCompositionUpdate(data)
             }
             is RimeMessage.BulkCandidatesMessage -> {
-                val data = if (candidatesMode == PopupCandidatesMode.ALWAYS_SHOW) {
-                    Candidates.Bulk()
-                } else {
-                    it.data
-                }
-                broadcaster.onCandidateListUpdate(data)
+                broadcaster.onCandidateListUpdate(it.data)
             }
             else -> {}
         }
