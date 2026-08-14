@@ -85,9 +85,9 @@ sealed class RimeMessage<T>(
         override val messageType = MessageType.Composition
     }
 
-    data class CandidateMenuMessage(
-        override val data: MenuProto,
-    ) : RimeMessage<MenuProto>(data) {
+    data class PagedCandidatesMessage(
+        override val data: Candidates.Paged,
+    ) : RimeMessage<Candidates.Paged>(data) {
         override val messageType = MessageType.Menu
     }
 
@@ -97,37 +97,10 @@ sealed class RimeMessage<T>(
         override val messageType = MessageType.Status
     }
 
-    data class CandidateListMessage(
-        override val data: Data,
-    ) : RimeMessage<CandidateListMessage.Data>(data) {
-
+    data class BulkCandidatesMessage(
+        override val data: Candidates.Bulk,
+    ) : RimeMessage<Candidates.Bulk>(data) {
         override val messageType = MessageType.Candidate
-
-        data class Data(
-            val total: Int = -1,
-            val highlighted: Int = 0,
-            val candidates: Array<CandidateProto> = arrayOf(),
-        ) {
-            override fun equals(other: Any?): Boolean {
-                if (this === other) return true
-                if (javaClass != other?.javaClass) return false
-
-                other as Data
-
-                if (total != other.total) return false
-                if (highlighted != other.highlighted) return false
-                if (!candidates.contentEquals(other.candidates)) return false
-
-                return true
-            }
-
-            override fun hashCode(): Int {
-                var result = total
-                result = 31 * result + highlighted
-                result = 31 * result + candidates.contentHashCode()
-                return result
-            }
-        }
     }
 
     data class KeyMessage(
@@ -188,17 +161,11 @@ sealed class RimeMessage<T>(
             MessageType.Composition ->
                 CompositionMessage(params[0] as CompositionProto)
             MessageType.Menu ->
-                CandidateMenuMessage(params[0] as MenuProto)
+                PagedCandidatesMessage(params[0] as Candidates.Paged)
             MessageType.Status ->
                 StatusMessage(params[0] as StatusProto)
             MessageType.Candidate ->
-                CandidateListMessage(
-                    CandidateListMessage.Data(
-                        params[0] as Int,
-                        params[1] as Int,
-                        params[2] as Array<CandidateProto>,
-                    ),
-                )
+                BulkCandidatesMessage(params[0] as Candidates.Bulk)
             MessageType.Key ->
                 KeyMessage(
                     KeyMessage.Data(

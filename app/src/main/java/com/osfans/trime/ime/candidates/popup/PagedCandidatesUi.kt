@@ -16,7 +16,7 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.osfans.trime.core.CandidateProto
-import com.osfans.trime.core.MenuProto
+import com.osfans.trime.core.Candidates
 import com.osfans.trime.data.theme.Theme
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.recyclerview.recyclerView
@@ -29,7 +29,7 @@ class PagedCandidatesUi(
     private val onPrevPage: () -> Unit,
     private val onNextPage: () -> Unit,
 ) : Ui {
-    private var menu = MenuProto()
+    private var candidates = Candidates.Paged()
 
     private var isHorizontal = true
 
@@ -55,7 +55,7 @@ class PagedCandidatesUi(
 
             override fun getItemId(position: Int): Long = items.getOrNull(position).hashCode().toLong()
 
-            override fun getItemCount(items: List<CandidateProto>) = items.size + (if (menu.pageNumber != 0 || !menu.isLastPage) 1 else 0)
+            override fun getItemCount(items: List<CandidateProto>) = items.size + (if (candidates.hasPrevPage || candidates.hasNextPage) 1 else 0)
 
             override fun getItemViewType(
                 position: Int,
@@ -86,7 +86,7 @@ class PagedCandidatesUi(
                 when (holder) {
                     is UiHolder.Candidate -> {
                         val candidate = item ?: return
-                        holder.ui.update(candidate, position == menu.highlightedCandidateIndex)
+                        holder.ui.update(candidate, position == candidates.highlighted)
                         holder.ui.root.setOnClickListener {
                             onCandidateClick.invoke(position)
                         }
@@ -96,7 +96,7 @@ class PagedCandidatesUi(
                         }
                     }
                     is UiHolder.Pagination -> {
-                        holder.ui.update(menu)
+                        holder.ui.update(candidates)
                         holder.ui.root.updateLayoutParams<FlexboxLayoutManager.LayoutParams> {
                             width = if (isHorizontal) ViewGroup.LayoutParams.WRAP_CONTENT else ViewGroup.LayoutParams.MATCH_PARENT
                             alignSelf = if (isHorizontal) AlignItems.CENTER else AlignItems.STRETCH
@@ -127,11 +127,11 @@ class PagedCandidatesUi(
         }
 
     fun update(
-        menu: MenuProto,
+        candidates: Candidates.Paged,
         horizontal: Boolean,
         layout: PopupCandidatesLayout,
     ) {
-        this.menu = menu
+        this.candidates = candidates
         this.isHorizontal = when (layout) {
             PopupCandidatesLayout.AUTOMATIC -> horizontal
             else -> layout == PopupCandidatesLayout.HORIZONTAL
@@ -145,6 +145,6 @@ class PagedCandidatesUi(
                 alignItems = AlignItems.STRETCH
             }
         }
-        candidatesAdapter.submitList(menu.candidates.toList())
+        candidatesAdapter.submitList(candidates.candidates.toList())
     }
 }

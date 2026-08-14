@@ -115,11 +115,17 @@ class GlobalRefSingleton {
   jclass CompositionProto;
   jmethodID CompositionProtoInit;
 
-  jclass MenuProto;
-  jmethodID MenuProtoInit;
-
   jclass StatusProto;
   jmethodID StatusProtoInit;
+
+  jclass RimeResponse;
+  jmethodID RimeResponseInit;
+
+  jclass CandidatesPaged;
+  jmethodID CandidatesPagedInit;
+
+  jclass CandidatesBulk;
+  jmethodID CandidatesBulkInit;
 
   jclass SchemaListItem;
   jmethodID SchemaListItemInit;
@@ -165,9 +171,8 @@ class GlobalRefSingleton {
         env->FindClass("com/osfans/trime/core/ContextProto")));
     ContextProtoInit =
         env->GetMethodID(ContextProto, "<init>",
-                         "(Lcom/osfans/trime/core/CompositionProto;Lcom/osfans/"
-                         "trime/core/"
-                         "MenuProto;Ljava/lang/String;I)V");
+                         "(Lcom/osfans/trime/core/CompositionProto;Ljava/lang/"
+                         "String;I)V");
 
     CompositionProto = reinterpret_cast<jclass>(env->NewGlobalRef(
         env->FindClass("com/osfans/trime/core/CompositionProto")));
@@ -175,18 +180,31 @@ class GlobalRefSingleton {
         env->GetMethodID(CompositionProto, "<init>",
                          "(IIIILjava/lang/String;Ljava/lang/String;)V");
 
-    MenuProto = reinterpret_cast<jclass>(
-        env->NewGlobalRef(env->FindClass("com/osfans/trime/core/MenuProto")));
-    MenuProtoInit = env->GetMethodID(
-        MenuProto, "<init>",
-        "(IIZI[Lcom/osfans/trime/core/CandidateProto;Ljava/lang/"
-        "String;[Ljava/lang/String;)V");
-
     StatusProto = reinterpret_cast<jclass>(
         env->NewGlobalRef(env->FindClass("com/osfans/trime/core/StatusProto")));
     StatusProtoInit =
         env->GetMethodID(StatusProto, "<init>",
                          "(Ljava/lang/String;Ljava/lang/String;ZZZZZZZ)V");
+
+    RimeResponse = reinterpret_cast<jclass>(env->NewGlobalRef(
+        env->FindClass("com/osfans/trime/core/RimeResponse")));
+    RimeResponseInit = env->GetMethodID(
+        RimeResponse, "<init>",
+        "(Lcom/osfans/trime/core/CommitProto;Lcom/osfans/trime/core/"
+        "CompositionProto;Lcom/osfans/trime/core/Candidates;"
+        "Lcom/osfans/trime/core/StatusProto;)V");
+
+    CandidatesPaged = reinterpret_cast<jclass>(env->NewGlobalRef(
+        env->FindClass("com/osfans/trime/core/Candidates$Paged")));
+    CandidatesPagedInit =
+        env->GetMethodID(CandidatesPaged, "<init>",
+                         "(ZZI[Lcom/osfans/trime/core/CandidateProto;)V");
+
+    CandidatesBulk = reinterpret_cast<jclass>(env->NewGlobalRef(
+        env->FindClass("com/osfans/trime/core/Candidates$Bulk")));
+    CandidatesBulkInit =
+        env->GetMethodID(CandidatesBulk, "<init>",
+                         "(II[Lcom/osfans/trime/core/CandidateProto;)V");
 
     SchemaListItem = reinterpret_cast<jclass>(
         env->NewGlobalRef(env->FindClass("com/osfans/trime/core/SchemaItem")));
