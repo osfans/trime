@@ -7,6 +7,7 @@ package com.osfans.trime.ime.bar.ui
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
@@ -16,6 +17,7 @@ import android.graphics.drawable.StateListDrawable
 import android.graphics.drawable.shapes.OvalShape
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
+import androidx.core.graphics.PaintCompat
 import androidx.core.view.isVisible
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.utils.sizeDp
@@ -100,8 +102,6 @@ class ToolButton(context: Context) : GestureFrame(context) {
 
         fontSize = fg.fontSize
         label.textSize = fontSize
-
-        label.typeface = Typeface.create(FontManager.getTypeface("toolbar_font"), Typeface.BOLD)
 
         colorStateList = ColorStateList(
             arrayOf(intArrayOf(android.R.attr.state_pressed), intArrayOf()),
@@ -201,7 +201,14 @@ class ToolButton(context: Context) : GestureFrame(context) {
             label.isVisible = false
             image.isVisible = true
         } else { // text icon
-            label.text = if (useLocalImage || style.isEmpty()) actionLabel else style
+            val text = if (useLocalImage || style.isEmpty()) actionLabel else style
+            label.text = text
+            // probe against the baseline typeface, not label.paint which may
+            // still hold the toolbar typeface from a previous update
+            val probePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { typeface = Typeface.DEFAULT }
+            val hasGlyph = PaintCompat.hasGlyph(probePaint, text)
+            val font = FontManager.getTypeface("toolbar_font")
+            label.typeface = if (hasGlyph) Typeface.create(font, Typeface.BOLD) else font
             image.isVisible = false
             label.isVisible = true
         }
