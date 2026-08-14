@@ -203,6 +203,7 @@ class Rime :
 
     override suspend fun setCandidatePagingMode(enabled: Boolean) = withRimeContext {
         pagingMode = enabled
+        emitResponse()
     }
 
     private fun startRime(fullCheck: Boolean) {
