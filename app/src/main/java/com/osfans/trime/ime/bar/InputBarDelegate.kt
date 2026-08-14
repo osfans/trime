@@ -20,6 +20,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
+import com.osfans.trime.core.Candidates
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
@@ -227,7 +228,7 @@ class InputBarDelegate : InputBroadcastReceiver {
         }
     }
 
-    override fun onCandidateListUpdate(data: RimeMessage.CandidateListMessage.Data) {
+    override fun onCandidateListUpdate(data: Candidates.Bulk) {
         barStateMachine.push(
             QuickBarStateMachine.TransitionEvent.CandidatesUpdated,
             QuickBarStateMachine.BooleanKey.CandidateEmpty to data.candidates.isEmpty(),

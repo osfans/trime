@@ -6,8 +6,8 @@
 package com.osfans.trime.ime.broadcast
 
 import android.view.inputmethod.EditorInfo
+import com.osfans.trime.core.Candidates
 import com.osfans.trime.core.CompositionProto
-import com.osfans.trime.core.MenuProto
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.core.StatusProto
@@ -54,16 +54,12 @@ class InputBroadcaster : InputBroadcastReceiver {
         receivers.forEach { it.onRimeOptionUpdated(value) }
     }
 
-    override fun onCandidateListUpdate(data: RimeMessage.CandidateListMessage.Data) {
+    override fun onCandidateListUpdate(data: Candidates.Bulk) {
         receivers.forEach { it.onCandidateListUpdate(data) }
     }
 
     override fun onCompositionUpdate(data: CompositionProto) {
         receivers.forEach { it.onCompositionUpdate(data) }
-    }
-
-    override fun onCandidateMenuUpdate(data: MenuProto) {
-        receivers.forEach { it.onCandidateMenuUpdate(data) }
     }
 
     override fun onKeyAppearanceUpdate(composing: Boolean, menu: Boolean, paging: Boolean) {

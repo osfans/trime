@@ -89,13 +89,14 @@ class Rime {
     return std::make_unique<CommitProto>();
   }
 
-  std::unique_ptr<ContextProto> context() {
+  std::unique_ptr<ContextProto> context(bool includeMenu = true) {
     RIME_STRUCT(RimeContext, data)
     auto s = session();
     if (rime->get_context(s, &data)) {
       auto input = rime->get_input(s);
       auto caretPos = rime->get_caret_pos(s);
-      auto p = std::make_unique<ContextProto>(&data, input, caretPos);
+      auto p =
+          std::make_unique<ContextProto>(&data, input, caretPos, includeMenu);
       rime->free_context(&data);
       return p;
     }
@@ -419,20 +420,30 @@ Java_com_osfans_trime_core_Rime_getRimeCandidates(JNIEnv *env, jclass clazz,
       env, Rime::Instance().getCandidates(start_index, limit));
 }
 
-extern "C" JNIEXPORT jobjectArray JNICALL
-Java_com_osfans_trime_core_Rime_getRimeBulkCandidates(JNIEnv *env,
-                                                      jclass clazz) {
-  auto [size, highlighted, list] = Rime::Instance().getBulkCandidates();
-  auto jSize = JRef(
-      env, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, size));
-  auto jHighlighted = JRef(
-      env,
-      env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, highlighted));
-  auto jList =
-      JRef<jobjectArray>(env, rimeCandidateListToJObjectArray(env, list));
-  auto params = env->NewObjectArray(3, GlobalRef->Object, nullptr);
-  env->SetObjectArrayElement(params, 0, jSize);
-  env->SetObjectArrayElement(params, 1, jHighlighted);
-  env->SetObjectArrayElement(params, 2, jList);
-  return params;
+extern "C" JNIEXPORT jobject JNICALL
+Java_com_osfans_trime_core_Rime_getRimeResponse(JNIEnv *env, jclass clazz,
+                                                jboolean paging_mode) {
+  auto commit = Rime::Instance().commit();
+  // the menu is only needed in paging mode, otherwise its candidates would be
+  // duplicated by the bulk candidates query below
+  auto context = Rime::Instance().context(paging_mode);
+  auto status = Rime::Instance().status();
+  auto jCommit = JRef(env, rimeCommitToJObject(env, *commit));
+  auto jComposition =
+      JRef(env, rimeCompositionToJObject(env, context->composition));
+  auto jStatus = JRef(env, rimeStatusToJObject(env, *status));
+  // keep the local references alive until RimeResponse is constructed below
+  jobject jCandidates = nullptr;
+  if (paging_mode) {
+    jCandidates = rimeCandidatesPagedToJObject(env, context->menu);
+  } else {
+    auto [size, highlighted, list] = Rime::Instance().getBulkCandidates();
+    auto jList =
+        JRef<jobjectArray>(env, rimeCandidateListToJObjectArray(env, list));
+    jCandidates =
+        env->NewObject(GlobalRef->CandidatesBulk, GlobalRef->CandidatesBulkInit,
+                       size, highlighted, *jList);
+  }
+  return rimeResponseToJObject(env, jCommit, jComposition, jCandidates,
+                               jStatus);
 }
