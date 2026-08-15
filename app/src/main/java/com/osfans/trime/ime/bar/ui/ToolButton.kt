@@ -7,7 +7,6 @@ package com.osfans.trime.ime.bar.ui
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
@@ -101,7 +100,7 @@ class ToolButton(context: Context) : GestureFrame(context) {
         fontSize = fg.fontSize
         label.textSize = fontSize
 
-        label.typeface = Typeface.create(FontManager.getTypeface("toolbar_font"), Typeface.BOLD)
+        label.typeface = FontManager.getTypeface("toolbar_font")
 
         colorStateList = ColorStateList(
             arrayOf(intArrayOf(android.R.attr.state_pressed), intArrayOf()),
