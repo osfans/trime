@@ -192,6 +192,7 @@
     <string name="automatic">Automatic</string>
     <string name="horizontal">Horizontal</string>
     <string name="vertical">Vertical</string>
+    <string name="vertical_reverse">Vertical reverse</string>
     <string name="ascii_switch_tips">Show tips when switching ASCII mode</string>
     <string name="key_double_tap_timeout">Key double tap timeout</string>
     <string name="key_slide_step_size">Step size for key sliding</string>

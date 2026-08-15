@@ -137,13 +137,14 @@ class PagedCandidatesUi(
             else -> layout == PopupCandidatesLayout.HORIZONTAL
         }
         candidatesLayoutManager.apply {
-            if (isHorizontal) {
-                flexDirection = FlexDirection.ROW
-                alignItems = AlignItems.BASELINE
-            } else {
-                flexDirection = FlexDirection.COLUMN
-                alignItems = AlignItems.STRETCH
+            flexDirection = when (layout) {
+                PopupCandidatesLayout.HORIZONTAL -> FlexDirection.ROW
+                PopupCandidatesLayout.VERTICAL_REVERSE -> FlexDirection.COLUMN_REVERSE
+                PopupCandidatesLayout.AUTOMATIC ->
+                    if (horizontal) FlexDirection.ROW else FlexDirection.COLUMN
+                else -> FlexDirection.COLUMN
             }
+            alignItems = if (isHorizontal) AlignItems.BASELINE else AlignItems.STRETCH
         }
         candidatesAdapter.submitList(menu.candidates.toList())
     }
