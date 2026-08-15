@@ -8,6 +8,8 @@ package com.osfans.trime.ime.candidates.popup
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter4.BaseQuickAdapter
@@ -68,14 +70,17 @@ class PagedCandidatesUi(
                 viewType: Int,
             ): UiHolder = when (viewType) {
                 0 -> UiHolder.Candidate(LabeledCandidateItemUi(ctx, theme))
-                else ->
-                    UiHolder.Pagination(PaginationUi(ctx, theme)).apply {
-                        val wrap = ViewGroup.LayoutParams.WRAP_CONTENT
-                        ui.root.layoutParams =
-                            FlexboxLayoutManager.LayoutParams(wrap, wrap).apply {
-                                flexGrow = 1f
-                            }
+                else -> UiHolder.Pagination(PaginationUi(ctx, theme)).apply {
+                    ui.prevIcon.setOnClickListener {
+                        onPrevPage.invoke()
                     }
+                    ui.nextIcon.setOnClickListener {
+                        onNextPage.invoke()
+                    }
+                }
+            }.apply {
+                // assign default LayoutParams, otherwise updateLayoutParams won't work
+                ui.root.layoutParams = FlexboxLayoutManager.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
             }
 
             override fun onBindViewHolder(
@@ -94,18 +99,16 @@ class PagedCandidatesUi(
                             onCandidateAction.invoke(position, candidate.text, v)
                             true
                         }
+                        holder.ui.root.updateLayoutParams<FlexboxLayoutManager.LayoutParams> {
+                            width = if (isHorizontal) WRAP_CONTENT else MATCH_PARENT
+                        }
                     }
                     is UiHolder.Pagination -> {
                         holder.ui.update(candidates)
                         holder.ui.root.updateLayoutParams<FlexboxLayoutManager.LayoutParams> {
-                            width = if (isHorizontal) ViewGroup.LayoutParams.WRAP_CONTENT else ViewGroup.LayoutParams.MATCH_PARENT
+                            flexGrow = 1f
+                            width = if (isHorizontal) WRAP_CONTENT else MATCH_PARENT
                             alignSelf = if (isHorizontal) AlignItems.CENTER else AlignItems.STRETCH
-                        }
-                        holder.ui.prevIcon.setOnClickListener {
-                            onPrevPage.invoke()
-                        }
-                        holder.ui.nextIcon.setOnClickListener {
-                            onNextPage.invoke()
                         }
                     }
                 }
