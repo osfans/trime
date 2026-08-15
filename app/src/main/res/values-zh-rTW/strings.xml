@@ -193,7 +193,8 @@
     <string name="candidates_layout">候選詞列表佈局</string>
     <string name="automatic">自動</string>
     <string name="horizontal">橫向</string>
-    <string name="vertical">"縱向 "</string>
+    <string name="vertical">縱向</string>
+    <string name="vertical_reverse">縱向倒序</string>
     <string name="ascii_switch_tips">切換中英文模式時顯示提示</string>
     <string name="key_double_tap_timeout">按鍵連擊逾時</string>
     <string name="key_slide_step_size">按鍵滑動步長</string>

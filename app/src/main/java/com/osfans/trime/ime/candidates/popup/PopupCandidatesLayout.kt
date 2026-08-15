@@ -12,4 +12,5 @@ enum class PopupCandidatesLayout(override val stringRes: Int) : PreferenceDelega
     AUTOMATIC(R.string.automatic),
     HORIZONTAL(R.string.horizontal),
     VERTICAL(R.string.vertical),
+    VERTICAL_REVERSE(R.string.vertical_reverse),
 }

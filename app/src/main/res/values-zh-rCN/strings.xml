@@ -193,6 +193,7 @@
     <string name="automatic">自动</string>
     <string name="horizontal">横向</string>
     <string name="vertical">纵向</string>
+    <string name="vertical_reverse">纵向倒序</string>
     <string name="ascii_switch_tips">切换中英文模式时显示提示</string>
     <string name="key_double_tap_timeout">按键双击超时</string>
     <string name="key_slide_step_size">按键滑动步长</string>
