@@ -71,6 +71,8 @@ sealed interface Candidates {
         val hasPrevPage: Boolean = false,
         /** Whether there is a next page to turn to */
         val hasNextPage: Boolean = false,
+        /** Whether the candidates are laid out horizontally (queried natively) */
+        val isHorizontalLayout: Boolean = false,
         override val highlighted: Int = 0,
         override val candidates: Array<CandidateProto> = arrayOf(),
     ) : Candidates {
@@ -82,6 +84,7 @@ sealed interface Candidates {
 
             if (hasPrevPage != other.hasPrevPage) return false
             if (hasNextPage != other.hasNextPage) return false
+            if (isHorizontalLayout != other.isHorizontalLayout) return false
             if (highlighted != other.highlighted) return false
             if (!candidates.contentEquals(other.candidates)) return false
 
@@ -91,10 +94,13 @@ sealed interface Candidates {
         override fun hashCode(): Int {
             var result = hasPrevPage.hashCode()
             result = 31 * result + hasNextPage.hashCode()
+            result = 31 * result + isHorizontalLayout.hashCode()
             result = 31 * result + highlighted
             result = 31 * result + candidates.contentHashCode()
             return result
         }
+
+        override fun toString(): String = "Paged(hasPrevPage=$hasPrevPage, hasNextPage=$hasNextPage, isHorizontalLayout=$isHorizontalLayout, highlighted=$highlighted, candidatesCount=${candidates.size})"
     }
 
     /** Bulk list: [total] is the candidate count, or -1 if unknown */
@@ -122,6 +128,8 @@ sealed interface Candidates {
             result = 31 * result + candidates.contentHashCode()
             return result
         }
+
+        override fun toString(): String = "Bulk(total=$total, highlighted=$highlighted, candidatesCount=${candidates.size})"
     }
 }
 

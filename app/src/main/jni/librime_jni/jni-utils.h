@@ -198,7 +198,7 @@ class GlobalRefSingleton {
         env->FindClass("com/osfans/trime/core/Candidates$Paged")));
     CandidatesPagedInit =
         env->GetMethodID(CandidatesPaged, "<init>",
-                         "(ZZI[Lcom/osfans/trime/core/CandidateProto;)V");
+                         "(ZZZI[Lcom/osfans/trime/core/CandidateProto;)V");
 
     CandidatesBulk = reinterpret_cast<jclass>(env->NewGlobalRef(
         env->FindClass("com/osfans/trime/core/Candidates$Bulk")));

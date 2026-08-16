@@ -129,12 +129,8 @@ class CandidatesView(
     private fun updateUi() {
         preeditUi.update(composition)
         preeditUi.root.visibility = if (preeditUi.visible) VISIBLE else GONE
-        // if CandidatesView can be shown, rime engine is ready most of the time,
-        // so it should be safety to get option immediately
-        val isHorizontalLayout = rime.run {
-            getRuntimeOption("_linear") || getRuntimeOption("_horizontal")
-        }
-        candidatesUi.update(candidates, isHorizontalLayout, layout)
+        // the candidate layout is queried natively with the page itself
+        candidatesUi.update(candidates, layout)
         if (evaluateVisibility()) {
             visibility = VISIBLE
         } else {

@@ -435,7 +435,13 @@ Java_com_osfans_trime_core_Rime_getRimeResponse(JNIEnv *env, jclass clazz,
   // keep the local references alive until RimeResponse is constructed below
   jobject jCandidates = nullptr;
   if (paging_mode) {
-    jCandidates = rimeCandidatesPagedToJObject(env, context->menu);
+    // the candidate layout is queried right where the page is built, so the
+    // consumer does not need a separate rime option round-trip per key
+    auto &rime = Rime::Instance();
+    bool is_horizontal_layout =
+        rime.getOption("_linear") || rime.getOption("_horizontal");
+    jCandidates =
+        rimeCandidatesPagedToJObject(env, context->menu, is_horizontal_layout);
   } else {
     auto [size, highlighted, list] = Rime::Instance().getBulkCandidates();
     auto jList =

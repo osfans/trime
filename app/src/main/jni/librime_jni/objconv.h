@@ -89,8 +89,8 @@ inline jobject rimeCompositionToJObject(JNIEnv* env,
           : nullptr);
 }
 
-inline jobject rimeCandidatesPagedToJObject(JNIEnv* env,
-                                            const MenuProto& menu) {
+inline jobject rimeCandidatesPagedToJObject(JNIEnv* env, const MenuProto& menu,
+                                            bool is_horizontal_layout) {
   int numCandidates = static_cast<int>(menu.candidates.size());
   auto jCandidates = JRef<jobjectArray>(
       env,
@@ -102,8 +102,8 @@ inline jobject rimeCandidatesPagedToJObject(JNIEnv* env,
   }
   return env->NewObject(GlobalRef->CandidatesPaged,
                         GlobalRef->CandidatesPagedInit, menu.pageNumber != 0,
-                        !menu.isLastPage, menu.highlightedCandidateIndex,
-                        *jCandidates);
+                        !menu.isLastPage, is_horizontal_layout,
+                        menu.highlightedCandidateIndex, *jCandidates);
 }
 
 inline jobject rimeContextToJObject(JNIEnv* env, const ContextProto& context) {
