@@ -131,12 +131,11 @@ class PagedCandidatesUi(
 
     fun update(
         candidates: Candidates.Paged,
-        horizontal: Boolean,
         layout: PopupCandidatesLayout,
     ) {
         this.candidates = candidates
         this.isHorizontal = when (layout) {
-            PopupCandidatesLayout.AUTOMATIC -> horizontal
+            PopupCandidatesLayout.AUTOMATIC -> candidates.isHorizontalLayout
             else -> layout == PopupCandidatesLayout.HORIZONTAL
         }
         candidatesLayoutManager.apply {
@@ -144,7 +143,7 @@ class PagedCandidatesUi(
                 PopupCandidatesLayout.HORIZONTAL -> FlexDirection.ROW
                 PopupCandidatesLayout.VERTICAL_REVERSE -> FlexDirection.COLUMN_REVERSE
                 PopupCandidatesLayout.AUTOMATIC ->
-                    if (horizontal) FlexDirection.ROW else FlexDirection.COLUMN
+                    if (isHorizontal) FlexDirection.ROW else FlexDirection.COLUMN
                 else -> FlexDirection.COLUMN
             }
             alignItems = if (isHorizontal) AlignItems.BASELINE else AlignItems.STRETCH
