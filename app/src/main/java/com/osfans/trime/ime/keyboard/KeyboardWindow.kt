@@ -82,6 +82,11 @@ class KeyboardWindow :
 
     private val keyboardActionListener = commonKeyboardActionListener.listener
 
+    // T9 input controller
+    private var t9Controller: com.osfans.trime.ime.t9.T9InputController? = null
+
+    fun getT9Controller(): com.osfans.trime.ime.t9.T9InputController? = t9Controller
+
     override fun onCreateView(): View {
         keyboardView = context.frameLayout(R.id.keyboard_view)
         attachKeyboard(evalKeyboard(".default"))
@@ -94,6 +99,8 @@ class KeyboardWindow :
             keyboardView.removeView(it)
         }
         currentKeyboard?.lastAsciiMode = rime.run { statusCached }.isAsciiMode
+        t9Controller?.destroy()
+        t9Controller = null
     }
 
     private fun selectKeyboardConfig(name: String): TextKeyboard? {
@@ -111,7 +118,7 @@ class KeyboardWindow :
 
         val config = selectKeyboardConfig(target)
         val keyboard = currentKeyboard ?: Keyboard(context, theme, config)
-        val view = currentKeyboardView ?: KeyboardView(context, theme, keyboard, popup, service, keyboardActionListener, enterKeyDisplay)
+        val view = currentKeyboardView ?: KeyboardView(context, theme, keyboard, popup, service, keyboardActionListener, enterKeyDisplay, t9Controller)
 
         if (currentKeyboard == null) {
             cachedKeyboards[target] = keyboard to view
@@ -135,6 +142,18 @@ class KeyboardWindow :
 
             // TODO：为避免过量重构，这里暂时将 currentKeyboard 同步到 KeyboardSwitcher
             KeyboardSwitcher.currentKeyboard = it
+        }
+
+        // Create or update T9 controller based on keyboard mode
+        if (keyboard.isT9Mode) {
+            if (t9Controller == null) {
+                t9Controller = com.osfans.trime.ime.t9.T9InputController(rime)
+            }
+            view.updateT9Controller(t9Controller)
+        } else {
+            t9Controller?.destroy()
+            t9Controller = null
+            view.updateT9Controller(null)
         }
 
         view.let {
@@ -313,5 +332,7 @@ class KeyboardWindow :
 
     override fun onDetached() {
         currentKeyboardView?.onDetach()
+        t9Controller?.destroy()
+        t9Controller = null
     }
 }

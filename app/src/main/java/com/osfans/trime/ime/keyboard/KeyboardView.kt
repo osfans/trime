@@ -8,6 +8,7 @@ package com.osfans.trime.ime.keyboard
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
+import android.view.Gravity
 import android.widget.FrameLayout
 import androidx.core.view.children
 import com.osfans.trime.data.prefs.AppPrefs
@@ -15,6 +16,8 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.broadcast.EnterKeyDisplayDelegate
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.popup.PopupDelegate
+import com.osfans.trime.ime.t9.T9CandidateView
+import com.osfans.trime.ime.t9.T9InputController
 
 // TODO: move layout calculation responsibilities from Keyboard to KeyboardView using ConstraintLayout
 @SuppressLint("ViewConstructor")
@@ -26,6 +29,7 @@ class KeyboardView(
     val service: TrimeInputMethodService,
     private val keyboardActionListener: KeyboardActionListener,
     private val enterKeyDisplay: EnterKeyDisplayDelegate,
+    private val t9Controller: T9InputController? = null,
 ) : FrameLayout(context) {
 
     private val keys get() = keyboard.keys
@@ -40,9 +44,52 @@ class KeyboardView(
     internal val hideKeySymbol: Boolean by AppPrefs.defaultInstance().keyboard.hideKeySymbol
     internal val hideKeyHint: Boolean by AppPrefs.defaultInstance().keyboard.hideKeyHint
 
+    private var t9CandidateView: T9CandidateView? = null
+
     init {
         setWillNotDraw(false)
         buildKeyViews()
+        if (keyboard.isT9Mode && t9Controller != null) {
+            createT9CandidateView()
+        }
+    }
+
+    private fun createT9CandidateView() {
+        val controller = t9Controller ?: return
+        createT9CandidateViewWithController(controller)
+    }
+
+    fun getT9Controller(): T9InputController? = t9Controller
+
+    fun updateT9Controller(controller: T9InputController?) {
+        t9CandidateView?.let { removeView(it) }
+        t9CandidateView = null
+        if (controller != null && keyboard.isT9Mode) {
+            createT9CandidateViewWithController(controller)
+        }
+    }
+
+    private fun createT9CandidateViewWithController(controller: T9InputController) {
+        t9CandidateView = T9CandidateView(context, null, theme, keyboard).apply {
+            layoutParams = LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                keyboard.t9CandidateHeight,
+            )
+            translationY = 0f
+            translationX = 0f
+
+            onItemSelected = { token ->
+                controller.onSelectPinyin(token.pos, token.raw, token.pinYin)
+            }
+        }
+
+        controller.onCandidatesChanged = { tokens ->
+            t9CandidateView?.post {
+                t9CandidateView?.updateItems(tokens)
+            }
+        }
+
+        addView(t9CandidateView, 0)
     }
 
     private fun buildKeyViews() {

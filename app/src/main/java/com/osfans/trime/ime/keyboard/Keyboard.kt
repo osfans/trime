@@ -150,6 +150,12 @@ class Keyboard(
             getKeyboardHeightFromTheme(theme),
         ).firstOrNull { it > 0 } ?: 0
 
+    /** T9模式开关  */
+    val isT9Mode: Boolean = selfConfig?.t9Mode ?: false
+
+    /** T9候选栏高度  */
+    val t9CandidateHeight: Int = selfConfig?.t9CandidateHeight?.let { context.dp(it) } ?: context.dp(36)
+
     private val expandKeypressArea: Boolean by AppPrefs.defaultInstance().keyboard.expandKeypressArea
 
     init {

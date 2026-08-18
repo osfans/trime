@@ -364,6 +364,23 @@ class CommonKeyboardActionListener {
                 keyEventCode: Int,
                 metaState: Int,
             ) {
+                // Handle T9 special keys (backspace, segment key)
+                val t9Controller = keyboardWindow.getT9Controller()
+                if (t9Controller != null) {
+                    when (keyEventCode) {
+                        KeyEvent.KEYCODE_DEL -> {
+                            if (t9Controller.onBackspace()) {
+                                return
+                            }
+                        }
+                        KeyEvent.KEYCODE_APOSTROPHE -> {
+                            if (t9Controller.onSegmentKey()) {
+                                return
+                            }
+                        }
+                    }
+                }
+                
                 val name = KeyCode.codeToKeyName(keyEventCode) ?: "VoidSymbol"
                 val value = RimeKeyEvent.getKeycodeByName(name)
                 val m = if (keyEventCode in KeyEvent.KEYCODE_NUMPAD_0..KeyEvent.KEYCODE_NUMPAD_EQUALS) {
@@ -395,6 +412,23 @@ class CommonKeyboardActionListener {
             override fun onText(input: String) {
                 if (input.isEmpty()) return
                 Timber.d("onText: $input")
+                
+                // Handle T9 digit keys
+                val t9Controller = keyboardWindow.getT9Controller()
+                if (t9Controller != null && input.length == 1) {
+                    when (input[0]) {
+                        in '1'..'9' -> {
+                            t9Controller.onDigitKey(input)
+                            return
+                        }
+                        '0' -> {
+                            // '0' key as segment key
+                            t9Controller.onSegmentKey()
+                            return
+                        }
+                    }
+                }
+                
                 val status = rime.run { statusCached }
                 if (!input[0].isAsciiPrintable() && status.isComposing) {
                     service.postRimeJob { commitComposition() }

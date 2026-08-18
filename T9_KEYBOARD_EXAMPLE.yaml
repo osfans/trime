@@ -1,0 +1,94 @@
+# SPDX-FileCopyrightText: 2026 Rime community
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# T9 九宫格拼音键盘示例配置
+# 将此文件放入主题的 preset_keyboards 部分即可使用
+
+# T9 键盘配置示例
+t9_pinyin:
+  name: T9 九宫格拼音
+  author: "osfans"
+  # 启用 T9 模式
+  t9_mode: true
+  # T9 候选栏高度（dp）
+  t9_candidate_height: 40
+  # 键盘宽度权重
+  width: 10
+  # 键高
+  height: 44
+  # 键盘锁定
+  lock: true
+  # 重置 ASCII 模式
+  reset_ascii_mode: false
+  ascii_mode: false
+  keys:
+    # 第一行：数字键 1-9, 0
+    - {click: '1', label: '1\n.,?!', long_click: '!'}
+    - {click: '2', label: '2\nabc', long_click: '@'}
+    - {click: '3', label: '3\ndef', long_click: '#'}
+    - {click: '4', label: '4\nghi', long_click: '$'}
+    - {click: '5', label: '5\njkl', long_click: '%'}
+    - {click: '6', label: '6\nmno', long_click: '^'}
+    - {click: '7', label: '7\npqrs', long_click: '&'}
+    - {click: '8', label: '8\ntuv', long_click: '*'}
+    - {click: '9', label: '9\nwxyz', long_click: '('}
+    - {click: '0', label: '0\n \'', long_click: ')'}
+
+    # 第二行：功能键
+    - {click: Shift_L, label: '⇧', long_click: Keyboard_number}
+    - {click: 'q', label: 'q', long_click: '_'}
+    - {click: 'w', label: 'w', long_click: '-'}
+    - {click: 'e', label: 'e', long_click: '+'}
+    - {click: 'r', label: 'r', long_click: '='}
+    - {click: 't', label: 't', long_click: '|'}
+    - {click: 'y', label: 'y', long_click: '\\'}
+    - {click: 'u', label: 'u', long_click: '['}
+    - {click: 'i', label: 'i', long_click: ']'}
+    - {click: 'o', label: 'o', long_click: '{'}
+    - {click: 'p', label: 'p', long_click: '}'}
+
+    # 第三行
+    - {click: Keyboard_symbols, label: '#+=', long_click: Keyboard_number}
+    - {click: 'a', label: 'a', long_click: select_all}
+    - {click: 's', label: 's', long_click: Home}
+    - {click: 'd', label: 'd', long_click: End}
+    - {click: 'f', label: 'f', long_click: Page_Up}
+    - {click: 'g', label: 'g', long_click: Page_Down}
+    - {click: 'h', label: 'h', long_click: Left}
+    - {click: 'j', label: 'j', long_click: Down}
+    - {click: 'k', label: 'k', long_click: Up}
+    - {click: 'l', label: 'l', long_click: Right}
+
+    # 第四行
+    - {click: Mode_switch, label: '中/英', long_click: Menu}
+    - {click: 'z', label: 'z', long_click: '`'}
+    - {click: 'x', label: 'x', long_click: cut}
+    - {click: 'c', label: 'c', long_click: copy}
+    - {click: 'v', label: 'v', long_click: paste}
+    - {click: 'b', label: 'b', long_click: '~'}
+    - {click: 'n', label: 'n', long_click: Insert}
+    - {click: 'm', label: 'm', long_click: Delete}
+    - {click: ',', label: ',', long_click: '<'}
+    - {click: '.', label: '.', long_click: '>'}
+    - {click: '/', label: '/', long_click: '?'}
+
+    # 第五行：空格行
+    - {click: BackSpace, label: '⌫', width: 15, repeatable: true}
+    - {click: space, label: '空格', width: 40}
+    - {click: "'", label: "'", long_click: '"'}
+    - {click: Return, label: '⏎', composing: Return1, long_click: CommitComment, width: 15}
+
+# 使用说明：
+# 1. 在主题配置中添加 t9_mode: true 启用 T9 模式
+# 2. 设置 t9_candidate_height 调整候选栏高度（默认 36dp）
+# 3. 数字键 1-9 对应九宫格拼音输入
+# 4. 数字键 0 作为分隔键（类似单引号）
+# 5. 退格键删除最后输入的数字或选中的拼音
+# 6. 点击候选栏上的拼音进行选择
+# 7. 支持主题自定义以下颜色：
+#    - t9_candidate_back_color: 候选栏背景色
+#    - t9_candidate_border_color: 候选栏边框色
+#    - t9_candidate_text_color: 候选文字颜色
+#    - t9_candidate_hilited_back_color: 候选按下/高亮背景色
+#    - t9_candidate_font: 候选字体
