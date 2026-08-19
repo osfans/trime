@@ -91,6 +91,15 @@ object KeyCode {
             start = found + 1
         }
         val token = repr.substring(start)
+        // A single uppercase letter (e.g. 'A') is the letter key with Shift
+        // held, just like on a physical keyboard. Do not use the synthetic
+        // uppercase codes from RimeKeyMapping.upperNameToCode: they carry no
+        // shift modifier, so in ascii mode rime would reject the bare
+        // uppercase keysym and the fallback would commit the lowercase
+        // letter instead.
+        if (modifiers == 0 && token.length == 1 && token[0] in 'A'..'Z') {
+            return KeyEvent.KEYCODE_A + (token[0] - 'A') to KeyEvent.META_SHIFT_ON
+        }
         val keycode = nameToKeyCode(token)
         if (keycode == 0) {
             Timber.e("Unrecognized key '$token'")
