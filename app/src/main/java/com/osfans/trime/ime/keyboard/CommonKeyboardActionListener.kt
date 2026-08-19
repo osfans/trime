@@ -364,8 +364,21 @@ class CommonKeyboardActionListener {
                 keyEventCode: Int,
                 metaState: Int,
             ) {
-                val name = KeyCode.codeToKeyName(keyEventCode) ?: "VoidSymbol"
-                val value = RimeKeyEvent.getKeycodeByName(name)
+                // An uppercase letter key (e.g. from `{x: A}`) is passed to
+                // rime as the uppercase keysym with Shift, matching what a
+                // physical keyboard reports via the unicode char, so that
+                // rime commits the uppercase letter in ascii mode as well.
+                // The generated reverse mapping would otherwise resolve e.g.
+                // KEYCODE_A to the lowercase name "a" (XK_a).
+                val value =
+                    if (metaState and KeyEvent.META_SHIFT_ON != 0 &&
+                        keyEventCode in KeyEvent.KEYCODE_A..KeyEvent.KEYCODE_Z
+                    ) {
+                        'A'.code + (keyEventCode - KeyEvent.KEYCODE_A) // XK_A..XK_Z
+                    } else {
+                        val name = KeyCode.codeToKeyName(keyEventCode) ?: "VoidSymbol"
+                        RimeKeyEvent.getKeycodeByName(name)
+                    }
                 val m = if (keyEventCode in KeyEvent.KEYCODE_NUMPAD_0..KeyEvent.KEYCODE_NUMPAD_EQUALS) {
                     metaState or KeyEvent.META_NUM_LOCK_ON
                 } else {
