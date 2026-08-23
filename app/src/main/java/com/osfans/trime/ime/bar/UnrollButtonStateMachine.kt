@@ -6,7 +6,6 @@
 package com.osfans.trime.ime.bar
 
 import com.osfans.trime.ime.bar.UnrollButtonStateMachine.BooleanKey.UnrolledCandidatesEmpty
-import com.osfans.trime.ime.bar.UnrollButtonStateMachine.BooleanKey.UnrolledCandidatesHighlighted
 import com.osfans.trime.ime.bar.UnrollButtonStateMachine.State.ClickToAttachWindow
 import com.osfans.trime.ime.bar.UnrollButtonStateMachine.State.ClickToDetachWindow
 import com.osfans.trime.ime.bar.UnrollButtonStateMachine.State.Hidden
@@ -23,7 +22,6 @@ object UnrollButtonStateMachine {
 
     enum class BooleanKey : EventStateMachine.BooleanStateKey {
         UnrolledCandidatesEmpty,
-        UnrolledCandidatesHighlighted,
     }
 
     enum class TransitionEvent(
@@ -32,7 +30,6 @@ object UnrollButtonStateMachine {
         UnrolledCandidatesUpdated({
             from(Hidden) transitTo ClickToAttachWindow on (UnrolledCandidatesEmpty to false)
             from(ClickToAttachWindow) transitTo Hidden on (UnrolledCandidatesEmpty to true)
-            from(ClickToAttachWindow) transitTo ClickToDetachWindow on (UnrolledCandidatesHighlighted to true)
         }),
         UnrolledCandidatesAttached({
             from(ClickToAttachWindow) transitTo ClickToDetachWindow
