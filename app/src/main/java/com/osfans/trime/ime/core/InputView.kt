@@ -74,16 +74,19 @@ class InputView(
 
     private val leftPaddingSpace =
         view(::View) {
+            isFocusable = false
             setOnClickListener(placeholderListener)
         }
 
     private val rightPaddingSpace =
         view(::View) {
+            isFocusable = false
             setOnClickListener(placeholderListener)
         }
 
     private val bottomPaddingSpace =
         view(::View) {
+            isFocusable = false
             setOnClickListener(placeholderListener)
         }
 
