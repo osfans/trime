@@ -29,8 +29,17 @@ object ThemeManager {
 
     private lateinit var _activeTheme: Theme
 
+    private fun ensureActiveTheme() {
+        if (!::_activeTheme.isInitialized) {
+            _activeTheme = evaluateActiveTheme()
+        }
+    }
+
     var activeTheme: Theme
-        get() = _activeTheme
+        get() {
+            ensureActiveTheme()
+            return _activeTheme
+        }
         private set(value) {
             if (::_activeTheme.isInitialized && _activeTheme == value) return
             _activeTheme = value
@@ -117,7 +126,7 @@ object ThemeManager {
     }
 
     fun init(configuration: Configuration) {
-        _activeTheme = evaluateActiveTheme()
+        ensureActiveTheme()
         ColorManager.init(configuration)
     }
 
