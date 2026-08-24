@@ -114,13 +114,18 @@ abstract class BaseInputView(
             return 0
         }
         val insets = WindowInsetsCompat.toWindowInsetsCompat(windowInsets)
-        var mask = WindowInsetsCompat.Type.navigationBars()
-        if (!ignoreSystemGestureInsets) {
-            mask = mask or WindowInsetsCompat.Type.mandatorySystemGestures() or
-                WindowInsetsCompat.Type.systemGestures()
+        val navBars = WindowInsetsCompat.Type.navigationBars()
+        val gestures = WindowInsetsCompat.Type.systemGestures() or
+            WindowInsetsCompat.Type.mandatorySystemGestures()
+        return if (ignoreSystemGestureInsets) {
+            // check gestures insets and ignore them when it greater than zero
+            val gesturesBottom = insets.getInsets(gestures).bottom
+            val navBarsBottom = insets.getInsets(navBars).bottom
+            if (gesturesBottom > 0) 0 else navBarsBottom
+        } else {
+            val insetsBottom = insets.getInsets(navBars or gestures).bottom
+            if (insetsBottom > 0) max(insetsBottom, navBarFrameHeight) else insetsBottom
         }
-        val insetsBottom = insets.getInsets(mask).bottom
-        return if (insetsBottom > 0) max(insetsBottom, navBarFrameHeight) else insetsBottom
     }
 
     override fun onAttachedToWindow() {
@@ -138,6 +143,6 @@ abstract class BaseInputView(
     }
 
     companion object {
-        private const val FALLBACK_NAVBAR_HEIGHT = 48
+        private const val FALLBACK_NAVBAR_HEIGHT = 16
     }
 }
