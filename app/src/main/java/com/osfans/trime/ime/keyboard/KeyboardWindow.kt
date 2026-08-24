@@ -4,8 +4,11 @@
 
 package com.osfans.trime.ime.keyboard
 
+import android.graphics.Point
+import android.os.Build
 import android.text.InputType
 import android.view.View
+import android.view.WindowInsets
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
@@ -24,11 +27,14 @@ import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.ime.popup.PopupDelegate
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.ResidentWindow
+import com.osfans.trime.util.isLandscape
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.instance
+import splitties.dimensions.dp
+import splitties.systemservices.windowManager
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.lParams
@@ -82,8 +88,25 @@ class KeyboardWindow :
 
     private val keyboardActionListener = commonKeyboardActionListener.listener
 
+    private var lastIsPortrait: Boolean? = null
+    private var containerWidth: Int = 0
+    private var allowedWidth: Int = 0
+
+    private val onKeyboardViewLayoutChangeListener =
+        View.OnLayoutChangeListener { v, left, _, right, _, _, _, _, _ ->
+            val width = right - left
+            if (width > 0 && allowedWidth != width) {
+                val isPortrait = !context.resources.configuration.isLandscape()
+                lastIsPortrait = isPortrait
+                containerWidth = width
+                allowedWidth = width
+                v.post { refreshKeyboards() }
+            }
+        }
+
     override fun onCreateView(): View {
         keyboardView = context.frameLayout(R.id.keyboard_view)
+        keyboardView.addOnLayoutChangeListener(onKeyboardViewLayoutChangeListener)
         attachKeyboard(evalKeyboard(".default"))
         return keyboardView
     }
@@ -94,6 +117,39 @@ class KeyboardWindow :
             keyboardView.removeView(it)
         }
         currentKeyboard?.lastAsciiMode = rime.run { statusCached }.isAsciiMode
+    }
+
+    /** 计算键盘可用宽度：优先使用已测量的容器宽度，否则回退到系统窗口测量。 */
+    private fun computeAllowedWidth(): Int {
+        val isPortrait = !context.resources.configuration.isLandscape()
+
+        if (containerWidth > 0 && lastIsPortrait == isPortrait) {
+            return containerWidth
+        }
+
+        val padding = theme.generalStyle.run {
+            if (context.isLandscapeMode()) keyboardPaddingLand else keyboardPadding
+        }
+
+        val safeWidth = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val windowMetrics = context.windowManager.maximumWindowMetrics
+            val insets = windowMetrics.windowInsets.getInsetsIgnoringVisibility(
+                WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout(),
+            )
+            val displayWidth = context.resources.displayMetrics.widthPixels
+            val windowWidth = windowMetrics.bounds.width() - insets.left - insets.right
+            if (windowWidth < displayWidth - context.dp(1)) displayWidth else windowWidth
+        } else {
+            @Suppress("DEPRECATION")
+            val size = Point()
+            @Suppress("DEPRECATION")
+            context.windowManager.defaultDisplay.getSize(size)
+            size.x
+        }
+
+        val width = safeWidth - 2 * context.dp(padding)
+        allowedWidth = width
+        return width
     }
 
     private fun selectKeyboardConfig(name: String): TextKeyboard? {
@@ -110,7 +166,7 @@ class KeyboardWindow :
         lastKeyboardId = target
 
         val config = selectKeyboardConfig(target)
-        val keyboard = currentKeyboard ?: Keyboard(context, theme, config)
+        val keyboard = currentKeyboard ?: Keyboard(context, theme, computeAllowedWidth(), config)
         val view = currentKeyboardView ?: KeyboardView(context, theme, keyboard, popup, service, keyboardActionListener, enterKeyDisplay)
 
         if (currentKeyboard == null) {
@@ -205,6 +261,17 @@ class KeyboardWindow :
             attachKeyboard(target)
         }
         Timber.d("Switched to keyboard: $target")
+    }
+
+    fun refreshKeyboards(isAll: Boolean = false) {
+        val id = currentKeyboardId.ifEmpty { return }
+        detachCurrentView()
+        if (isAll) {
+            cachedKeyboards.clear()
+        } else {
+            cachedKeyboards.remove(id)
+        }
+        attachKeyboard(id)
     }
 
     override fun onStartInput(info: EditorInfo) {

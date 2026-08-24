@@ -6,17 +6,13 @@
 package com.osfans.trime.ime.keyboard
 
 import android.content.Context
-import android.graphics.Point
-import android.os.Build
 import android.view.KeyEvent
-import android.view.WindowInsets
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.model.TextKeyboard
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
-import splitties.systemservices.windowManager
 import kotlin.math.abs
 import kotlin.math.pow
 
@@ -25,6 +21,7 @@ import kotlin.math.pow
 class Keyboard(
     private val context: Context,
     private val theme: Theme,
+    private val allowedWidth: Int,
     selfConfig: TextKeyboard? = null,
 ) {
 
@@ -89,36 +86,6 @@ class Keyboard(
         private set
 
     var firstPressedKeyIndex: Int = -1
-
-    /** Width of the screen available to fit the keyboard  */
-    private val allowedWidth: Int
-        get() {
-            val padding = theme.generalStyle.run {
-                if (context.isLandscapeMode()) keyboardPaddingLand else keyboardPadding
-            }
-
-            val safeWidth = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                val windowMetrics = context.windowManager.maximumWindowMetrics
-                val insets = windowMetrics.windowInsets.getInsetsIgnoringVisibility(
-                    WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout(),
-                )
-                val displayWidth = context.resources.displayMetrics.widthPixels
-                val windowWidth = windowMetrics.bounds.width() - insets.left - insets.right
-                val isPortrait = displayWidth < context.resources.displayMetrics.heightPixels
-                if (isPortrait && windowWidth < displayWidth - context.dp(1)) {
-                    displayWidth
-                } else {
-                    windowWidth
-                }
-            } else {
-                @Suppress("DEPRECATION")
-                val size = Point()
-                @Suppress("DEPRECATION")
-                context.windowManager.defaultDisplay.getSize(size)
-                size.x
-            }
-            return safeWidth - 2 * context.dp(padding)
-        }
 
     /** Keyboard default ascii mode  */
     val asciiMode = selfConfig?.asciiMode ?: false
