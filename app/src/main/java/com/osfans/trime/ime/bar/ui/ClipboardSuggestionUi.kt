@@ -52,6 +52,7 @@ class ClipboardSuggestionUi(
 
     val dismiss =
         imageView {
+            isFocusable = false
             imageDrawable = drawable(R.drawable.ic_outline_cancel_24)!!.apply {
                 setTint(ColorManager.getColor("candidate_text_color"))
             }
