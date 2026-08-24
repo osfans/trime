@@ -29,7 +29,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import splitties.dimensions.dp
 import splitties.views.dsl.core.withTheme
-import kotlin.math.max
 
 abstract class BaseInputView(
     val service: TrimeInputMethodService,
@@ -120,7 +119,7 @@ abstract class BaseInputView(
                 WindowInsetsCompat.Type.systemGestures()
         }
         val insetsBottom = insets.getInsets(mask).bottom
-        return if (insetsBottom > 0) max(insetsBottom, navBarFrameHeight) else insetsBottom
+        return if (insetsBottom > 0) insetsBottom else navBarFrameHeight
     }
 
     override fun onAttachedToWindow() {
