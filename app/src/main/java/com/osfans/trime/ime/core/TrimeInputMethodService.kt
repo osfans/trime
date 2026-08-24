@@ -285,6 +285,11 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         contentView.addView(newCandidatesView)
         inputDeviceManager.setCandidatesView(newCandidatesView)
         candidatesView = newCandidatesView
+        if (decorLocationUpdated) {
+            candidatesView?.updateCursorAnchor(anchorPosition, contentSize)
+        } else {
+            workaroundNullCursorAnchorInfo()
+        }
         return newCandidatesView
     }
 
