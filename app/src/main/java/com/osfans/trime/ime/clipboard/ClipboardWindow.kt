@@ -227,6 +227,8 @@ class ClipboardWindow(private val initialTab: Int = 0) : BoardWindow.BarBoardWin
     }
 
     override fun onDetached() {
+        clipboardBeansAdapter.dismissPopupMenu()
+        collectionBeansAdapter.dismissPopupMenu()
         clipboardBeansSubmitJob?.cancel()
         collectionBeansSubmitJob?.cancel()
     }
