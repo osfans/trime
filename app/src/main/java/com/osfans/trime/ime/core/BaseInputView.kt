@@ -128,6 +128,11 @@ abstract class BaseInputView(
         }
     }
 
+    fun dismissCandidateActionMenu() {
+        candidateActionMenu?.dismiss()
+        candidateActionMenu = null
+    }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         // on API 35+, we must call requestApplyInsets() manually after replacing views,
@@ -137,8 +142,7 @@ abstract class BaseInputView(
 
     override fun onDetachedFromWindow() {
         handleMessages = false
-        candidateActionMenu?.dismiss()
-        candidateActionMenu = null
+        dismissCandidateActionMenu()
         super.onDetachedFromWindow()
     }
 

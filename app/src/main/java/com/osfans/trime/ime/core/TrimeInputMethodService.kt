@@ -571,6 +571,8 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     override fun onFinishInputView(finishingInput: Boolean) {
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
         decorLocationUpdated = false
+        inputView?.dismissCandidateActionMenu()
+        candidatesView?.dismissCandidateActionMenu()
         inputDeviceManager.onFinishInputView()
         currentInputConnection?.apply {
             finishComposingText()
