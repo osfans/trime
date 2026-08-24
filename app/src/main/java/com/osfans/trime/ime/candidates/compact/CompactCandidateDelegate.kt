@@ -153,6 +153,11 @@ class CompactCandidateDelegate : InputBroadcastReceiver {
         }
         context.recyclerView(R.id.candidate_view) {
             itemAnimator = null
+            isFocusable = false
+            isFocusableInTouchMode = false
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                defaultFocusHighlightEnabled = false
+            }
             adapter = this@CompactCandidateDelegate.adapter
             layoutManager = this@CompactCandidateDelegate.layoutManager
             addItemDecoration(FlexboxVerticalDecoration(separatorDrawable))
