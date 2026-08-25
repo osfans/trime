@@ -25,6 +25,7 @@ data class SafTreeListing(
 
 object SafTreeWalker {
     private const val SKIP_DIR = "build"
+    private const val SKIP_DIR_SUBSTRING = ".userdb"
 
     private val documentProjection =
         arrayOf(
@@ -35,11 +36,16 @@ object SafTreeWalker {
             DocumentsContract.Document.COLUMN_LAST_MODIFIED,
         )
 
-    fun shouldSkip(relativePath: String): Boolean {
+    fun shouldSkip(
+        relativePath: String,
+        isDirectory: Boolean = false,
+    ): Boolean {
         val normalized = relativePath.trimStart('/').trim().removePrefix("./")
         if (normalized.isEmpty()) return false
         val segments = normalized.split('/')
-        return segments.any { it == SKIP_DIR }
+        if (segments.any { it == SKIP_DIR }) return true
+        val dirSegments = if (isDirectory) segments else segments.dropLast(1)
+        return dirSegments.any { it.contains(SKIP_DIR_SUBSTRING) }
     }
 
     fun listFiles(
@@ -80,8 +86,9 @@ object SafTreeWalker {
                         } else {
                             "$relativePath/$name"
                         }
-                    if (shouldSkip(childPath)) continue
-                    if (DocumentsContract.Document.MIME_TYPE_DIR == mimeType) {
+                    val isDirectory = DocumentsContract.Document.MIME_TYPE_DIR == mimeType
+                    if (shouldSkip(childPath, isDirectory)) continue
+                    if (isDirectory) {
                         directoryIds[childPath] = documentId
                         queue.add(childPath to documentId)
                     } else {
@@ -122,32 +129,5 @@ object SafTreeWalker {
             }
         }
         return null
-    }
-
-    fun ensureDirectory(
-        contentResolver: ContentResolver,
-        treeUri: Uri,
-        rootDocumentId: String,
-        relativeDir: String,
-    ): String {
-        if (relativeDir.isEmpty()) return rootDocumentId
-        var parentId = rootDocumentId
-        for (segment in relativeDir.split('/').filter { it.isNotEmpty() }) {
-            parentId =
-                findChildDocumentId(contentResolver, treeUri, parentId, segment)
-                    ?: run {
-                        val parentUri =
-                            DocumentsContract.buildDocumentUriUsingTree(treeUri, parentId)
-                        val created =
-                            DocumentsContract.createDocument(
-                                contentResolver,
-                                parentUri,
-                                DocumentsContract.Document.MIME_TYPE_DIR,
-                                segment,
-                            ) ?: error("Failed to create directory '$segment'")
-                        DocumentsContract.getDocumentId(created)
-                    }
-        }
-        return parentId
     }
 }
