@@ -9,10 +9,12 @@ import android.content.Context
 import android.content.Intent
 import android.util.SparseArray
 import android.view.KeyEvent
+import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.ui.main.ClipEditActivity
 import com.osfans.trime.ui.main.LogActivity
 import com.osfans.trime.ui.main.MainActivity
 import com.osfans.trime.ui.main.NavigationRoute
+import com.osfans.trime.ui.setup.SetupActivity
 import timber.log.Timber
 
 object AppUtils {

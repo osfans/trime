@@ -35,6 +35,7 @@ import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.soundeffect.SoundEffectManager
 import com.osfans.trime.databinding.ActivityMainBinding
+import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.ui.setup.SetupActivity
 import com.osfans.trime.util.isStorageAvailable
 import com.osfans.trime.util.item
@@ -60,6 +61,11 @@ class MainActivity : AppCompatActivity() {
             }
         AppCompatDelegate.setDefaultNightMode(uiMode)
         super.onCreate(savedInstanceState)
+        if (SetupActivity.shouldSetup()) {
+            startActivity<SetupActivity>()
+            finish()
+            return
+        }
         enableEdgeToEdge()
         val binding = ActivityMainBinding.inflate(layoutInflater)
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->

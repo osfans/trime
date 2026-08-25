@@ -19,9 +19,11 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
         android:src="@mipmap/ic_app_icon"
-        app:layout_constraintBottom_toTopOf="@+id/step_text"
+        app:layout_constraintBottom_toTopOf="@id/step_text"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
         android:id="@+id/step_text"
@@ -34,6 +36,7 @@
         app:layout_constraintBottom_toTopOf="@id/hint_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/app_icon"
         tools:text="Step text here ..." />
 
     <TextView
@@ -43,32 +46,79 @@
         android:layout_marginHorizontal="24dp"
         android:gravity="center"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/storage_mode_group"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/step_text"
         tools:text="Hint text here ..." />
+
+    <RadioGroup
+        android:id="@+id/storage_mode_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/action_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/hint_text"
+        tools:visibility="visible">
+
+        <RadioButton
+            android:id="@+id/radio_external_sync"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/data_storage_mode_external_sync" />
+
+        <TextView
+            android:id="@+id/desc_external_sync"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginBottom="12dp"
+            android:text="@string/data_storage_mode_external_sync_desc"
+            android:textSize="14sp" />
+
+        <RadioButton
+            android:id="@+id/radio_app_storage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/data_storage_mode_app_storage" />
+
+        <TextView
+            android:id="@+id/desc_app_storage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:text="@string/data_storage_mode_app_storage_desc"
+            android:textSize="14sp" />
+    </RadioGroup>
 
     <Button
         android:id="@+id/action_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/hint_text"
+        app:layout_constraintTop_toBottomOf="@id/storage_mode_group"
         tools:text="Action" />
 
     <ImageView
         android:id="@+id/done_icon"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:layout_marginTop="36dp"
+        android:layout_marginTop="24dp"
         android:layout_marginEnd="8dp"
         android:src="@drawable/ic_baseline_check_circle_24"
         android:tint="?android:attr/colorAccent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/done_text"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/hint_text" />
+        app:layout_constraintTop_toBottomOf="@id/storage_mode_group" />
 
     <TextView
         android:id="@+id/done_text"

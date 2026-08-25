@@ -5,11 +5,11 @@
 package com.osfans.trime.ui.setup
 
 import android.content.Context
+import androidx.fragment.app.FragmentActivity
 import com.osfans.trime.R
+import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.util.InputMethodUtils
 import com.osfans.trime.util.appContext
-import com.osfans.trime.util.isStorageAvailable
-import com.osfans.trime.util.requestExternalStoragePermission
 
 enum class SetupPage {
     Permissions,
@@ -27,7 +27,7 @@ enum class SetupPage {
 
     fun getHintText(context: Context) = context.getText(
         when (this) {
-            Permissions -> R.string.setup__request_permission_hint
+            Permissions -> R.string.setup__select_data_path_hint
             Enable -> R.string.setup__enable_ime_hint
             Select -> R.string.setup__select_ime_hint
         },
@@ -35,22 +35,28 @@ enum class SetupPage {
 
     fun getButtonText(context: Context) = context.getText(
         when (this) {
-            Permissions -> R.string.setup__request_permission
+            Permissions -> R.string.setup__select_data_path
             Enable -> R.string.setup__enable_ime
             Select -> R.string.setup__select_ime
         },
     )
 
-    fun getButtonAction(context: Context) {
+    fun getButtonAction(activity: FragmentActivity) {
         when (this) {
-            Permissions -> context.requestExternalStoragePermission()
-            Enable -> InputMethodUtils.showImeEnablerActivity(context)
+            Permissions -> (activity as SetupActivity).launchDataPathPicker()
+            Enable -> InputMethodUtils.showImeEnablerActivity(activity)
             Select -> InputMethodUtils.showImePicker()
         }
     }
 
+    fun showActionButton(): Boolean =
+        when (this) {
+            Permissions -> RimeDataSync.usesExternalSync()
+            else -> true
+        }
+
     fun isDone() = when (this) {
-        Permissions -> appContext.isStorageAvailable()
+        Permissions -> RimeDataSync.isStorageAvailable(appContext)
         Enable -> InputMethodUtils.checkIsTrimeEnabled()
         Select -> InputMethodUtils.checkIsTrimeSelected()
     }

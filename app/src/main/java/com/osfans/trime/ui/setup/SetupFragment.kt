@@ -8,8 +8,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.osfans.trime.R
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.databinding.FragmentSetupBinding
 import com.osfans.trime.ui.setup.SetupPage.Companion.isLastPage
 import com.osfans.trime.util.serializable
@@ -19,6 +22,7 @@ class SetupFragment : Fragment() {
     private lateinit var binding: FragmentSetupBinding
 
     private val page: SetupPage by lazy { requireArguments().serializable("page")!! }
+    private val prefs = AppPrefs.defaultInstance().profile
 
     private var isDone: Boolean = false
         set(new) {
@@ -28,10 +32,14 @@ class SetupFragment : Fragment() {
             with(binding) {
                 stepText.text = page.getStepText(requireContext())
                 hintText.text = page.getHintText(requireContext())
-                actionButton.visibility = if (new) View.GONE else View.VISIBLE
+                val showStorageMode = page == SetupPage.Permissions
+                storageModeGroup.visibility = if (showStorageMode) View.VISIBLE else View.GONE
+                val showActionButton = !new && page.showActionButton()
+                actionButton.visibility = if (showActionButton) View.VISIBLE else View.GONE
                 actionButton.text = page.getButtonText(requireContext())
-                actionButton.setOnClickListener { page.getButtonAction(requireContext()) }
+                actionButton.setOnClickListener { page.getButtonAction(requireActivity()) }
                 doneText.visibility = if (new) View.VISIBLE else View.GONE
+                doneIcon.visibility = if (new) View.VISIBLE else View.GONE
             }
             field = new
         }
@@ -42,8 +50,30 @@ class SetupFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         binding = FragmentSetupBinding.inflate(inflater)
+        if (page == SetupPage.Permissions) {
+            setupStorageModeRadios()
+        }
         sync()
         return binding.root
+    }
+
+    private fun setupStorageModeRadios() {
+        val mode = prefs.dataStorageMode.getValue()
+        binding.radioExternalSync.isChecked = mode == AppPrefs.Profile.DataStorageMode.EXTERNAL_SYNC
+        binding.radioAppStorage.isChecked = mode == AppPrefs.Profile.DataStorageMode.APP_STORAGE
+        binding.storageModeGroup.setOnCheckedChangeListener { _: RadioGroup, checkedId ->
+            val newMode =
+                when (checkedId) {
+                    R.id.radio_external_sync -> AppPrefs.Profile.DataStorageMode.EXTERNAL_SYNC
+                    R.id.radio_app_storage -> AppPrefs.Profile.DataStorageMode.APP_STORAGE
+                    else -> return@setOnCheckedChangeListener
+                }
+            if (prefs.dataStorageMode.getValue() != newMode) {
+                prefs.dataStorageMode.setValue(newMode)
+            }
+            sync()
+            (activity as? SetupActivity)?.refreshSkipButtonVisibility()
+        }
     }
 
     // Called on window focus changed
