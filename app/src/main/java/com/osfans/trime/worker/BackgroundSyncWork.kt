@@ -14,6 +14,8 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.sync.ExternalSyncFallback
+import com.osfans.trime.data.sync.RimeDataSync
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -35,13 +37,26 @@ class BackgroundSyncWork(
         if (!enable) {
             return Result.failure()
         }
+        if (RimeDataSync.usesExternalSync(applicationContext) &&
+            !RimeDataSync.hasExternalAccess(applicationContext)
+        ) {
+            ExternalSyncFallback.fallbackToAppStorage(applicationContext)
+        }
+        if (!RimeDataSync.isStorageAvailable(applicationContext)) {
+            Timber.w("Background sync skipped: storage not available")
+            return Result.failure()
+        }
         val rime = RimeDaemon.createSession(javaClass.name)
-        val success = rime.runOnReady { syncUserData() }
-        lastSyncTime = System.currentTimeMillis()
-        lastSyncStatus = success
-        RimeDaemon.destroySession(javaClass.name)
-
-        return if (success) Result.success() else Result.retry()
+        try {
+            lastSyncStatus =
+                RimeDataSync.syncUserDataWithOptionalExport(applicationContext) {
+                    rime.runOnReady { syncUserData() }
+                }
+            lastSyncTime = System.currentTimeMillis()
+            return if (lastSyncStatus) Result.success() else Result.retry()
+        } finally {
+            RimeDaemon.destroySession(javaClass.name)
+        }
     }
 
     companion object {
