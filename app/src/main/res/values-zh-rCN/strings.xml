@@ -158,6 +158,8 @@
     <string name="reset_data_path_hint">清除已选文件夹并重新选择</string>
     <string name="sync_user_data_success">用户数据已同步到外部文件夹</string>
     <string name="sync_user_data_failure">用户数据同步失败</string>
+    <string name="sync_partial_copy_failure">部分文件复制失败</string>
+    <string name="sync_partial_copy_failure_detail">%2$s 时有 %1$d 个文件复制失败。其余文件已复制，部署将继续进行。</string>
     <string name="data_path_permission_revoked">数据文件夹访问权限已被撤销，请重新选择文件夹。</string>
     <string name="grant_permission">授予权限</string>
     <string name="notification_permission_title">没有通知权限</string>

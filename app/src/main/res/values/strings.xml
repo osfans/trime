@@ -159,6 +159,8 @@
     <string name="reset_data_path_hint">Clear the selected folder and pick again</string>
     <string name="sync_user_data_success">User data synced to external folder</string>
     <string name="sync_user_data_failure">Failed to sync user data</string>
+    <string name="sync_partial_copy_failure">Some files failed to copy</string>
+    <string name="sync_partial_copy_failure_detail">%1$d file(s) failed during %2$s. Remaining files were copied and deployment can continue.</string>
     <string name="data_path_permission_revoked">Data folder access was revoked. Please select the folder again.</string>
     <string name="grant_permission">Grant permission</string>
     <string name="notification_permission_title">No Notification Permission</string>
