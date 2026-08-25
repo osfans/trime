@@ -7,18 +7,18 @@ package com.osfans.trime.data.sync
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.nio.channels.FileChannel
+import java.io.OutputStream
 
 object AtomicLocalFileCopy {
-    fun writeFromChannel(
+    fun writeFromStream(
         destFile: File,
-        copy: (FileChannel) -> Unit,
+        copy: (OutputStream) -> Unit,
     ): Long {
         val tempFile = File(destFile.parentFile, "${destFile.name}.tmp")
         tempFile.parentFile?.mkdirs()
         try {
-            FileOutputStream(tempFile).channel.use { outChannel ->
-                copy(outChannel)
+            FileOutputStream(tempFile).use { output ->
+                copy(output)
             }
             val bytes = tempFile.length()
             if (destFile.exists() && !destFile.delete()) {
@@ -43,9 +43,7 @@ object AtomicLocalFileCopy {
     fun copyFromInput(
         source: FileInputStream,
         destFile: File,
-    ): Long = writeFromChannel(destFile) { outChannel ->
-        source.channel.use { inChannel ->
-            inChannel.transferTo(0, Long.MAX_VALUE, outChannel)
-        }
+    ): Long = writeFromStream(destFile) { output ->
+        source.copyTo(output)
     }
 }
