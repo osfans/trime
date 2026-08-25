@@ -29,12 +29,11 @@ object SyncIndex {
     private val indexFile: File
         get() = File(appContext.filesDir, INDEX_FILE)
 
-    fun load(): SyncIndexData =
-        indexFile
-            .takeIf { it.exists() }
-            ?.readText()
-            ?.let { runCatching { json.decodeFromString<SyncIndexData>(it) }.getOrNull() }
-            ?: SyncIndexData()
+    fun load(): SyncIndexData = indexFile
+        .takeIf { it.exists() }
+        ?.readText()
+        ?.let { runCatching { json.decodeFromString<SyncIndexData>(it) }.getOrNull() }
+        ?: SyncIndexData()
 
     fun save(data: SyncIndexData) {
         indexFile.writeText(json.encodeToString(data))

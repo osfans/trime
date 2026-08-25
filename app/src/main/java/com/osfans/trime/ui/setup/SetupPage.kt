@@ -49,11 +49,10 @@ enum class SetupPage {
         }
     }
 
-    fun showActionButton(): Boolean =
-        when (this) {
-            Permissions -> RimeDataSync.usesExternalSync()
-            else -> true
-        }
+    fun showActionButton(): Boolean = when (this) {
+        Permissions -> RimeDataSync.usesExternalSync()
+        else -> true
+    }
 
     fun isDone() = when (this) {
         Permissions -> RimeDataSync.isStorageAvailable(appContext)
