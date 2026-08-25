@@ -62,9 +62,6 @@
     <string name="system_default">系统默认</string>
     <string name="key_swipe_travel">触发按键滑动手势的距离</string>
     <string name="trime_app_slogan">击响中文之韵</string>
-    <string name="external_storage_permission_not_available">存储权限不可用</string>
-    <string name="external_storage_permission_granted">已授予存储权限</string>
-    <string name="external_storage_permission_denied">已拒绝授权存储权限，部署或读取方案和配置功能或不可用</string>
     <string name="custom_sound_effect_name">自定义按键音效</string>
     <string name="setup__next">下一步</string>
     <string name="done">完成</string>
@@ -155,9 +152,13 @@
     <string name="setup__select_data_path">先选择数据文件夹</string>
     <string name="setup__data_path_imported">数据文件夹导入成功</string>
     <string name="setup__data_path_import_failed">数据文件夹导入失败</string>
-    <string name="reset_data_path">重置数据文件夹</string>
-    <string name="reset_data_path_hint">清除已选文件夹并重新选择</string>
-    <string name="sync_user_data_success">用户数据已同步到外部文件夹</string>
+    <string name="select_another_directory_to_sync">要选择另一个文件夹进行同步吗？</string>
+    <string name="select_another_directory">选择</string>
+    <string name="reset_data_path_cancelled_message">未选择数据文件夹。外部同步需要选择文件夹。请重新选择，或切换为使用应用专属存储空间。</string>
+    <string name="reset_data_path_pick_again">重新选择文件夹</string>
+    <string name="data_path_not_selected">未选择数据文件夹</string>
+    <string name="sync_user_data_success">用户数据同步成功</string>
+    <string name="sync_user_data_success_external">用户数据已同步到外部文件夹</string>
     <string name="sync_user_data_failure">用户数据同步失败</string>
     <string name="sync_partial_copy_failure">部分文件复制失败</string>
     <string name="sync_partial_copy_failure_detail">%2$s 时有 %1$d 个文件复制失败。其余文件已复制，部署将继续进行。</string>

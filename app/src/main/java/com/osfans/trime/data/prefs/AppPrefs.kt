@@ -365,7 +365,6 @@ class AppPrefs(
         }
 
         companion object {
-            const val USER_DATA_DIR = "profile_user_data_dir"
             const val EXTERNAL_RIME_TREE_URI = "profile_external_rime_tree_uri"
             const val EXTERNAL_RIME_DISPLAY_NAME = "profile_external_rime_display_name"
             const val DATA_STORAGE_MODE = "profile_data_storage_mode"
@@ -376,7 +375,6 @@ class AppPrefs(
         }
 
         val dataStorageMode = enum(R.string.data_storage_mode, DATA_STORAGE_MODE, DataStorageMode.EXTERNAL_SYNC)
-        val userDataDir = string(USER_DATA_DIR, "")
         val externalRimeTreeUri = string(EXTERNAL_RIME_TREE_URI, "")
         val externalRimeDisplayName = string(EXTERNAL_RIME_DISPLAY_NAME, "")
         val periodicBackgroundSync = bool(PERIODIC_BACKGROUND_SYNC, false)

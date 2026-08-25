@@ -66,9 +66,6 @@
     <string name="system_default">系統預設</string>
     <string name="key_swipe_travel">觸發滑動手勢的最短距離</string>
     <string name="trime_app_slogan">擊響中文之韻</string>
-    <string name="external_storage_permission_not_available">儲存許可權不可用</string>
-    <string name="external_storage_permission_granted">已授予儲存許可權</string>
-    <string name="external_storage_permission_denied">已拒絕授權儲存許可權，部署或讀取方案和配置功能或不可用</string>
     <string name="custom_sound_effect_name">自訂按鍵音效</string>
     <string name="setup__next">下一步</string>
     <string name="done">完成</string>
@@ -156,9 +153,13 @@
     <string name="setup__select_data_path">先選擇資料夾</string>
     <string name="setup__data_path_imported">資料夾匯入成功</string>
     <string name="setup__data_path_import_failed">資料夾匯入失敗</string>
-    <string name="reset_data_path">重設資料夾</string>
-    <string name="reset_data_path_hint">清除已選資料夾並重新選擇</string>
-    <string name="sync_user_data_success">使用者資料已同步到外部資料夾</string>
+    <string name="select_another_directory_to_sync">要選擇另一個資料夾進行同步嗎？</string>
+    <string name="select_another_directory">選擇</string>
+    <string name="reset_data_path_cancelled_message">未選擇資料夾。外部同步需要選擇資料夾。請重新選擇，或切換為使用應用程式專屬儲存空間。</string>
+    <string name="reset_data_path_pick_again">重新選擇資料夾</string>
+    <string name="data_path_not_selected">未選擇資料夾</string>
+    <string name="sync_user_data_success">使用者資料同步成功</string>
+    <string name="sync_user_data_success_external">使用者資料已同步到外部資料夾</string>
     <string name="sync_user_data_failure">使用者資料同步失敗</string>
     <string name="sync_partial_copy_failure">部分檔案複製失敗</string>
     <string name="sync_partial_copy_failure_detail">%2$s 時有 %1$d 個檔案複製失敗。其餘檔案已複製，部署將繼續進行。</string>
