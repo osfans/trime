@@ -17,6 +17,10 @@ object ExternalSyncFallback {
         if (!RimeDataSync.usesExternalSync(context)) return
         Timber.w(reason, "External sync unavailable; falling back to app-specific storage")
         RimeDataSync.clearExternalTree(context)
+        UserDbMigration.onStorageModeChanged(
+            AppPrefs.Profile.DataStorageMode.EXTERNAL_SYNC,
+            AppPrefs.Profile.DataStorageMode.APP_STORAGE,
+        )
         AppPrefs.defaultInstance().profile.dataStorageMode.setValue(
             AppPrefs.Profile.DataStorageMode.APP_STORAGE,
         )

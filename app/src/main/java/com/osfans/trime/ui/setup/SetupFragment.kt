@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.osfans.trime.R
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.sync.UserDbMigration
 import com.osfans.trime.databinding.FragmentSetupBinding
 import com.osfans.trime.ui.setup.SetupPage.Companion.isLastPage
 import com.osfans.trime.util.serializable
@@ -69,6 +70,8 @@ class SetupFragment : Fragment() {
                     else -> return@setOnCheckedChangeListener
                 }
             if (prefs.dataStorageMode.getValue() != newMode) {
+                val oldMode = prefs.dataStorageMode.getValue()
+                UserDbMigration.onStorageModeChanged(oldMode, newMode)
                 prefs.dataStorageMode.setValue(newMode)
             }
             sync()
