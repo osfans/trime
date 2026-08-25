@@ -15,6 +15,12 @@ class SafPathCache(
 ) {
     private val directoryIds = ConcurrentHashMap(listing.directoryIds)
     private val fileIds = ConcurrentHashMap(listing.files.associate { it.relativePath to it.documentId })
+    private val fileSizes = ConcurrentHashMap(listing.files.associate { it.relativePath to it.size })
+
+    fun hasFile(
+        relativePath: String,
+        expectedSize: Long,
+    ): Boolean = fileIds.containsKey(relativePath) && fileSizes[relativePath] == expectedSize
 
     fun ensureDirectory(
         contentResolver: ContentResolver,
@@ -73,5 +79,14 @@ class SafPathCache(
                 created
             }
         return docUri
+    }
+
+    fun rememberFile(
+        relativePath: String,
+        documentId: String,
+        size: Long? = null,
+    ) {
+        fileIds[relativePath] = documentId
+        size?.let { fileSizes[relativePath] = it }
     }
 }
