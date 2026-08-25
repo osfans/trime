@@ -19,6 +19,7 @@ import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.prefs.PreferenceDelegate
 import com.osfans.trime.data.sync.RimeDataSync
+import com.osfans.trime.data.sync.SafDisplayPath
 import com.osfans.trime.data.sync.UserDbMigration
 import com.osfans.trime.ui.common.PaddingPreferenceFragment
 import com.osfans.trime.ui.common.withLoadingDialog
@@ -88,11 +89,11 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
     }
 
     private fun dataPathSummary(): String {
-        val displayName = prefs.externalRimeDisplayName.getValue()
-        if (displayName.isNotEmpty()) return displayName
         val uri = prefs.externalRimeTreeUri.getValue()
-        if (uri.isNotEmpty()) return uri
-        return getString(R.string.data_path_not_selected)
+        if (uri.isEmpty()) return getString(R.string.data_path_not_selected)
+        return SafDisplayPath.fromTreeUri(Uri.parse(uri))
+            ?: prefs.externalRimeDisplayName.getValue().takeIf { it.isNotEmpty() }
+            ?: uri
     }
 
     private fun updateDataPathSummary() {
