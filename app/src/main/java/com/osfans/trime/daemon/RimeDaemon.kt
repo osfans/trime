@@ -6,7 +6,6 @@ package com.osfans.trime.daemon
 
 import android.app.PendingIntent
 import android.content.Intent
-import android.graphics.Color
 import androidx.core.app.NotificationCompat
 import com.osfans.trime.R
 import com.osfans.trime.TrimeApplication
@@ -17,8 +16,8 @@ import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.lifecycleScope
 import com.osfans.trime.core.whenReady
 import com.osfans.trime.ui.main.LogActivity
+import com.osfans.trime.util.DeployNotification
 import com.osfans.trime.util.appContext
-import com.osfans.trime.util.createNotificationChannel
 import com.osfans.trime.util.readText
 import com.osfans.trime.util.subprocess
 import kotlinx.coroutines.CoroutineScope
@@ -110,15 +109,10 @@ object RimeDaemon {
      */
     fun getFirstSessionOrNull() = sessions.firstNotNullOfOrNull { it.value }
 
-    private const val CHANNEL_ID = "rime-daemon"
-    private const val MESSAGE_ID = 2331
     private var restartId = 0
 
     init {
-        createNotificationChannel(
-            CHANNEL_ID,
-            appContext.getString(R.string.rime_daemon),
-        )
+        DeployNotification.ensureChannel()
         TrimeApplication.getInstance().coroutineScope.launch {
             realRime.messageFlow.collect {
                 handleRimeMessage(it)
@@ -132,7 +126,7 @@ object RimeDaemon {
     ) {
         val builder =
             NotificationCompat
-                .Builder(appContext, CHANNEL_ID)
+                .Builder(appContext, DeployNotification.CHANNEL_ID)
                 .setContentTitle(appContext.getString(R.string.rime_daemon))
         builder.buildAction()
         builder.build().let { notificationManager.notify(id, it) }
@@ -164,29 +158,13 @@ object RimeDaemon {
 
     private suspend fun handleRimeMessage(it: RimeMessage<*>) {
         if (it is RimeMessage.DeployMessage) {
-            val buildNotification: NotificationCompat.Builder.() -> Unit
             when (it.data) {
                 RimeMessage.DeployMessage.State.Start -> {
-                    buildNotification = {
-                        setSmallIcon(R.drawable.ic_baseline_refresh_reversed_24)
-                        setContentText(appContext.getString(R.string.deploy_progress))
-                        setProgress(0, 0, true)
-                        setOngoing(true)
-                        setAutoCancel(false)
-                        setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    }
+                    DeployNotification.showProgress()
                     withContext(Dispatchers.IO) { subprocess("logcat", "--clear") }
                 }
                 RimeMessage.DeployMessage.State.Success -> {
-                    buildNotification = {
-                        setSmallIcon(R.drawable.ic_baseline_refresh_reversed_24)
-                        setColor(Color.GREEN)
-                        setContentText(appContext.getString(R.string.deploy_finish))
-                        setOngoing(false)
-                        setTimeoutAfter(3000L)
-                        setAutoCancel(true)
-                        setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    }
+                    DeployNotification.showSuccess()
                 }
                 RimeMessage.DeployMessage.State.Failure -> {
                     val intent =
@@ -198,26 +176,16 @@ object RimeDaemon {
                             putExtra(LogActivity.FROM_DEPLOY, true)
                             putExtra(LogActivity.DEPLOY_FAILURE_TRACE, log)
                         }
-                    buildNotification = {
-                        setSmallIcon(R.drawable.ic_baseline_warning_24)
-                        setColor(Color.YELLOW)
-                        setContentText(appContext.getString(R.string.view_deploy_failure_log))
-                        setContentIntent(
-                            PendingIntent.getActivity(
-                                appContext,
-                                0,
-                                intent,
-                                PendingIntent.FLAG_ONE_SHOT or
-                                    PendingIntent.FLAG_IMMUTABLE,
-                            ),
+                    val pendingIntent =
+                        PendingIntent.getActivity(
+                            appContext,
+                            0,
+                            intent,
+                            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE,
                         )
-                        setOngoing(false)
-                        setAutoCancel(true)
-                        setPriority(NotificationCompat.PRIORITY_HIGH)
-                    }
+                    DeployNotification.showFailure(pendingIntent)
                 }
             }
-            sendNotification(MESSAGE_ID, buildNotification)
         }
     }
 }
