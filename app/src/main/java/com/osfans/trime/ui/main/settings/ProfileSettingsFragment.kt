@@ -19,6 +19,7 @@ import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.prefs.PreferenceDelegate
 import com.osfans.trime.data.sync.RimeDataSync
+import com.osfans.trime.data.sync.UserDbMigration
 import com.osfans.trime.ui.common.PaddingPreferenceFragment
 import com.osfans.trime.ui.common.withLoadingDialog
 import com.osfans.trime.ui.main.MainViewModel
@@ -179,6 +180,10 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
 
     private fun fallbackToAppStorage() {
         RimeDataSync.clearExternalTree(requireContext())
+        UserDbMigration.onStorageModeChanged(
+            AppPrefs.Profile.DataStorageMode.EXTERNAL_SYNC,
+            AppPrefs.Profile.DataStorageMode.APP_STORAGE,
+        )
         prefs.dataStorageMode.setValue(AppPrefs.Profile.DataStorageMode.APP_STORAGE)
         updateStorageModeUi()
         updateDataPathSummary()
@@ -211,6 +216,7 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                             val oldMode = prefs.dataStorageMode.getValue()
                             val mode =
                                 AppPrefs.Profile.DataStorageMode.valueOf(newValue as String)
+                            UserDbMigration.onStorageModeChanged(oldMode, mode)
                             prefs.dataStorageMode.setValue(mode)
                             if (
                                 oldMode == AppPrefs.Profile.DataStorageMode.APP_STORAGE &&

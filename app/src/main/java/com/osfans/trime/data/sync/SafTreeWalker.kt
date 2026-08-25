@@ -39,11 +39,13 @@ object SafTreeWalker {
     fun shouldSkip(
         relativePath: String,
         isDirectory: Boolean = false,
+        skipUserDb: Boolean = true,
     ): Boolean {
         val normalized = relativePath.trimStart('/').trim().removePrefix("./")
         if (normalized.isEmpty()) return false
         val segments = normalized.split('/')
         if (segments.any { it == SKIP_DIR }) return true
+        if (!skipUserDb) return false
         val dirSegments = if (isDirectory) segments else segments.dropLast(1)
         return dirSegments.any { it.contains(SKIP_DIR_SUBSTRING) }
     }
@@ -52,12 +54,14 @@ object SafTreeWalker {
         contentResolver: ContentResolver,
         treeUri: Uri,
         rootDocumentId: String,
-    ): List<SafFileEntry> = listTree(contentResolver, treeUri, rootDocumentId).files
+        skipUserDb: Boolean = true,
+    ): List<SafFileEntry> = listTree(contentResolver, treeUri, rootDocumentId, skipUserDb).files
 
     fun listTree(
         contentResolver: ContentResolver,
         treeUri: Uri,
         rootDocumentId: String,
+        skipUserDb: Boolean = true,
     ): SafTreeListing {
         val result = mutableListOf<SafFileEntry>()
         val directoryIds = mutableMapOf("" to rootDocumentId)
@@ -87,7 +91,7 @@ object SafTreeWalker {
                             "$relativePath/$name"
                         }
                     val isDirectory = DocumentsContract.Document.MIME_TYPE_DIR == mimeType
-                    if (shouldSkip(childPath, isDirectory)) continue
+                    if (shouldSkip(childPath, isDirectory, skipUserDb)) continue
                     if (isDirectory) {
                         directoryIds[childPath] = documentId
                         queue.add(childPath to documentId)
