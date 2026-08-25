@@ -15,4 +15,9 @@ class SafTreeWalkerTest :
             SafTreeWalker.shouldSkip("foo/build/bar.txt") shouldBe true
             SafTreeWalker.shouldSkip("foo/src/Bar.kt") shouldBe false
         }
+        "should skip directories whose name contains .userdb but not .userdb.yaml files" {
+            SafTreeWalker.shouldSkip("luna_pinyin.userdb", isDirectory = true) shouldBe true
+            SafTreeWalker.shouldSkip("foo/luna_pinyin.userdb/user.kct") shouldBe true
+            SafTreeWalker.shouldSkip("luna_pinyin.userdb.yaml") shouldBe false
+        }
     })
