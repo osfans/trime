@@ -9,6 +9,7 @@ import com.osfans.trime.BuildConfig
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.opencc.OpenCCDictManager
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.sync.ExternalSyncFallback
 import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.ime.core.InlinePreeditMode
 import com.osfans.trime.util.appContext
@@ -101,13 +102,19 @@ class Rime :
         var deployEnd: Long? = null
 
         if (RimeDataSync.usesExternalSync()) {
-            check(RimeDataSync.hasExternalAccess(appContext)) { "No data path selected" }
+            if (!RimeDataSync.hasExternalAccess(appContext)) {
+                ExternalSyncFallback.fallbackToAppStorage(appContext)
+            }
         }
         if (RimeDataSync.usesExternalSync() && !skipImport) {
             importStart = System.currentTimeMillis()
-            val stats = RimeDataSync.importToLocal(appContext, keepNotificationUntilDeploySuccess = true).getOrThrow()
-
-            Timber.i("Import finished: $stats")
+            val importResult =
+                RimeDataSync.importToLocal(appContext, keepNotificationUntilDeploySuccess = true)
+            if (importResult.isFailure) {
+                ExternalSyncFallback.fallbackToAppStorage(appContext, importResult.exceptionOrNull())
+            } else {
+                Timber.i("Import finished: ${importResult.getOrNull()}")
+            }
             importEnd = System.currentTimeMillis()
         }
         val deployFinished = CompletableDeferred<Boolean>()
