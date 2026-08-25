@@ -26,8 +26,8 @@ import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.util.ResourceUtils
 import com.osfans.trime.util.addCategory
 import com.osfans.trime.util.addPreference
+import com.osfans.trime.util.buildDocumentsProviderIntent
 import com.osfans.trime.util.customFormatTimeInDefault
-import com.osfans.trime.util.launchBrowseAppRimeDataDir
 import com.osfans.trime.util.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -328,7 +328,11 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                     title = getString(R.string.browse_app_data_dir),
                     summary = DataManager.userDataDir.absolutePath,
                 ) {
-                    ctx.launchBrowseAppRimeDataDir()
+                    runCatching {
+                        ctx.startActivity(buildDocumentsProviderIntent())
+                    }.onFailure {
+                        ctx.toast(R.string.browse_app_data_dir_failed)
+                    }
                 }
                 addPreference(R.string.reset, R.string.reset_hint) {
                     val items = ctx.assets.list("shared") ?: return@addPreference
