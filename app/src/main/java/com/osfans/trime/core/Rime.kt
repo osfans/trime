@@ -95,19 +95,12 @@ class Rime :
     }
 
     override suspend fun deploy(skipImport: Boolean) = RimeMaintenanceMutex.withLock {
-        val totalStart = System.currentTimeMillis()
-        var importStart: Long? = null
-        var importEnd: Long? = null
-        var deployStart: Long? = null
-        var deployEnd: Long? = null
-
         if (RimeDataSync.usesExternalSync()) {
             if (!RimeDataSync.hasExternalAccess(appContext)) {
                 ExternalSyncFallback.fallbackToAppStorage(appContext)
             }
         }
         if (RimeDataSync.usesExternalSync() && !skipImport) {
-            importStart = System.currentTimeMillis()
             val importResult =
                 RimeDataSync.importToLocal(appContext, keepNotificationUntilDeploySuccess = true)
             if (importResult.isFailure) {
@@ -115,19 +108,16 @@ class Rime :
             } else {
                 Timber.i("Import finished: ${importResult.getOrNull()}")
             }
-            importEnd = System.currentTimeMillis()
         }
         val deployFinished = CompletableDeferred<Boolean>()
         val deployHandler: (RimeMessage<*>) -> Unit = { message ->
             if (message is RimeMessage.DeployMessage) {
                 when (message.data) {
-                    RimeMessage.DeployMessage.State.Start -> deployStart = System.currentTimeMillis()
+                    RimeMessage.DeployMessage.State.Start -> Unit
                     RimeMessage.DeployMessage.State.Success -> {
-                        deployEnd = System.currentTimeMillis()
                         deployFinished.complete(true)
                     }
                     RimeMessage.DeployMessage.State.Failure -> {
-                        deployEnd = System.currentTimeMillis()
                         deployFinished.complete(false)
                     }
                 }
@@ -148,31 +138,6 @@ class Rime :
             check(success) { "Rime deploy failed" }
         } finally {
             unregisterRimeMessageHandler(deployHandler)
-            val totalEnd = System.currentTimeMillis()
-            val importDuration =
-                if (importStart != null && importEnd != null) {
-                    formatDurationSeconds(importStart, importEnd)
-                } else {
-                    "-"
-                }
-            val deployDuration =
-                if (deployStart != null && deployEnd != null) {
-                    formatDurationSeconds(deployStart, deployEnd)
-                } else {
-                    "-"
-                }
-            Timber.i(
-                "deploy timing: importStart=%s importEnd=%s importDuration=%s " +
-                    "deployStart=%s deployEnd=%s deployDuration=%s total=%s skipImport=%s",
-                importStart?.let(::formatEpochSeconds) ?: "-",
-                importEnd?.let(::formatEpochSeconds) ?: "-",
-                importDuration,
-                deployStart?.let(::formatEpochSeconds) ?: "-",
-                deployEnd?.let(::formatEpochSeconds) ?: "-",
-                deployDuration,
-                formatDurationSeconds(totalStart, totalEnd),
-                skipImport,
-            )
         }
     }
 
@@ -483,13 +448,6 @@ class Rime :
         lifecycleRegistry.emitState(RimeLifecycle.State.STOPPED)
         unregisterRimeMessageHandler(::handleRimeMessage)
     }
-
-    private fun formatEpochSeconds(ms: Long) = "%.3fs".format(ms / 1000.0)
-
-    private fun formatDurationSeconds(
-        startMs: Long,
-        endMs: Long,
-    ) = "%.2fs".format((endMs - startMs) / 1000.0)
 
     companion object {
         private val messageFlow_ =

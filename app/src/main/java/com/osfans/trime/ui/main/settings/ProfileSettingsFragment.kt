@@ -77,7 +77,6 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
 
     private lateinit var editSyncIntervalPreference: EditTextIntPreference
     private lateinit var dataPathPreference: Preference
-    private lateinit var resetDataPathPreference: Preference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,9 +103,6 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
         val externalSync = RimeDataSync.usesExternalSync()
         if (::dataPathPreference.isInitialized) {
             dataPathPreference.isEnabled = externalSync
-        }
-        if (::resetDataPathPreference.isInitialized) {
-            resetDataPathPreference.isEnabled = externalSync
         }
         findPreference<ListPreference>(AppPrefs.Profile.DATA_STORAGE_MODE)?.value =
             prefs.dataStorageMode.getValue().name
@@ -149,6 +145,18 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                 }
             }
         }
+    }
+
+    private fun promptSelectAnotherDirectory() {
+        AlertDialog
+            .Builder(requireContext())
+            .setMessage(R.string.select_another_directory_to_sync)
+            .setPositiveButton(R.string.select_another_directory) { _, _ ->
+                RimeDataSync.clearExternalTree(requireContext())
+                updateDataPathSummary()
+                launchResetDataPathPicker()
+            }.setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun promptResetDataPathCancelled() {
@@ -243,21 +251,7 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                         setTitle(R.string.user_data_dir)
                         summary = dataPathSummary()
                         setOnPreferenceClickListener {
-                            launchDataPathPicker(cancelToAppStorage = false)
-                            true
-                        }
-                    },
-                )
-                addPreference(
-                    Preference(requireContext()).apply {
-                        resetDataPathPreference = this
-                        isIconSpaceReserved = false
-                        setTitle(R.string.reset_data_path)
-                        setSummary(R.string.reset_data_path_hint)
-                        setOnPreferenceClickListener {
-                            RimeDataSync.clearExternalTree(ctx)
-                            updateDataPathSummary()
-                            launchResetDataPathPicker()
+                            promptSelectAnotherDirectory()
                             true
                         }
                     },
