@@ -8,11 +8,14 @@ package com.osfans.trime.ui.common
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import splitties.dimensions.dp
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.horizontalMargin
@@ -46,21 +49,30 @@ fun Context.ProgressBarDialogIndeterminate(
         ).setCancelable(false)
 }
 
-fun LifecycleCoroutineScope.withLoadingDialog(
+suspend fun withLoadingDialog(
     context: Context,
     @StringRes title: Int = R.string.loading,
     threshold: Long = 200L,
     action: suspend () -> Unit,
 ) {
-    var loadingDialog: AlertDialog? = null
-    val loadingJob =
-        launch {
-            delay(threshold)
-            loadingDialog = context.ProgressBarDialogIndeterminate(title).show()
+    coroutineScope {
+        var loadingDialog: AlertDialog? = null
+        val loadingJob =
+            launch {
+                delay(threshold)
+                withContext(Dispatchers.Main) {
+                    loadingDialog = context.ProgressBarDialogIndeterminate(title).show()
+                }
+            }
+        try {
+            action()
+        } finally {
+            withContext(NonCancellable) {
+                loadingJob.cancelAndJoin()
+                withContext(Dispatchers.Main) {
+                    loadingDialog?.dismiss()
+                }
+            }
         }
-    launch {
-        action()
-        loadingJob.cancelAndJoin()
-        loadingDialog?.dismiss()
     }
 }

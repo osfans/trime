@@ -7,20 +7,18 @@ package com.osfans.trime.ui.main.settings
 
 import android.net.Uri
 import android.os.Bundle
-import android.provider.DocumentsContract
-import android.view.ViewGroup
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.SwitchPreferenceCompat
 import com.osfans.trime.R
-import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.prefs.PreferenceDelegate
+import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.ui.common.PaddingPreferenceFragment
 import com.osfans.trime.ui.common.withLoadingDialog
 import com.osfans.trime.ui.main.MainViewModel
@@ -28,30 +26,11 @@ import com.osfans.trime.util.ResourceUtils
 import com.osfans.trime.util.addCategory
 import com.osfans.trime.util.addPreference
 import com.osfans.trime.util.customFormatTimeInDefault
-import com.osfans.trime.util.getFileFromUri
-import com.osfans.trime.util.getUriForFile
+import com.osfans.trime.util.launchBrowseAppRimeDataDir
 import com.osfans.trime.util.toast
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import splitties.dimensions.dp
-import splitties.resources.drawable
-import splitties.resources.styledColor
-import splitties.views.dsl.constraintlayout.centerVertically
-import splitties.views.dsl.constraintlayout.constraintLayout
-import splitties.views.dsl.constraintlayout.endOfParent
-import splitties.views.dsl.constraintlayout.endToStartOf
-import splitties.views.dsl.constraintlayout.lParams
-import splitties.views.dsl.constraintlayout.matchConstraints
-import splitties.views.dsl.constraintlayout.startOfParent
-import splitties.views.dsl.constraintlayout.startToEndOf
-import splitties.views.dsl.core.add
-import splitties.views.dsl.core.editText
-import splitties.views.dsl.core.imageButton
-import splitties.views.dsl.core.matchParent
-import splitties.views.dsl.core.wrapContent
-import splitties.views.imageDrawable
-import splitties.views.topPadding
-import java.io.File
 
 class ProfileSettingsFragment : PaddingPreferenceFragment() {
     private val viewModel: MainViewModel by activityViewModels()
@@ -59,6 +38,9 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
     private val backgroundSyncEnable = prefs.periodicBackgroundSync
     private val lastSyncTime by prefs.lastBackgroundSyncTime
     private val lastSyncStatus by prefs.lastBackgroundSyncStatus
+
+    private var pendingPickerCancelToAppStorage = false
+    private var pendingResetDataPath = false
 
     private val onBackgroundSyncEnable = PreferenceDelegate.OnChangeListener<Boolean> { _, v ->
         editSyncIntervalPreference.isEnabled = v
@@ -71,31 +53,140 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
             }
         }
 
-    private val onUserDataDirChange = PreferenceDelegate.OnChangeListener<String> { _, newValue ->
-        findPreference<Preference>(AppPrefs.Profile.USER_DATA_DIR)?.summary = newValue
+    private val onDataPathChange = PreferenceDelegate.OnChangeListener<String> { _, _ ->
+        updateDataPathSummary()
     }
 
-    private lateinit var browseLauncher: ActivityResultLauncher<Uri?>
-    private var launcherResultCallback: ((path: String) -> Unit)? = null
+    private val onStorageModeChange =
+        PreferenceDelegate.OnChangeListener<AppPrefs.Profile.DataStorageMode> { _, _ ->
+            updateStorageModeUi()
+        }
+
+    private val dataPathPicker =
+        registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+            if (uri == null) {
+                when {
+                    pendingResetDataPath -> promptResetDataPathCancelled()
+                    pendingPickerCancelToAppStorage -> fallbackToAppStorage()
+                }
+                return@registerForActivityResult
+            }
+            handleTreePicked(uri, pendingPickerCancelToAppStorage)
+        }
 
     private lateinit var editSyncIntervalPreference: EditTextIntPreference
+    private lateinit var dataPathPreference: Preference
+    private lateinit var resetDataPathPreference: Preference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         prefs.periodicBackgroundSync.registerOnChangeListener(onBackgroundSyncEnable)
         prefs.periodicBackgroundSyncInterval.registerOnChangeListener(onSyncIntervalChange)
-        prefs.userDataDir.registerOnChangeListener(onUserDataDirChange)
+        prefs.externalRimeTreeUri.registerOnChangeListener(onDataPathChange)
+        prefs.externalRimeDisplayName.registerOnChangeListener(onDataPathChange)
+        prefs.dataStorageMode.registerOnChangeListener(onStorageModeChange)
+    }
 
-        browseLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) {
-            it ?: return@registerForActivityResult
-            val uri =
-                DocumentsContract.buildDocumentUriUsingTree(
-                    it,
-                    DocumentsContract.getTreeDocumentId(it),
-                ) ?: return@registerForActivityResult
-            val path = requireContext().getFileFromUri(uri)?.absolutePath ?: return@registerForActivityResult
-            launcherResultCallback?.invoke(path)
+    private fun dataPathSummary(): String {
+        val displayName = prefs.externalRimeDisplayName.getValue()
+        if (displayName.isNotEmpty()) return displayName
+        val uri = prefs.externalRimeTreeUri.getValue()
+        if (uri.isNotEmpty()) return uri
+        return getString(R.string.data_path_not_selected)
+    }
+
+    private fun updateDataPathSummary() {
+        findPreference<Preference>(AppPrefs.Profile.EXTERNAL_RIME_TREE_URI)?.summary = dataPathSummary()
+    }
+
+    private fun updateStorageModeUi() {
+        val externalSync = RimeDataSync.usesExternalSync()
+        if (::dataPathPreference.isInitialized) {
+            dataPathPreference.isEnabled = externalSync
         }
+        if (::resetDataPathPreference.isInitialized) {
+            resetDataPathPreference.isEnabled = externalSync
+        }
+        findPreference<ListPreference>(AppPrefs.Profile.DATA_STORAGE_MODE)?.value =
+            prefs.dataStorageMode.getValue().name
+    }
+
+    private fun launchDataPathPicker(cancelToAppStorage: Boolean) {
+        pendingPickerCancelToAppStorage = cancelToAppStorage
+        pendingResetDataPath = false
+        dataPathPicker.launch(null as Uri?)
+    }
+
+    private fun launchResetDataPathPicker() {
+        pendingPickerCancelToAppStorage = false
+        pendingResetDataPath = true
+        dataPathPicker.launch(null as Uri?)
+    }
+
+    private fun handleTreePicked(
+        uri: Uri,
+        onCancelToAppStorage: Boolean,
+    ) {
+        val ctx = requireContext()
+        lifecycleScope.launch {
+            withLoadingDialog(ctx) {
+                runCatching {
+                    withContext(Dispatchers.IO) {
+                        RimeDataSync.persistTreeUri(ctx, uri)
+                        RimeDataSync.importToLocal(ctx).getOrThrow()
+                        viewModel.rime.runOnReady { deploy(skipImport = true) }
+                    }
+                }.onSuccess {
+                    updateDataPathSummary()
+                    ctx.toast(R.string.setup__data_path_imported)
+                }.onFailure {
+                    if (onCancelToAppStorage) {
+                        fallbackToAppStorage()
+                    } else {
+                        ctx.toast(R.string.setup__data_path_import_failed)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun promptResetDataPathCancelled() {
+        AlertDialog
+            .Builder(requireContext())
+            .setMessage(R.string.reset_data_path_cancelled_message)
+            .setPositiveButton(R.string.reset_data_path_pick_again) { _, _ ->
+                launchResetDataPathPicker()
+            }.setNegativeButton(R.string.reset_data_path_use_app_storage) { _, _ ->
+                fallbackToAppStorage()
+            }.setOnCancelListener {
+                launchResetDataPathPicker()
+            }.show()
+    }
+
+    private fun promptExternalSyncFolderSelection() {
+        val ctx = requireContext()
+        AlertDialog
+            .Builder(ctx)
+            .setMessage(R.string.external_sync_select_folder_message)
+            .setPositiveButton(R.string.setup__select_data_path) { _, _ ->
+                launchDataPathPicker(cancelToAppStorage = true)
+            }.setNegativeButton(android.R.string.cancel) { _, _ ->
+                fallbackToAppStorage()
+            }.setOnCancelListener {
+                fallbackToAppStorage()
+            }.show()
+    }
+
+    private fun fallbackToAppStorage() {
+        RimeDataSync.clearExternalTree(requireContext())
+        prefs.dataStorageMode.setValue(AppPrefs.Profile.DataStorageMode.APP_STORAGE)
+        updateStorageModeUi()
+        updateDataPathSummary()
+        AlertDialog
+            .Builder(requireContext())
+            .setMessage(R.string.external_sync_fallback_app_storage)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 
     override fun onCreatePreferences(
@@ -106,65 +197,61 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
         preferenceScreen = preferenceManager.createPreferenceScreen(ctx).apply {
             addCategory(R.string.storage) {
                 isIconSpaceReserved = false
+                val storageModes = AppPrefs.Profile.DataStorageMode.entries
+                addPreference(
+                    ListPreference(ctx).apply {
+                        key = AppPrefs.Profile.DATA_STORAGE_MODE
+                        isIconSpaceReserved = false
+                        setTitle(R.string.data_storage_mode)
+                        entries = storageModes.map { getString(it.stringRes) }.toTypedArray()
+                        entryValues = storageModes.map { it.name }.toTypedArray()
+                        value = prefs.dataStorageMode.getValue().name
+                        summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
+                        setOnPreferenceChangeListener { _, newValue ->
+                            val oldMode = prefs.dataStorageMode.getValue()
+                            val mode =
+                                AppPrefs.Profile.DataStorageMode.valueOf(newValue as String)
+                            prefs.dataStorageMode.setValue(mode)
+                            if (
+                                oldMode == AppPrefs.Profile.DataStorageMode.APP_STORAGE &&
+                                mode == AppPrefs.Profile.DataStorageMode.EXTERNAL_SYNC &&
+                                !RimeDataSync.hasExternalAccess()
+                            ) {
+                                promptExternalSyncFolderSelection()
+                            } else if (
+                                oldMode == AppPrefs.Profile.DataStorageMode.EXTERNAL_SYNC &&
+                                mode == AppPrefs.Profile.DataStorageMode.APP_STORAGE
+                            ) {
+                                RimeDataSync.clearExternalTree(ctx)
+                                updateDataPathSummary()
+                            }
+                            true
+                        }
+                    },
+                )
                 addPreference(
                     Preference(requireContext()).apply {
-                        key = AppPrefs.Profile.USER_DATA_DIR
+                        dataPathPreference = this
+                        key = AppPrefs.Profile.EXTERNAL_RIME_TREE_URI
                         isIconSpaceReserved = false
                         setTitle(R.string.user_data_dir)
-                        setDefaultValue(DataManager.defaultDataDir.absolutePath)
-                        summary = prefs.userDataDir.getValue()
+                        summary = dataPathSummary()
                         setOnPreferenceClickListener {
-                            val dirNameText = ctx.editText {
-                                setText(prefs.userDataDir.getValue())
-                            }
-                            launcherResultCallback = { path ->
-                                dirNameText.setText(path)
-                            }
-                            val browseButton = ctx.imageButton {
-                                imageDrawable = ctx.drawable(R.drawable.ic_baseline_more_horiz_24)!!.apply {
-                                    setTint(styledColor(android.R.attr.colorControlNormal))
-                                }
-                                setOnClickListener {
-                                    val currentValue = prefs.userDataDir.getValue()
-                                    browseLauncher.launch(ctx.getUriForFile(File(currentValue)))
-                                }
-                            }
-                            val dialogContent = ctx.constraintLayout {
-                                layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
-                                topPadding = dp(8)
-                                add(
-                                    dirNameText,
-                                    lParams(matchConstraints, wrapContent) {
-                                        centerVertically()
-                                        startOfParent(dp(20))
-                                        endToStartOf(browseButton, dp(2))
-                                    },
-                                )
-                                val size = dp(48)
-                                add(
-                                    browseButton,
-                                    lParams(size, size) {
-                                        centerVertically()
-                                        startToEndOf(dirNameText, dp(2))
-                                        endOfParent(dp(20))
-                                    },
-                                )
-                            }
-                            AlertDialog.Builder(ctx)
-                                .setTitle(R.string.user_data_dir)
-                                .setView(dialogContent)
-                                .setPositiveButton(android.R.string.ok) { _, _ ->
-                                    prefs.userDataDir.setValue(dirNameText.text.toString())
-                                }
-                                .setNegativeButton(android.R.string.cancel, null)
-                                .setNeutralButton(R.string.default_) { _, _ ->
-                                    prefs.userDataDir.setValue(DataManager.defaultDataDir.absolutePath)
-                                }
-                                .setOnDismissListener {
-                                    // avoid memory leak
-                                    launcherResultCallback = null
-                                }
-                                .show()
+                            launchDataPathPicker(cancelToAppStorage = false)
+                            true
+                        }
+                    },
+                )
+                addPreference(
+                    Preference(requireContext()).apply {
+                        resetDataPathPreference = this
+                        isIconSpaceReserved = false
+                        setTitle(R.string.reset_data_path)
+                        setSummary(R.string.reset_data_path_hint)
+                        setOnPreferenceClickListener {
+                            RimeDataSync.clearExternalTree(ctx)
+                            updateDataPathSummary()
+                            launchResetDataPathPicker()
                             true
                         }
                     },
@@ -173,7 +260,26 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
             addCategory(R.string.synchronization) {
                 isIconSpaceReserved = false
                 addPreference(R.string.sync_user_data_immediately) {
-                    viewModel.rime.launchOnReady { it.syncUserData() }
+                    lifecycleScope.launch {
+                        withLoadingDialog(ctx) {
+                            runCatching {
+                                RimeDataSync.syncUserDataWithOptionalExport(ctx) {
+                                    viewModel.rime.runOnReady { syncUserData() }
+                                }
+                            }.onSuccess { success ->
+                                ctx.toast(
+                                    when {
+                                        !success -> R.string.sync_user_data_failure
+                                        RimeDataSync.usesExternalSync(ctx) ->
+                                            R.string.sync_user_data_success_external
+                                        else -> R.string.sync_user_data_success
+                                    },
+                                )
+                            }.onFailure {
+                                ctx.toast(R.string.sync_user_data_failure)
+                            }
+                        }
+                    }
                 }
                 addPreference(
                     SwitchPreferenceCompat(ctx).apply {
@@ -218,29 +324,37 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
             }
             addCategory(R.string.maintenance) {
                 isIconSpaceReserved = false
+                addPreference(
+                    title = getString(R.string.browse_app_data_dir),
+                    summary = DataManager.userDataDir.absolutePath,
+                ) {
+                    ctx.launchBrowseAppRimeDataDir()
+                }
                 addPreference(R.string.reset, R.string.reset_hint) {
                     val items = ctx.assets.list("shared") ?: return@addPreference
                     val checked = BooleanArray(items.size) { false }
                     AlertDialog
-                        .Builder(context)
+                        .Builder(ctx)
                         .setTitle(R.string.reset)
                         .setMultiChoiceItems(items, checked) { _, id, isChecked ->
                             checked[id] = isChecked
                         }.setNegativeButton(android.R.string.cancel, null)
                         .setPositiveButton(android.R.string.ok) { _, _ ->
-                            var res = true
-                            lifecycleScope.withLoadingDialog(context) {
-                                withContext(Dispatchers.IO) {
-                                    res =
-                                        items
-                                            .filterIndexed { index, _ -> checked[index] }
-                                            .fold(true) { acc, asset ->
-                                                val destPath =
-                                                    DataManager.sharedDataDir.resolve(asset).absolutePath
-                                                ResourceUtils
-                                                    .copyFile("shared/$asset", destPath)
-                                                    .fold({ acc and true }, { acc and false })
-                                            }
+                            lifecycleScope.launch {
+                                var res = true
+                                withLoadingDialog(ctx) {
+                                    withContext(Dispatchers.IO) {
+                                        res =
+                                            items
+                                                .filterIndexed { index, _ -> checked[index] }
+                                                .fold(true) { acc, asset ->
+                                                    val destPath =
+                                                        DataManager.sharedDataDir.resolve(asset).absolutePath
+                                                    ResourceUtils
+                                                        .copyFile("shared/$asset", destPath)
+                                                        .fold({ acc and true }, { acc and false })
+                                                }
+                                    }
                                 }
                                 ctx.toast((if (res) R.string.reset_success else R.string.reset_failure))
                             }
@@ -248,12 +362,28 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                 }
             }
         }
+        updateStorageModeUi()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         prefs.periodicBackgroundSync.unregisterOnChangeListener(onBackgroundSyncEnable)
         prefs.periodicBackgroundSyncInterval.unregisterOnChangeListener(onSyncIntervalChange)
-        prefs.userDataDir.unregisterOnChangeListener(onUserDataDirChange)
+        prefs.externalRimeTreeUri.unregisterOnChangeListener(onDataPathChange)
+        prefs.externalRimeDisplayName.unregisterOnChangeListener(onDataPathChange)
+        prefs.dataStorageMode.unregisterOnChangeListener(onStorageModeChange)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateStorageModeUi()
+        val ctx = requireContext()
+        if (
+            RimeDataSync.usesExternalSync(ctx) &&
+            prefs.externalRimeTreeUri.getValue().isNotEmpty() &&
+            !RimeDataSync.hasExternalAccess(ctx)
+        ) {
+            ctx.toast(R.string.data_path_permission_revoked)
+        }
     }
 }

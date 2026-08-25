@@ -66,9 +66,6 @@
     <string name="system_default">System default</string>
     <string name="key_swipe_travel">Min travel for gesture</string>
     <string name="trime_app_slogan">Rimes with Your Keystrokes on Android</string>
-    <string name="external_storage_permission_not_available">External storage permission is not available</string>
-    <string name="external_storage_permission_granted">External storage permission is granted</string>
-    <string name="external_storage_permission_denied">External storage permission was denied, deployment or reading schemas and config may not be available</string>
     <string name="custom_sound_effect_name">Custom key Sound Effect</string>
     <string name="setup__next">Next</string>
     <string name="done">Done</string>
@@ -156,9 +153,14 @@
     <string name="setup__select_data_path">Select data folder first</string>
     <string name="setup__data_path_imported">Data folder imported successfully</string>
     <string name="setup__data_path_import_failed">Failed to import data folder</string>
-    <string name="reset_data_path">Reset data folder</string>
-    <string name="reset_data_path_hint">Clear the selected folder and pick again</string>
-    <string name="sync_user_data_success">User data synced to external folder</string>
+    <string name="select_another_directory_to_sync">Change another directory to import?</string>
+    <string name="select_another_directory">Change</string>
+    <string name="reset_data_path_cancelled_message">No data folder was selected. External sync requires a folder. Pick one again, or switch to app-specific storage.</string>
+    <string name="reset_data_path_pick_again">Pick folder again</string>
+    <string name="reset_data_path_use_app_storage" translatable="false">@string/data_storage_mode_app_storage</string>
+    <string name="data_path_not_selected">No data folder selected</string>
+    <string name="sync_user_data_success">User data synced successfully</string>
+    <string name="sync_user_data_success_external">User data synced to external folder</string>
     <string name="sync_user_data_failure">Failed to sync user data</string>
     <string name="sync_partial_copy_failure">Some files failed to copy</string>
     <string name="sync_partial_copy_failure_detail">%1$d file(s) failed during %2$s. Remaining files were copied and deployment can continue.</string>
