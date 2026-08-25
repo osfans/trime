@@ -10,6 +10,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Parcelable
+import android.provider.DocumentsContract
+import com.osfans.trime.BuildConfig
 
 inline fun <reified T : Parcelable> Intent.parcelable(key: String): T? {
     // https://issuetracker.google.com/issues/240585930#comment6
@@ -48,4 +50,9 @@ fun buildIntentFromAction(
         }
     }
     else -> Intent(fullAction, Uri.parse(argument))
+}
+
+fun buildDocumentsProviderIntent(): Intent {
+    val uri = DocumentsContract.buildRootUri("${BuildConfig.APPLICATION_ID}.provider", "files")
+    return Intent(Intent.ACTION_VIEW, uri)
 }
