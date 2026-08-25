@@ -24,7 +24,7 @@ interface RimeApi {
 
     suspend fun isEmpty(): Boolean
 
-    suspend fun deploy()
+    suspend fun deploy(skipImport: Boolean = false)
 
     suspend fun updateConfig()
 

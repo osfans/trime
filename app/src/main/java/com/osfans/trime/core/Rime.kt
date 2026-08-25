@@ -9,9 +9,11 @@ import com.osfans.trime.BuildConfig
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.opencc.OpenCCDictManager
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.ime.core.InlinePreeditMode
 import com.osfans.trime.util.appContext
-import com.osfans.trime.util.isStorageAvailable
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
@@ -19,7 +21,10 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import timber.log.Timber
+import java.util.concurrent.CopyOnWriteArrayList
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * Rime JNI and instance methods
@@ -88,9 +93,80 @@ class Rime :
         getCurrentRimeSchema() == ".default" // 無方案
     }
 
-    override suspend fun deploy() = withRimeContext {
-        exitRime()
-        startRime(true)
+    override suspend fun deploy(skipImport: Boolean) = RimeMaintenanceMutex.withLock {
+        val totalStart = System.currentTimeMillis()
+        var importStart: Long? = null
+        var importEnd: Long? = null
+        var deployStart: Long? = null
+        var deployEnd: Long? = null
+
+        if (RimeDataSync.usesExternalSync()) {
+            check(RimeDataSync.hasExternalAccess(appContext)) { "No data path selected" }
+        }
+        if (RimeDataSync.usesExternalSync() && !skipImport) {
+            importStart = System.currentTimeMillis()
+            val stats = RimeDataSync.importToLocal(appContext, keepNotificationUntilDeploySuccess = true).getOrThrow()
+
+            Timber.i("Import finished: $stats")
+            importEnd = System.currentTimeMillis()
+        }
+        val deployFinished = CompletableDeferred<Boolean>()
+        val deployHandler: (RimeMessage<*>) -> Unit = { message ->
+            if (message is RimeMessage.DeployMessage) {
+                when (message.data) {
+                    RimeMessage.DeployMessage.State.Start -> deployStart = System.currentTimeMillis()
+                    RimeMessage.DeployMessage.State.Success -> {
+                        deployEnd = System.currentTimeMillis()
+                        deployFinished.complete(true)
+                    }
+                    RimeMessage.DeployMessage.State.Failure -> {
+                        deployEnd = System.currentTimeMillis()
+                        deployFinished.complete(false)
+                    }
+                }
+            }
+        }
+        registerRimeMessageHandler(deployHandler)
+        try {
+            withRimeContext {
+                exitRime()
+                startRime(true)
+            }
+            val success =
+                withContext(Dispatchers.IO) {
+                    withTimeout(5.minutes) {
+                        deployFinished.await()
+                    }
+                }
+            check(success) { "Rime deploy failed" }
+        } finally {
+            unregisterRimeMessageHandler(deployHandler)
+            val totalEnd = System.currentTimeMillis()
+            val importDuration =
+                if (importStart != null && importEnd != null) {
+                    formatDurationSeconds(importStart, importEnd)
+                } else {
+                    "-"
+                }
+            val deployDuration =
+                if (deployStart != null && deployEnd != null) {
+                    formatDurationSeconds(deployStart, deployEnd)
+                } else {
+                    "-"
+                }
+            Timber.i(
+                "deploy timing: importStart=%s importEnd=%s importDuration=%s " +
+                    "deployStart=%s deployEnd=%s deployDuration=%s total=%s skipImport=%s",
+                importStart?.let(::formatEpochSeconds) ?: "-",
+                importEnd?.let(::formatEpochSeconds) ?: "-",
+                importDuration,
+                deployStart?.let(::formatEpochSeconds) ?: "-",
+                deployEnd?.let(::formatEpochSeconds) ?: "-",
+                deployDuration,
+                formatDurationSeconds(totalStart, totalEnd),
+                skipImport,
+            )
+        }
     }
 
     override suspend fun updateConfig() = withRimeContext {
@@ -98,8 +174,32 @@ class Rime :
         startRime(false)
     }
 
-    override suspend fun syncUserData(): Boolean = withRimeContext {
-        syncRimeUserData()
+    override suspend fun syncUserData(): Boolean = RimeMaintenanceMutex.withLock {
+        // RimeSyncUserData schedules maintenance asynchronously and returns once the
+        // worker is started. Wait for DeployMessage so callers (e.g. export) only
+        // proceed after sync/<installation_id>/ has been written.
+        val syncFinished = CompletableDeferred<Boolean>()
+        val syncHandler: (RimeMessage<*>) -> Unit = { message ->
+            if (message is RimeMessage.DeployMessage) {
+                when (message.data) {
+                    RimeMessage.DeployMessage.State.Success -> syncFinished.complete(true)
+                    RimeMessage.DeployMessage.State.Failure -> syncFinished.complete(false)
+                    else -> {}
+                }
+            }
+        }
+        registerRimeMessageHandler(syncHandler)
+        try {
+            val started = withRimeContext { syncRimeUserData() }
+            if (!started) return@withLock false
+            withContext(Dispatchers.IO) {
+                withTimeout(5.minutes) {
+                    syncFinished.await()
+                }
+            }
+        } finally {
+            unregisterRimeMessageHandler(syncHandler)
+        }
     }
 
     override suspend fun processKey(
@@ -348,7 +448,7 @@ class Rime :
     }
 
     fun startup() {
-        if (!appContext.isStorageAvailable()) {
+        if (!RimeDataSync.isStorageAvailable(appContext)) {
             Timber.w("Skip starting rime: storage not available!")
             return
         }
@@ -377,6 +477,13 @@ class Rime :
         unregisterRimeMessageHandler(::handleRimeMessage)
     }
 
+    private fun formatEpochSeconds(ms: Long) = "%.3fs".format(ms / 1000.0)
+
+    private fun formatDurationSeconds(
+        startMs: Long,
+        endMs: Long,
+    ) = "%.2fs".format((endMs - startMs) / 1000.0)
+
     companion object {
         private val messageFlow_ =
             MutableSharedFlow<RimeMessage<*>>(
@@ -384,7 +491,7 @@ class Rime :
                 onBufferOverflow = BufferOverflow.DROP_OLDEST,
             )
 
-        private val rimeMessageHandlers = ArrayList<(RimeMessage<*>) -> Unit>()
+        private val rimeMessageHandlers = CopyOnWriteArrayList<(RimeMessage<*>) -> Unit>()
 
         init {
             System.loadLibrary("rime_jni")
