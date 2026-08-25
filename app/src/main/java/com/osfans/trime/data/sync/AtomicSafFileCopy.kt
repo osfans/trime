@@ -87,28 +87,26 @@ object AtomicSafFileCopy {
         parentUri: Uri,
         tempUri: Uri,
         fileName: String,
-    ): Uri =
-        DocumentsContract.renameDocument(contentResolver, tempUri, fileName)
-            ?: run {
-                val created =
-                    DocumentsContract.createDocument(
-                        contentResolver,
-                        parentUri,
-                        "application/octet-stream",
-                        fileName,
-                    ) ?: error("Failed to create document $fileName")
-                copyDocument(contentResolver, tempUri, created)
-                DocumentsContract.deleteDocument(contentResolver, tempUri)
-                created
-            }
+    ): Uri = DocumentsContract.renameDocument(contentResolver, tempUri, fileName)
+        ?: run {
+            val created =
+                DocumentsContract.createDocument(
+                    contentResolver,
+                    parentUri,
+                    "application/octet-stream",
+                    fileName,
+                ) ?: error("Failed to create document $fileName")
+            copyDocument(contentResolver, tempUri, created)
+            DocumentsContract.deleteDocument(contentResolver, tempUri)
+            created
+        }
 
     private fun documentLength(
         contentResolver: ContentResolver,
         uri: Uri,
-    ): Long =
-        contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
-            pfd.statSize
-        } ?: error("Cannot stat $uri")
+    ): Long = contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
+        pfd.statSize
+    } ?: error("Cannot stat $uri")
 
     private fun deleteChildIfExists(
         contentResolver: ContentResolver,
