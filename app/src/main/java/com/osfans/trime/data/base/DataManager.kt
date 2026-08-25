@@ -6,8 +6,6 @@ package com.osfans.trime.data.base
 
 import android.content.res.AssetManager
 import android.os.Build
-import android.os.Environment
-import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.util.FileUtils
 import com.osfans.trime.util.ResourceUtils
 import com.osfans.trime.util.appContext
@@ -18,7 +16,15 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
 object DataManager {
-    private const val DEFAULT_CUSTOM_FILE_NAME = "default.custom.yaml"
+    const val DEFAULT_CUSTOM_FILE_NAME = "default.custom.yaml"
+    const val USER_CONFIG_FILE_NAME = "user.yaml"
+    const val INSTALLATION_FILE_NAME = "installation.yaml"
+
+    val POST_SCHEMA_DEPLOY_EXPORT_FILES =
+        listOf(
+            DEFAULT_CUSTOM_FILE_NAME,
+            USER_CONFIG_FILE_NAME,
+        )
 
     private const val DATA_CHECKSUMS_NAME = "checksums.json"
 
@@ -50,14 +56,13 @@ object DataManager {
         .use { it.readText() }
         .let { deserializeDataChecksums(it) }
 
-    private val prefs by lazy { AppPrefs.defaultInstance() }
-
-    val defaultDataDir = File(Environment.getExternalStorageDirectory(), "rime")
-
     val sharedDataDir = File(appContext.getExternalFilesDir(null), "shared").also { it.mkdirs() }
 
-    val userDataDir
-        get() = File(prefs.profile.userDataDir.getValue()).also { it.mkdirs() }
+    private val runtimeUserDataDir =
+        File(appContext.getExternalFilesDir(null), "rime").also { it.mkdirs() }
+
+    /** App-scoped path used by Rime at runtime. */
+    val userDataDir get() = runtimeUserDataDir
 
     val prebuiltDataDir = File(sharedDataDir, "build")
     val stagingDir get() = File(userDataDir, "build")
