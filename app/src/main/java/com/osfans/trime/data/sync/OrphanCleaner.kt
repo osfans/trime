@@ -4,12 +4,13 @@
 
 package com.osfans.trime.data.sync
 
+import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.util.FileUtils
 import timber.log.Timber
 import java.io.File
 
 object OrphanCleaner {
-    private val preservedFiles = setOf("installation.yaml")
+    private val preservedFiles = setOf(DataManager.INSTALLATION_FILE_NAME)
 
     data class Result(
         val deleted: Int = 0,
