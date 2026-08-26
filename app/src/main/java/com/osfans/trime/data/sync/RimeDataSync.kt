@@ -89,6 +89,7 @@ object RimeDataSync {
         treeUri()?.let { releaseTreeUri(context, it) }
         prefs.externalRimeTreeUri.setValue("")
         prefs.externalRimeDisplayName.setValue("")
+        SyncIndex.clear()
     }
 
     fun persistTreeUri(
@@ -101,6 +102,9 @@ object RimeDataSync {
         prefs.externalRimeDisplayName.setValue(resolveDisplayName(context, uri))
         if (previous != null && previous != uri) {
             releaseTreeUri(context, previous)
+        }
+        if (previous?.toString() != uri.toString()) {
+            SyncIndex.save(SyncIndexData(treeUri = uri.toString()))
         }
     }
 
@@ -137,7 +141,7 @@ object RimeDataSync {
                         )
                     }
                 val removeResult = OrphanCleaner.removeLocalOrphans(destRoot, externalPaths)
-                SyncIndex.save(SyncIndexData(mergeIndexEntries(index.entries, copyResults)))
+                SyncIndex.save(SyncIndex.withCurrentTree(mergeIndexEntries(index.entries, copyResults)))
                 val importStats = mergeStats(copyResults.map { it.result })
                 if (UserDbMigration.shouldImportUserDb() && importStats.failed == 0) {
                     UserDbMigration.markImported()
@@ -188,7 +192,7 @@ object RimeDataSync {
                         )
                     }
                 }
-            SyncIndex.save(SyncIndexData(mergeIndexEntries(index.entries, copyResults)))
+            SyncIndex.save(SyncIndex.withCurrentTree(mergeIndexEntries(index.entries, copyResults)))
             mergeStats(copyResults.map { it.result }).also { stats ->
                 Timber.d(
                     "exportConfigFilesToExternal: copied=${stats.copied}, " +
@@ -232,7 +236,7 @@ object RimeDataSync {
                     externalWins = true,
                     createdDirs,
                 )
-            SyncIndex.save(SyncIndexData(mergeIndexEntries(index.entries, listOf(copyResult))))
+            SyncIndex.save(SyncIndex.withCurrentTree(mergeIndexEntries(index.entries, listOf(copyResult))))
             DeployNotification.notifyPartialCopyIfNeeded(
                 mergeStats(listOf(copyResult.result)),
                 "importThemeToLocal for '$configId'",
@@ -257,7 +261,7 @@ object RimeDataSync {
             val localFiles = listLocalFiles(srcRoot)
             val listing = SafTreeWalker.listTree(cr, treeUri, rootId)
             val cache = SafPathCache(listing, rootId)
-            val indexData = SyncIndexData(index.entries)
+            val indexData = SyncIndex.withCurrentTree(index.entries)
             val parentDirsToEnsure =
                 localFiles
                     .filter { file ->
@@ -288,7 +292,7 @@ object RimeDataSync {
                         exportPathPrefix = "sync",
                     )
                 }
-            SyncIndex.save(SyncIndexData(mergeIndexEntries(index.entries, copyResults)))
+            SyncIndex.save(SyncIndex.withCurrentTree(mergeIndexEntries(index.entries, copyResults)))
             mergeStats(copyResults.map { it.result }).also { stats ->
                 DeployNotification.notifyPartialCopyIfNeeded(
                     stats,
@@ -340,7 +344,7 @@ object RimeDataSync {
                 return IndexedCopyResult(CopyResult(0, 0, deleted = 0, failed = 1, bytesCopied = 0), null)
             }
         return runCatching {
-            if (!SyncIndex.shouldCopy(entry.relativePath, entry.size, entry.lastModified, SyncIndexData(indexEntries))) {
+            if (!SyncIndex.shouldCopy(entry.relativePath, entry.size, entry.lastModified, SyncIndex.withCurrentTree(indexEntries))) {
                 if (destFile.exists() &&
                     destFile.length() == entry.size &&
                     destFile.lastModified() >= entry.lastModified
@@ -409,7 +413,7 @@ object RimeDataSync {
         val lastModified = sourceFile.lastModified()
         return runCatching {
             if (!force &&
-                !SyncIndex.shouldCopy(relativePath, size, lastModified, SyncIndexData(indexEntries))
+                !SyncIndex.shouldCopy(relativePath, size, lastModified, SyncIndex.withCurrentTree(indexEntries))
             ) {
                 if (cache.hasFile(relativePath, size)) {
                     return IndexedCopyResult(
