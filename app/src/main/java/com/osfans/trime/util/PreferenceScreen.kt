@@ -42,6 +42,7 @@ fun Preference.setup(
     } else {
         setIcon(
             context.drawable(icon)?.apply {
+                mutate()
                 setTint(context.styledColor(android.R.attr.colorControlNormal))
             },
         )
