@@ -77,6 +77,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
             android:layout_marginBottom="12dp"
+            android:clickable="true"
+            android:focusable="true"
             android:text="@string/data_storage_mode_external_sync_desc"
             android:textSize="14sp" />
 
@@ -91,6 +93,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
+            android:clickable="true"
+            android:focusable="true"
             android:text="@string/data_storage_mode_app_storage_desc"
             android:textSize="14sp" />
     </RadioGroup>

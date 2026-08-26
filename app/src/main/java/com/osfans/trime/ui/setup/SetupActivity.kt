@@ -82,6 +82,12 @@ class SetupActivity : FragmentActivity() {
             }
     }
 
+    private fun ensureStorageReady(): Boolean {
+        if (SetupPage.Permissions.isDone()) return true
+        toast(R.string.setup__select_data_path)
+        return false
+    }
+
     private fun completeSetup() {
         startActivity<MainActivity>()
         finish()
@@ -118,6 +124,7 @@ class SetupActivity : FragmentActivity() {
         binding.skipButton.apply {
             text = getString(R.string.setup__skip)
             setOnClickListener {
+                if (!ensureStorageReady()) return@setOnClickListener
                 AlertDialog
                     .Builder(this@SetupActivity)
                     .setMessage(R.string.setup__skip_hint)
@@ -130,10 +137,7 @@ class SetupActivity : FragmentActivity() {
         val nextButton =
             binding.nextButton.apply {
                 setOnClickListener {
-                    if (viewPager.currentItem == 0 && !SetupPage.Permissions.isDone()) {
-                        toast(R.string.setup__select_data_path)
-                        return@setOnClickListener
-                    }
+                    if (!ensureStorageReady()) return@setOnClickListener
                     if (viewPager.currentItem != SetupPage.entries.size - 1) {
                         viewPager.currentItem += 1
                     } else {
@@ -146,6 +150,12 @@ class SetupActivity : FragmentActivity() {
         viewPager.registerOnPageChangeCallback(
             object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
+                    if (position != 0 && !SetupPage.Permissions.isDone()) {
+                        ensureStorageReady()
+                        viewPager.setCurrentItem(0, false)
+                        refreshSkipButtonVisibility()
+                        return
+                    }
                     // Manually call following observer when page changed
                     // intentionally before changing the text of nextButton
                     viewModel.isAllDone.value = viewModel.isAllDone.value
