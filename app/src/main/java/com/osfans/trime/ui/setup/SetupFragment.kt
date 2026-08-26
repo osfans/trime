@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.osfans.trime.R
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.data.sync.UserDbMigration
 import com.osfans.trime.databinding.FragmentSetupBinding
 import com.osfans.trime.ui.setup.SetupPage.Companion.isLastPage
@@ -73,9 +74,20 @@ class SetupFragment : Fragment() {
                 val oldMode = prefs.dataStorageMode.getValue()
                 UserDbMigration.onStorageModeChanged(oldMode, newMode)
                 prefs.dataStorageMode.setValue(newMode)
+                if (oldMode == AppPrefs.Profile.DataStorageMode.EXTERNAL_SYNC &&
+                    newMode == AppPrefs.Profile.DataStorageMode.APP_STORAGE
+                ) {
+                    RimeDataSync.clearExternalTree(requireContext())
+                }
             }
             sync()
             (activity as? SetupActivity)?.refreshSkipButtonVisibility()
+        }
+        binding.descExternalSync.setOnClickListener {
+            binding.radioExternalSync.isChecked = true
+        }
+        binding.descAppStorage.setOnClickListener {
+            binding.radioAppStorage.isChecked = true
         }
     }
 
