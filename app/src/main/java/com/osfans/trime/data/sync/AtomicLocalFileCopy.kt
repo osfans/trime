@@ -8,34 +8,68 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.OutputStream
+import java.util.UUID
 
 object AtomicLocalFileCopy {
     fun writeFromStream(
         destFile: File,
         copy: (OutputStream) -> Unit,
     ): Long {
-        val tempFile = File(destFile.parentFile, "${destFile.name}.tmp")
-        tempFile.parentFile?.mkdirs()
+        val parent = destFile.parentFile ?: error("No parent for ${destFile.path}")
+        val operationId = UUID.randomUUID().toString()
+        val incoming = File(parent, ".trime-new-$operationId.tmp")
+        val backup = File(parent, ".trime-bak-$operationId.tmp")
+        parent.mkdirs()
+        var expectedBytes = -1L
+        var backedUp = false
         try {
-            FileOutputStream(tempFile).use { output ->
+            FileOutputStream(incoming).use { output ->
                 copy(output)
             }
-            val bytes = tempFile.length()
-            if (destFile.exists() && !destFile.delete()) {
-                error("Failed to replace ${destFile.path}")
+            expectedBytes = incoming.length()
+
+            if (destFile.exists()) {
+                if (!destFile.renameTo(backup)) {
+                    error("Failed to back up ${destFile.path}")
+                }
+                backedUp = true
             }
-            if (!tempFile.renameTo(destFile)) {
-                tempFile.inputStream().use { input ->
+
+            if (!incoming.renameTo(destFile)) {
+                incoming.inputStream().use { input ->
                     FileOutputStream(destFile).use { output ->
                         input.copyTo(output)
                     }
                 }
-                tempFile.delete()
+                incoming.delete()
             }
-            return bytes
+
+            if (backup.exists()) {
+                backup.delete()
+            }
+
+            return expectedBytes
+        } catch (e: Exception) {
+            if (backedUp && backup.exists()) {
+                if (!destFile.exists() || destFile.length() != expectedBytes) {
+                    if (destFile.exists()) {
+                        destFile.delete()
+                    }
+                    backup.renameTo(destFile)
+                }
+            }
+            if (!backedUp && incoming.exists()) {
+                incoming.delete()
+            }
+            throw e
         } finally {
-            if (tempFile.exists()) {
-                tempFile.delete()
+            if (expectedBytes >= 0 && destFile.exists() && destFile.length() == expectedBytes) {
+                if (incoming.exists()) {
+                    incoming.delete()
+                }
+                if (backup.exists()) {
+                    backup.delete()
+                }
             }
         }
     }
