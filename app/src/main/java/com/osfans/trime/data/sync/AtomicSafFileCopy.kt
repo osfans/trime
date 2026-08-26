@@ -10,15 +10,15 @@ import android.provider.DocumentsContract
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.util.UUID
 
 object AtomicSafFileCopy {
     /**
      * Atomically replaces [fileName] under [parentDir] with [sourceFile].
      *
-     * Sequence: write `$fileName.tmp` and verify length; rename existing target to
-     * `$fileName.bak` (never delete first); rename temp to [fileName]; delete backup
-     * only after that succeeds. If replacement fails after the backup rename, restore
-     * the backup to [fileName] before rethrowing.
+     * Uses operation-scoped `.trime-replace-<uuid>.tmp` / `.bak` artifacts so user
+     * files such as `user.yaml.bak` are never deleted. If replacement fails after
+     * the backup rename, restore the backup to [fileName] before rethrowing.
      */
     fun copyFromFile(
         contentResolver: ContentResolver,
@@ -29,8 +29,9 @@ object AtomicSafFileCopy {
         parentDir: String,
         fileName: String,
     ) {
-        val tempName = "$fileName.tmp"
-        val backupName = "$fileName.bak"
+        val operationId = UUID.randomUUID().toString()
+        val tempName = ".trime-replace-$operationId.tmp"
+        val backupName = ".trime-replace-$operationId.bak"
         val expectedBytes = sourceFile.length()
         val parentId = cache.ensureDirectory(contentResolver, treeUri, parentDir)
         val parentUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, parentId)
