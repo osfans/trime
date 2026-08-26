@@ -55,6 +55,10 @@ class SetupActivity : FragmentActivity() {
                     toast(R.string.setup__data_path_imported)
                     binding.skipButton.visibility = View.VISIBLE
                 }.onFailure {
+                    withContext(Dispatchers.IO) {
+                        RimeDataSync.clearExternalTree(this@SetupActivity)
+                    }
+                    refreshCurrentFragment()
                     toast(R.string.setup__data_path_import_failed)
                 }
             }

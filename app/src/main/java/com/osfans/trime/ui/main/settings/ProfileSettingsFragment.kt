@@ -141,6 +141,10 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                     if (onCancelToAppStorage) {
                         fallbackToAppStorage()
                     } else {
+                        withContext(Dispatchers.IO) {
+                            RimeDataSync.clearExternalTree(ctx)
+                        }
+                        updateDataPathSummary()
                         ctx.toast(R.string.setup__data_path_import_failed)
                     }
                 }
