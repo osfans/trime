@@ -48,10 +48,7 @@ class BackgroundSyncWork(
         }
         val rime = RimeDaemon.createSession(javaClass.name)
         try {
-            lastSyncStatus =
-                RimeDataSync.syncUserDataWithOptionalExport(applicationContext) {
-                    rime.runOnReady { syncUserData() }
-                }
+            lastSyncStatus = rime.runOnReady { syncUserData() }
             lastSyncTime = System.currentTimeMillis()
             return if (lastSyncStatus) Result.success() else Result.retry()
         } finally {

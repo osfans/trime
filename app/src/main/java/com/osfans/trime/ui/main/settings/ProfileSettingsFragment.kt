@@ -268,9 +268,7 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                     lifecycleScope.launch {
                         withLoadingDialog(ctx) {
                             runCatching {
-                                RimeDataSync.syncUserDataWithOptionalExport(ctx) {
-                                    viewModel.rime.runOnReady { syncUserData() }
-                                }
+                                viewModel.rime.runOnReady { syncUserData() }
                             }.onSuccess { success ->
                                 ctx.toast(
                                     when {

@@ -161,17 +161,28 @@ class Rime :
             }
         }
         registerRimeMessageHandler(syncHandler)
-        try {
-            val started = withRimeContext { syncRimeUserData() }
-            if (!started) return@withLock false
-            withContext(Dispatchers.IO) {
-                withTimeout(5.minutes) {
-                    syncFinished.await()
+        val syncOk =
+            try {
+                val started = withRimeContext { syncRimeUserData() }
+                if (!started) {
+                    false
+                } else {
+                    withContext(Dispatchers.IO) {
+                        withTimeout(5.minutes) {
+                            syncFinished.await()
+                        }
+                    }
                 }
+            } finally {
+                unregisterRimeMessageHandler(syncHandler)
             }
-        } finally {
-            unregisterRimeMessageHandler(syncHandler)
+        if (!syncOk) return@withLock false
+        if (!RimeDataSync.usesExternalSync()) return@withLock true
+        if (!RimeDataSync.hasExternalAccess(appContext)) {
+            Timber.w("Export skipped: no data path selected")
+            return@withLock false
         }
+        RimeDataSync.exportToExternal(appContext).isSuccess
     }
 
     override suspend fun processKey(
