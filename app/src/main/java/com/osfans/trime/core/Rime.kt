@@ -63,7 +63,7 @@ class Rime :
             object : RimeDispatcher.RimeController {
                 override fun nativeStartup() {
                     startRime(false)
-                    lifecycleRegistry.emitState(RimeLifecycle.State.READY)
+                    lifecycleRegistry.emitEvent(RimeLifecycle.Event.ON_READY)
                 }
 
                 override fun nativeFinalize() {
@@ -440,7 +440,7 @@ class Rime :
             return
         }
         registerRimeMessageHandler(::handleRimeMessage)
-        lifecycleRegistry.emitState(RimeLifecycle.State.STARTING)
+        lifecycleRegistry.emitEvent(RimeLifecycle.Event.ON_START)
         dispatcher.start()
     }
 
@@ -449,14 +449,14 @@ class Rime :
             Timber.w("Skip stopping rime: not at ready state!")
             return
         }
-        lifecycleRegistry.emitState(RimeLifecycle.State.STOPPING)
+        lifecycleRegistry.emitEvent(RimeLifecycle.Event.ON_STOP)
         Timber.i("Rime finalize()")
         dispatcher.stop().let {
             if (it.isNotEmpty()) {
                 Timber.w("${it.size} job(s) didn't get a chance to run!")
             }
         }
-        lifecycleRegistry.emitState(RimeLifecycle.State.STOPPED)
+        lifecycleRegistry.emitEvent(RimeLifecycle.Event.ON_STOPPED)
         unregisterRimeMessageHandler(::handleRimeMessage)
     }
 
