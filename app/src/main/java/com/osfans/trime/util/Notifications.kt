@@ -38,7 +38,7 @@ object DeployNotification {
     const val CHANNEL_ID = "rime-daemon"
     const val MESSAGE_ID = 2331
     private const val PARTIAL_COPY_MESSAGE_ID = 2332
-    private const val EXTERNAL_SYNC_FALLBACK_MESSAGE_ID = 2333
+    private const val EXTERNAL_SYNC_UNAVAILABLE_MESSAGE_ID = 2333
 
     fun ensureChannel() {
         createNotificationChannel(CHANNEL_ID, appContext.getString(R.string.rime_daemon))
@@ -157,12 +157,12 @@ object DeployNotification {
         return stats
     }
 
-    fun showExternalSyncFallback() {
-        val message = appContext.getString(R.string.external_sync_missing_tree_fallback)
+    fun showExternalSyncUnavailable() {
+        val message = appContext.getString(R.string.external_sync_unavailable)
         val contentIntent =
             PendingIntent.getActivity(
                 appContext,
-                EXTERNAL_SYNC_FALLBACK_MESSAGE_ID,
+                EXTERNAL_SYNC_UNAVAILABLE_MESSAGE_ID,
                 Intent(appContext, MainActivity::class.java).apply {
                     action = Intent.ACTION_RUN
                     putExtra(MainActivity.EXTRA_SETTINGS_ROUTE, NavigationRoute.Profile)
@@ -181,6 +181,6 @@ object DeployNotification {
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
-            .let { notificationManager.notify(EXTERNAL_SYNC_FALLBACK_MESSAGE_ID, it) }
+            .let { notificationManager.notify(EXTERNAL_SYNC_UNAVAILABLE_MESSAGE_ID, it) }
     }
 }

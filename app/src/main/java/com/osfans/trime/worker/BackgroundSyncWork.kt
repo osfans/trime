@@ -14,7 +14,6 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.sync.ExternalSyncFallback
 import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.util.DeployNotification
 import kotlinx.coroutines.withTimeoutOrNull
@@ -39,11 +38,6 @@ class BackgroundSyncWork(
     private suspend fun doBackgroundSync(): Result {
         if (!enable) {
             return Result.failure()
-        }
-        if (RimeDataSync.usesExternalSync(applicationContext) &&
-            !RimeDataSync.hasExternalAccess(applicationContext)
-        ) {
-            ExternalSyncFallback.fallbackToAppStorage(applicationContext)
         }
         if (!RimeDataSync.isStorageAvailable(applicationContext)) {
             if (RimeDataSync.usesExternalSync(applicationContext)) {

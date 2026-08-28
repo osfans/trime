@@ -124,7 +124,7 @@
     <string name="use_app_specific_storage_desc">直接使用應用程式內部私有儲存空間，使用者需要使用支援的檔案管理器管理資料。解除安裝應用程式時，系統可能會詢問是否保留資料，請隨時做好備份。</string>
     <string name="external_sync_select_folder_message">外部同步需要選擇資料資料夾。請選擇存放 Trime 設定檔的位置。</string>
     <string name="external_sync_fallback_app_storage">資料夾選擇失敗或已取消。儲存模式將還原為使用應用程式專屬儲存空間。</string>
-    <string name="external_sync_missing_tree_fallback">外部資料資料夾缺失或無法存取，已切換為應用程式專屬儲存空間。如需繼續外部同步，請在設定中重新選擇資料夾。</string>
+    <string name="external_sync_unavailable">外部資料資料夾缺失或無法存取，本次部署使用本機資料。如需恢復外部同步，請在設定中重新選擇資料夾。</string>
     <string name="maintenance">維護</string>
     <string name="loading">正在載入</string>
     <string name="success">成功</string>

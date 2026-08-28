@@ -126,7 +126,7 @@
     <string name="use_app_specific_storage_desc">Use internal private storage; users need a compatible file manager to access. On uninstall, system may ask to keep data — always have backups on hand.</string>
     <string name="external_sync_select_folder_message">External sync requires selecting a data folder. Select where trime configuration files will be stored.</string>
     <string name="external_sync_fallback_app_storage">Folder selection failed or was cancelled. Storage mode will fall back to app-specific storage.</string>
-    <string name="external_sync_missing_tree_fallback">External data folder is missing or inaccessible. Switched to app-specific storage. Re-select the folder in Settings if needed.</string>
+    <string name="external_sync_unavailable">External data folder is missing or inaccessible. Deploying with local data. Re-select the folder in Settings to resume external sync.</string>
     <string name="maintenance">Maintenance</string>
     <string name="loading">Loading</string>
     <string name="success">success</string>

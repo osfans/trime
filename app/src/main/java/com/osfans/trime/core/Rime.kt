@@ -9,9 +9,9 @@ import com.osfans.trime.BuildConfig
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.opencc.OpenCCDictManager
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.sync.ExternalSyncFallback
 import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.ime.core.InlinePreeditMode
+import com.osfans.trime.util.DeployNotification
 import com.osfans.trime.util.appContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
@@ -93,17 +93,40 @@ class Rime :
 
     override suspend fun deploy(skipImport: Boolean) {
         if (RimeDataSync.usesExternalSync()) {
-            if (!RimeDataSync.hasExternalAccess(appContext)) {
-                ExternalSyncFallback.fallbackToAppStorage(appContext)
-            }
-        }
-        if (RimeDataSync.usesExternalSync() && !skipImport) {
-            val importResult =
-                RimeDataSync.importToLocal(appContext, keepNotificationUntilDeploySuccess = true)
-            if (importResult.isFailure) {
-                ExternalSyncFallback.fallbackToAppStorage(appContext, importResult.exceptionOrNull())
-            } else {
-                Timber.i("Import finished: ${importResult.getOrNull()}")
+            // Take the maintenance lease before the import: it serializes
+            // this deploy's import and maintenance against other imports
+            // and maintenance runs (the maintenance thread reads and writes
+            // the same local tree). The lease is released by the daemon when
+            // the maintenance this deploy starts terminates.
+            RimeDataSync.acquireMaintenanceLease()
+            when {
+                !RimeDataSync.hasExternalAccess(appContext) -> {
+                    // Do not silently switch the storage mode: the deployment
+                    // itself still works with the local data. Tell the user to
+                    // re-select the external folder instead.
+                    DeployNotification.showExternalSyncUnavailable()
+                }
+                skipImport -> {
+                    // Local config deployments (e.g. schema list changes)
+                    // update default.custom.yaml; export just the config
+                    // files after the maintenance. The local sync/ snapshot
+                    // was not imported, so exporting it could overwrite
+                    // newer external dictionaries.
+                    RimeDataSync.requestExportAfterMaintenance()
+                }
+                else -> {
+                    val importResult =
+                        RimeDataSync.importToLocal(appContext, keepNotificationUntilDeploySuccess = true)
+                    if (importResult.isFailure) {
+                        DeployNotification.showExternalSyncUnavailable()
+                        Timber.e(importResult.exceptionOrNull(), "Failed to import before deploy")
+                    } else if (importResult.getOrNull()?.failed == 0) {
+                        // The external tree was imported, so exporting the
+                        // user-data sync/ snapshot after the maintenance is
+                        // safe: it reflects the imported state.
+                        RimeDataSync.requestExportAfterMaintenance(exportUserData = true)
+                    }
+                }
             }
         }
         // The deployment runs asynchronously on the rime maintenance thread. Its
@@ -413,8 +436,11 @@ class Rime :
     }
 
     fun startup() {
-        if (!RimeDataSync.isStorageAvailable(appContext)) {
-            Timber.w("Skip starting rime: storage not available!")
+        // Only the runtime directories must be writable to start Rime: with
+        // external sync selected but the folder missing, the deploy path (not
+        // startup) notifies the user and deploys with local data.
+        if (!RimeDataSync.isRuntimeReady()) {
+            Timber.w("Skip starting rime: storage not ready!")
             return
         }
         if (lifecycle.currentState != RimeLifecycle.State.STOPPED) {
