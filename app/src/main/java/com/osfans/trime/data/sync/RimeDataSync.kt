@@ -219,9 +219,7 @@ object RimeDataSync {
             val themeFileName = "$configId.yaml"
             val index = SyncIndex.load()
             val entry =
-                SafTreeWalker
-                    .listFiles(cr, treeUri, rootId)
-                    .find { it.relativePath == themeFileName }
+                SafTreeWalker.findFileEntry(cr, treeUri, rootId, themeFileName)
             if (entry == null) {
                 Timber.d("Theme file '$themeFileName' not found at external root, skip import")
                 return@runCatching SyncStats()
