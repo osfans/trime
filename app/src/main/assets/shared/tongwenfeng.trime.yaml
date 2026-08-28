@@ -77,6 +77,7 @@ style:
 preedit:                  # 预编辑文本视图参数
   horizontal_padding: 8     # 横向内边距（整数）
 #  alpha: 0.8                 # 透明度（0-1，浮点）
+  top_start_radius: 4       # 始上端圆角（浮点）
   top_end_radius: 4         # 末上端圆角（浮点）
   foreground:               # 前景样式
     font_size: 16             # 预编辑字体大小（浮点）

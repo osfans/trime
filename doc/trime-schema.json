@@ -326,6 +326,12 @@
           "maximum": 64,
           "default": 8
         },
+        "top_start_radius": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 48,
+          "default": 0.0
+        },
         "top_end_radius": {
           "type": "number",
           "minimum": 0.0,

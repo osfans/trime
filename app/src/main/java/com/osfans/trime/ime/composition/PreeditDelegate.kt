@@ -32,11 +32,12 @@ class PreeditDelegate : InputBroadcastReceiver {
             context,
             theme,
             setupPreeditView = {
-                val radiusSize = dp(theme.preedit.topEndRadius)
+                val startRadius = dp(theme.preedit.topStartRadius)
+                val endRadius = dp(theme.preedit.topEndRadius)
                 val radii = if (layoutDirection == View.LAYOUT_DIRECTION_LTR) {
-                    floatArrayOf(0f, 0f, radiusSize, radiusSize, 0f, 0f, 0f, 0f)
+                    floatArrayOf(startRadius, startRadius, endRadius, endRadius, 0f, 0f, 0f, 0f)
                 } else {
-                    floatArrayOf(radiusSize, radiusSize, 0f, 0f, 0f, 0f, 0f, 0f)
+                    floatArrayOf(endRadius, endRadius, startRadius, startRadius, 0f, 0f, 0f, 0f)
                 }
                 background = GradientDrawable().apply {
                     setColor(ColorManager.getColor("text_back_color"))
