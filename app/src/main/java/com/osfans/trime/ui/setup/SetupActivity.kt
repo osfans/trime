@@ -1,6 +1,7 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2026 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.ui.setup
 
@@ -9,14 +10,15 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
@@ -38,9 +40,11 @@ import kotlinx.coroutines.withContext
 import splitties.systemservices.notificationManager
 
 class SetupActivity : FragmentActivity() {
-    private lateinit var binding: ActivitySetupBinding
     private lateinit var viewPager: ViewPager2
-    private val viewModel: SetupViewModel by viewModels()
+
+    private lateinit var skipButton: Button
+    private lateinit var prevButton: Button
+    private lateinit var nextButton: Button
 
     private val dataPathPicker =
         registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
@@ -53,7 +57,7 @@ class SetupActivity : FragmentActivity() {
                     }
                     refreshCurrentFragment()
                     toast(R.string.setup__data_path_imported)
-                    binding.skipButton.visibility = View.VISIBLE
+                    skipButton.visibility = View.VISIBLE
                 }.onFailure {
                     withContext(Dispatchers.IO) {
                         RimeDataSync.clearExternalTree(this@SetupActivity)
@@ -73,15 +77,6 @@ class SetupActivity : FragmentActivity() {
         (fragment as? SetupFragment)?.sync()
     }
 
-    fun refreshSkipButtonVisibility() {
-        binding.skipButton.visibility =
-            if (viewPager.currentItem == 0 && !SetupPage.Permissions.isDone()) {
-                View.GONE
-            } else {
-                View.VISIBLE
-            }
-    }
-
     private fun ensureStorageReady(): Boolean {
         if (SetupPage.Permissions.isDone()) return true
         toast(R.string.setup__select_data_path)
@@ -94,17 +89,17 @@ class SetupActivity : FragmentActivity() {
     }
 
     companion object {
-        private var binaryCount = false
+        private var shown = false
         private const val CHANNEL_ID = "setup"
         private const val NOTIFY_ID = 87463
 
-        fun shouldSetup() = !binaryCount && SetupPage.hasUndonePage()
+        fun shouldShowUp() = !shown && SetupPage.hasUndonePage()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        binding = ActivitySetupBinding.inflate(layoutInflater)
+        val binding = ActivitySetupBinding.inflate(layoutInflater)
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
             val sysBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             binding.root.setPadding(
@@ -116,12 +111,7 @@ class SetupActivity : FragmentActivity() {
             windowInsets
         }
         setContentView(binding.root)
-        val prevButton =
-            binding.prevButton.apply {
-                text = getString(R.string.setup__prev)
-                setOnClickListener { viewPager.currentItem -= 1 }
-            }
-        binding.skipButton.apply {
+        skipButton = binding.skipButton.apply {
             text = getString(R.string.setup__skip)
             setOnClickListener {
                 if (!ensureStorageReady()) return@setOnClickListener
@@ -134,7 +124,12 @@ class SetupActivity : FragmentActivity() {
                     .show()
             }
         }
-        val nextButton =
+        prevButton =
+            binding.prevButton.apply {
+                text = getString(R.string.setup__prev)
+                setOnClickListener { viewPager.currentItem -= 1 }
+            }
+        nextButton =
             binding.nextButton.apply {
                 setOnClickListener {
                     if (!ensureStorageReady()) return@setOnClickListener
@@ -153,48 +148,40 @@ class SetupActivity : FragmentActivity() {
                     if (position != 0 && !SetupPage.Permissions.isDone()) {
                         ensureStorageReady()
                         viewPager.setCurrentItem(0, false)
-                        refreshSkipButtonVisibility()
-                        return
                     }
-                    // Manually call following observer when page changed
-                    // intentionally before changing the text of nextButton
-                    viewModel.isAllDone.value = viewModel.isAllDone.value
-                    // Hide prev button for the first page
-                    prevButton.visibility = if (position != 0) View.VISIBLE else View.GONE
-                    refreshSkipButtonVisibility()
-                    nextButton.text =
-                        getString(
-                            if (position.isLastPage()) {
-                                R.string.done
-                            } else {
-                                R.string.setup__next
-                            },
-                        )
+                    updateButtons()
                 }
             },
         )
-        viewModel.isAllDone.observe(this) { allDone ->
-            nextButton.apply {
-                // Hide next button for the last page when allDone == false
-                (allDone || !viewPager.currentItem.isLastPage()).let {
-                    visibility = if (it) View.VISIBLE else View.GONE
-                }
-            }
-        }
         // Skip to undone page
         firstUndonePage()?.let { viewPager.currentItem = it.ordinal }
-        binaryCount = true
+        updateButtons()
+        shown = true
         createNotificationChannel(
             CHANNEL_ID,
             appContext.getString(R.string.setup_channel),
         )
-        refreshSkipButtonVisibility()
+    }
+
+    fun updateButtons() {
+        val allDone = !SetupPage.hasUndonePage()
+        val ensureStorage = SetupPage.Permissions.isDone()
+        val isFirstPage = viewPager.currentItem == 0
+        val isLastPage = viewPager.currentItem.isLastPage()
+
+        prevButton.isGone = isFirstPage
+        skipButton.isGone = isFirstPage && !ensureStorage || allDone
+        nextButton.text = getString(if (isLastPage) R.string.done else R.string.setup__next)
+        nextButton.isGone = isLastPage && !allDone
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        val fragment = supportFragmentManager.findFragmentByTag("f${viewPager.currentItem}")
-        (fragment as SetupFragment).sync()
+        if (!hasFocus) return
+        for (fragment in supportFragmentManager.fragments) {
+            if (fragment.isVisible) (fragment as? SetupFragment)?.sync()
+        }
+        updateButtons()
     }
 
     override fun onPause() {
