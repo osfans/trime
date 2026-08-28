@@ -113,12 +113,13 @@ object SafTreeWalker {
         return SafTreeListing(result, directoryIds)
     }
 
-    fun findChildDocumentId(
+    fun findFileEntry(
         contentResolver: ContentResolver,
         treeUri: Uri,
         parentDocumentId: String,
         displayName: String,
-    ): String? {
+        includeDirectories: Boolean = false,
+    ): SafFileEntry? {
         val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, parentDocumentId)
         val cursor =
             contentResolver.query(childrenUri, documentProjection, null, null, null)
@@ -126,12 +127,35 @@ object SafTreeWalker {
         cursor.use {
             val idCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
             val nameCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+            val mimeCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE)
+            val sizeCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_SIZE)
+            val modCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_LAST_MODIFIED)
             while (it.moveToNext()) {
-                if (it.getString(nameCol) == displayName) {
-                    return it.getString(idCol)
+                val name = it.getString(nameCol)
+                if (name == displayName) {
+                    val mimeType = it.getString(mimeCol)
+                    if (mimeType == DocumentsContract.Document.MIME_TYPE_DIR && !includeDirectories) {
+                        continue
+                    }
+                    return SafFileEntry(
+                        documentId = it.getString(idCol),
+                        displayName = name,
+                        mimeType = mimeType,
+                        size = it.getLong(sizeCol),
+                        lastModified = it.getLong(modCol),
+                        relativePath = name,
+                    )
                 }
             }
         }
         return null
     }
+
+    fun findChildDocumentId(
+        contentResolver: ContentResolver,
+        treeUri: Uri,
+        parentDocumentId: String,
+        displayName: String,
+    ): String? = findFileEntry(contentResolver, treeUri, parentDocumentId, displayName, includeDirectories = true)
+        ?.documentId
 }

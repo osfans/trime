@@ -396,44 +396,43 @@ object RimeDataSync {
     suspend fun importThemeToLocal(
         context: Context = appContext,
         configId: String,
-    ): Result<SyncStats> = syncMutex.withLock {
-        withContext(Dispatchers.IO) {
-            runCatching {
-                if (!usesExternalSync(context) || !hasExternalAccess(context)) {
-                    return@runCatching SyncStats()
-                }
-                val treeUri = treeUri() ?: return@runCatching SyncStats()
-                val cr = context.contentResolver
-                val rootId = DocumentsContract.getTreeDocumentId(treeUri)
-                val destRoot = DataManager.userDataDir
-                val themeFileName = "$configId.yaml"
-                val index = SyncIndex.load()
-                val entry =
-                    SafTreeWalker
-                        .listFiles(cr, treeUri, rootId)
-                        .find { it.relativePath == themeFileName }
-                if (entry == null) {
-                    Timber.d("Theme file '$themeFileName' not found at external root, skip import")
-                    return@runCatching SyncStats()
-                }
-                val createdDirs = LocalDirectoryGate()
-                val copyResult =
-                    copySafToLocal(
-                        context,
-                        treeUri,
-                        entry,
-                        destRoot,
-                        index.entries,
-                        externalWins = true,
-                        createdDirs,
+    ): Result<SyncStats> = withMaintenanceLease {
+        syncMutex.withLock {
+            withContext(Dispatchers.IO) {
+                runCatching {
+                    if (!usesExternalSync(context) || !hasExternalAccess(context)) {
+                        return@runCatching SyncStats()
+                    }
+                    val treeUri = treeUri() ?: return@runCatching SyncStats()
+                    val cr = context.contentResolver
+                    val rootId = DocumentsContract.getTreeDocumentId(treeUri)
+                    val destRoot = DataManager.userDataDir
+                    val themeFileName = "$configId.yaml"
+                    val index = SyncIndex.load()
+                    val entry =
+                        SafTreeWalker.findFileEntry(cr, treeUri, rootId, themeFileName)
+                    if (entry == null) {
+                        Timber.d("Theme file '$themeFileName' not found at external root, skip import")
+                        return@runCatching SyncStats()
+                    }
+                    val createdDirs = LocalDirectoryGate()
+                    val copyResult =
+                        copySafToLocal(
+                            context,
+                            treeUri,
+                            entry,
+                            destRoot,
+                            index.entries,
+                            externalWins = true,
+                            createdDirs,
+                        )
+                    SyncIndex.save(SyncIndex.withCurrentTree(mergeIndexEntries(index.entries, listOf(copyResult))))
+                    DeployNotification.notifyPartialCopyIfNeeded(
+                        mergeStats(listOf(copyResult.result)),
+                        "importThemeToLocal for '$configId'",
                     )
-                SyncIndex.save(SyncIndex.withCurrentTree(mergeIndexEntries(index.entries, listOf(copyResult))))
-                DeployNotification.notifyPartialCopyIfNeeded(
-                    mergeStats(listOf(copyResult.result)),
-                    "importThemeToLocal for '$configId'",
-
-                )
-            }.onFailure { Timber.e(it, "importThemeToLocal failed for '$configId'") }
+                }.onFailure { Timber.e(it, "importThemeToLocal failed for '$configId'") }
+            }
         }
     }
 
