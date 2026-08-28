@@ -513,6 +513,10 @@
           "type": "string",
           "default": "hilited_candidate_back_color"
         },
+        "hilited_key_border_color": {
+          "type": "string",
+          "default": "key_border_color"
+        },
         "hilited_key_text_color": {
           "type": "string",
           "default": "hilited_candidate_text_color"
@@ -525,17 +529,33 @@
           "type": "string",
           "default": "hilited_key_back_color"
         },
+        "hilited_off_key_border_color": {
+          "type": "string",
+          "default": "hilited_key_border_color"
+        },
         "hilited_on_key_back_color": {
           "type": "string",
           "default": "hilited_key_back_color"
+        },
+        "hilited_on_key_border_color": {
+          "type": "string",
+          "default": "hilited_key_border_color"
         },
         "hilited_off_key_text_color": {
           "type": "string",
           "default": "hilited_key_text_color"
         },
+        "hilited_off_key_symbol_color": {
+          "type": "string",
+          "default": "hilited_key_symbol_color"
+        },
         "hilited_on_key_text_color": {
           "type": "string",
           "default": "hilited_key_text_color"
+        },
+        "hilited_on_key_symbol_color": {
+          "type": "string",
+          "default": "hilited_key_symbol_color"
         },
         "key_back_color": { "type": "string", "default": "back_color" },
         "key_border_color": { "type": "string", "default": "border_color" },
@@ -549,14 +569,24 @@
         },
         "label_color": { "type": "string", "default": "candidate_text_color" },
         "off_key_back_color": { "type": "string", "default": "key_back_color" },
+        "off_key_border_color": { "type": "string", "default": "key_border_color" },
         "off_key_text_color": { "type": "string", "default": "key_text_color" },
+        "off_key_symbol_color": { "type": "string", "default": "key_symbol_color" },
         "on_key_back_color": {
           "type": "string",
           "default": "hilited_key_back_color"
         },
+        "on_key_border_color": {
+          "type": "string",
+          "default": "hilited_key_border_color"
+        },
         "on_key_text_color": {
           "type": "string",
           "default": "hilited_key_text_color"
+        },
+        "on_key_symbol_color": {
+          "type": "string",
+          "default": "hilited_key_symbol_color"
         },
         "preview_back_color": { "type": "string", "default": "key_back_color" },
         "preview_text_color": { "type": "string", "default": "key_text_color" },
@@ -673,6 +703,12 @@
             "default": "0xd3d7da",
             "description": "標明按鍵背景"
           },
+          "hilited_key_border_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "description": "標明按鍵邊框"
+          },
           "hilited_key_symbol_color": {
             "type": "number",
             "minimum": 0,
@@ -692,11 +728,23 @@
             "default": "0xd3d7da",
             "description": "標明按鍵關閉狀態背景"
           },
+          "hilited_off_key_border_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "description": "標明按鍵關閉狀態邊框"
+          },
           "hilited_off_key_text_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "description": "標明按鍵關閉狀態文字"
+          },
+          "hilited_off_key_symbol_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "description": "標明按鍵關閉狀態符號"
           },
           "hilited_on_key_back_color": {
             "type": "number",
@@ -705,11 +753,23 @@
             "default": "0xd3d7da",
             "description": "標明按鍵打開狀態背景"
           },
+          "hilited_on_key_border_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "description": "標明按鍵打開狀態邊框"
+          },
           "hilited_on_key_text_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "description": "標明按鍵打開狀態文字"
+          },
+          "hilited_on_key_symbol_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "description": "標明按鍵打開狀態符號"
           },
           "hilited_text_color": {
             "type": "number",
@@ -766,11 +826,23 @@
             "default": "0xd3d7da",
             "description": "按鍵關閉狀態背景"
           },
+          "off_key_border_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "description": "按鍵關閉狀態邊框"
+          },
           "off_key_text_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "description": "按鍵關閉狀態文字"
+          },
+          "off_key_symbol_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "description": "按鍵關閉狀態符號"
           },
           "on_key_back_color": {
             "type": "number",
@@ -779,12 +851,24 @@
             "default": "0x23948e",
             "description": "按鍵打開狀態背景"
           },
+          "on_key_border_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "description": "按鍵打開狀態邊框"
+          },
           "on_key_text_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "default": "0x37474f",
             "description": "按鍵打開狀態文字"
+          },
+          "on_key_symbol_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "description": "按鍵打開狀態符號"
           },
           "preview_back_color": {
             "type": "number",

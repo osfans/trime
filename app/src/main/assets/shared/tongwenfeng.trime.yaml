@@ -115,21 +115,30 @@ fallback_colors:
 #  hilited_label_color: hilited_candidate_text_color # 高亮候选序号 颜色
 #  hilited_comment_text_color: comment_text_color
 #  hilited_key_back_color: hilited_candidate_back_color
+#  hilited_key_border_color: key_border_color
 #  hilited_key_text_color: hilited_candidate_text_color
 #  hilited_key_symbol_color: hilited_comment_text_color
 #  hilited_off_key_back_color: hilited_key_back_color
+#  hilited_off_key_border_color: hilited_key_border_color
 #  hilited_on_key_back_color: hilited_key_back_color
+#  hilited_on_key_border_color: hilited_key_border_color
 #  hilited_off_key_text_color: hilited_key_text_color
 #  hilited_on_key_text_color: hilited_key_text_color
+#  hilited_off_key_symbol_color: hilited_key_symbol_color
+#  hilited_on_key_symbol_color: hilited_key_symbol_color
 #  key_back_color: back_color
 #  key_border_color: border_color
 #  key_text_color: candidate_text_color
 #  key_symbol_color: comment_text_color
 #  label_color: candidate_text_color
 #  off_key_back_color: key_back_color
+#  off_key_border_color: key_border_color
 #  off_key_text_color: key_text_color
+#  off_key_symbol_color: key_symbol_color
 #  on_key_back_color: hilited_key_back_color
+#  on_key_border_color: hilited_key_border_color
 #  on_key_text_color: hilited_key_text_color
+#  on_key_symbol_color: hilited_key_symbol_color
 #  preview_back_color: key_back_color
 #  preview_text_color: key_text_color
 #  shadow_color: border_color
@@ -215,11 +224,14 @@ preset_color_schemes:
     hilited_candidate_text_color: 0xff000000 #標明候選文字
     hilited_comment_text_color: 0xff000000 #標明提示
     hilited_key_back_color: 0xffd3d7da #標明按鍵背景
+    hilited_key_border_color: 0xffeceff1 #標明按鍵邊框
     hilited_key_symbol_color: 0xff000000 #標明按鍵符號
     hilited_key_text_color: 0xff000000 #標明按鍵文字
     hilited_off_key_back_color: 0xffd3d7da #標明按鍵關閉狀態背景
+    hilited_off_key_border_color: 0xffeceff1 #標明按鍵關閉狀態邊框
     hilited_off_key_text_color: 0xff000000 #標明按鍵關閉狀態文字
     hilited_on_key_back_color: 0xffd3d7da #標明按鍵打開狀態背景
+    hilited_on_key_border_color: 0xffeceff1 #標明按鍵打開狀態邊框
     hilited_on_key_text_color: 0xff000000 #標明按鍵打開狀態文字
     hilited_text_color: 0xff23948e #標明編碼
     key_back_color: 0xffeceff1 #按鍵背景
@@ -229,8 +241,10 @@ preset_color_schemes:
     keyboard_back_color: 0xffffffff #鍵盤背景
     label_color: 0xff000000 #標籤
     off_key_back_color: 0xffd3d7da #按鍵關閉狀態背景
+    off_key_border_color: 0xffeceff1 #按鍵關閉狀態邊框
     off_key_text_color: 0xff000000 #按鍵關閉狀態文字
     on_key_back_color: 0xff23948e #按鍵打開狀態背景
+    on_key_border_color: 0xffeceff1 #按鍵打開狀態邊框
     on_key_text_color: 0xff37474f #按鍵打開狀態文字
     preview_back_color: 0x55bfbfbf #按鍵提示背景
     preview_text_color: 0xff23948e #按鍵提示文字
