@@ -5,6 +5,7 @@
 
 package com.osfans.trime.core
 
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.SharedFlow
 
 interface RimeApi {
@@ -28,7 +29,13 @@ interface RimeApi {
 
     suspend fun updateConfig()
 
-    suspend fun syncUserData(): Boolean
+    /**
+     * Schedules a user-data sync, importing the external tree first when
+     * external sync is in use. Returns the deferred outcome of the
+     * post-maintenance export, or null when the sync was aborted (no external
+     * access or a failed import) or rejected (another maintenance is running).
+     */
+    suspend fun syncUserData(): CompletableDeferred<Boolean>?
 
     suspend fun processKey(
         value: Int,

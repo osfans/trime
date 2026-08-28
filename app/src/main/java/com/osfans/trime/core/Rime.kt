@@ -13,6 +13,7 @@ import com.osfans.trime.data.sync.ExternalSyncFallback
 import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.ime.core.InlinePreeditMode
 import com.osfans.trime.util.appContext
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
@@ -119,14 +120,51 @@ class Rime :
         startRime(false)
     }
 
-    override suspend fun syncUserData(): Boolean {
-        // RimeSyncUserData schedules maintenance asynchronously and returns once the
-        // worker is started. Concurrent maintenance is rejected by librime itself
-        // (Deployer::StartWork returns false while a work thread is running), so the
-        // result only tells whether the task was scheduled. The maintenance result
-        // is reported via the daemon's deploy notification, which also exports the
-        // sync/ output.
-        return withRimeContext { syncRimeUserData() }
+    override suspend fun syncUserData(): CompletableDeferred<Boolean>? {
+        // Import the external tree first, so the sync never overwrites newer
+        // external data with a stale local snapshot.
+        if (RimeDataSync.usesExternalSync()) {
+            if (!RimeDataSync.hasExternalAccess(appContext)) {
+                DeployNotification.showExternalSyncUnavailable()
+                return null
+            }
+            // Take the maintenance lease before the import, like deploy():
+            // it serializes this sync's import and maintenance against
+            // other imports and maintenance runs, and is released by the
+            // daemon when the maintenance terminates (also when librime
+            // rejects the task below: the running maintenance owns it).
+            RimeDataSync.acquireMaintenanceLease()
+            val importResult = RimeDataSync.importToLocal(appContext, showProgress = false)
+            if (importResult.isFailure || importResult.getOrNull()?.failed != 0) {
+                Timber.e(
+                    importResult.exceptionOrNull(),
+                    "Failed to import the external tree before user-data sync, aborting",
+                )
+                // No maintenance will be scheduled, so the daemon's terminal
+                // handling will never release the lease; release it here or
+                // later imports/deploys/syncs would wait forever.
+                RimeDataSync.releaseMaintenanceLease()
+                return null
+            }
+        }
+        // Queue the export request before scheduling: maintenance runs and
+        // requests are consumed in the same FIFO order, so the returned
+        // deferred is completed with the outcome of this sync's own export.
+        // The external tree was imported just above, so exporting the
+        // user-data sync/ snapshot is safe.
+        val request = RimeDataSync.requestExportAfterMaintenance(exportUserData = true)
+        val scheduled = withRimeContext { syncRimeUserData() }
+        if (!scheduled) {
+            // librime rejected the task (another maintenance is running).
+            // Withdraw the request: consuming it later would export a sync/
+            // snapshot that this sync never produced. Return null like the
+            // aborted cases above, so callers do not wait on a maintenance
+            // that never runs.
+            RimeDataSync.cancelExportRequest(request)
+            Timber.w("RimeSyncUserData rejected: maintenance already running")
+            return null
+        }
+        return request
     }
 
     override suspend fun processKey(

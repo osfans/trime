@@ -292,11 +292,16 @@ object RimeDataSync {
     suspend fun importToLocal(
         context: Context = appContext,
         keepNotificationUntilDeploySuccess: Boolean = false,
+        showProgress: Boolean = true,
     ): Result<SyncStats> {
         if (!usesExternalSync(context)) {
             return Result.success(SyncStats())
         }
-        DeployNotification.showProgress()
+        if (showProgress) DeployNotification.showProgress()
+        // Callers serialize this against maintenance runs via the
+        // maintenance lease: deploy/sync hold it from before the import
+        // until their maintenance terminates ([acquireMaintenanceLease]),
+        // one-off imports use [withMaintenanceLease].
         return syncMutex.withLock { importToLocalLocked(context) }
             .onFailure { Timber.e(it, "importToLocal failed") }
             .also { result ->

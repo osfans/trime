@@ -280,7 +280,7 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                                 }
                             }.onSuccess { scheduled ->
                                 ctx.toast(
-                                    if (scheduled) {
+                                    if (scheduled != null) {
                                         R.string.sync_user_data_scheduled
                                     } else {
                                         R.string.sync_user_data_failure
