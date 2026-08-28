@@ -13,7 +13,10 @@ import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.util.DeployNotification
 import com.osfans.trime.util.appContext
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
@@ -28,6 +31,205 @@ data class SyncStats(
 )
 
 object RimeDataSync {
+    /**
+     * Export requests queued by deploy/sync initiators before scheduling a
+     * maintenance run. The daemon consumes the oldest request when a
+     * maintenance completes and completes it with the export outcome.
+     * Because librime executes maintenance in submission order and requests
+     * are consumed in the same order, each initiator reliably awaits its own
+     * export. Startup maintenance (which imports nothing) finds an empty
+     * queue and exports nothing. All access is serialized by [syncMutex].
+     */
+    private val exportRequests = ArrayDeque<ExportRequest>()
+
+    // Whether the maintenance that is currently running started with queued
+    // requests. Set by [maintenanceStarted] and consumed by the matching
+    // completion: a maintenance that started with an empty queue (e.g. the
+    // startup maintenance) must not consume requests that were queued while
+    // it was running, because those belong to the maintenance that follows.
+    private var startedWithRequests = false
+
+    // A queued export request: the deferred outcome for the initiator and
+    // whether the maintenance's user-data sync/ is to be exported too (only
+    // requests preceded by a successful external import or user-data sync
+    // may overwrite the external dictionaries).
+    data class ExportRequest(
+        val deferred: CompletableDeferred<Boolean>,
+        val exportUserData: Boolean,
+    )
+
+    // Serializes external-tree imports against maintenance runs: the
+    // maintenance thread reads and writes the same local tree, so an import
+    // overlapping it could mutate the maintenance's inputs. The lease is
+    // reentrant (a deploy may acquire inside a [withMaintenanceLease] block
+    // after a manual import): each acquire increments [maintenanceLeaseHolders]
+    // and the underlying mutex is released when the last holder releases.
+    // A deploy/sync keeps its lease until the maintenance it starts
+    // terminates ([maintenanceFinished]); a maintenance without an owning
+    // request (e.g. the startup maintenance) takes the lease itself when it
+    // starts ([maintenanceStarted]).
+    private val maintenanceMutex = Mutex()
+    private var maintenanceLeaseHolders = 0
+
+    /**
+     * Takes the maintenance lease, waiting for any active maintenance to
+     * terminate. The caller must be a deploy/sync that is about to import
+     * the external tree: the lease is kept until the maintenance it starts
+     * terminates (released by [maintenanceFinished]), and when librime
+     * rejects the scheduled task it is released by the running maintenance's
+     * own termination, so the caller never releases it directly.
+     */
+    suspend fun acquireMaintenanceLease() {
+        // Wait without holding syncMutex: the maintenance that owns the
+        // lease can only release it via [maintenanceFinished], which needs
+        // syncMutex, so acquiring while holding syncMutex would deadlock
+        // both sides (the terminal handling would never reach the release).
+        maintenanceMutex.lock()
+        syncMutex.withLock {
+            maintenanceLeaseHolders++
+        }
+    }
+
+    /**
+     * Runs [block] while holding the maintenance lease, waiting for any
+     * active maintenance to terminate first. For one-off local tree
+     * mutations that are not followed by a maintenance (e.g. manual imports
+     * or theme imports); deploy/sync use [acquireMaintenanceLease] instead
+     * because their lease must span the maintenance they start.
+     */
+    suspend fun <T> withMaintenanceLease(block: suspend () -> T): T {
+        acquireMaintenanceLease()
+        try {
+            return block()
+        } finally {
+            releaseMaintenanceLease()
+        }
+    }
+
+    /**
+     * Releases one lease held by a caller that acquired it but will not
+     * schedule a maintenance (e.g. a sync whose external import failed
+     * before the task could be scheduled): the daemon's terminal handling
+     * would never run, so the lease would otherwise block later
+     * imports/deploys/syncs forever. The underlying mutex is unlocked when
+     * the last holder releases.
+     */
+    suspend fun releaseMaintenanceLease() = syncMutex.withLock {
+        maintenanceLeaseHolders--
+        if (maintenanceLeaseHolders == 0 && maintenanceMutex.isLocked) {
+            maintenanceMutex.unlock()
+        }
+    }
+
+    /**
+     * Queues an export request for the maintenance that follows and returns
+     * the deferred export outcome. The daemon completes the deferred after
+     * the post-maintenance export, or with `false` if the maintenance fails.
+     * When [exportUserData] is false only the post-schema-deploy config files
+     * are exported (e.g. for local config deployments that skipped the
+     * external import); exporting `sync/` then could overwrite newer
+     * external dictionaries with a stale local snapshot.
+     */
+    suspend fun requestExportAfterMaintenance(
+        exportUserData: Boolean = false,
+    ): CompletableDeferred<Boolean> = syncMutex.withLock {
+        CompletableDeferred<Boolean>().also {
+            exportRequests.addLast(ExportRequest(it, exportUserData))
+        }
+    }
+
+    /**
+     * Records that a maintenance run started, so that its completion only
+     * consumes requests that were queued before the run started. Requests
+     * queued during the run belong to the maintenance that follows (they are
+     * scheduled only after this one finishes), and consuming them here would
+     * export a snapshot this maintenance never produced. Also takes the
+     * maintenance lease, which [maintenanceFinished] releases.
+     */
+    suspend fun maintenanceStarted() = syncMutex.withLock {
+        startedWithRequests = exportRequests.isNotEmpty()
+        // A deploy/sync that started this maintenance already holds the
+        // lease (acquired before its import). Take the lease ourselves only
+        // for maintenance runs without an owner (e.g. the startup
+        // maintenance). Either way [maintenanceFinished] releases one share
+        // when the run terminates.
+        if (maintenanceLeaseHolders == 0 && !maintenanceMutex.isLocked) {
+            maintenanceMutex.lock()
+        }
+    }
+
+    /**
+     * Releases one lease share when a maintenance terminates, letting
+     * waiting imports proceed. Also releases the share of a deploy/sync
+     * whose task was rejected by librime: that share is owned by this
+     * running maintenance.
+     */
+    suspend fun maintenanceFinished() = syncMutex.withLock {
+        if (maintenanceLeaseHolders > 0) {
+            maintenanceLeaseHolders--
+        }
+        if (maintenanceLeaseHolders == 0 && maintenanceMutex.isLocked) {
+            maintenanceMutex.unlock()
+        }
+    }
+
+    /**
+     * Consumes the export request that this maintenance run owns and runs the
+     * post-maintenance exports for it, completing the request with the export
+     * outcome. Returns null when the run started without requests (e.g. a
+     * startup maintenance), in which case nothing is exported.
+     */
+    suspend fun exportPendingRequest(): Boolean? = syncMutex.withLock {
+        if (!startedWithRequests) return@withLock null
+        startedWithRequests = false
+        val request = exportRequests.removeFirstOrNull() ?: return@withLock null
+        val results =
+            buildList {
+                add(exportConfigFilesToExternalLocked(appContext))
+                if (request.exportUserData) {
+                    add(exportToExternalLocked(appContext))
+                }
+            }
+        results.forEach { result ->
+            result.exceptionOrNull()?.let { Timber.e(it, "Failed to export after maintenance") }
+        }
+        val ok = results.all { it.isSuccess }
+        request.deferred.complete(ok)
+        ok
+    }
+
+    /**
+     * Completes the export request that this failed maintenance run owns with
+     * `false`, so that waiters can retry instead of hanging until their
+     * timeout.
+     */
+    suspend fun failPendingRequest() = syncMutex.withLock {
+        if (startedWithRequests) {
+            startedWithRequests = false
+            exportRequests.removeFirstOrNull()?.deferred?.complete(false)
+        }
+    }
+
+    /**
+     * Withdraws a queued export request (e.g. when scheduling was rejected by
+     * librime) and completes it with `false` so the waiter can retry. Does
+     * nothing when the request was already consumed by a maintenance.
+     */
+    suspend fun cancelExportRequest(request: CompletableDeferred<Boolean>) = syncMutex.withLock {
+        val index = exportRequests.indexOfFirst { it.deferred === request }
+        if (index >= 0) {
+            exportRequests.removeAt(index)
+            request.complete(false)
+        }
+    }
+
+    /**
+     * Serializes external-tree operations: the pre-maintenance imports and the
+     * daemon's post-maintenance exports share local files and the index, so
+     * they must not overlap (librime only guards its own maintenance thread).
+     */
+    private val syncMutex = Mutex()
+
     private val parallelism = Runtime.getRuntime().availableProcessors().coerceIn(4, 8)
 
     private val uriPermissionFlags =
@@ -52,27 +254,6 @@ object RimeDataSync {
 
     fun isStorageAvailable(context: Context = appContext): Boolean = isRuntimeReady() && (!usesExternalSync(context) || hasExternalAccess(context))
 
-    suspend fun syncUserDataWithOptionalExport(
-        context: Context = appContext,
-        syncUserData: suspend () -> Boolean,
-    ): Boolean {
-        val dictSyncOk = syncUserData()
-        if (!dictSyncOk) {
-            Timber.w("Export skipped: Rime user sync failed")
-            return false
-        }
-        val exportOk =
-            when {
-                !usesExternalSync(context) -> true
-                !hasExternalAccess(context) -> {
-                    Timber.w("Export skipped: no data path selected")
-                    false
-                }
-                else -> exportToExternal(context).isSuccess
-            }
-        return exportOk
-    }
-
     fun releaseTreeUri(
         context: Context,
         uri: Uri,
@@ -85,17 +266,17 @@ object RimeDataSync {
         }.onFailure { Timber.w(it, "Failed to release URI permission: $uri") }
     }
 
-    fun clearExternalTree(context: Context) {
+    suspend fun clearExternalTree(context: Context) = syncMutex.withLock {
         treeUri()?.let { releaseTreeUri(context, it) }
         prefs.externalRimeTreeUri.setValue("")
         prefs.externalRimeDisplayName.setValue("")
         SyncIndex.clear()
     }
 
-    fun persistTreeUri(
+    suspend fun persistTreeUri(
         context: Context,
         uri: Uri,
-    ) {
+    ) = syncMutex.withLock {
         val previous = treeUri()
         context.contentResolver.takePersistableUriPermission(uri, uriPermissionFlags)
         prefs.externalRimeTreeUri.setValue(uri.toString())
@@ -116,49 +297,53 @@ object RimeDataSync {
             return Result.success(SyncStats())
         }
         DeployNotification.showProgress()
-        return withContext(Dispatchers.IO) {
-            runCatching {
-                val treeUri = treeUri() ?: error("No data path selected")
-                check(hasExternalAccess(context)) { "No access to data path" }
-                val cr = context.contentResolver
-                val rootId = DocumentsContract.getTreeDocumentId(treeUri)
-                val destRoot = DataManager.userDataDir
-                val index = SyncIndex.load()
-                val skipUserDb = !UserDbMigration.shouldImportUserDb()
-                val files = SafTreeWalker.listFiles(cr, treeUri, rootId, skipUserDb = skipUserDb)
-                val externalPaths = files.map { it.relativePath }.toSet()
-                val createdDirs = LocalDirectoryGate()
-                val copyResults =
-                    BoundedCopyPool.mapParallel(files, parallelism) { entry ->
-                        copySafToLocal(
-                            context,
-                            treeUri,
-                            entry,
-                            destRoot,
-                            index.entries,
-                            externalWins = true,
-                            createdDirs,
-                        )
-                    }
-                val removeResult = OrphanCleaner.removeLocalOrphans(destRoot, externalPaths)
-                SyncIndex.save(SyncIndex.withCurrentTree(mergeIndexEntries(index.entries, copyResults)))
-                val importStats = mergeStats(copyResults.map { it.result })
-                if (UserDbMigration.shouldImportUserDb() && importStats.failed == 0) {
-                    UserDbMigration.markImported()
+        return syncMutex.withLock { importToLocalLocked(context) }
+            .onFailure { Timber.e(it, "importToLocal failed") }
+            .also { result ->
+                if (!keepNotificationUntilDeploySuccess || result.isFailure) {
+                    DeployNotification.cancel()
                 }
-                DeployNotification.notifyPartialCopyIfNeeded(
-                    importStats + removeResult.toCopyResult(),
-                    "importToLocal",
-                )
-            }.onFailure { Timber.e(it, "importToLocal failed") }
-        }.also { result ->
-            if (!keepNotificationUntilDeploySuccess || result.isFailure) {
-                DeployNotification.cancel()
             }
+    }
+
+    private suspend fun importToLocalLocked(context: Context): Result<SyncStats> = withContext(Dispatchers.IO) {
+        runCatching {
+            val treeUri = treeUri() ?: error("No data path selected")
+            check(hasExternalAccess(context)) { "No access to data path" }
+            val cr = context.contentResolver
+            val rootId = DocumentsContract.getTreeDocumentId(treeUri)
+            val destRoot = DataManager.userDataDir
+            val index = SyncIndex.load()
+            val skipUserDb = !UserDbMigration.shouldImportUserDb()
+            val files = SafTreeWalker.listFiles(cr, treeUri, rootId, skipUserDb = skipUserDb)
+            val externalPaths = files.map { it.relativePath }.toSet()
+            val createdDirs = LocalDirectoryGate()
+            val copyResults =
+                BoundedCopyPool.mapParallel(files, parallelism) { entry ->
+                    copySafToLocal(
+                        context,
+                        treeUri,
+                        entry,
+                        destRoot,
+                        index.entries,
+                        externalWins = true,
+                        createdDirs,
+                    )
+                }
+            val removeResult = OrphanCleaner.removeLocalOrphans(destRoot, externalPaths)
+            SyncIndex.save(SyncIndex.withCurrentTree(mergeIndexEntries(index.entries, copyResults)))
+            val importStats = mergeStats(copyResults.map { it.result })
+            if (UserDbMigration.shouldImportUserDb() && importStats.failed == 0) {
+                UserDbMigration.markImported()
+            }
+            DeployNotification.notifyPartialCopyIfNeeded(
+                importStats + removeResult.toCopyResult(),
+                "importToLocal",
+            )
         }
     }
 
-    suspend fun exportConfigFilesToExternal(context: Context = appContext): Result<SyncStats> = withContext(Dispatchers.IO) {
+    private suspend fun exportConfigFilesToExternalLocked(context: Context = appContext): Result<SyncStats> = withContext(Dispatchers.IO) {
         if (!usesExternalSync(context)) {
             return@withContext Result.success(SyncStats())
         }
@@ -206,45 +391,48 @@ object RimeDataSync {
     suspend fun importThemeToLocal(
         context: Context = appContext,
         configId: String,
-    ): Result<SyncStats> = withContext(Dispatchers.IO) {
-        runCatching {
-            if (!usesExternalSync(context) || !hasExternalAccess(context)) {
-                return@runCatching SyncStats()
-            }
-            val treeUri = treeUri() ?: return@runCatching SyncStats()
-            val cr = context.contentResolver
-            val rootId = DocumentsContract.getTreeDocumentId(treeUri)
-            val destRoot = DataManager.userDataDir
-            val themeFileName = "$configId.yaml"
-            val index = SyncIndex.load()
-            val entry =
-                SafTreeWalker
-                    .listFiles(cr, treeUri, rootId)
-                    .find { it.relativePath == themeFileName }
-            if (entry == null) {
-                Timber.d("Theme file '$themeFileName' not found at external root, skip import")
-                return@runCatching SyncStats()
-            }
-            val createdDirs = LocalDirectoryGate()
-            val copyResult =
-                copySafToLocal(
-                    context,
-                    treeUri,
-                    entry,
-                    destRoot,
-                    index.entries,
-                    externalWins = true,
-                    createdDirs,
+    ): Result<SyncStats> = syncMutex.withLock {
+        withContext(Dispatchers.IO) {
+            runCatching {
+                if (!usesExternalSync(context) || !hasExternalAccess(context)) {
+                    return@runCatching SyncStats()
+                }
+                val treeUri = treeUri() ?: return@runCatching SyncStats()
+                val cr = context.contentResolver
+                val rootId = DocumentsContract.getTreeDocumentId(treeUri)
+                val destRoot = DataManager.userDataDir
+                val themeFileName = "$configId.yaml"
+                val index = SyncIndex.load()
+                val entry =
+                    SafTreeWalker
+                        .listFiles(cr, treeUri, rootId)
+                        .find { it.relativePath == themeFileName }
+                if (entry == null) {
+                    Timber.d("Theme file '$themeFileName' not found at external root, skip import")
+                    return@runCatching SyncStats()
+                }
+                val createdDirs = LocalDirectoryGate()
+                val copyResult =
+                    copySafToLocal(
+                        context,
+                        treeUri,
+                        entry,
+                        destRoot,
+                        index.entries,
+                        externalWins = true,
+                        createdDirs,
+                    )
+                SyncIndex.save(SyncIndex.withCurrentTree(mergeIndexEntries(index.entries, listOf(copyResult))))
+                DeployNotification.notifyPartialCopyIfNeeded(
+                    mergeStats(listOf(copyResult.result)),
+                    "importThemeToLocal for '$configId'",
+
                 )
-            SyncIndex.save(SyncIndex.withCurrentTree(mergeIndexEntries(index.entries, listOf(copyResult))))
-            DeployNotification.notifyPartialCopyIfNeeded(
-                mergeStats(listOf(copyResult.result)),
-                "importThemeToLocal for '$configId'",
-            )
-        }.onFailure { Timber.e(it, "importThemeToLocal failed for '$configId'") }
+            }.onFailure { Timber.e(it, "importThemeToLocal failed for '$configId'") }
+        }
     }
 
-    suspend fun exportToExternal(context: Context = appContext): Result<SyncStats> = withContext(Dispatchers.IO) {
+    private suspend fun exportToExternalLocked(context: Context = appContext): Result<SyncStats> = withContext(Dispatchers.IO) {
         if (!usesExternalSync(context)) {
             return@withContext Result.success(SyncStats())
         }

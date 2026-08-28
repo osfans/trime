@@ -158,9 +158,11 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
             .Builder(requireContext())
             .setMessage(R.string.select_another_directory_to_sync)
             .setPositiveButton(R.string.select_another_directory) { _, _ ->
-                RimeDataSync.clearExternalTree(requireContext())
-                updateDataPathSummary()
-                launchResetDataPathPicker()
+                lifecycleScope.launch {
+                    RimeDataSync.clearExternalTree(requireContext())
+                    updateDataPathSummary()
+                    launchResetDataPathPicker()
+                }
             }.setNegativeButton(android.R.string.cancel, null)
             .show()
     }
@@ -193,19 +195,21 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
     }
 
     private fun fallbackToAppStorage() {
-        RimeDataSync.clearExternalTree(requireContext())
-        UserDbMigration.onStorageModeChanged(
-            DataStorageMode.EXTERNAL_SYNC,
-            DataStorageMode.APP_STORAGE,
-        )
-        prefs.dataStorageMode.setValue(DataStorageMode.APP_STORAGE)
-        updateStorageModeUi()
-        updateDataPathSummary()
-        AlertDialog
-            .Builder(requireContext())
-            .setMessage(R.string.external_sync_fallback_app_storage)
-            .setPositiveButton(android.R.string.ok, null)
-            .show()
+        lifecycleScope.launch {
+            RimeDataSync.clearExternalTree(requireContext())
+            UserDbMigration.onStorageModeChanged(
+                DataStorageMode.EXTERNAL_SYNC,
+                DataStorageMode.APP_STORAGE,
+            )
+            prefs.dataStorageMode.setValue(DataStorageMode.APP_STORAGE)
+            updateStorageModeUi()
+            updateDataPathSummary()
+            AlertDialog
+                .Builder(requireContext())
+                .setMessage(R.string.external_sync_fallback_app_storage)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+        }
     }
 
     override fun onCreatePreferences(
@@ -242,8 +246,10 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                                 oldMode == DataStorageMode.EXTERNAL_SYNC &&
                                 mode == DataStorageMode.APP_STORAGE
                             ) {
-                                RimeDataSync.clearExternalTree(ctx)
-                                updateDataPathSummary()
+                                lifecycleScope.launch {
+                                    RimeDataSync.clearExternalTree(ctx)
+                                    updateDataPathSummary()
+                                }
                             }
                             true
                         }
@@ -269,14 +275,15 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                     lifecycleScope.launch {
                         withLoadingDialog(ctx) {
                             runCatching {
-                                viewModel.rime.runOnReady { syncUserData() }
-                            }.onSuccess { success ->
+                                viewModel.rime.runOnReady {
+                                    syncUserData()
+                                }
+                            }.onSuccess { scheduled ->
                                 ctx.toast(
-                                    when {
-                                        !success -> R.string.sync_user_data_failure
-                                        RimeDataSync.usesExternalSync(ctx) ->
-                                            R.string.sync_user_data_success_external
-                                        else -> R.string.sync_user_data_success
+                                    if (scheduled) {
+                                        R.string.sync_user_data_scheduled
+                                    } else {
+                                        R.string.sync_user_data_failure
                                     },
                                 )
                             }.onFailure {

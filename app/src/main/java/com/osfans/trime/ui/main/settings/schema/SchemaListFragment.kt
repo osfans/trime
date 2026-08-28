@@ -9,7 +9,6 @@ import android.view.View
 import com.osfans.trime.TrimeApplication
 import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.daemon.RimeDaemon
-import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.ui.common.OnItemChangedListener
 import com.osfans.trime.ui.main.settings.ProgressFragment
 import com.osfans.trime.util.NaiveDustman
@@ -106,9 +105,6 @@ class SchemaListFragment :
                         session.runOnReady {
                             setEnabledSchemata(schemaIds)
                             deploy(skipImport = true)
-                        }
-                        if (RimeDataSync.usesExternalSync(appContext)) {
-                            RimeDataSync.exportConfigFilesToExternal(appContext).getOrThrow()
                         }
                     } finally {
                         RimeDaemon.destroySession(sessionName)

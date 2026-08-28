@@ -23,9 +23,11 @@ data class SyncIndexData(
 )
 
 /**
- * File-backed index of synced paths. Not thread-safe.
+ * File-backed index of synced paths.
  *
- * Callers must not call [load], [save], or [clear] at the same time from more than one thread.
+ * [load], [save], and [clear] are individually synchronized; callers must
+ * still serialize load-to-save sequences (e.g. via RimeDataSync's operation
+ * lock) to avoid lost updates.
  */
 object SyncIndex {
     private const val INDEX_FILE = "rime_sync_index.json"
@@ -35,6 +37,7 @@ object SyncIndex {
     private val indexFile: File
         get() = File(appContext.filesDir, INDEX_FILE)
 
+    @Synchronized
     fun load(): SyncIndexData {
         val stored =
             indexFile
@@ -49,10 +52,12 @@ object SyncIndex {
         return stored
     }
 
+    @Synchronized
     fun save(data: SyncIndexData) {
         indexFile.writeText(json.encodeToString(data))
     }
 
+    @Synchronized
     fun clear() {
         save(SyncIndexData())
     }

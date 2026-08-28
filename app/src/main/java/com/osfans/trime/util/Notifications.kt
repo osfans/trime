@@ -91,6 +91,21 @@ object DeployNotification {
             .let { notificationManager.notify(MESSAGE_ID, it) }
     }
 
+    fun showExportFailure() {
+        ensureChannel()
+        NotificationCompat
+            .Builder(appContext, CHANNEL_ID)
+            .setContentTitle(appContext.getString(R.string.rime_daemon))
+            .setSmallIcon(R.drawable.ic_baseline_warning_24)
+            .setColor(Color.YELLOW)
+            .setContentText(appContext.getString(R.string.sync_export_failure))
+            .setOngoing(false)
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+            .let { notificationManager.notify(MESSAGE_ID, it) }
+    }
+
     fun cancel() {
         notificationManager.cancel(MESSAGE_ID)
     }

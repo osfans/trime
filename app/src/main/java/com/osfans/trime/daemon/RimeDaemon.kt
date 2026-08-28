@@ -15,6 +15,7 @@ import com.osfans.trime.core.RimeLifecycle
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.lifecycleScope
 import com.osfans.trime.core.whenReady
+import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.ui.main.LogActivity
 import com.osfans.trime.util.DeployNotification
 import com.osfans.trime.util.appContext
@@ -27,6 +28,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import splitties.systemservices.notificationManager
+import timber.log.Timber
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
@@ -160,30 +162,58 @@ object RimeDaemon {
         if (it is RimeMessage.DeployMessage) {
             when (it.data) {
                 RimeMessage.DeployMessage.State.Start -> {
+                    // Bind the pending export requests to this maintenance
+                    // run, so its completion only consumes requests that were
+                    // queued before it started.
+                    RimeDataSync.maintenanceStarted()
                     DeployNotification.showProgress()
                     withContext(Dispatchers.IO) { subprocess("logcat", "--clear") }
                 }
                 RimeMessage.DeployMessage.State.Success -> {
-                    DeployNotification.showSuccess()
+                    // Export only for maintenance runs preceded by an external
+                    // import or a local config change (deploy/sync): startup
+                    // maintenance imports nothing, and exporting then could
+                    // overwrite newer external configs. The success
+                    // notification is posted only after the exports finished.
+                    try {
+                        when (RimeDataSync.exportPendingRequest()) {
+                            null, true -> DeployNotification.showSuccess()
+                            false -> DeployNotification.showExportFailure()
+                        }
+                    } finally {
+                        // Release the maintenance lease so that imports
+                        // waiting for this run can proceed.
+                        RimeDataSync.maintenanceFinished()
+                    }
                 }
                 RimeMessage.DeployMessage.State.Failure -> {
-                    val intent =
-                        Intent(appContext, LogActivity::class.java).apply {
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            val log =
-                                subprocess("logcat", "-v", "brief", "-s", "rime.trime:W", "-d")
-                                    .readText()
-                            putExtra(LogActivity.FROM_DEPLOY, true)
-                            putExtra(LogActivity.DEPLOY_FAILURE_TRACE, log)
-                        }
-                    val pendingIntent =
-                        PendingIntent.getActivity(
-                            appContext,
-                            0,
-                            intent,
-                            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE,
-                        )
-                    DeployNotification.showFailure(pendingIntent)
+                    try {
+                        // Complete the pending export request with failure so that
+                        // waiters (e.g. the background sync worker) can retry
+                        // instead of waiting for the next maintenance.
+                        RimeDataSync.failPendingRequest()
+                        val intent =
+                            Intent(appContext, LogActivity::class.java).apply {
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                val log =
+                                    subprocess("logcat", "-v", "brief", "-s", "rime.trime:W", "-d")
+                                        .readText()
+                                putExtra(LogActivity.FROM_DEPLOY, true)
+                                putExtra(LogActivity.DEPLOY_FAILURE_TRACE, log)
+                            }
+                        val pendingIntent =
+                            PendingIntent.getActivity(
+                                appContext,
+                                0,
+                                intent,
+                                PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE,
+                            )
+                        DeployNotification.showFailure(pendingIntent)
+                    } finally {
+                        // Release the maintenance lease so that imports
+                        // waiting for this run can proceed.
+                        RimeDataSync.maintenanceFinished()
+                    }
                 }
             }
         }

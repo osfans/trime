@@ -62,6 +62,7 @@
     <string name="clipboard_suggestion">顯示剪貼簿建議</string>
     <string name="clipboard_suggestion_timeout">剪貼簿項目逾時</string>
     <string name="deploy_finish">部署完成</string>
+    <string name="sync_export_failure">匯出到外部資料夾失敗</string>
     <string name="open_source_licenses">開放源代碼軟體許可</string>
     <string name="system_default">系統預設</string>
     <string name="key_swipe_travel">觸發滑動手勢的最短距離</string>
@@ -158,6 +159,7 @@
     <string name="data_path_not_selected">未選擇資料夾</string>
     <string name="sync_user_data_success">使用者資料同步成功</string>
     <string name="sync_user_data_success_external">使用者資料已同步到外部資料夾</string>
+    <string name="sync_user_data_scheduled">使用者資料同步已開始，結果請查看通知</string>
     <string name="sync_user_data_failure">使用者資料同步失敗</string>
     <string name="sync_partial_copy_failure">部分檔案複製失敗</string>
     <string name="sync_partial_copy_failure_detail">%2$s 時有 %1$d 個檔案複製失敗。其餘檔案已複製，部署將繼續進行。</string>

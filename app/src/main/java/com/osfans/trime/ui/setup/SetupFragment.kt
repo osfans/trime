@@ -10,12 +10,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.sync.DataStorageMode
 import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.databinding.FragmentSetupBinding
 import com.osfans.trime.util.serializable
+import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class SetupFragment : Fragment() {
     private lateinit var binding: FragmentSetupBinding
@@ -41,11 +44,30 @@ class SetupFragment : Fragment() {
                     newMode == DataStorageMode.APP_STORAGE
                 ) {
                     prefs.userDbMigrated.setValue(false)
-                    RimeDataSync.clearExternalTree(requireContext())
+                    // Commit the mode only after the cleanup finished: a
+                    // cancelled cleanup would leave the stale external grant
+                    // behind and silently reuse it when switching back.
+                    lifecycleScope.launch {
+                        val cleared =
+                            runCatching { RimeDataSync.clearExternalTree(requireContext()) }.isSuccess
+                        // Re-check the selection before the delayed commit: the
+                        // user may have picked the external mode again while
+                        // the cleanup was waiting on the sync lock.
+                        if (cleared &&
+                            prefs.dataStorageMode.getValue() == DataStorageMode.EXTERNAL_SYNC
+                        ) {
+                            prefs.dataStorageMode.setValue(newMode)
+                        } else if (!cleared) {
+                            Timber.e("Failed to clear the external tree; keeping $oldMode")
+                        }
+                        sync()
+                        (requireActivity() as SetupActivity).updateButtons()
+                    }
+                } else {
+                    prefs.dataStorageMode.setValue(newMode)
+                    sync()
+                    (requireActivity() as SetupActivity).updateButtons()
                 }
-                prefs.dataStorageMode.setValue(newMode)
-                sync()
-                (requireActivity() as SetupActivity).updateButtons()
             }
             syncFromExternalDesc.setOnClickListener { syncFromExternalOption.isChecked = true }
             appSpecificStorageDesc.setOnClickListener { appSpecificStorageOption.isChecked = true }

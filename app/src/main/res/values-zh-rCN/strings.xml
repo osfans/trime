@@ -59,6 +59,7 @@
     <string name="clipboard_suggestion">显示剪贴板提示</string>
     <string name="clipboard_suggestion_timeout">剪贴板提示超时</string>
     <string name="deploy_finish">部署完成</string>
+    <string name="sync_export_failure">导出到外部文件夹失败</string>
     <string name="system_default">系统默认</string>
     <string name="key_swipe_travel">触发按键滑动手势的距离</string>
     <string name="trime_app_slogan">击响中文之韵</string>
@@ -159,6 +160,7 @@
     <string name="data_path_not_selected">未选择数据文件夹</string>
     <string name="sync_user_data_success">用户数据同步成功</string>
     <string name="sync_user_data_success_external">用户数据已同步到外部文件夹</string>
+    <string name="sync_user_data_scheduled">用户数据同步已开始，结果请查看通知</string>
     <string name="sync_user_data_failure">用户数据同步失败</string>
     <string name="sync_partial_copy_failure">部分文件复制失败</string>
     <string name="sync_partial_copy_failure_detail">%2$s 时有 %1$d 个文件复制失败。其余文件已复制，部署将继续进行。</string>

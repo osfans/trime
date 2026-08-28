@@ -13,8 +13,6 @@ import com.osfans.trime.data.sync.ExternalSyncFallback
 import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.ime.core.InlinePreeditMode
 import com.osfans.trime.util.appContext
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
@@ -22,10 +20,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 import timber.log.Timber
 import java.util.concurrent.CopyOnWriteArrayList
-import kotlin.time.Duration.Companion.minutes
 
 /**
  * Rime JNI and instance methods
@@ -94,7 +90,7 @@ class Rime :
         getCurrentRimeSchema() == ".default" // 無方案
     }
 
-    override suspend fun deploy(skipImport: Boolean) = RimeMaintenanceMutex.withLock {
+    override suspend fun deploy(skipImport: Boolean) {
         if (RimeDataSync.usesExternalSync()) {
             if (!RimeDataSync.hasExternalAccess(appContext)) {
                 ExternalSyncFallback.fallbackToAppStorage(appContext)
@@ -109,35 +105,12 @@ class Rime :
                 Timber.i("Import finished: ${importResult.getOrNull()}")
             }
         }
-        val deployFinished = CompletableDeferred<Boolean>()
-        val deployHandler: (RimeMessage<*>) -> Unit = { message ->
-            if (message is RimeMessage.DeployMessage) {
-                when (message.data) {
-                    RimeMessage.DeployMessage.State.Start -> Unit
-                    RimeMessage.DeployMessage.State.Success -> {
-                        deployFinished.complete(true)
-                    }
-                    RimeMessage.DeployMessage.State.Failure -> {
-                        deployFinished.complete(false)
-                    }
-                }
-            }
-        }
-        registerRimeMessageHandler(deployHandler)
-        try {
-            withRimeContext {
-                exitRime()
-                startRime(true)
-            }
-            val success =
-                withContext(Dispatchers.IO) {
-                    withTimeout(5.minutes) {
-                        deployFinished.await()
-                    }
-                }
-            check(success) { "Rime deploy failed" }
-        } finally {
-            unregisterRimeMessageHandler(deployHandler)
+        // The deployment runs asynchronously on the rime maintenance thread. Its
+        // final result is reported by the daemon's deploy notification, which also
+        // exports the post-deploy config files, so callers do not need to wait here.
+        withRimeContext {
+            exitRime()
+            startRime(true)
         }
     }
 
@@ -146,43 +119,14 @@ class Rime :
         startRime(false)
     }
 
-    override suspend fun syncUserData(): Boolean = RimeMaintenanceMutex.withLock {
+    override suspend fun syncUserData(): Boolean {
         // RimeSyncUserData schedules maintenance asynchronously and returns once the
-        // worker is started. Wait for DeployMessage so callers (e.g. export) only
-        // proceed after sync/<installation_id>/ has been written.
-        val syncFinished = CompletableDeferred<Boolean>()
-        val syncHandler: (RimeMessage<*>) -> Unit = { message ->
-            if (message is RimeMessage.DeployMessage) {
-                when (message.data) {
-                    RimeMessage.DeployMessage.State.Success -> syncFinished.complete(true)
-                    RimeMessage.DeployMessage.State.Failure -> syncFinished.complete(false)
-                    else -> {}
-                }
-            }
-        }
-        registerRimeMessageHandler(syncHandler)
-        val syncOk =
-            try {
-                val started = withRimeContext { syncRimeUserData() }
-                if (!started) {
-                    false
-                } else {
-                    withContext(Dispatchers.IO) {
-                        withTimeout(5.minutes) {
-                            syncFinished.await()
-                        }
-                    }
-                }
-            } finally {
-                unregisterRimeMessageHandler(syncHandler)
-            }
-        if (!syncOk) return@withLock false
-        if (!RimeDataSync.usesExternalSync()) return@withLock true
-        if (!RimeDataSync.hasExternalAccess(appContext)) {
-            Timber.w("Export skipped: no data path selected")
-            return@withLock false
-        }
-        RimeDataSync.exportToExternal(appContext).isSuccess
+        // worker is started. Concurrent maintenance is rejected by librime itself
+        // (Deployer::StartWork returns false while a work thread is running), so the
+        // result only tells whether the task was scheduled. The maintenance result
+        // is reported via the daemon's deploy notification, which also exports the
+        // sync/ output.
+        return withRimeContext { syncRimeUserData() }
     }
 
     override suspend fun processKey(
