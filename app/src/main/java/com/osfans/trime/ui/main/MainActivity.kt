@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
             }
         AppCompatDelegate.setDefaultNightMode(uiMode)
         super.onCreate(savedInstanceState)
-        if (SetupActivity.shouldSetup()) {
+        if (SetupActivity.shouldShowUp()) {
             startActivity<SetupActivity>()
             finish()
             return
@@ -155,7 +155,7 @@ class MainActivity : AppCompatActivity() {
     private fun processIntent(intent: Intent?) {
         val action = intent?.action ?: return
         when (action) {
-            Intent.ACTION_MAIN -> if (SetupActivity.shouldSetup()) {
+            Intent.ACTION_MAIN -> if (SetupActivity.shouldShowUp()) {
                 startActivity<SetupActivity>()
             }
             Intent.ACTION_RUN -> {
