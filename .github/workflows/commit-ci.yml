@@ -49,6 +49,11 @@ jobs:
         run: |
           sdkmanager --install "cmake;3.31.6"
 
+      - name: Check code style
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          make style-lint
+
       - name: Calculate JNI cache hash
         id: cache-hash
         run: |
@@ -65,11 +70,6 @@ jobs:
         if: ${{ !steps.jni-cache.outputs.cache-hit }}
         run: |
           git submodule update --init --recursive
-        
-      - name: Check code style
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        run: |
-          make style-lint
 
       - name: Build debug Trime
         run: |
