@@ -7,6 +7,9 @@
 # clang format options
 method="-i"
 
+# echo clang-format version for developer
+clang-format --version
+
 while getopts "in" option; do
 	case "${option}" in
 	i) # format code

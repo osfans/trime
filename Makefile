@@ -36,6 +36,7 @@ spotlessApply:
 cmake-format:
 	cmake-format -i app/src/main/jni/cmake/*.cmake app/src/main/jni/CMakeLists.txt
 
+# Currently we are using clang-format version 22.1.8
 clang-format-lint:
 	./script/clang-format.sh -n
 
