@@ -7,7 +7,7 @@
 #include "jni-utils.h"
 
 extern "C" JNIEXPORT jobject JNICALL
-Java_com_osfans_trime_core_RimeKeyEvent_parse(JNIEnv *env, jclass clazz,
+Java_com_osfans_trime_core_RimeKeyEvent_parse(JNIEnv* env, jclass clazz,
                                               jstring repr) {
   rime::KeyEvent ke;
   ke.Parse(*CString(env, repr));
@@ -16,14 +16,14 @@ Java_com_osfans_trime_core_RimeKeyEvent_parse(JNIEnv *env, jclass clazz,
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_com_osfans_trime_core_RimeKeyEvent_getModifierByName(JNIEnv *env,
+Java_com_osfans_trime_core_RimeKeyEvent_getModifierByName(JNIEnv* env,
                                                           jclass /* thiz */,
                                                           jstring name) {
   return RimeGetModifierByName(CString(env, name));
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_com_osfans_trime_core_RimeKeyEvent_getKeycodeByName(JNIEnv *env,
+Java_com_osfans_trime_core_RimeKeyEvent_getKeycodeByName(JNIEnv* env,
                                                          jclass /* thiz */,
                                                          jstring name) {
   return RimeGetKeycodeByName(CString(env, name));

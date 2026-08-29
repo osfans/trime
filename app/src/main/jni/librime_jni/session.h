@@ -7,7 +7,7 @@
 class SessionHolder {
  public:
   SessionHolder() {
-    auto *api = rime_get_api();
+    auto* api = rime_get_api();
     id_ = api->create_session();
 
     if (!id_) {
@@ -15,7 +15,7 @@ class SessionHolder {
     }
   }
 
-  SessionHolder(SessionHolder &&) = delete;
+  SessionHolder(SessionHolder&&) = delete;
 
   ~SessionHolder() {
     if (id_) {
