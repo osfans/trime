@@ -8,6 +8,7 @@ package com.osfans.trime.ime.composition
 import android.annotation.SuppressLint
 import android.graphics.RectF
 import android.os.Build
+import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
@@ -182,9 +183,17 @@ class CandidatesView(
                 x =
                     if (layoutDirection == LAYOUT_DIRECTION_RTL) {
                         val rtlOffset = parentWidth - horizontal
-                        if (rtlOffset + selfWidth > parentWidth) selfWidth - parentWidth else -rtlOffset
+                        if (rtlOffset + selfWidth > parentWidth - spacingDp) {
+                            selfWidth - parentWidth + spacingDp
+                        } else {
+                            -rtlOffset
+                        }
                     } else {
-                        if (horizontal + selfWidth > parentWidth) parentWidth - selfWidth else horizontal
+                        if (horizontal + selfWidth > parentWidth - spacingDp) {
+                            parentWidth - selfWidth - spacingDp
+                        } else {
+                            horizontal
+                        }
                     }
                 val bottomLimit = parentHeight - bottomInsets - spacingDp
                 y = if (bottom + selfHeight > bottomLimit) top - selfHeight - spacingDp else bottom + spacingDp
@@ -244,6 +253,15 @@ class CandidatesView(
 
         isFocusable = false
         layoutParams = ViewGroup.LayoutParams(wrapContent, wrapContent)
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        // Reserve SPACING on both horizontal sides, so the window stays within
+        // the screen edges when positioned by updatePosition()
+        val maxWidth = MeasureSpec.getSize(widthMeasureSpec) - dp(2 * SPACING).roundToInt()
+        val cappedWidthSpec = MeasureSpec.makeMeasureSpec(maxWidth, MeasureSpec.AT_MOST)
+        super.onMeasure(cappedWidthSpec, heightMeasureSpec)
+        setMeasuredDimension(measuredWidth.coerceAtMost(maxWidth), measuredHeight)
     }
 
     override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {
