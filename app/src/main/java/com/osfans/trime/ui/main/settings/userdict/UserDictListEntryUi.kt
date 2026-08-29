@@ -6,6 +6,7 @@
 package com.osfans.trime.ui.main.settings.userdict
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.view.ViewGroup
 import com.osfans.trime.R
 import splitties.dimensions.dp
@@ -43,6 +44,7 @@ class UserDictListEntryUi(
     val moreButton = imageButton {
         background = styledDrawable(android.R.attr.selectableItemBackground)
         imageDrawable = drawable(R.drawable.ic_baseline_more_horiz_24)
+        imageTintList = ColorStateList.valueOf(styledColor(android.R.attr.colorControlNormal))
     }
 
     override val root = constraintLayout {
