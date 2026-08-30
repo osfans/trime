@@ -8,7 +8,6 @@ package com.osfans.trime.ime.composition
 import android.annotation.SuppressLint
 import android.graphics.RectF
 import android.os.Build
-import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
@@ -132,12 +131,11 @@ class CandidatesView(
         preeditUi.root.visibility = if (preeditUi.visible) VISIBLE else GONE
         // the candidate layout is queried natively with the page itself
         candidatesUi.update(candidates, layout)
-        if (evaluateVisibility()) {
-            visibility = VISIBLE
+        visibility = if (evaluateVisibility()) {
+            VISIBLE
         } else {
             // RecyclerView won't update its items when ancestor view is GONE
-            visibility = INVISIBLE
-            touchEventReceiverWindow.dismiss()
+            INVISIBLE
         }
     }
 
@@ -155,32 +153,39 @@ class CandidatesView(
         val selfWidth = w.toFloat()
         val selfHeight = h.toFloat()
         val spacingDp = dp(SPACING)
+        val anchorTop = top - spacingDp
+        val anchorBottom = bottom + spacingDp
+        val bottomLimit = parentHeight - bottomInsets
+        val bottomSpace = bottomLimit - anchorBottom
 
-        val x: Float
-        val y: Float
+        val tX: Float
+        val tY: Float
+
         val minX = spacingDp
         val minY = spacingDp
         val maxX = parentWidth - selfWidth - spacingDp
-        val maxY = (if (bottom + selfHeight > parentHeight) top else parentHeight) - selfHeight - spacingDp
+        val flipAbove = anchorBottom + selfHeight > bottomLimit && // bottom space is not enough
+            anchorTop > bottomSpace // top space is larger than bottom
+        val maxY = if (flipAbove) anchorTop - selfHeight else bottomLimit - selfHeight - spacingDp
         when (position) {
             PopupPosition.TOP_RIGHT -> {
-                x = maxX
-                y = minY
+                tX = maxX
+                tY = minY
             }
             PopupPosition.TOP_LEFT -> {
-                x = minX
-                y = minY
+                tX = minX
+                tY = minY
             }
             PopupPosition.BOTTOM_RIGHT -> {
-                x = maxX
-                y = maxY
+                tX = maxX
+                tY = maxY
             }
             PopupPosition.BOTTOM_LEFT -> {
-                x = minX
-                y = maxY
+                tX = minX
+                tY = maxY
             }
             PopupPosition.FOLLOW -> {
-                x =
+                tX =
                     if (layoutDirection == LAYOUT_DIRECTION_RTL) {
                         val rtlOffset = parentWidth - horizontal
                         if (rtlOffset + selfWidth > parentWidth - spacingDp) {
@@ -195,14 +200,13 @@ class CandidatesView(
                             horizontal
                         }
                     }
-                val bottomLimit = parentHeight - bottomInsets - spacingDp
-                y = if (bottom + selfHeight > bottomLimit) top - selfHeight - spacingDp else bottom + spacingDp
+                tY = if (flipAbove) anchorTop - selfHeight else anchorBottom
             }
         }
-        translationX = x
-        translationY = y
+        translationX = tX
+        translationY = tY
         // update touchEventReceiverWindow's position after CandidatesView's
-        touchEventReceiverWindow.showAt(x.roundToInt(), y.roundToInt(), w, h)
+        touchEventReceiverWindow.showAt(tX.roundToInt(), tY.roundToInt(), w, h)
         shouldUpdatePosition = false
     }
 
@@ -212,6 +216,19 @@ class CandidatesView(
     ) {
         this.anchorPosition.set(anchorPosition)
         val (parentWidth, parentHeight) = parent
+        parentSize[0] = parentWidth
+        parentSize[1] = parentHeight
+        updatePosition()
+    }
+
+    /**
+     * Anchor candidates view to bottom-left corner, takes navbar bottom insets into consideration.
+     * Should only be used when [CursorAnchorInfo][android.view.inputmethod.CursorAnchorInfo] is invalid
+     */
+    fun updateCursorAnchor(@Size(2) parent: FloatArray) {
+        val (parentWidth, parentHeight) = parent
+        val bottom = parentHeight - bottomInsets
+        anchorPosition.set(0f, bottom, 0f, bottom)
         parentSize[0] = parentWidth
         parentSize[1] = parentHeight
         updatePosition()
@@ -256,12 +273,19 @@ class CandidatesView(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        // Reserve SPACING on both horizontal sides, so the window stays within
-        // the screen edges when positioned by updatePosition()
-        val maxWidth = MeasureSpec.getSize(widthMeasureSpec) - dp(2 * SPACING).roundToInt()
-        val cappedWidthSpec = MeasureSpec.makeMeasureSpec(maxWidth, MeasureSpec.AT_MOST)
-        super.onMeasure(cappedWidthSpec, heightMeasureSpec)
-        setMeasuredDimension(measuredWidth.coerceAtMost(maxWidth), measuredHeight)
+        // Reserve SPACING on both sides so that when updatePosition() docks the
+        // window to a parent edge, its own spacing budget (minX/maxX = spacingDp)
+        // is always achievable. Only cap when the spec constrains the width —
+        // an UNSPECIFIED spec has no parent edges to reserve spacing from.
+        val newWidthMeasureSpec =
+            if (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.UNSPECIFIED) {
+                widthMeasureSpec
+            } else {
+                val maxWidth = MeasureSpec.getSize(widthMeasureSpec) -
+                    dp(2 * SPACING).roundToInt()
+                MeasureSpec.makeMeasureSpec(maxWidth, MeasureSpec.AT_MOST)
+            }
+        super.onMeasure(newWidthMeasureSpec, heightMeasureSpec)
     }
 
     override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {
@@ -277,6 +301,13 @@ class CandidatesView(
         viewTreeObserver.addOnPreDrawListener(preDrawListener)
     }
 
+    override fun setVisibility(visibility: Int) {
+        if (visibility != VISIBLE) {
+            touchEventReceiverWindow.dismiss()
+        }
+        super.setVisibility(visibility)
+    }
+
     override fun onDetachedFromWindow() {
         viewTreeObserver.removeOnPreDrawListener(preDrawListener)
         viewTreeObserver.removeOnGlobalLayoutListener(layoutListener)
@@ -286,8 +317,8 @@ class CandidatesView(
 
     companion object {
         /**
-         * Minimum spacing in density-independent pixels (dp) between the candidate window
-         * and the screen edges.
+         * Spacing in density-independent pixels (dp) kept between the candidate
+         * window and the parent edges whenever the window docks to them.
          */
         private const val SPACING = 5f
     }
