@@ -18,6 +18,7 @@ import com.osfans.trime.R
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.prefs.PreferenceDelegate
+import com.osfans.trime.data.sync.DataStorageMode
 import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.data.sync.SafDisplayPath
 import com.osfans.trime.data.sync.UserDbMigration
@@ -60,7 +61,7 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
     }
 
     private val onStorageModeChange =
-        PreferenceDelegate.OnChangeListener<AppPrefs.Profile.DataStorageMode> { _, _ ->
+        PreferenceDelegate.OnChangeListener<DataStorageMode> { _, _ ->
             updateStorageModeUi()
         }
 
@@ -194,10 +195,10 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
     private fun fallbackToAppStorage() {
         RimeDataSync.clearExternalTree(requireContext())
         UserDbMigration.onStorageModeChanged(
-            AppPrefs.Profile.DataStorageMode.EXTERNAL_SYNC,
-            AppPrefs.Profile.DataStorageMode.APP_STORAGE,
+            DataStorageMode.EXTERNAL_SYNC,
+            DataStorageMode.APP_STORAGE,
         )
-        prefs.dataStorageMode.setValue(AppPrefs.Profile.DataStorageMode.APP_STORAGE)
+        prefs.dataStorageMode.setValue(DataStorageMode.APP_STORAGE)
         updateStorageModeUi()
         updateDataPathSummary()
         AlertDialog
@@ -215,7 +216,7 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
         preferenceScreen = preferenceManager.createPreferenceScreen(ctx).apply {
             addCategory(R.string.storage) {
                 isIconSpaceReserved = false
-                val storageModes = AppPrefs.Profile.DataStorageMode.entries
+                val storageModes = DataStorageMode.entries
                 addPreference(
                     ListPreference(ctx).apply {
                         key = AppPrefs.Profile.DATA_STORAGE_MODE
@@ -228,18 +229,18 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                         setOnPreferenceChangeListener { _, newValue ->
                             val oldMode = prefs.dataStorageMode.getValue()
                             val mode =
-                                AppPrefs.Profile.DataStorageMode.valueOf(newValue as String)
+                                DataStorageMode.valueOf(newValue as String)
                             UserDbMigration.onStorageModeChanged(oldMode, mode)
                             prefs.dataStorageMode.setValue(mode)
                             if (
-                                oldMode == AppPrefs.Profile.DataStorageMode.APP_STORAGE &&
-                                mode == AppPrefs.Profile.DataStorageMode.EXTERNAL_SYNC &&
+                                oldMode == DataStorageMode.APP_STORAGE &&
+                                mode == DataStorageMode.EXTERNAL_SYNC &&
                                 !RimeDataSync.hasExternalAccess()
                             ) {
                                 promptExternalSyncFolderSelection()
                             } else if (
-                                oldMode == AppPrefs.Profile.DataStorageMode.EXTERNAL_SYNC &&
-                                mode == AppPrefs.Profile.DataStorageMode.APP_STORAGE
+                                oldMode == DataStorageMode.EXTERNAL_SYNC &&
+                                mode == DataStorageMode.APP_STORAGE
                             ) {
                                 RimeDataSync.clearExternalTree(ctx)
                                 updateDataPathSummary()

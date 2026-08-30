@@ -9,12 +9,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.RadioGroup
 import androidx.fragment.app.Fragment
 import com.osfans.trime.R
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.sync.DataStorageMode
 import com.osfans.trime.data.sync.RimeDataSync
-import com.osfans.trime.data.sync.UserDbMigration
 import com.osfans.trime.databinding.FragmentSetupBinding
 import com.osfans.trime.util.serializable
 
@@ -22,6 +21,7 @@ class SetupFragment : Fragment() {
     private lateinit var binding: FragmentSetupBinding
 
     private val page: SetupPage by lazy { requireArguments().serializable("page")!! }
+
     private val prefs = AppPrefs.defaultInstance().profile
 
     override fun onCreateView(
@@ -29,54 +29,45 @@ class SetupFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        binding = FragmentSetupBinding.inflate(inflater)
-        if (page == SetupPage.Permissions) {
-            setupStorageModeRadios()
+        binding = FragmentSetupBinding.inflate(inflater).apply {
+            storageModeOptions.setOnCheckedChangeListener { _, checkedId ->
+                val oldMode = prefs.dataStorageMode.getValue()
+                val newMode = when (checkedId) {
+                    R.id.sync_from_external_option -> DataStorageMode.EXTERNAL_SYNC
+                    R.id.app_specific_storage_option -> DataStorageMode.APP_STORAGE
+                    else -> return@setOnCheckedChangeListener
+                }
+                if (oldMode == DataStorageMode.EXTERNAL_SYNC &&
+                    newMode == DataStorageMode.APP_STORAGE
+                ) {
+                    prefs.userDbMigrated.setValue(false)
+                    RimeDataSync.clearExternalTree(requireContext())
+                }
+                prefs.dataStorageMode.setValue(newMode)
+                sync()
+                (requireActivity() as SetupActivity).updateButtons()
+            }
+            syncFromExternalDesc.setOnClickListener { syncFromExternalOption.isChecked = true }
+            appSpecificStorageDesc.setOnClickListener { appSpecificStorageOption.isChecked = true }
         }
         sync()
         return binding.root
     }
 
-    private fun setupStorageModeRadios() {
-        val mode = prefs.dataStorageMode.getValue()
-        binding.radioExternalSync.isChecked = mode == AppPrefs.Profile.DataStorageMode.EXTERNAL_SYNC
-        binding.radioAppStorage.isChecked = mode == AppPrefs.Profile.DataStorageMode.APP_STORAGE
-        binding.storageModeGroup.setOnCheckedChangeListener { _: RadioGroup, checkedId ->
-            val newMode =
-                when (checkedId) {
-                    R.id.radio_external_sync -> AppPrefs.Profile.DataStorageMode.EXTERNAL_SYNC
-                    R.id.radio_app_storage -> AppPrefs.Profile.DataStorageMode.APP_STORAGE
-                    else -> return@setOnCheckedChangeListener
-                }
-            if (prefs.dataStorageMode.getValue() != newMode) {
-                val oldMode = prefs.dataStorageMode.getValue()
-                UserDbMigration.onStorageModeChanged(oldMode, newMode)
-                prefs.dataStorageMode.setValue(newMode)
-                if (oldMode == AppPrefs.Profile.DataStorageMode.EXTERNAL_SYNC &&
-                    newMode == AppPrefs.Profile.DataStorageMode.APP_STORAGE
-                ) {
-                    RimeDataSync.clearExternalTree(requireContext())
-                }
-            }
-            sync()
-            (activity as? SetupActivity)?.updateButtons()
-        }
-        binding.descExternalSync.setOnClickListener {
-            binding.radioExternalSync.isChecked = true
-        }
-        binding.descAppStorage.setOnClickListener {
-            binding.radioAppStorage.isChecked = true
-        }
-    }
-
     // Called on window focus changed
     fun sync() {
         val done = page.isDone()
+        val isStorageModePage = page == SetupPage.Mode
+        val checkedId = when (prefs.dataStorageMode.getValue()) {
+            DataStorageMode.EXTERNAL_SYNC -> R.id.sync_from_external_option
+            DataStorageMode.APP_STORAGE -> R.id.app_specific_storage_option
+        }
         with(binding) {
+            storageModeOptions.visibility = if (isStorageModePage) View.VISIBLE else View.GONE
+            storageModeOptions.check(checkedId)
+
             stepText.text = page.getStepText(requireContext())
             hintText.text = page.getHintText(requireContext())
-            val showStorageMode = page == SetupPage.Permissions
-            storageModeGroup.visibility = if (showStorageMode) View.VISIBLE else View.GONE
             val showActionButton = !done && page.showActionButton()
             actionButton.visibility = if (showActionButton) View.VISIBLE else View.GONE
             actionButton.text = page.getButtonText(requireContext())

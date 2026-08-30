@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.annotation.Keep
 import com.osfans.trime.R
+import com.osfans.trime.data.sync.DataStorageMode
 import com.osfans.trime.ime.candidates.compact.CompactCandidateMode
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesLayout
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
@@ -359,10 +360,6 @@ class AppPrefs(
     class Profile(
         shared: SharedPreferences,
     ) : PreferenceDelegateOwner(shared) {
-        enum class DataStorageMode(override val stringRes: Int) : PreferenceDelegateEnum {
-            EXTERNAL_SYNC(R.string.data_storage_mode_external_sync),
-            APP_STORAGE(R.string.data_storage_mode_app_storage),
-        }
 
         companion object {
             const val EXTERNAL_RIME_TREE_URI = "profile_external_rime_tree_uri"
