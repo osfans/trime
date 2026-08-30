@@ -115,10 +115,10 @@
     <string name="profile">配置</string>
     <string name="storage">存储</string>
     <string name="data_storage_mode">数据存储模式</string>
-    <string name="data_storage_mode_external_sync">从外部存储导入</string>
-    <string name="data_storage_mode_app_storage">使用应用专属存储空间</string>
-    <string name="data_storage_mode_external_sync_desc">推荐。每次部署前从您选择的目录导入文件，并在同步时导出。需要较多存储空间。</string>
-    <string name="data_storage_mode_app_storage_desc">数据仅保存在应用文件夹。您需自行将 Trime 配置文件直接放入应用文件夹。删除 Trime 时这些文件会自动删除。</string>
+    <string name="sync_from_external">从外部存储同步</string>
+    <string name="use_app_specific_storage">使用应用专属存储空间</string>
+    <string name="sync_from_external_desc">每次部署或同步用户数据前，从指定目录导入数据到内部存储，并在同步用户数据后导出到该目录。需要较多存储空间。推荐老用户使用。</string>
+    <string name="use_app_specific_storage_desc">直接使用应用内部私有存储空间，用户需要使用支持的文件管理器管理数据。卸载应用时系统可能会询问是否保留数据，请随时做好备份。</string>
     <string name="external_sync_select_folder_message">外部同步需要选择数据文件夹。请选择存放 Trime 配置文件的位置。</string>
     <string name="external_sync_fallback_app_storage">文件夹选择失败或已取消。存储模式将还原为使用应用专属存储空间。</string>
     <string name="external_sync_missing_tree_fallback">外部数据文件夹缺失或无法访问，已切换为应用专属存储空间。如需继续外部同步，请在设置中重新选择文件夹。</string>
@@ -148,8 +148,8 @@
     <string name="enable_landscape_mode">启用横屏模式</string>
     <string name="split_space_percent">自动分割键盘比例</string>
     <string name="setup__step_three">第 3 步</string>
-    <string name="setup__select_data_path_hint">选择 Trime 如何存储 Rime 数据。</string>
-    <string name="setup__select_data_path">先选择数据文件夹</string>
+    <string name="setup__select_data_path_hint">选择<b>同文输入法</b>如何存储 Rime 数据</string>
+    <string name="setup__select_data_path">选择外部数据目录…</string>
     <string name="setup__data_path_imported">数据文件夹导入成功</string>
     <string name="setup__data_path_import_failed">数据文件夹导入失败</string>
     <string name="select_another_directory_to_sync">要选择另一个文件夹进行同步吗？</string>

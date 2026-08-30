@@ -1,6 +1,7 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2026 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.ui.setup
 
@@ -12,14 +13,14 @@ import com.osfans.trime.util.InputMethodUtils
 import com.osfans.trime.util.appContext
 
 enum class SetupPage {
-    Permissions,
+    Mode,
     Enable,
     Select,
     ;
 
     fun getStepText(context: Context) = context.getText(
         when (this) {
-            Permissions -> R.string.setup__step_one
+            Mode -> R.string.setup__step_one
             Enable -> R.string.setup__step_two
             Select -> R.string.setup__step_three
         },
@@ -27,7 +28,7 @@ enum class SetupPage {
 
     fun getHintText(context: Context) = context.getText(
         when (this) {
-            Permissions -> R.string.setup__select_data_path_hint
+            Mode -> R.string.setup__select_data_path_hint
             Enable -> R.string.setup__enable_ime_hint
             Select -> R.string.setup__select_ime_hint
         },
@@ -35,7 +36,7 @@ enum class SetupPage {
 
     fun getButtonText(context: Context) = context.getText(
         when (this) {
-            Permissions -> R.string.setup__select_data_path
+            Mode -> R.string.setup__select_data_path
             Enable -> R.string.setup__enable_ime
             Select -> R.string.setup__select_ime
         },
@@ -43,19 +44,19 @@ enum class SetupPage {
 
     fun getButtonAction(activity: FragmentActivity) {
         when (this) {
-            Permissions -> (activity as SetupActivity).launchDataPathPicker()
+            Mode -> (activity as SetupActivity).launchDataPathPicker()
             Enable -> InputMethodUtils.showImeEnablerActivity(activity)
             Select -> InputMethodUtils.showImePicker()
         }
     }
 
     fun showActionButton(): Boolean = when (this) {
-        Permissions -> RimeDataSync.usesExternalSync()
+        Mode -> RimeDataSync.usesExternalSync()
         else -> true
     }
 
     fun isDone() = when (this) {
-        Permissions -> RimeDataSync.isStorageAvailable(appContext)
+        Mode -> RimeDataSync.isStorageAvailable(appContext)
         Enable -> InputMethodUtils.checkIsTrimeEnabled()
         Select -> InputMethodUtils.checkIsTrimeSelected()
     }

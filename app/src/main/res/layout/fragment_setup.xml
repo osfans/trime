@@ -46,56 +46,54 @@
         android:layout_marginHorizontal="24dp"
         android:gravity="center"
         android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@id/storage_mode_group"
+        app:layout_constraintBottom_toTopOf="@id/storage_mode_options"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/step_text"
         tools:text="Hint text here ..." />
 
     <RadioGroup
-        android:id="@+id/storage_mode_group"
+        android:id="@+id/storage_mode_options"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
         android:layout_marginTop="16dp"
-        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/action_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/hint_text"
-        tools:visibility="visible">
+        app:layout_constraintTop_toBottomOf="@id/hint_text">
 
         <RadioButton
-            android:id="@+id/radio_external_sync"
+            android:id="@+id/sync_from_external_option"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/data_storage_mode_external_sync" />
+            android:text="@string/sync_from_external" />
 
         <TextView
-            android:id="@+id/desc_external_sync"
+            android:id="@+id/sync_from_external_desc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
             android:layout_marginBottom="12dp"
             android:clickable="true"
             android:focusable="true"
-            android:text="@string/data_storage_mode_external_sync_desc"
+            android:text="@string/sync_from_external_desc"
             android:textSize="14sp" />
 
         <RadioButton
-            android:id="@+id/radio_app_storage"
+            android:id="@+id/app_specific_storage_option"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/data_storage_mode_app_storage" />
+            android:text="@string/use_app_specific_storage" />
 
         <TextView
-            android:id="@+id/desc_app_storage"
+            android:id="@+id/app_specific_storage_desc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
             android:clickable="true"
             android:focusable="true"
-            android:text="@string/data_storage_mode_app_storage_desc"
+            android:text="@string/use_app_specific_storage_desc"
             android:textSize="14sp" />
     </RadioGroup>
 
@@ -107,7 +105,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/storage_mode_group"
+        app:layout_constraintTop_toBottomOf="@id/storage_mode_options"
         tools:text="Action" />
 
     <ImageView
@@ -122,7 +120,8 @@
         app:layout_constraintEnd_toStartOf="@id/done_text"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/storage_mode_group" />
+        app:layout_constraintTop_toBottomOf="@id/storage_mode_options"
+        tools:ignore="UseAppTint" />
 
     <TextView
         android:id="@+id/done_text"

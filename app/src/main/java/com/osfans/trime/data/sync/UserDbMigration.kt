@@ -16,11 +16,11 @@ object UserDbMigration {
     }
 
     fun onStorageModeChanged(
-        from: AppPrefs.Profile.DataStorageMode,
-        to: AppPrefs.Profile.DataStorageMode,
+        from: DataStorageMode,
+        to: DataStorageMode,
     ) {
-        if (from == AppPrefs.Profile.DataStorageMode.EXTERNAL_SYNC &&
-            to == AppPrefs.Profile.DataStorageMode.APP_STORAGE
+        if (from == DataStorageMode.EXTERNAL_SYNC &&
+            to == DataStorageMode.APP_STORAGE
         ) {
             prefs.userDbMigrated.setValue(false)
         }

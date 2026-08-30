@@ -77,12 +77,6 @@ class SetupActivity : FragmentActivity() {
         (fragment as? SetupFragment)?.sync()
     }
 
-    private fun ensureStorageReady(): Boolean {
-        if (SetupPage.Permissions.isDone()) return true
-        toast(R.string.setup__select_data_path)
-        return false
-    }
-
     private fun completeSetup() {
         startActivity<MainActivity>()
         finish()
@@ -114,7 +108,6 @@ class SetupActivity : FragmentActivity() {
         skipButton = binding.skipButton.apply {
             text = getString(R.string.setup__skip)
             setOnClickListener {
-                if (!ensureStorageReady()) return@setOnClickListener
                 AlertDialog
                     .Builder(this@SetupActivity)
                     .setMessage(R.string.setup__skip_hint)
@@ -132,7 +125,6 @@ class SetupActivity : FragmentActivity() {
         nextButton =
             binding.nextButton.apply {
                 setOnClickListener {
-                    if (!ensureStorageReady()) return@setOnClickListener
                     if (viewPager.currentItem != SetupPage.entries.size - 1) {
                         viewPager.currentItem += 1
                     } else {
@@ -144,13 +136,7 @@ class SetupActivity : FragmentActivity() {
         viewPager.adapter = Adapter()
         viewPager.registerOnPageChangeCallback(
             object : ViewPager2.OnPageChangeCallback() {
-                override fun onPageSelected(position: Int) {
-                    if (position != 0 && !SetupPage.Permissions.isDone()) {
-                        ensureStorageReady()
-                        viewPager.setCurrentItem(0, false)
-                    }
-                    updateButtons()
-                }
+                override fun onPageSelected(position: Int) = updateButtons()
             },
         )
         // Skip to undone page
@@ -165,14 +151,17 @@ class SetupActivity : FragmentActivity() {
 
     fun updateButtons() {
         val allDone = !SetupPage.hasUndonePage()
-        val ensureStorage = SetupPage.Permissions.isDone()
+        val modeSetupDone = SetupPage.Mode.isDone()
         val isFirstPage = viewPager.currentItem == 0
         val isLastPage = viewPager.currentItem.isLastPage()
 
+        viewPager.isUserInputEnabled = modeSetupDone
+
         prevButton.isGone = isFirstPage
-        skipButton.isGone = isFirstPage && !ensureStorage || allDone
+        skipButton.isGone = !modeSetupDone || allDone
         nextButton.text = getString(if (isLastPage) R.string.done else R.string.setup__next)
         nextButton.isGone = isLastPage && !allDone
+        nextButton.isEnabled = modeSetupDone
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

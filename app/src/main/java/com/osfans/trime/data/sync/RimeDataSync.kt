@@ -48,7 +48,7 @@ object RimeDataSync {
     fun isRuntimeReady(): Boolean = DataManager.userDataDir.canWrite() && DataManager.sharedDataDir.canWrite()
 
     fun usesExternalSync(context: Context = appContext): Boolean = AppPrefs.defaultInstance().profile.dataStorageMode.getValue() ==
-        AppPrefs.Profile.DataStorageMode.EXTERNAL_SYNC
+        DataStorageMode.EXTERNAL_SYNC
 
     fun isStorageAvailable(context: Context = appContext): Boolean = isRuntimeReady() && (!usesExternalSync(context) || hasExternalAccess(context))
 
