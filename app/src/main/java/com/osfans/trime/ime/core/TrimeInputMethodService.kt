@@ -288,7 +288,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         if (decorLocationUpdated) {
             candidatesView?.updateCursorAnchor(anchorPosition, contentSize)
         } else {
-            workaroundNullCursorAnchorInfo()
+            candidatesView?.updateCursorAnchor(contentSize)
         }
         return newCandidatesView
     }
@@ -377,11 +377,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     private val anchorPosition = RectF()
 
-    private fun workaroundNullCursorAnchorInfo() {
-        anchorPosition.set(0f, contentSize[1], 0f, contentSize[1])
-        candidatesView?.updateCursorAnchor(anchorPosition, contentSize)
-    }
-
     override fun onUpdateCursorAnchorInfo(info: CursorAnchorInfo) {
         val bounds = info.getCharacterBounds(0)
         // update anchorPosition
@@ -405,7 +400,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             updateDecorLocation()
         }
         if (anchorPosition.any(Float::isNaN)) {
-            workaroundNullCursorAnchorInfo()
+            candidatesView?.updateCursorAnchor(contentSize)
             return
         }
         info.matrix.mapRect(anchorPosition)
@@ -563,7 +558,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 if (!decorLocationUpdated) {
                     updateDecorLocation()
                 }
-                workaroundNullCursorAnchorInfo()
+                // anchor CandidatesView to bottom-left corner in case InputConnection does not
+                // support monitoring CursorAnchorInfo
+                candidatesView?.updateCursorAnchor(contentSize)
             }
         }
     }
