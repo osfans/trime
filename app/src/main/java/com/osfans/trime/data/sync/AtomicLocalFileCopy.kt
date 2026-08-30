@@ -58,7 +58,10 @@ object AtomicLocalFileCopy {
                     backup.renameTo(destFile)
                 }
             }
-            if (!backedUp && incoming.exists()) {
+            // The incoming temp file is a copy of the source data, so it can
+            // always be discarded, whether or not the destination was backed
+            // up (a failed restore leaves it orphaned otherwise).
+            if (incoming.exists()) {
                 incoming.delete()
             }
             throw e

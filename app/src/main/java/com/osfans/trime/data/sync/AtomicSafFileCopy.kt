@@ -7,6 +7,7 @@ package com.osfans.trime.data.sync
 import android.content.ContentResolver
 import android.net.Uri
 import android.provider.DocumentsContract
+import timber.log.Timber
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -66,30 +67,40 @@ object AtomicSafFileCopy {
                 SafTreeWalker.findChildDocumentId(contentResolver, treeUri, parentId, fileName)
             if (existingTargetId != null) {
                 val targetUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, existingTargetId)
-                backupUri =
-                    DocumentsContract.renameDocument(contentResolver, targetUri, backupName)
-                        ?: error("Failed to rename existing document to backup")
+                backupUri = moveDocument(contentResolver, parentUri, targetUri, backupName)
             }
 
-            val finalUri = replaceTempWithFinalName(contentResolver, parentUri, tempUri, fileName)
+            val finalUri = moveDocument(contentResolver, parentUri, tempUri, fileName)
             backupUri?.let { DocumentsContract.deleteDocument(contentResolver, it) }
             cache.rememberFile(relativePath, DocumentsContract.getDocumentId(finalUri), expectedBytes)
         } catch (e: Exception) {
             backupUri?.let { backup ->
-                DocumentsContract.renameDocument(contentResolver, backup, fileName)
+                runCatching {
+                    moveDocument(contentResolver, parentUri, backup, fileName)
+                }.onFailure { restoreError ->
+                    Timber.e(restoreError, "Failed to restore $fileName from backup")
+                }
             }
             runCatching { DocumentsContract.deleteDocument(contentResolver, tempUri) }
             throw e
         }
     }
 
-    private fun replaceTempWithFinalName(
+    /**
+     * Moves [sourceUri] under [parentUri] to [fileName], renaming when the
+     * provider supports it and otherwise falling back to a create + copy +
+     * delete sequence. On failure the created document is deleted before
+     * rethrowing, so no partial document is left at [fileName].
+     */
+    private fun moveDocument(
         contentResolver: ContentResolver,
         parentUri: Uri,
-        tempUri: Uri,
+        sourceUri: Uri,
         fileName: String,
-    ): Uri = DocumentsContract.renameDocument(contentResolver, tempUri, fileName)
+    ): Uri = DocumentsContract.renameDocument(contentResolver, sourceUri, fileName)
         ?: run {
+            // Providers may not implement renameDocument; fall back to a
+            // create + copy + delete sequence.
             val created =
                 DocumentsContract.createDocument(
                     contentResolver,
@@ -97,8 +108,17 @@ object AtomicSafFileCopy {
                     "application/octet-stream",
                     fileName,
                 ) ?: error("Failed to create document $fileName")
-            copyDocument(contentResolver, tempUri, created)
-            DocumentsContract.deleteDocument(contentResolver, tempUri)
+            try {
+                copyDocument(contentResolver, sourceUri, created)
+                if (!DocumentsContract.deleteDocument(contentResolver, sourceUri)) {
+                    error("Failed to delete source document $sourceUri")
+                }
+            } catch (e: Exception) {
+                // Leave no partial document at [fileName] so that a backup can
+                // be restored to this name cleanly.
+                runCatching { DocumentsContract.deleteDocument(contentResolver, created) }
+                throw e
+            }
             created
         }
 
