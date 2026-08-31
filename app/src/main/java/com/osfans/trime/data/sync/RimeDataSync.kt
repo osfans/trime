@@ -111,11 +111,12 @@ object RimeDataSync {
     suspend fun importToLocal(
         context: Context = appContext,
         keepNotificationUntilDeploySuccess: Boolean = false,
+        showProgress: Boolean = true,
     ): Result<SyncStats> {
         if (!usesExternalSync(context)) {
             return Result.success(SyncStats())
         }
-        DeployNotification.showProgress()
+        if (showProgress) DeployNotification.showProgress()
         return withContext(Dispatchers.IO) {
             runCatching {
                 val treeUri = treeUri() ?: error("No data path selected")
