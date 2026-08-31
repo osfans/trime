@@ -147,6 +147,16 @@ class Rime :
     }
 
     override suspend fun syncUserData(): Boolean = RimeMaintenanceMutex.withLock {
+        // Keep the local user data dir a fresh copy of the external tree before
+        // syncing. The first sync also migrates the user databases (imported
+        // once, never synced afterwards, see UserDbMigration); every subsequent
+        // sync imports incrementally (SyncIndex) before the rime maintenance
+        // runs. The import progress notification is suppressed so syncing does
+        // not show a deploy notification.
+        if (RimeDataSync.usesExternalSync() && RimeDataSync.hasExternalAccess(appContext)) {
+            RimeDataSync.importToLocal(appContext, showProgress = false)
+                .onFailure { Timber.e(it, "Failed to import before user-data sync") }
+        }
         // RimeSyncUserData schedules maintenance asynchronously and returns once the
         // worker is started. Wait for DeployMessage so callers (e.g. export) only
         // proceed after sync/<installation_id>/ has been written.
