@@ -2,6 +2,119 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.12] - 2026-09-01
+
+### 🚀 Features
+
+- Add input field for testing in `MainActivity`
+- Adjust margin so keyboard won't hide content
+- *(MainActivity)* Synchronize animation with the software keyboard
+- *(TestInputPanel)* Add fade-out animation for dismiss
+- Allow ignoring system gesture insets
+- Recreate input view when keyboard press area setting changes
+- Add vertical reverse layout for paged candidates
+- Wrap long candidate text in paged candidate items
+- Add strings for SAF storage and setup flow
+- Add SAF tree walker and sync index
+- Import and export Rime data via SAF
+- Import from SAF before deploy and await deploy completion
+- Export to SAF after background user-data sync
+- Replace storage permission step with SAF folder selection
+- Manage SAF data path and storage mode in profile
+- Sync theme and schema config with external SAF tree
+- Skip "userdb" directory too during import
+- Serialize local directory creation during import
+- Import via temp file then atomic replace
+- Export via temp SAF document then replace
+- One-time import of userdb on first migration
+- Show full directory path on "User Directory"
+- *(ui)* Restore the preedit UI root padding of #1933 and add top_start_radius
+- *(theme)* Complete state color params for key_border_color and key_symbol_color
+- Make system to ask user to keep data on uninstall
+- Import the external tree before user-data sync
+
+### 🐛 Bug Fixes
+
+- Loop `ContextWrapper` chain to get `FragmentActivity` correctly
+- Start drawable to `start` instead of `left`
+- Remove default tint color in vector drawable
+- Restore `isAsciiMode` after leaving password field
+- Binding keys for page turning couldn't turn candidate page continuously
+- Ensure input views aren't obscured by system UI bottom elements
+- Could not type uppercase letters in ascii mode
+- *(MainActivity)* Restore bottom margin after IME hides
+- Filter invalid key behavior tokens during keyboard parsing
+- Clear stale input bar candidates on paging mode switch
+- Uppercase key actions commit lowercase in ascii mode
+- Avoid oversized navigation bar inset (#2087)
+- Clear the SAF tree after a failed setup import
+- Bind the sync index to the selected tree URI
+- Export after every Rime user-data sync
+- Use unique SAF temp and backup names
+- Stage local copies in unique files and keep the old dest
+- Ui logic for storage mode change
+- *(ui)* Prevent the close button of the clipboard prompt from automatically gaining focus
+- *(ui)* Prevent candidate words in the candidate bar from automatically gaining focus
+- *(ui)* Prevent the sides and bottom of the keyboard area from automatically gaining focus
+- *(window)* After switching the theme color scheme, the position of the candidate window is not set correctly
+- *(theme)* Check and set initialization before accessing _activeTheme
+- *(ui)* In some apps, the clipboard popupMenu and keyboard stealing focus lead to high-frequency flickering
+- *(ui)* In some apps, the candidate popupMenu and keyboard stealing focus lead to high-frequency flickering
+- *(keyboard)* The keyboard can utilize the maximum available width when in landscape mode
+- *(keyboard)* The font icon with the prefix "ic@" should not be controlled by "keyLongTextSize"
+- *(ui)* The issue of abnormal coloring of the entry icon for test input
+- *(ui)* The abnormal color of the "More" button on the user dictionary page
+- *(window)* The issue where the container exceeds the screen when the content of the candidate window is too much
+- *(toolbar)* Clipboard content overflow when candidate_view_height is set to a certain threshold
+- *(key)* Unify per-key color fallback for functional keys
+
+### 🚜 Refactor
+
+- Polish TestInputPanel
+- Renew TestInputPanel background
+- Avoid setting internal option via rime
+- Disable popup menu icon showing on Samsung OneUI
+- Remove unused onRelease in keyboard action listener
+- Optimize text key sequence parsing
+- Improve KeyAction construction
+- Simplify KeyCode implementation
+- Simplify KeyCode conversions via generated mappings
+- Polish ToolButton implementation
+- Decouple ToolButton from RimeDaemon
+- Cache space key actions
+- Derive clickability from key behaviors
+- Don't bold toolbar labels by default
+- Merge Rime JNI queries to reduce boundary crossings
+- Migrate key symbol/hint visibility to app prefs
+- Do not open unrolled candidate window when highlight move on
+- Keep Rime user data under app-scoped storage
+- Extract DeployNotification for shared progress UI
+- Remove external storage permissions
+- Remove "reset data path" preference
+- Simplify picker intent logic
+- Refer to `installation.yaml` in DataManager
+- Refactor RimeLifecycle with StateFlow
+- Remove public MutableLiveData in steup UI
+- Polish setup page creation
+- Refine popup candidate window positioning
+
+### ⚡ Performance
+
+- Query the candidate layout with the response
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version to 3.3.12
+- Update dependencies and migrate to AGP 9
+- SpotlessApply
+- Upgrade openjdk to 25
+- Update github action
+- Upgrade runner image to ubuntu-26.04
+- Format with clang-format
+- Echo clang-format version
+- Move up code style lint step
+- Add 3.3.12 changelog
+
 ## [3.3.11] - 2026-07-01
 
 ### 🐛 Bug Fixes
