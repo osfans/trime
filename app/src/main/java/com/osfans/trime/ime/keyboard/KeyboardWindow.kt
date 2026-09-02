@@ -32,6 +32,7 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.runBlocking
+import org.kodein.di.DI
 import org.kodein.di.instance
 import splitties.dimensions.dp
 import splitties.systemservices.windowManager
@@ -41,16 +42,16 @@ import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import timber.log.Timber
 
-class KeyboardWindow :
-    BoardWindow.NoBarBoardWindow(),
+class KeyboardWindow(di: DI) :
+    BoardWindow.NoBarBoardWindow(di),
     ResidentWindow,
     InputBroadcastReceiver {
-    private val service: TrimeInputMethodService by di.instance()
-    private val theme: Theme by di.instance()
-    private val rime: RimeSession by di.instance()
-    private val commonKeyboardActionListener: CommonKeyboardActionListener by di.instance()
-    private val popup: PopupDelegate by di.instance()
-    private val enterKeyDisplay: EnterKeyDisplayDelegate by di.instance()
+    private val service: TrimeInputMethodService by instance()
+    private val theme: Theme by instance()
+    private val rime: RimeSession by instance()
+    private val commonKeyboardActionListener: CommonKeyboardActionListener by instance()
+    private val popup: PopupDelegate by instance()
+    private val enterKeyDisplay: EnterKeyDisplayDelegate by instance()
 
     private val cursorCapsMode: Int
         get() =

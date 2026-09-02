@@ -26,6 +26,7 @@ import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ui.main.settings.ThemePickerDialog
 import com.osfans.trime.util.AppUtils
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
 import org.kodein.di.instance
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.constraintLayout
@@ -35,12 +36,12 @@ import splitties.views.dsl.core.add
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.recyclerview.gridLayoutManager
 
-class SwitchOptionWindow :
-    BoardWindow.BarBoardWindow(),
+class SwitchOptionWindow(di: DI) :
+    BoardWindow.BarBoardWindow(di),
     InputBroadcastReceiver {
-    private val service: TrimeInputMethodService by di.instance()
-    private val rime: RimeSession by di.instance()
-    private val theme: Theme by di.instance()
+    private val service: TrimeInputMethodService by instance()
+    private val rime: RimeSession by instance()
+    private val theme: Theme by instance()
 
     private val staticEntries by lazy {
         arrayOf(

@@ -25,14 +25,15 @@ import com.osfans.trime.ime.window.BoardWindowManager
 import com.osfans.trime.util.NativeTokenizer
 import com.osfans.trime.util.toast
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
 import org.kodein.di.instance
 import splitties.dimensions.dp
 import splitties.systemservices.clipboardManager
 
-class SegmentsWindow(private val source: String) : BoardWindow.BarBoardWindow() {
-    private val service: TrimeInputMethodService by di.instance()
-    private val theme: Theme by di.instance()
-    private val windowManager: BoardWindowManager by di.instance()
+class SegmentsWindow(di: DI, private val source: String) : BoardWindow.BarBoardWindow(di) {
+    private val service: TrimeInputMethodService by instance()
+    private val theme: Theme by instance()
+    private val windowManager: BoardWindowManager by instance()
 
     override val title: String by lazy {
         context.getString(R.string.word_segment)

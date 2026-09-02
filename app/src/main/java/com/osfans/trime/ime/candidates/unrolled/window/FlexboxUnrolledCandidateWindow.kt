@@ -17,10 +17,11 @@ import com.osfans.trime.ime.candidates.unrolled.PagingCandidateViewAdapter
 import com.osfans.trime.ime.candidates.unrolled.UnrolledCandidateLayout
 import com.osfans.trime.ime.candidates.unrolled.decoration.FlexboxHorizontalDecoration
 import com.osfans.trime.ime.window.BoardWindow
+import org.kodein.di.DI
 import splitties.dimensions.dp
 import splitties.views.dsl.core.wrapContent
 
-class FlexboxUnrolledCandidateWindow : BaseUnrolledCandidateWindow() {
+class FlexboxUnrolledCandidateWindow(di: DI) : BaseUnrolledCandidateWindow(di) {
     override fun exitAnimation(nextWindow: BoardWindow): Transition = Slide().apply {
         slideEdge = Gravity.TOP
     }

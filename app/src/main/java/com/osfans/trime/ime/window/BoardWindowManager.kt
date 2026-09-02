@@ -5,7 +5,7 @@
 
 package com.osfans.trime.ime.window
 
-import android.content.Context
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.FrameLayout
 import androidx.transition.Transition
@@ -13,7 +13,8 @@ import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.osfans.trime.R
 import com.osfans.trime.ime.broadcast.InputBroadcaster
-import com.osfans.trime.ime.dependency.InputDependencyManager
+import org.kodein.di.DI
+import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.frameLayout
@@ -21,9 +22,9 @@ import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import timber.log.Timber
 
-class BoardWindowManager {
-    private val context: Context by InputDependencyManager.getInstance().di.instance()
-    private val broadcaster: InputBroadcaster by InputDependencyManager.getInstance().di.instance()
+class BoardWindowManager(override val di: DI) : DIAware {
+    private val context by instance<ContextThemeWrapper>()
+    private val broadcaster by instance<InputBroadcaster>()
 
     private val cachedResidentWindows = mutableMapOf<ResidentWindow.Key, Pair<BoardWindow, View?>>()
 

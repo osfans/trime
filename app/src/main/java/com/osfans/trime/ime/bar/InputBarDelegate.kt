@@ -5,9 +5,9 @@
 
 package com.osfans.trime.ime.bar
 
-import android.content.Context
 import android.os.Build
 import android.util.Size
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
@@ -36,7 +36,6 @@ import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.candidates.compact.CompactCandidateDelegate
 import com.osfans.trime.ime.candidates.unrolled.window.FlexboxUnrolledCandidateWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
-import com.osfans.trime.ime.dependency.InputDependencyManager
 import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
 import com.osfans.trime.ime.keyboard.KeyBehavior
 import com.osfans.trime.ime.keyboard.KeyboardWindow
@@ -51,6 +50,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.kodein.di.DI
+import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.dimensions.dp
 import splitties.views.dsl.core.add
@@ -59,15 +60,16 @@ import splitties.views.dsl.core.matchParent
 import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 
-class InputBarDelegate : InputBroadcastReceiver {
-    private val di = InputDependencyManager.getInstance().di
-    private val context: Context by di.instance()
-    private val service: TrimeInputMethodService by di.instance()
-    private val theme: Theme by di.instance()
-    private val windowManager: BoardWindowManager by di.instance()
-    private val commonKeyboardActionListener: CommonKeyboardActionListener by di.instance()
-    private val candidate: CompactCandidateDelegate by di.instance()
-    private val rime: RimeSession by di.instance()
+class InputBarDelegate(override val di: DI) :
+    DIAware,
+    InputBroadcastReceiver {
+    private val context: ContextThemeWrapper by instance()
+    private val service: TrimeInputMethodService by instance()
+    private val theme: Theme by instance()
+    private val windowManager: BoardWindowManager by instance()
+    private val commonKeyboardActionListener: CommonKeyboardActionListener by instance()
+    private val candidate: CompactCandidateDelegate by instance()
+    private val rime: RimeSession by instance()
 
     val themedHeight = theme.generalStyle.run { candidateViewHeight + commentHeight }
 
@@ -133,7 +135,7 @@ class InputBarDelegate : InputBroadcastReceiver {
             if (action.isNotEmpty()) {
                 commonKeyboardActionListener.listener.onAction(KeyActionManager.getAction(action))
             } else {
-                windowManager.attachWindow(SwitchOptionWindow())
+                windowManager.attachWindow(SwitchOptionWindow(di))
             }
         }.apply {
             hideKeyboardButton.apply {
@@ -202,7 +204,7 @@ class InputBarDelegate : InputBroadcastReceiver {
 
     private fun setUnrollButtonToAttach() {
         candidateUi.unrollButton.setOnClickListener {
-            windowManager.attachWindow(FlexboxUnrolledCandidateWindow())
+            windowManager.attachWindow(FlexboxUnrolledCandidateWindow(di))
         }
         candidateUi.unrollButton.setIcon(R.drawable.ic_baseline_expand_more_24)
     }
