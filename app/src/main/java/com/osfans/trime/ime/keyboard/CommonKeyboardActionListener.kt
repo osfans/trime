@@ -6,8 +6,8 @@
 package com.osfans.trime.ime.keyboard
 
 import android.app.Dialog
-import android.content.Context
 import android.content.Intent
+import android.view.ContextThemeWrapper
 import android.view.KeyEvent
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
@@ -23,7 +23,6 @@ import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.clipboard.ClipboardWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
-import com.osfans.trime.ime.dependency.InputDependencyManager
 import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
 import com.osfans.trime.ime.switches.SwitchOptionWindow
 import com.osfans.trime.ime.symbol.LiquidData
@@ -40,20 +39,21 @@ import com.osfans.trime.util.customFormatDateTime
 import com.osfans.trime.util.isAsciiPrintable
 import com.osfans.trime.util.toast
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
+import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.systemservices.clipboardManager
 import splitties.systemservices.inputMethodManager
 import timber.log.Timber
 
-class CommonKeyboardActionListener {
-    private val di = InputDependencyManager.getInstance().di
+class CommonKeyboardActionListener(override val di: DI) : DIAware {
 
-    private val context: Context by di.instance()
-    private val service: TrimeInputMethodService by di.instance()
-    private val rime: RimeSession by di.instance()
-    private val windowManager: BoardWindowManager by di.instance()
-    private val keyboardWindow: KeyboardWindow by di.instance()
-    private val liquidWindow: LiquidWindow by di.instance()
+    private val context: ContextThemeWrapper by instance()
+    private val service: TrimeInputMethodService by instance()
+    private val rime: RimeSession by instance()
+    private val windowManager: BoardWindowManager by instance()
+    private val keyboardWindow: KeyboardWindow by instance()
+    private val liquidWindow: LiquidWindow by instance()
 
     private val prefs = AppPrefs.defaultInstance()
 
@@ -177,7 +177,7 @@ class CommonKeyboardActionListener {
 
                 when (action.command) {
                     "liquid_keyboard" -> handleLiquidKeyboard(arg)
-                    "menu_keyboard" -> windowManager.attachWindow(SwitchOptionWindow())
+                    "menu_keyboard" -> windowManager.attachWindow(SwitchOptionWindow(di))
                     "clipboard_window" -> handleClipboardWindow(arg)
                     "set_color_scheme" -> handleColorScheme(arg)
                     "set_theme" -> handleTheme(arg)
@@ -198,7 +198,7 @@ class CommonKeyboardActionListener {
             private fun handleLiquidKeyboard(arg: String) {
                 // for compatibility
                 if (arg == "剪贴" || arg == "clipboard") {
-                    windowManager.attachWindow(ClipboardWindow())
+                    windowManager.attachWindow(ClipboardWindow(di))
                     return
                 }
                 val liquidTagList = LiquidData.getTagList()
@@ -218,7 +218,7 @@ class CommonKeyboardActionListener {
 
             private fun handleClipboardWindow(arg: String) {
                 val tabIndex = arg.toIntOrNull()?.coerceIn(0, 1) ?: 0
-                windowManager.attachWindow(ClipboardWindow(tabIndex))
+                windowManager.attachWindow(ClipboardWindow(di, tabIndex))
             }
 
             private fun handleColorScheme(arg: String) {

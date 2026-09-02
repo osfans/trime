@@ -5,10 +5,10 @@
 
 package com.osfans.trime.ime.candidates.compact
 
-import android.content.Context
 import android.content.res.Configuration
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RectShape
+import android.view.ContextThemeWrapper
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexboxLayoutManager
@@ -24,24 +24,24 @@ import com.osfans.trime.ime.bar.UnrollButtonStateMachine
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.candidates.unrolled.decoration.FlexboxVerticalDecoration
 import com.osfans.trime.ime.core.InputView
-import com.osfans.trime.ime.core.TrimeInputMethodService
-import com.osfans.trime.ime.dependency.InputDependencyManager
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import org.kodein.di.DI
+import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.dimensions.dp
 import splitties.views.dsl.recyclerview.recyclerView
 import kotlin.math.max
 
-class CompactCandidateDelegate : InputBroadcastReceiver {
-    private val di = InputDependencyManager.getInstance().di
-    private val context: Context by di.instance()
-    val service: TrimeInputMethodService by di.instance()
-    val rime: RimeSession by di.instance()
-    val theme: Theme by di.instance()
-    private val inputView: InputView by di.instance()
-    val bar: InputBarDelegate by di.instance()
+class CompactCandidateDelegate(override val di: DI) :
+    DIAware,
+    InputBroadcastReceiver {
+    private val context: ContextThemeWrapper by instance()
+    private val rime: RimeSession by instance()
+    private val theme: Theme by instance()
+    private val inputView: InputView by instance()
+    private val bar: InputBarDelegate by instance()
 
     private val fillStyle by AppPrefs.defaultInstance().keyboard.horizontalCandidateMode
 

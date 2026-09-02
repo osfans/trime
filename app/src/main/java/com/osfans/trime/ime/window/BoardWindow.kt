@@ -4,19 +4,19 @@
 
 package com.osfans.trime.ime.window
 
-import android.content.Context
+import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.View
 import androidx.transition.Fade
 import androidx.transition.Slide
 import androidx.transition.Transition
-import com.osfans.trime.ime.dependency.InputDependencyManager
+import org.kodein.di.DI
+import org.kodein.di.DIAware
 import org.kodein.di.instance
 
-sealed class BoardWindow {
-    protected val di = InputDependencyManager.getInstance().di
+sealed class BoardWindow(override val di: DI) : DIAware {
 
-    protected val context: Context by di.instance()
+    protected val context: ContextThemeWrapper by instance()
 
     /**
      * Animation when the window is added to the layout
@@ -45,11 +45,11 @@ sealed class BoardWindow {
      */
     abstract fun onDetached()
 
-    abstract class NoBarBoardWindow : BoardWindow() {
+    abstract class NoBarBoardWindow(di: DI) : BoardWindow(di) {
         override fun toString(): String = javaClass.name
     }
 
-    abstract class BarBoardWindow : BoardWindow() {
+    abstract class BarBoardWindow(di: DI) : BoardWindow(di) {
         open val showTitle: Boolean = true
 
         open val title: String = ""

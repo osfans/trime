@@ -7,13 +7,14 @@ package com.osfans.trime.ime.broadcast
 
 import android.view.inputmethod.EditorInfo
 import com.osfans.trime.data.theme.Theme
-import com.osfans.trime.ime.dependency.InputDependencyManager
+import org.kodein.di.DI
+import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.bitflags.hasFlag
 
-class EnterKeyDisplayDelegate {
-    private val broadcaster: InputBroadcaster by InputDependencyManager.getInstance().di.instance()
-    private val theme: Theme by InputDependencyManager.getInstance().di.instance()
+class EnterKeyDisplayDelegate(override val di: DI) : DIAware {
+    private val broadcaster: InputBroadcaster by instance()
+    private val theme: Theme by instance()
 
     companion object {
         const val DEFAULT_LABEL = "Enter"

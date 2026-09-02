@@ -29,14 +29,15 @@ import com.osfans.trime.ui.main.ClipEditActivity
 import com.osfans.trime.util.AppUtils
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
 import org.kodein.di.instance
 import splitties.views.recyclerview.verticalLayoutManager
 
-class ClipboardWindow(private val initialTab: Int = 0) : BoardWindow.BarBoardWindow() {
+class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.BarBoardWindow(di) {
 
-    private val service: TrimeInputMethodService by di.instance()
-    private val windowManager: BoardWindowManager by di.instance()
-    private val theme: Theme by di.instance()
+    private val service: TrimeInputMethodService by instance()
+    private val windowManager: BoardWindowManager by instance()
+    private val theme: Theme by instance()
 
     private lateinit var clipboardLayout: ClipboardLayout
     private lateinit var clipboardPagesAdapter: ClipboardPagesAdapter
@@ -82,7 +83,7 @@ class ClipboardWindow(private val initialTab: Int = 0) : BoardWindow.BarBoardWin
 
             override fun onSegment(bean: DatabaseBean) {
                 val text = bean.text ?: return
-                windowManager.attachWindow(SegmentsWindow(text))
+                windowManager.attachWindow(SegmentsWindow(di, text))
             }
 
             override fun onCollect(bean: DatabaseBean) {
@@ -120,7 +121,7 @@ class ClipboardWindow(private val initialTab: Int = 0) : BoardWindow.BarBoardWin
 
             override fun onSegment(bean: DatabaseBean) {
                 val text = bean.text ?: return
-                windowManager.attachWindow(SegmentsWindow(text))
+                windowManager.attachWindow(SegmentsWindow(di, text))
             }
 
             override fun onDelete(id: Int) {

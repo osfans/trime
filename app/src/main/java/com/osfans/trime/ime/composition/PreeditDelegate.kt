@@ -5,8 +5,8 @@
 
 package com.osfans.trime.ime.composition
 
-import android.content.Context
 import android.graphics.drawable.GradientDrawable
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewOutlineProvider
 import com.osfans.trime.core.CompositionProto
@@ -16,16 +16,19 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.core.TouchEventReceiverWindow
-import com.osfans.trime.ime.dependency.InputDependencyManager
+import org.kodein.di.DI
+import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.dimensions.dp
 import splitties.views.horizontalPadding
 
-class PreeditDelegate : InputBroadcastReceiver {
+class PreeditDelegate(override val di: DI) :
+    DIAware,
+    InputBroadcastReceiver {
 
-    private val context: Context by InputDependencyManager.getInstance().di.instance()
-    private val theme: Theme by InputDependencyManager.getInstance().di.instance()
-    private val rime: RimeSession by InputDependencyManager.getInstance().di.instance()
+    private val context: ContextThemeWrapper by instance()
+    private val theme: Theme by instance()
+    private val rime: RimeSession by instance()
 
     val ui =
         PreeditUi(

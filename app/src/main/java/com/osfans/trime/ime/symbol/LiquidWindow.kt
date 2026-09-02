@@ -21,18 +21,19 @@ import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.BoardWindowManager
 import com.osfans.trime.ime.window.ResidentWindow
+import org.kodein.di.DI
 import org.kodein.di.instance
 
-class LiquidWindow :
-    BoardWindow.BarBoardWindow(),
+class LiquidWindow(di: DI) :
+    BoardWindow.BarBoardWindow(di),
     ResidentWindow {
     override val showTitle = false
 
-    private val service: TrimeInputMethodService by di.instance()
-    private val rime: RimeSession by di.instance()
-    private val theme: Theme by di.instance()
-    private val windowManager: BoardWindowManager by di.instance()
-    private val commonKeyboardActionListener: CommonKeyboardActionListener by di.instance()
+    private val service: TrimeInputMethodService by instance()
+    private val rime: RimeSession by instance()
+    private val theme: Theme by instance()
+    private val windowManager: BoardWindowManager by instance()
+    private val commonKeyboardActionListener: CommonKeyboardActionListener by instance()
 
     private lateinit var liquidLayout: LiquidLayout
     private val symbolHistory = SymbolHistory(180)
