@@ -27,7 +27,7 @@ object FileUtils {
         }
     }
 
-    fun delete(file: File) = runCatching {
+    fun delete(file: File): Result<Unit> = runCatching {
         if (!file.exists()) return Result.success(Unit)
         val res =
             if (file.isDirectory) {
