@@ -18,11 +18,11 @@ abstract class Database : RoomDatabase() {
     companion object {
         val MIGRATION_3_4 =
             object : Migration(3, 4) {
-                override fun migrate(database: SupportSQLiteDatabase) {
-                    if (database.needUpgrade(4)) {
-                        database.execSQL("ALTER TABLE ${DatabaseBean.TABLE_NAME} RENAME TO _t_data")
-                        database.execSQL("ALTER TABLE _t_data ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0")
-                        database.execSQL(
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    if (db.needUpgrade(4)) {
+                        db.execSQL("ALTER TABLE ${DatabaseBean.TABLE_NAME} RENAME TO _t_data")
+                        db.execSQL("ALTER TABLE _t_data ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0")
+                        db.execSQL(
                             """
                             CREATE TABLE IF NOT EXISTS ${DatabaseBean.TABLE_NAME} (
                                 id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -34,13 +34,13 @@ abstract class Database : RoomDatabase() {
                             )
                             """.trimIndent(),
                         )
-                        database.execSQL(
+                        db.execSQL(
                             """
                             INSERT INTO ${DatabaseBean.TABLE_NAME} (id, text, html, type, time, pinned)
                             SELECT id, text, html, type, time, pinned FROM _t_data
                             """.trimIndent(),
                         )
-                        database.execSQL("DROP TABLE _t_data")
+                        db.execSQL("DROP TABLE _t_data")
                     }
                 }
             }
