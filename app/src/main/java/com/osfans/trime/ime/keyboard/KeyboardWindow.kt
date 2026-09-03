@@ -73,7 +73,9 @@ class KeyboardWindow(di: DI) :
 
     private lateinit var keyboardView: FrameLayout
 
-    companion object : ResidentWindow.Key
+    companion object : ResidentWindow.Key {
+        lateinit var currentKeyboard: Keyboard
+    }
 
     override val key: ResidentWindow.Key
         get() = KeyboardWindow
@@ -84,7 +86,7 @@ class KeyboardWindow(di: DI) :
     private var lastLockKeyboardId = ""
     private var tempAsciiMode: Boolean? = null
     private val cachedKeyboards = mutableMapOf<String, Pair<Keyboard, KeyboardView>>()
-    private val currentKeyboard: Keyboard? get() = cachedKeyboards[currentKeyboardId]?.first
+    private val activeKeyboard: Keyboard? get() = cachedKeyboards[currentKeyboardId]?.first
     private val currentKeyboardView: KeyboardView? get() = cachedKeyboards[currentKeyboardId]?.second
 
     private val keyboardActionListener = commonKeyboardActionListener.listener
@@ -117,7 +119,7 @@ class KeyboardWindow(di: DI) :
             it.onDetach()
             keyboardView.removeView(it)
         }
-        currentKeyboard?.lastAsciiMode = rime.run { statusCached }.isAsciiMode
+        activeKeyboard?.lastAsciiMode = rime.run { statusCached }.isAsciiMode
     }
 
     /** 计算键盘可用宽度：优先使用已测量的容器宽度，否则回退到系统窗口测量。 */
@@ -167,10 +169,10 @@ class KeyboardWindow(di: DI) :
         lastKeyboardId = target
 
         val config = selectKeyboardConfig(target)
-        val keyboard = currentKeyboard ?: Keyboard(context, theme, computeAllowedWidth(), config)
+        val keyboard = activeKeyboard ?: Keyboard(context, theme, computeAllowedWidth(), config)
         val view = currentKeyboardView ?: KeyboardView(context, theme, keyboard, popup, service, keyboardActionListener, enterKeyDisplay)
 
-        if (currentKeyboard == null) {
+        if (activeKeyboard == null) {
             cachedKeyboards[target] = keyboard to view
             keyboard.lastAsciiMode = keyboard.asciiMode
         }
@@ -190,8 +192,7 @@ class KeyboardWindow(di: DI) :
                 }
             }
 
-            // TODO：为避免过量重构，这里暂时将 currentKeyboard 同步到 KeyboardSwitcher
-            KeyboardSwitcher.currentKeyboard = it
+            currentKeyboard = it
         }
 
         view.let {
@@ -229,7 +230,7 @@ class KeyboardWindow(di: DI) :
                 ".last" -> lastKeyboardId
                 ".last_lock" -> lastLockKeyboardId
                 ".ascii" -> {
-                    var ascii = currentKeyboard?.asciiKeyboard
+                    var ascii = activeKeyboard?.asciiKeyboard
                     if (ascii.isNullOrEmpty()) {
                         ascii = lastLockKeyboardId
                     }
@@ -237,7 +238,7 @@ class KeyboardWindow(di: DI) :
                 }
                 else -> {
                     id.ifEmpty {
-                        if (currentKeyboard?.isLock == true) currentKeyboardId else lastLockKeyboardId
+                        if (activeKeyboard?.isLock == true) currentKeyboardId else lastLockKeyboardId
                     }
                 }
             }
@@ -315,7 +316,7 @@ class KeyboardWindow(di: DI) :
                     service.postRimeJob { setRuntimeOption("ascii_mode", saved) }
                 }
                 tempAsciiMode = null
-            } ?: currentKeyboard?.let {
+            } ?: activeKeyboard?.let {
                 if (theme.generalStyle.resetAsciiModeOnFocusChange) {
                     val targetMode = if (it.resetAsciiMode) it.asciiMode else it.lastAsciiMode
                     if (isAsciiMode != targetMode) {
@@ -336,7 +337,7 @@ class KeyboardWindow(di: DI) :
 
     override fun onKeyAppearanceUpdate(composing: Boolean, menu: Boolean, paging: Boolean) {
         if (!rime.run { statusCached }.isAsciiMode) {
-            currentKeyboard?.appearanceStateKeys?.forEach { key ->
+            activeKeyboard?.appearanceStateKeys?.forEach { key ->
                 currentKeyboardView?.invalidateKeyByIndex(key.index)
             }
         }
@@ -347,7 +348,7 @@ class KeyboardWindow(di: DI) :
         end: Int,
     ) {
         dispatchCapsState { on, shifted ->
-            currentKeyboard?.setShifted(on, shifted)?.let { if (it) currentKeyboardView?.invalidateAllKeys() }
+            activeKeyboard?.setShifted(on, shifted)?.let { if (it) currentKeyboardView?.invalidateAllKeys() }
         }
     }
 

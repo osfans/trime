@@ -118,7 +118,7 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
             }
 
             override fun onAction(action: KeyAction) {
-                val text = action.getText(KeyboardSwitcher.currentKeyboard)
+                val text = action.getText(KeyboardWindow.currentKeyboard)
                 val shouldHandle = when {
                     action.commit.isNotEmpty() -> {
                         service.commitText(action.commit)
@@ -341,15 +341,15 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
                     else -> false
                 }
 
-                if (action.modifier == 0 && KeyboardSwitcher.currentKeyboard.isOnlyShiftOn && shouldHookShiftKey) {
+                if (action.modifier == 0 && KeyboardWindow.currentKeyboard.isOnlyShiftOn && shouldHookShiftKey) {
                     onKey(action.code, 0)
                     return
                 }
 
                 val modifier = when {
-                    action.modifier == 0 -> KeyboardSwitcher.currentKeyboard.modifier
+                    action.modifier == 0 -> KeyboardWindow.currentKeyboard.modifier
                     (action.modifier and KeyEvent.META_CTRL_ON) != 0 && isNavigationKey(action.code) ->
-                        action.modifier or KeyboardSwitcher.currentKeyboard.modifier
+                        action.modifier or KeyboardWindow.currentKeyboard.modifier
                     else -> action.modifier
                 }
 

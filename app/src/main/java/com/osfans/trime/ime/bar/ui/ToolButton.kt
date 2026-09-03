@@ -24,7 +24,7 @@ import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.model.ToolBar
 import com.osfans.trime.ime.core.AutoScaleTextView
 import com.osfans.trime.ime.keyboard.GestureFrame
-import com.osfans.trime.ime.keyboard.KeyboardSwitcher
+import com.osfans.trime.ime.keyboard.KeyboardWindow
 import splitties.dimensions.dp
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.imageView
@@ -91,7 +91,7 @@ class ToolButton(context: Context) : GestureFrame(context) {
         } else {
             singleStyle = fg.style
         }
-        actionLabel = keyAction.getLabel(KeyboardSwitcher.currentKeyboard)
+        actionLabel = keyAction.getLabel(KeyboardWindow.currentKeyboard)
 
         val padding = dp(fg.padding)
         image.padding = padding
