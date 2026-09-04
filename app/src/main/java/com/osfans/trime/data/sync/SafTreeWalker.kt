@@ -50,18 +50,54 @@ object SafTreeWalker {
         return dirSegments.any { it.contains(SKIP_DIR_SUBSTRING) }
     }
 
+    /**
+     * Whether [relativePath] should be listed. [skipPrefix] drops that path and its
+     * descendants. [limitToPrefix] keeps only ancestors of the prefix, the prefix
+     * itself, and descendants. Applied before enqueue so skipped directories are
+     * never queried.
+     */
+    fun shouldVisit(
+        relativePath: String,
+        skipPrefix: String? = null,
+        limitToPrefix: String? = null,
+    ): Boolean {
+        if (!skipPrefix.isNullOrEmpty() &&
+            (relativePath == skipPrefix || relativePath.startsWith("$skipPrefix/"))
+        ) {
+            return false
+        }
+        if (!limitToPrefix.isNullOrEmpty()) {
+            val selfOrDescendant =
+                relativePath == limitToPrefix || relativePath.startsWith("$limitToPrefix/")
+            val ancestor = limitToPrefix.startsWith("$relativePath/")
+            if (!selfOrDescendant && !ancestor) return false
+        }
+        return true
+    }
+
     fun listFiles(
         contentResolver: ContentResolver,
         treeUri: Uri,
         rootDocumentId: String,
         skipUserDb: Boolean = true,
-    ): List<SafFileEntry> = listTree(contentResolver, treeUri, rootDocumentId, skipUserDb).files
+        skipPrefix: String? = null,
+        limitToPrefix: String? = null,
+    ): List<SafFileEntry> = listTree(
+        contentResolver,
+        treeUri,
+        rootDocumentId,
+        skipUserDb,
+        skipPrefix,
+        limitToPrefix,
+    ).files
 
     fun listTree(
         contentResolver: ContentResolver,
         treeUri: Uri,
         rootDocumentId: String,
         skipUserDb: Boolean = true,
+        skipPrefix: String? = null,
+        limitToPrefix: String? = null,
     ): SafTreeListing {
         val result = mutableListOf<SafFileEntry>()
         val directoryIds = mutableMapOf("" to rootDocumentId)
@@ -92,6 +128,7 @@ object SafTreeWalker {
                         }
                     val isDirectory = DocumentsContract.Document.MIME_TYPE_DIR == mimeType
                     if (shouldSkip(childPath, isDirectory, skipUserDb)) continue
+                    if (!shouldVisit(childPath, skipPrefix, limitToPrefix)) continue
                     if (isDirectory) {
                         directoryIds[childPath] = documentId
                         queue.add(childPath to documentId)

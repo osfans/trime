@@ -4,14 +4,11 @@
 
 package com.osfans.trime.data.sync
 
-import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.util.FileUtils
 import timber.log.Timber
 import java.io.File
 
 object OrphanCleaner {
-    private val preservedFiles = setOf(DataManager.INSTALLATION_FILE_NAME)
-
     data class Result(
         val deleted: Int = 0,
         val failed: Int = 0,
@@ -20,6 +17,7 @@ object OrphanCleaner {
     fun removeLocalOrphans(
         root: File,
         externalPaths: Set<String>,
+        ownId: String? = null,
     ): Result {
         if (!root.exists()) return Result()
         var deleted = 0
@@ -39,7 +37,7 @@ object OrphanCleaner {
                         return@forEach
                     }
                 when {
-                    file.isFile && relative in preservedFiles -> Unit
+                    file.isFile && SyncPathPolicy.shouldPreserveLocal(relative, ownId) -> Unit
                     file.isFile && relative !in externalPaths -> {
                         val deleteResult = FileUtils.delete(file)
                         if (deleteResult.isSuccess) {
