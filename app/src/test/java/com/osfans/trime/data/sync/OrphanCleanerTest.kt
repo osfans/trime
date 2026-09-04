@@ -7,11 +7,12 @@ package com.osfans.trime.data.sync
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import java.io.File
+import kotlin.io.path.createTempDirectory
 
 class OrphanCleanerTest :
     StringSpec({
         "preserves installation.yaml even when missing from external listing" {
-            val root = createTempDir()
+            val root = createTempDirectory().toFile()
             try {
                 val installation = File(root, "installation.yaml")
                 installation.writeText("installation_id: test")

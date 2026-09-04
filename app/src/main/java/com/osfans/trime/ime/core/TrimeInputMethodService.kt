@@ -264,7 +264,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 }
             is RimeMessage.DeployMessage -> {
                 if (it.data == RimeMessage.DeployMessage.State.Success) {
-                    ThemeManager.selectTheme(ThemeManager.prefs.selectedTheme.getValue())
+                    // The deployment may have refreshed the current theme's artifact.
+                    val themeId = ThemeManager.prefs.selectedTheme.getValue()
+                    lifecycleScope.launch { ThemeManager.selectTheme(themeId) }
                 }
             }
             else -> {}
