@@ -14,6 +14,8 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.register
+import org.gradle.process.ExecOperations
+import javax.inject.Inject
 
 class OpenCCDataPlugin : Plugin<Project> {
     companion object {
@@ -52,6 +54,9 @@ class OpenCCDataPlugin : Plugin<Project> {
     }
 
     abstract class InstallOpenCCDataTask : DefaultTask() {
+        @get:Inject
+        abstract val execOperations: ExecOperations
+
         @get:PathSensitive(PathSensitivity.NAME_ONLY)
         @get:InputDirectory
         abstract val inputDir: DirectoryProperty
@@ -102,10 +107,10 @@ class OpenCCDataPlugin : Plugin<Project> {
                     source: String,
                     outputFilePath: String,
                 ) {
-                    project.providers.exec {
+                    execOperations.exec {
                         workingDir = output
                         commandLine = listOf("python3", reverse, source, outputFilePath)
-                    }.result.get()
+                    }.assertNormalExitValue()
                 }
                 for (dict in DICTS_GENERATED) {
                     val inputName = dict.substringBefore("Rev")
