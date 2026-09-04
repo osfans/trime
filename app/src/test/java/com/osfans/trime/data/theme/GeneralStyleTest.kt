@@ -7,6 +7,7 @@
 package com.osfans.trime.data.theme
 
 import com.osfans.trime.data.theme.model.GeneralStyle
+import com.osfans.trime.util.yaml.Node
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -76,6 +77,24 @@ class GeneralStyleTest :
                     style.enterLabel.go shouldBe "go"
                     style.enterLabel.default shouldBe "default"
                 }
+            }
+        }
+
+        Given("an empty style section") {
+            val style = GeneralStyle.decode(Node.Mapping())
+
+            Then("decode equals the constructor defaults") {
+                style shouldBe GeneralStyle.DEFAULTS
+            }
+            Then("decode fills explicit keys but keeps the defaults for the rest") {
+                val style =
+                    GeneralStyle.decode(
+                        Node.Mapping(
+                            Node.Scalar("candidate_text_size") to Node.Scalar("20"),
+                        ),
+                    )
+                style.candidateTextSize shouldBe 20f
+                style.keyHeight shouldBe 0
             }
         }
     })
