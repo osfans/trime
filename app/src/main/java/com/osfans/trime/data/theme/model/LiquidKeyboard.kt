@@ -6,7 +6,7 @@
 package com.osfans.trime.data.theme.model
 
 import android.os.Parcelable
-import com.osfans.trime.ime.symbol.LiquidData
+import com.osfans.trime.data.theme.LiquidData
 import com.osfans.trime.util.splitWithSurrogates
 import com.osfans.trime.util.yaml.Node
 import com.osfans.trime.util.yaml.enum
