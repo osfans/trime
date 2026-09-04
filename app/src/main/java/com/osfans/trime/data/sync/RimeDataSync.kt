@@ -126,11 +126,24 @@ object RimeDataSync {
                 val destRoot = DataManager.userDataDir
                 val index = SyncIndex.load()
                 val skipUserDb = !UserDbMigration.shouldImportUserDb()
-                val files = SafTreeWalker.listFiles(cr, treeUri, rootId, skipUserDb = skipUserDb)
+                val ownId = SyncPathPolicy.readOwnInstallationId()
+                val skipPrefix =
+                    ownId?.takeIf { it.isNotEmpty() }?.let {
+                        runCatching { SyncPathPolicy.ownSyncPrefix(it) }.getOrNull()
+                    }
+                val files =
+                    SafTreeWalker.listFiles(
+                        cr,
+                        treeUri,
+                        rootId,
+                        skipUserDb = skipUserDb,
+                        skipPrefix = skipPrefix,
+                    )
                 val externalPaths = files.map { it.relativePath }.toSet()
+                val toCopy = files.filter { SyncPathPolicy.shouldImport(it.relativePath, ownId) }
                 val createdDirs = LocalDirectoryGate()
                 val copyResults =
-                    BoundedCopyPool.mapParallel(files, parallelism) { entry ->
+                    BoundedCopyPool.mapParallel(toCopy, parallelism) { entry ->
                         copySafToLocal(
                             context,
                             treeUri,
@@ -141,7 +154,7 @@ object RimeDataSync {
                             createdDirs,
                         )
                     }
-                val removeResult = OrphanCleaner.removeLocalOrphans(destRoot, externalPaths)
+                val removeResult = OrphanCleaner.removeLocalOrphans(destRoot, externalPaths, ownId)
                 SyncIndex.save(SyncIndex.withCurrentTree(mergeIndexEntries(index.entries, copyResults)))
                 val importStats = mergeStats(copyResults.map { it.result })
                 if (UserDbMigration.shouldImportUserDb() && importStats.failed == 0) {
@@ -173,8 +186,11 @@ object RimeDataSync {
             val rootId = DocumentsContract.getTreeDocumentId(treeUri)
             val srcRoot = DataManager.userDataDir
             val index = SyncIndex.load()
-            val listing = SafTreeWalker.listTree(cr, treeUri, rootId)
-            val cache = SafPathCache(listing, rootId)
+            val cache =
+                SafPathCache(
+                    SafTreeListing(emptyList(), mapOf("" to rootId)),
+                    rootId,
+                )
             val copyResults =
                 DataManager.POST_SCHEMA_DEPLOY_EXPORT_FILES.map { fileName ->
                     val sourceFile = srcRoot.resolve(fileName)
@@ -254,32 +270,55 @@ object RimeDataSync {
             check(hasExternalAccess(context)) { "No access to data path" }
             val cr = context.contentResolver
             val rootId = DocumentsContract.getTreeDocumentId(treeUri)
-            val srcRoot = DataManager.userDataDir.resolve("sync")
-            if (!srcRoot.exists()) {
+            val ownId = SyncPathPolicy.readOwnInstallationId()
+            if (ownId.isNullOrEmpty()) {
+                Timber.w("Export skipped: installation_id unreadable")
+                return@runCatching SyncStats()
+            }
+            val exportPrefix =
+                runCatching { SyncPathPolicy.ownSyncPrefix(ownId) }.getOrElse {
+                    Timber.w("Export skipped: installation_id unreadable")
+                    return@runCatching SyncStats()
+                }
+            val srcRoot = DataManager.userDataDir.resolve(exportPrefix)
+            if (!srcRoot.isDirectory) {
                 return@runCatching SyncStats()
             }
             val index = SyncIndex.load()
             val localFiles = listLocalFiles(srcRoot)
-            val listing = SafTreeWalker.listTree(cr, treeUri, rootId)
+            if (localFiles.isEmpty()) {
+                return@runCatching SyncStats()
+            }
+            val listing = SafTreeWalker.listTree(cr, treeUri, rootId, limitToPrefix = exportPrefix)
             val cache = SafPathCache(listing, rootId)
             val indexData = SyncIndex.withCurrentTree(index.entries)
             val parentDirsToEnsure =
                 localFiles
-                    .filter { file ->
-                        val relativePath = file.relativeTo(srcRoot).path.replace('\\', '/')
-                        SyncIndex.shouldCopy(
-                            relativePath,
-                            file.length(),
-                            file.lastModified(),
-                            indexData,
-                        )
-                    }.map { file ->
-                        file.relativeTo(srcRoot).path.replace('\\', '/').substringBeforeLast('/', "")
+                    .mapNotNull { file ->
+                        val relativePath =
+                            runCatching {
+                                val localRel =
+                                    SyncRelativePath.normalize(
+                                        file.relativeTo(srcRoot).path.replace('\\', '/'),
+                                    )
+                                SyncRelativePath.normalize("$exportPrefix/$localRel")
+                            }.getOrNull() ?: return@mapNotNull null
+                        if (!SyncIndex.shouldCopy(
+                                relativePath,
+                                file.length(),
+                                file.lastModified(),
+                                indexData,
+                            )
+                        ) {
+                            return@mapNotNull null
+                        }
+                        relativePath.substringBeforeLast('/', "")
                     }.distinct()
                     .sortedBy { it.count { c -> c == '/' } }
             for (parentDir in parentDirsToEnsure) {
-                val externalDir = if (parentDir.isEmpty()) "sync" else "sync/$parentDir"
-                cache.ensureDirectory(cr, treeUri, externalDir)
+                if (parentDir.isNotEmpty()) {
+                    cache.ensureDirectory(cr, treeUri, parentDir)
+                }
             }
             val copyResults =
                 BoundedCopyPool.mapParallel(localFiles, parallelism) { file ->
@@ -290,7 +329,7 @@ object RimeDataSync {
                         srcRoot,
                         index.entries,
                         cache,
-                        exportPathPrefix = "sync",
+                        exportPathPrefix = exportPrefix,
                     )
                 }
             SyncIndex.save(SyncIndex.withCurrentTree(mergeIndexEntries(index.entries, copyResults)))
