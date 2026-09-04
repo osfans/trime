@@ -127,9 +127,14 @@ object RimeDataSync {
                 val index = SyncIndex.load()
                 val skipUserDb = !UserDbMigration.shouldImportUserDb()
                 val ownId = SyncPathPolicy.readOwnInstallationId()
+                val syncDir =
+                    SyncPathPolicy.treeRelativeSyncDir(
+                        SyncPathPolicy.readOwnSyncDir(),
+                        destRoot,
+                    )
                 val skipPrefix =
                     ownId?.takeIf { it.isNotEmpty() }?.let {
-                        runCatching { SyncPathPolicy.ownSyncPrefix(it) }.getOrNull()
+                        runCatching { SyncPathPolicy.ownSyncPrefix(it, syncDir) }.getOrNull()
                     }
                 val files =
                     SafTreeWalker.listFiles(
@@ -140,7 +145,7 @@ object RimeDataSync {
                         skipPrefix = skipPrefix,
                     )
                 val externalPaths = files.map { it.relativePath }.toSet()
-                val toCopy = files.filter { SyncPathPolicy.shouldImport(it.relativePath, ownId) }
+                val toCopy = files.filter { SyncPathPolicy.shouldImport(it.relativePath, ownId, syncDir) }
                 val createdDirs = LocalDirectoryGate()
                 val copyResults =
                     BoundedCopyPool.mapParallel(toCopy, parallelism) { entry ->
@@ -154,7 +159,7 @@ object RimeDataSync {
                             createdDirs,
                         )
                     }
-                val removeResult = OrphanCleaner.removeLocalOrphans(destRoot, externalPaths, ownId)
+                val removeResult = OrphanCleaner.removeLocalOrphans(destRoot, externalPaths, ownId, syncDir)
                 SyncIndex.save(SyncIndex.withCurrentTree(mergeIndexEntries(index.entries, copyResults)))
                 val importStats = mergeStats(copyResults.map { it.result })
                 if (UserDbMigration.shouldImportUserDb() && importStats.failed == 0) {
@@ -273,13 +278,17 @@ object RimeDataSync {
                 Timber.w("Export skipped: installation_id unreadable")
                 return@runCatching SyncStats()
             }
+            val syncDirRaw = SyncPathPolicy.readOwnSyncDir()
+            val userDataDir = DataManager.userDataDir
+            val syncDir = SyncPathPolicy.treeRelativeSyncDir(syncDirRaw, userDataDir)
             val exportPrefix =
-                runCatching { SyncPathPolicy.ownSyncPrefix(ownId) }.getOrElse {
+                runCatching { SyncPathPolicy.ownSyncPrefix(ownId, syncDir) }.getOrElse {
                     Timber.w("Export skipped: installation_id unreadable")
                     return@runCatching SyncStats()
                 }
-            val srcRoot = DataManager.userDataDir.resolve(exportPrefix)
+            val srcRoot = SyncPathPolicy.localOwnSyncDir(ownId, syncDirRaw, userDataDir)
             if (!srcRoot.isDirectory) {
+                Timber.w("Export skipped: local sync dir does not exist: ${srcRoot.path}")
                 return@runCatching SyncStats()
             }
             val index = SyncIndex.load()

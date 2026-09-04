@@ -18,6 +18,7 @@ object OrphanCleaner {
         root: File,
         externalPaths: Set<String>,
         ownId: String? = null,
+        syncDir: String = SyncPathPolicy.DEFAULT_SYNC_DIR,
     ): Result {
         if (!root.exists()) return Result()
         var deleted = 0
@@ -37,7 +38,7 @@ object OrphanCleaner {
                         return@forEach
                     }
                 when {
-                    file.isFile && SyncPathPolicy.shouldPreserveLocal(relative, ownId) -> Unit
+                    file.isFile && SyncPathPolicy.shouldPreserveLocal(relative, ownId, syncDir) -> Unit
                     file.isFile && relative !in externalPaths -> {
                         val deleteResult = FileUtils.delete(file)
                         if (deleteResult.isSuccess) {
