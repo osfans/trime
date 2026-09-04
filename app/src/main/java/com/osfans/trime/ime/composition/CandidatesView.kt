@@ -139,6 +139,20 @@ class CandidatesView(
         }
     }
 
+    /** Restyles after a scheme switch without rebuilding this view. */
+    fun refreshColors() {
+        background =
+            ColorManager.getDecorDrawable(
+                colorKey = "text_back_color",
+                borderColorKey = "candidate_border_color",
+                borderPx = dp(theme.window.border),
+                cornerRadius = dp(theme.window.cornerRadius),
+            )
+        preeditUi.refreshColors()
+        preeditUi.update(composition)
+        candidatesUi.refreshColors()
+    }
+
     private fun updatePosition() {
         if (visibility != VISIBLE) return
         val (parentWidth, parentHeight) = parentSize

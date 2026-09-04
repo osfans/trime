@@ -84,6 +84,12 @@ class CompactCandidateDelegate(override val di: DI) :
         )
     }
 
+    /** Restyles the compact list after a scheme switch; visible rows re-bind. */
+    fun refreshColors() {
+        separatorDrawable.paint.color = ColorManager.getColor("candidate_separator_color")
+        adapter.notifyDataSetChanged()
+    }
+
     val adapter by lazy {
         CompactCandidateViewAdapter(theme).apply {
             setOnItemClickListener { _, _, position ->

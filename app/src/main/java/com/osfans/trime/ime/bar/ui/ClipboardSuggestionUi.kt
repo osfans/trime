@@ -105,4 +105,13 @@ class ClipboardSuggestionUi(
                 },
             )
         }
+
+    /** Re-applies the colors that were set once at construction. */
+    fun refreshColors() {
+        icon.imageDrawable?.setTint(ColorManager.getColor("candidate_text_color"))
+        text.setTextColor(ColorManager.getColor("candidate_text_color"))
+        dismiss.imageDrawable?.setTint(ColorManager.getColor("candidate_text_color"))
+        suggestionView.background =
+            rippleDrawable(ColorManager.getColor("hilited_candidate_back_color"))
+    }
 }

@@ -164,6 +164,13 @@ class InputView(
 
     val keyboardView: View
 
+    /** Restyles colors after a scheme switch without rebuilding the view tree. */
+    fun refreshColors() {
+        keyboardBackground.imageDrawable = ColorManager.getDrawable("keyboard_background")
+        keyboardWindow.refreshColors()
+        inputBar.refreshColors()
+    }
+
     init {
         // MUST call before any operation
         val receivers: List<InputBroadcastReceiver> by allInstances()

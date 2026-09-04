@@ -54,12 +54,12 @@ class CandidateItemUi(
     private val textFont = FontManager.getTypeface("candidate_font")
     private val commentFont = FontManager.getTypeface("comment_font")
 
-    private val textColor = ColorManager.getColor("candidate_text_color")
-    private val commentColor = ColorManager.getColor("comment_text_color")
-
-    private val hlCommentColor = ColorManager.getColor("hilited_comment_text_color")
-    private val hlTextColor = ColorManager.getColor("hilited_candidate_text_color")
-    private val hlBackColor = ColorManager.getColor("hilited_candidate_back_color")
+    // Read at use time so a scheme switch re-binds rows with the new colors.
+    private val textColor: Int get() = ColorManager.getColor("candidate_text_color")
+    private val commentColor: Int get() = ColorManager.getColor("comment_text_color")
+    private val hlCommentColor: Int get() = ColorManager.getColor("hilited_comment_text_color")
+    private val hlTextColor: Int get() = ColorManager.getColor("hilited_candidate_text_color")
+    private val hlBackColor: Int get() = ColorManager.getColor("hilited_candidate_back_color")
 
     private val commentPosition = theme.generalStyle.commentPosition
     private val commentVerticalBias = theme.generalStyle.commentVerticalBias

@@ -118,4 +118,10 @@ class TabUi(
             external = null
         }
     }
+
+    /** Restyles the tab bar after a scheme switch. */
+    fun refreshColors() {
+        backButton.refreshColors()
+        titleText.setTextColor(ColorManager.getColor("key_text_color"))
+    }
 }

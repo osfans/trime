@@ -264,6 +264,22 @@ class InputBarDelegate(override val di: DI) :
         }
     }
 
+    /** Restyles the bar after a scheme switch without rebuilding its views. */
+    fun refreshColors() {
+        view.background =
+            ColorManager.getDecorDrawable(
+                "candidate_background",
+                "candidate_border_color",
+                context.dp(theme.generalStyle.candidateBorder),
+                context.dp(theme.generalStyle.candidateBorderRound),
+            )
+        alwaysUi.refreshColors()
+        candidateUi.refreshColors()
+        // the compact candidate rows live inside candidateUi and re-bind via the delegate
+        candidate.refreshColors()
+        tabUi.refreshColors()
+    }
+
     override fun onStartInput(info: EditorInfo) {
         evalAlwaysUiState()
     }

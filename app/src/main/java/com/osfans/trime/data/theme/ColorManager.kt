@@ -46,6 +46,15 @@ object ColorManager {
 
     private var bitmapCache: LruCache<String, Bitmap>? = null
 
+    private var generation = 0L
+
+    /**
+     * Bumped whenever the active scheme changes. Scheme-dependent caches
+     * (e.g. per-key colors in Key) re-resolve when it moves.
+     */
+    val colorGeneration: Long
+        get() = generation
+
     fun interface OnColorChangeListener {
         fun onColorChange(theme: Theme)
     }
@@ -124,6 +133,7 @@ object ColorManager {
         val target = scheme ?: resolveActiveScheme(activeScope.theme)
         if (activeScope.activeColorScheme == target) return
         activeScope.updateScheme(target)
+        generation++
         if (notify) fireChange()
     }
 

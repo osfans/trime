@@ -28,8 +28,9 @@ open class PreeditUi(
     private val setupPreeditView: (TextView.() -> Unit)? = null,
     private val onMoveCursor: ((Int) -> Unit)? = null,
 ) : Ui {
-    private val textColor = ColorManager.getColor("text_color")
-    private val highlightTextColor = ColorManager.getColor("hilited_text_color")
+    // Read at use time so a scheme switch re-renders with the new colors.
+    private val textColor: Int get() = ColorManager.getColor("text_color")
+    private val highlightTextColor: Int get() = ColorManager.getColor("hilited_text_color")
 
     val preedit =
         view(::PreeditTextView) {
@@ -59,6 +60,11 @@ open class PreeditUi(
 
     var visible = false
         private set
+
+    /** Re-applies the text color after a scheme switch. */
+    fun refreshColors() {
+        preedit.setTextColor(textColor)
+    }
 
     private fun updateTextView(
         str: CharSequence,

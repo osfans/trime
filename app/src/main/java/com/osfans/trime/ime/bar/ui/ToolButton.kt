@@ -66,20 +66,19 @@ class ToolButton(context: Context) : GestureFrame(context) {
     private var singleStyle = ""
 
     private var actionLabel = ""
+    private var config: ToolBar.Button? = null
 
     private var fontSize = 0f
     private var colorStateList: ColorStateList? = null
 
     constructor(context: Context, @DrawableRes icon: Int) : this(context) {
-        val tintList = ColorStateList.valueOf(
-            ColorManager.getColor("candidate_text_color"),
-        )
-        image.imageTintList = tintList
+        applyIconTint()
         image.padding = dp(4)
         setIcon(icon)
     }
 
     constructor(context: Context, config: ToolBar.Button) : this(context) {
+        this.config = config
         val keyAction = KeyActionManager.getAction(config.action)
         isRepeatable = keyAction.isRepeatable
 
@@ -102,6 +101,18 @@ class ToolButton(context: Context) : GestureFrame(context) {
 
         label.typeface = FontManager.getTypeface("toolbar_font")
 
+        applyConfigColors(config)
+    }
+
+    /** Applies the tint of icon-only buttons; re-run on scheme switches. */
+    private fun applyIconTint() {
+        image.imageTintList =
+            ColorStateList.valueOf(ColorManager.getColor("candidate_text_color"))
+    }
+
+    /** Applies scheme-dependent colors; re-run on scheme switches. */
+    private fun applyConfigColors(config: ToolBar.Button) {
+        val fg = config.foreground
         colorStateList = ColorStateList(
             arrayOf(intArrayOf(android.R.attr.state_pressed), intArrayOf()),
             intArrayOf(
@@ -122,6 +133,16 @@ class ToolButton(context: Context) : GestureFrame(context) {
                 intArrayOf(),
                 backgroundStateDrawable(bg, highlight = false),
             )
+        }
+    }
+
+    /** Restyles this button after a scheme switch. */
+    fun refreshColors() {
+        val cfg = config
+        if (cfg == null) {
+            applyIconTint()
+        } else {
+            applyConfigColors(cfg)
         }
     }
 
