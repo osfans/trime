@@ -18,6 +18,7 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.osfans.trime.R
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.window.BoardWindow
@@ -32,7 +33,8 @@ import splitties.systemservices.clipboardManager
 
 class SegmentsWindow(di: DI, private val source: String) : BoardWindow.BarBoardWindow(di) {
     private val service: TrimeInputMethodService by instance()
-    private val theme: Theme by instance()
+    private val scope: ThemeScope by instance()
+    private val theme: Theme get() = scope.theme
     private val windowManager: BoardWindowManager by instance()
 
     override val title: String by lazy {
@@ -40,7 +42,7 @@ class SegmentsWindow(di: DI, private val source: String) : BoardWindow.BarBoardW
     }
 
     private val adapter by lazy {
-        SegmentsAdapter(theme, { onSelectionChanged() }, source)
+        SegmentsAdapter(scope, { onSelectionChanged() }, source)
     }
 
     private val touchListener by lazy {
@@ -50,7 +52,7 @@ class SegmentsWindow(di: DI, private val source: String) : BoardWindow.BarBoardW
     }
 
     private val ui by lazy {
-        SegmentsUi(context).apply {
+        SegmentsUi(context, scope).apply {
             recyclerView.apply {
                 layoutManager = FlexboxLayoutManager(context).apply {
                     flexDirection = FlexDirection.ROW

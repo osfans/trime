@@ -12,8 +12,8 @@ import android.view.ViewOutlineProvider
 import com.osfans.trime.core.CompositionProto
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
-import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.core.TouchEventReceiverWindow
 import org.kodein.di.DI
@@ -27,13 +27,16 @@ class PreeditDelegate(override val di: DI) :
     InputBroadcastReceiver {
 
     private val context: ContextThemeWrapper by instance()
-    private val theme: Theme by instance()
+    private val scope: ThemeScope by instance()
     private val rime: RimeSession by instance()
+
+    private val theme: Theme
+        get() = scope.theme
 
     val ui =
         PreeditUi(
             context,
-            theme,
+            scope,
             setupPreeditView = {
                 val startRadius = dp(theme.preedit.topStartRadius)
                 val endRadius = dp(theme.preedit.topEndRadius)
@@ -43,7 +46,7 @@ class PreeditDelegate(override val di: DI) :
                     floatArrayOf(endRadius, endRadius, startRadius, startRadius, 0f, 0f, 0f, 0f)
                 }
                 background = GradientDrawable().apply {
-                    setColor(ColorManager.getColor("text_back_color"))
+                    setColor(scope.colors.textBackColor)
                     shape = GradientDrawable.RECTANGLE
                     cornerRadii = radii
                 }

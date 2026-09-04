@@ -7,7 +7,7 @@ package com.osfans.trime.ime.bar.ui
 import android.content.Context
 import android.text.TextUtils
 import com.osfans.trime.R
-import com.osfans.trime.data.theme.ColorManager
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.keyboard.GestureFrame
 import com.osfans.trime.util.rippleDrawable
 import splitties.dimensions.dp
@@ -32,12 +32,13 @@ import splitties.views.imageDrawable
 
 class ClipboardSuggestionUi(
     override val ctx: Context,
+    private val scope: ThemeScope,
 ) : Ui {
     private val icon =
         imageView {
             imageDrawable =
                 drawable(R.drawable.ic_clipboard_24)!!.apply {
-                    setTint(ColorManager.getColor("candidate_text_color"))
+                    setTint(scope.colors.candidateTextColor)
                 }
         }
 
@@ -46,14 +47,14 @@ class ClipboardSuggestionUi(
             isSingleLine = true
             maxWidth = dp(220)
             ellipsize = TextUtils.TruncateAt.END
-            setTextColor(ColorManager.getColor("candidate_text_color"))
+            setTextColor(scope.colors.candidateTextColor)
         }
 
     val dismiss =
         imageView {
             isFocusable = false
             imageDrawable = drawable(R.drawable.ic_outline_cancel_24)!!.apply {
-                setTint(ColorManager.getColor("candidate_text_color"))
+                setTint(scope.colors.candidateTextColor)
             }
         }
 
@@ -89,7 +90,7 @@ class ClipboardSuggestionUi(
 
     val suggestionView = GestureFrame(ctx).apply {
         add(layout, lParams(matchParent, matchParent))
-        background = rippleDrawable(ColorManager.getColor("hilited_candidate_back_color"))
+        background = rippleDrawable(scope.colors.hilitedCandidateBackColor)
     }
 
     override val root =
@@ -108,10 +109,10 @@ class ClipboardSuggestionUi(
 
     /** Re-applies the colors that were set once at construction. */
     fun refreshColors() {
-        icon.imageDrawable?.setTint(ColorManager.getColor("candidate_text_color"))
-        text.setTextColor(ColorManager.getColor("candidate_text_color"))
-        dismiss.imageDrawable?.setTint(ColorManager.getColor("candidate_text_color"))
+        icon.imageDrawable?.setTint(scope.colors.candidateTextColor)
+        text.setTextColor(scope.colors.candidateTextColor)
+        dismiss.imageDrawable?.setTint(scope.colors.candidateTextColor)
         suggestionView.background =
-            rippleDrawable(ColorManager.getColor("hilited_candidate_back_color"))
+            rippleDrawable(scope.colors.hilitedCandidateBackColor)
     }
 }

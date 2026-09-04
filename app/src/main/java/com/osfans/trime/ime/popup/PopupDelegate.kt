@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -25,7 +26,8 @@ import java.util.LinkedList
 
 class PopupDelegate(override val di: DI) : DIAware {
     private val context: ContextThemeWrapper by instance()
-    private val theme: Theme by instance()
+    private val scope: ThemeScope by instance()
+    private val theme: Theme get() = scope.theme
     private val service: TrimeInputMethodService by instance()
 
     private val showingEntryUi = HashMap<Int, PopupEntryUi>()
@@ -81,7 +83,7 @@ class PopupDelegate(override val di: DI) : DIAware {
         }
         val popup = (
             freeEntryUi.poll()
-                ?: PopupEntryUi(context, theme, popupKeyHeight, popupRadius)
+                ?: PopupEntryUi(context, scope, popupKeyHeight, popupRadius)
             ).apply {
             lastShowTime = System.currentTimeMillis()
             setText(content)
@@ -120,7 +122,7 @@ class PopupDelegate(override val di: DI) : DIAware {
         val labels = keys
         val keyboardUi = PopupKeyboardUi(
             context,
-            theme,
+            scope,
             rootBounds,
             bounds,
             { dismissPopup(viewId) },

@@ -16,8 +16,8 @@ import androidx.paging.PagingConfig
 import androidx.recyclerview.widget.RecyclerView
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
-import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.bar.InputBarDelegate
 import com.osfans.trime.ime.bar.UnrollButtonStateMachine
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
@@ -44,11 +44,14 @@ abstract class BaseUnrolledCandidateWindow(di: DI) :
     InputBroadcastReceiver {
     protected val service: TrimeInputMethodService by instance()
     protected val rime: RimeSession by instance()
-    protected val theme: Theme by instance()
+    protected val scope: ThemeScope by instance()
     private val inputView: InputView by instance()
     private val bar: InputBarDelegate by instance()
     private val windowManager: BoardWindowManager by instance()
     private val compactCandidate: CompactCandidateDelegate by instance()
+
+    protected val theme: Theme
+        get() = scope.theme
 
     private lateinit var lifecycleCoroutineScope: LifecycleCoroutineScope
     private lateinit var candidateLayout: UnrolledCandidateLayout
@@ -59,7 +62,7 @@ abstract class BaseUnrolledCandidateWindow(di: DI) :
             val intrinsicSize = max(spacing, context.dp(spacing)).toInt()
             intrinsicWidth = intrinsicSize
             intrinsicHeight = intrinsicSize
-            paint.color = ColorManager.getColor("candidate_separator_color")
+            paint.color = scope.colors.candidateSeparatorColor
         }
     }
 

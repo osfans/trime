@@ -17,8 +17,8 @@ import com.osfans.trime.core.Candidates
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.bar.InputBarDelegate
 import com.osfans.trime.ime.bar.UnrollButtonStateMachine
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
@@ -39,9 +39,12 @@ class CompactCandidateDelegate(override val di: DI) :
     InputBroadcastReceiver {
     private val context: ContextThemeWrapper by instance()
     private val rime: RimeSession by instance()
-    private val theme: Theme by instance()
+    private val scope: ThemeScope by instance()
     private val inputView: InputView by instance()
     private val bar: InputBarDelegate by instance()
+
+    private val theme: Theme
+        get() = scope.theme
 
     private val fillStyle by AppPrefs.defaultInstance().keyboard.horizontalCandidateMode
 
@@ -86,12 +89,12 @@ class CompactCandidateDelegate(override val di: DI) :
 
     /** Restyles the compact list after a scheme switch; visible rows re-bind. */
     fun refreshColors() {
-        separatorDrawable.paint.color = ColorManager.getColor("candidate_separator_color")
+        separatorDrawable.paint.color = scope.colors.candidateSeparatorColor
         adapter.notifyDataSetChanged()
     }
 
     val adapter by lazy {
-        CompactCandidateViewAdapter(theme).apply {
+        CompactCandidateViewAdapter(scope).apply {
             setOnItemClickListener { _, _, position ->
                 rime.launchOnReady { it.selectCandidate(position, global = true) }
             }
@@ -143,7 +146,7 @@ class CompactCandidateDelegate(override val di: DI) :
             val intrinsicSize = max(spacing, context.dp(spacing)).toInt()
             intrinsicWidth = intrinsicSize
             intrinsicHeight = intrinsicSize
-            paint.color = ColorManager.getColor("candidate_separator_color")
+            paint.color = scope.colors.candidateSeparatorColor
         }
     }
 

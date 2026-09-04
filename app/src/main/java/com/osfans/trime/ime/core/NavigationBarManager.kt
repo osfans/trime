@@ -10,7 +10,7 @@ import android.os.Build
 import android.view.Window
 import androidx.annotation.ColorInt
 import androidx.core.view.WindowCompat
-import com.osfans.trime.data.theme.ColorManager
+import com.osfans.trime.data.theme.ThemeColors
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.data.theme.ThemePrefs
 import com.osfans.trime.util.ColorUtils
@@ -79,6 +79,7 @@ class NavigationBarManager {
     fun evaluate(
         window: Window,
         useVirtualKeyboard: Boolean,
+        colors: ThemeColors,
     ) {
         if (useVirtualKeyboard) {
             evaluateWithVirtualKeyboard(window)
@@ -88,13 +89,16 @@ class NavigationBarManager {
             window.useSystemNavbarBackground(true)
             window.enforceNavbarContrast(false)
         }
-        update(window)
+        update(window, colors)
     }
 
-    private fun update(window: Window) {
+    private fun update(
+        window: Window,
+        colors: ThemeColors,
+    ) {
         val backColor =
             runCatching {
-                ColorManager.getColor("back_color")
+                colors.backColor
             }.getOrDefault(Color.BLACK)
         if (shouldUpdateNavbarForeground) {
             WindowCompat

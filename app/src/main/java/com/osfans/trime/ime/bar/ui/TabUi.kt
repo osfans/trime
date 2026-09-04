@@ -10,8 +10,8 @@ import android.graphics.Typeface
 import android.view.View
 import androidx.core.view.isVisible
 import com.osfans.trime.R
-import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.after
 import splitties.views.dsl.constraintlayout.centerHorizontally
@@ -29,8 +29,10 @@ import splitties.views.gravityVerticalCenter
 
 class TabUi(
     override val ctx: Context,
-    theme: Theme,
+    private val scope: ThemeScope,
 ) : Ui {
+    private val theme: Theme get() = scope.theme
+
     private val backButton: ToolButton
 
     init {
@@ -41,9 +43,9 @@ class TabUi(
             ),
         )
         backButton = if (backButtonConfig != null) {
-            ToolButton(ctx, backButtonConfig)
+            ToolButton(ctx, backButtonConfig, scope)
         } else {
-            ToolButton(ctx, R.drawable.ic_baseline_arrow_back_24)
+            ToolButton(ctx, R.drawable.ic_baseline_arrow_back_24, scope)
         }
     }
 
@@ -51,7 +53,7 @@ class TabUi(
         typeface = Typeface.defaultFromStyle(Typeface.BOLD)
         gravity = gravityVerticalCenter
         textSize = theme.generalStyle.candidateTextSize
-        setTextColor(ColorManager.getColor("key_text_color"))
+        setTextColor(scope.colors.keyTextColor)
     }
 
     private var external: View? = null
@@ -122,6 +124,6 @@ class TabUi(
     /** Restyles the tab bar after a scheme switch. */
     fun refreshColors() {
         backButton.refreshColors()
-        titleText.setTextColor(ColorManager.getColor("key_text_color"))
+        titleText.setTextColor(scope.colors.keyTextColor)
     }
 }

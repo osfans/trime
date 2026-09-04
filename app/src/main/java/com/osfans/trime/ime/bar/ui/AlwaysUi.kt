@@ -12,6 +12,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
 import com.osfans.trime.R
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.data.theme.model.ToolBar
 import splitties.views.dsl.constraintlayout.after
 import splitties.views.dsl.constraintlayout.before
@@ -29,9 +30,11 @@ import timber.log.Timber
 
 class AlwaysUi(
     override val ctx: Context,
-    private val theme: Theme,
+    private val scope: ThemeScope,
     private val onButtonClick: ((String) -> Unit)? = null,
 ) : Ui {
+    private val theme: Theme get() = scope.theme
+
     enum class State {
         Toolbar,
         Clipboard,
@@ -45,7 +48,7 @@ class AlwaysUi(
         buttonConfig: ToolBar.Button?,
         @DrawableRes icon: Int = 0,
     ): ToolButton = if (buttonConfig != null) {
-        ToolButton(ctx, buttonConfig).apply {
+        ToolButton(ctx, buttonConfig, scope).apply {
             setOnClickListener { onButtonClick?.invoke(buttonConfig.action) }
             val longPressAction = buttonConfig.longPressAction
             if (longPressAction.isNotEmpty()) {
@@ -56,18 +59,18 @@ class AlwaysUi(
             }
         }
     } else {
-        ToolButton(ctx, icon).apply {
+        ToolButton(ctx, icon, scope).apply {
             setOnClickListener { onButtonClick?.invoke("") }
         }
     }
 
-    val buttonsUi = ButtonsBarUi(ctx, theme, onButtonClick)
+    val buttonsUi = ButtonsBarUi(ctx, scope, onButtonClick)
 
-    val clipboardUi = ClipboardSuggestionUi(ctx)
+    val clipboardUi = ClipboardSuggestionUi(ctx, scope)
 
     val inlineSuggestionsUi = InlineSuggestionsUi(ctx)
 
-    val hideKeyboardButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_drop_down_24)
+    val hideKeyboardButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_drop_down_24, scope)
     private val rightMostButton =
         ViewAnimator(ctx).apply {
             add(hideKeyboardButton, lParams(matchParent, matchParent))

@@ -20,10 +20,10 @@ import com.osfans.trime.R
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.data.theme.ThemePrefs
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -34,8 +34,12 @@ import kotlin.math.max
 abstract class BaseInputView(
     val service: TrimeInputMethodService,
     val rime: RimeSession,
-    val theme: Theme,
+    val scope: ThemeScope,
 ) : ConstraintLayout(service) {
+    /** The theme config; geometry is theme-scoped, colors go through [scope.colors]. */
+    val theme: Theme
+        get() = scope.theme
+
     protected abstract fun handleRimeMessage(it: RimeMessage<*>)
 
     private var messageHandlerJob: Job? = null
@@ -69,7 +73,7 @@ abstract class BaseInputView(
     fun showCandidateActionMenu(idx: Int, text: String, view: View, global: Boolean) {
         candidateActionMenu?.dismiss()
         candidateActionMenu = null
-        val highlightColor = ColorManager.getColor("hilited_candidate_text_color")
+        val highlightColor = scope.colors.hilitedCandidateTextColor
         val title = buildSpannedString {
             bold {
                 color(highlightColor) { append(text) }

@@ -137,14 +137,20 @@ object ColorManager {
         if (notify) fireChange()
     }
 
-    private fun backgroundFolder() = requireScope().theme.generalStyle.backgroundFolder
+    private fun backgroundFolder(scope: ThemeScope) = scope.theme.generalStyle.backgroundFolder
 
+    /**
+     * Resolves a color key against the given scope. Exposed so UI code can
+     * look up keys only a theme can define through an injected scope.
+     */
     @ColorInt
-    private fun resolveColor(key: String): Int {
-        val tableEntry = ColorKey.from(key)?.let { requireScope().colorTable?.get(it) }
+    internal fun resolveColor(
+        scope: ThemeScope,
+        key: String,
+    ): Int {
+        val tableEntry = ColorKey.from(key)?.let { scope.colorTable?.get(it) }
         if (tableEntry is ColorTable.Value.Color) return tableEntry.argb
         // Keys defined only by a theme resolve through the same chain rules.
-        val scope = requireScope()
         val scheme = requireNotNull(scope.activeColorScheme)
         val raw = ColorTable.resolveRaw(key, scheme.colors, scope.theme.fallbackColors)
         return try {
@@ -155,31 +161,40 @@ object ColorManager {
         }
     }
 
-    private fun resolveDrawable(key: String): Drawable? {
-        val tableEntry = ColorKey.from(key)?.let { requireScope().colorTable?.get(it) }
+    /** Resolves a drawable key (color or image asset) against the given scope. */
+    internal fun resolveDrawable(
+        scope: ThemeScope,
+        key: String,
+    ): Drawable? {
+        val tableEntry = ColorKey.from(key)?.let { scope.colorTable?.get(it) }
         if (tableEntry != null) {
             return when (tableEntry) {
                 is ColorTable.Value.Color -> GradientDrawable().apply { setColor(tableEntry.argb) }
-                is ColorTable.Value.Image -> imageDrawable(tableEntry.path)
-                ColorTable.Value.None -> parseDrawable(key)
+                is ColorTable.Value.Image -> imageDrawable(scope, tableEntry.path)
+                ColorTable.Value.None -> parseDrawable(scope, key)
             }
         }
         // Keys defined only by a theme resolve through the same chain rules.
-        val scope = requireScope()
         val scheme = requireNotNull(scope.activeColorScheme)
         val raw = ColorTable.resolveRaw(key, scheme.colors, scope.theme.fallbackColors)
-        return parseDrawable(raw ?: key)
+        return parseDrawable(scope, raw ?: key)
     }
 
-    private fun parseDrawable(value: String): Drawable? {
+    private fun parseDrawable(
+        scope: ThemeScope,
+        value: String,
+    ): Drawable? {
         if (value.isEmpty()) return null
-        if (ColorTable.isImageValue(value)) return imageDrawable(value)
+        if (ColorTable.isImageValue(value)) return imageDrawable(scope, value)
         val color = runCatching { ColorUtils.parseColor(value) }.getOrDefault(Color.TRANSPARENT)
         return GradientDrawable().apply { setColor(color) }
     }
 
-    private fun imageDrawable(value: String): Drawable? {
-        val path = resolveImageFilePath(value)
+    private fun imageDrawable(
+        scope: ThemeScope,
+        value: String,
+    ): Drawable? {
+        val path = resolveImageFilePath(scope, value)
         val bitmap =
             bitmapCache?.get(path)
                 ?: BitmapFactory.decodeFile(path)?.also {
@@ -198,8 +213,11 @@ object ColorManager {
         return bitmap.toDrawable(Resources.getSystem())
     }
 
-    private fun resolveImageFilePath(value: String): String {
-        val default = DataManager.userDataDir.resolve("backgrounds/${backgroundFolder()}/$value")
+    private fun resolveImageFilePath(
+        scope: ThemeScope,
+        value: String,
+    ): String {
+        val default = DataManager.userDataDir.resolve("backgrounds/${backgroundFolder(scope)}/$value")
         if (!default.exists()) {
             val fallback = DataManager.userDataDir.resolve("backgrounds/$value")
             if (fallback.exists()) return fallback.absolutePath
@@ -208,24 +226,25 @@ object ColorManager {
     }
 
     @ColorInt
-    fun getColor(key: String): Int = resolveColor(key)
+    fun getColor(key: String): Int = resolveColor(requireScope(), key)
 
-    fun getDrawable(key: String): Drawable? = resolveDrawable(key)
+    fun getDrawable(key: String): Drawable? = resolveDrawable(requireScope(), key)
 
-    fun getDecorDrawable(
+    internal fun resolveDecorDrawable(
+        scope: ThemeScope,
         colorKey: String,
-        borderColorKey: String? = null,
-        borderPx: Int = 0,
-        cornerRadius: Float = 0f,
-        alpha: Int = 255,
-    ): Drawable? = when (val drawable = getDrawable(colorKey)) {
+        borderColorKey: String?,
+        borderPx: Int,
+        cornerRadius: Float,
+        alpha: Int,
+    ): Drawable? = when (val drawable = resolveDrawable(scope, colorKey)) {
         is GradientDrawable ->
             drawable.also {
                 it.cornerRadius = cornerRadius
                 it.alpha = MathUtils.clamp(alpha, 0, 255)
                 if (!borderColorKey.isNullOrEmpty()) {
                     try {
-                        val borderColor = getColor(borderColorKey)
+                        val borderColor = resolveColor(scope, borderColorKey)
                         it.setStroke(borderPx, borderColor)
                     } catch (_: Exception) {
                     }
@@ -233,4 +252,12 @@ object ColorManager {
             }
         else -> drawable?.also { it.alpha = MathUtils.clamp(alpha, 0, 255) }
     }
+
+    fun getDecorDrawable(
+        colorKey: String,
+        borderColorKey: String? = null,
+        borderPx: Int = 0,
+        cornerRadius: Float = 0f,
+        alpha: Int = 255,
+    ): Drawable? = resolveDecorDrawable(requireScope(), colorKey, borderColorKey, borderPx, cornerRadius, alpha)
 }

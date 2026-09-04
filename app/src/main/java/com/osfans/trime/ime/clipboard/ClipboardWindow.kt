@@ -17,9 +17,9 @@ import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DatabaseBean
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.segments.SegmentsWindow
@@ -37,7 +37,8 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
 
     private val service: TrimeInputMethodService by instance()
     private val windowManager: BoardWindowManager by instance()
-    private val theme: Theme by instance()
+    private val scope: ThemeScope by instance()
+    private val theme: Theme get() = scope.theme
 
     private lateinit var clipboardLayout: ClipboardLayout
     private lateinit var clipboardPagesAdapter: ClipboardPagesAdapter
@@ -55,7 +56,7 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
     private var collectionBeansSubmitJob: Job? = null
 
     private val clipboardBeansAdapter by lazy {
-        object : ClipboardAdapter(theme) {
+        object : ClipboardAdapter(scope) {
             override fun onPaste(bean: DatabaseBean) {
                 val text = bean.text ?: return
                 service.commitText(text)
@@ -101,7 +102,7 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
     }
 
     private val collectionBeansAdapter by lazy {
-        object : ClipboardAdapter(theme) {
+        object : ClipboardAdapter(scope) {
             override fun onPaste(bean: DatabaseBean) {
                 val text = bean.text ?: return
                 service.commitText(text)
@@ -150,7 +151,7 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
         }
     }
 
-    override fun onCreateView() = ClipboardLayout(context, theme).apply {
+    override fun onCreateView() = ClipboardLayout(context, scope).apply {
         clipboardLayout = this
         clipboardPagesAdapter = object : ClipboardPagesAdapter() {
             override fun getItemCount(): Int = 2
@@ -172,7 +173,7 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
                     setText(label)
                     textSize = theme.generalStyle.candidateTextSize
                     setTypeface(FontManager.getTypeface("candidate_font"), Typeface.BOLD)
-                    setTextColor(ColorManager.getColor("key_text_color"))
+                    setTextColor(scope.colors.keyTextColor)
                 }
             }
             deleteAllButton.setOnClickListener {

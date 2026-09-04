@@ -8,6 +8,7 @@ package com.osfans.trime.ime.clipboard
 import android.content.Context
 import com.osfans.trime.R
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.bar.ui.ToolButton
 import com.osfans.trime.ime.core.InputTabLayout
 import splitties.dimensions.dp
@@ -20,11 +21,12 @@ import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.wrapContent
 
-class ClipboardTitleUi(override val ctx: Context, private val theme: Theme) : Ui {
+class ClipboardTitleUi(override val ctx: Context, private val scope: ThemeScope) : Ui {
+    private val theme: Theme get() = scope.theme
 
     val tabLayout = InputTabLayout(ctx)
 
-    val deleteAllButton = ToolButton(ctx, R.drawable.ic_baseline_delete_sweep_24)
+    val deleteAllButton = ToolButton(ctx, R.drawable.ic_baseline_delete_sweep_24, scope)
 
     private val size = theme.generalStyle.run { candidateViewHeight + commentHeight }
 

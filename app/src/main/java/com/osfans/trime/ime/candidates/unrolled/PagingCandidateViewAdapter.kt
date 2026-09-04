@@ -9,12 +9,12 @@ import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import com.osfans.trime.core.CandidateProto
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.candidates.CandidateItemUi
 import com.osfans.trime.ime.candidates.CandidateViewHolder
 
 open class PagingCandidateViewAdapter(
-    val theme: Theme,
+    val scope: ThemeScope,
 ) : PagingDataAdapter<CandidateProto, CandidateViewHolder>(diffCallback) {
     companion object {
         private val diffCallback =
@@ -46,7 +46,7 @@ open class PagingCandidateViewAdapter(
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): CandidateViewHolder = CandidateViewHolder(CandidateItemUi(parent.context, theme))
+    ): CandidateViewHolder = CandidateViewHolder(CandidateItemUi(parent.context, scope))
 
     override fun onBindViewHolder(
         holder: CandidateViewHolder,

@@ -18,6 +18,7 @@ import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.bar.ui.ToolButton
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.core.TrimeInputMethodService
@@ -41,7 +42,8 @@ class SwitchOptionWindow(di: DI) :
     InputBroadcastReceiver {
     private val service: TrimeInputMethodService by instance()
     private val rime: RimeSession by instance()
-    private val theme: Theme by instance()
+    private val scope: ThemeScope by instance()
+    private val theme: Theme get() = scope.theme
 
     private val staticEntries by lazy {
         arrayOf(
@@ -95,7 +97,7 @@ class SwitchOptionWindow(di: DI) :
 
     private val adapter: SwitchOptionAdapter by lazy {
         object : SwitchOptionAdapter() {
-            override val theme: Theme = this@SwitchOptionWindow.theme
+            override val scope: ThemeScope = this@SwitchOptionWindow.scope
 
             override fun onItemClick(
                 view: View,
@@ -183,7 +185,7 @@ class SwitchOptionWindow(di: DI) :
     override fun onCreateView() = view
 
     private val settingsButton by lazy {
-        ToolButton(context, R.drawable.ic_baseline_settings_24).apply {
+        ToolButton(context, R.drawable.ic_baseline_settings_24, scope).apply {
             setOnClickListener { AppUtils.launchMainActivity(context) }
         }
     }

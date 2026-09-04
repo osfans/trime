@@ -27,7 +27,7 @@ class FlexboxUnrolledCandidateWindow(di: DI) : BaseUnrolledCandidateWindow(di) {
     }
 
     override val adapter by lazy {
-        object : PagingCandidateViewAdapter(theme) {
+        object : PagingCandidateViewAdapter(scope) {
             override fun onCreateViewHolder(
                 parent: ViewGroup,
                 viewType: Int,
@@ -59,7 +59,7 @@ class FlexboxUnrolledCandidateWindow(di: DI) : BaseUnrolledCandidateWindow(di) {
         }
     }
 
-    override fun onCreateCandidateLayout(): UnrolledCandidateLayout = UnrolledCandidateLayout(context, theme).apply {
+    override fun onCreateCandidateLayout(): UnrolledCandidateLayout = UnrolledCandidateLayout(context, scope).apply {
         recyclerView.apply {
             adapter = this@FlexboxUnrolledCandidateWindow.adapter
             layoutManager = this@FlexboxUnrolledCandidateWindow.layoutManager

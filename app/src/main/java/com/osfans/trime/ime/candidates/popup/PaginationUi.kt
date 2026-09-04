@@ -11,8 +11,7 @@ import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import com.osfans.trime.R
 import com.osfans.trime.core.Candidates
-import com.osfans.trime.data.theme.ColorManager
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.util.styledFloat
 import splitties.dimensions.dp
 import splitties.resources.drawable
@@ -28,12 +27,12 @@ import splitties.views.imageDrawable
 
 class PaginationUi(
     override val ctx: Context,
-    val theme: Theme,
+    private val scope: ThemeScope,
 ) : Ui {
     private fun createIcon(
         @DrawableRes icon: Int,
     ) = imageView {
-        imageTintList = ColorStateList.valueOf(ColorManager.getColor("key_text_color"))
+        imageTintList = ColorStateList.valueOf(scope.colors.keyTextColor)
         imageDrawable = drawable(icon)
         scaleType = ImageView.ScaleType.CENTER_CROP
     }
