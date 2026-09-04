@@ -10,14 +10,14 @@ import android.view.ViewGroup
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter4.BaseQuickAdapter
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.data.theme.model.LiquidKeyboard
 import com.osfans.trime.ime.core.AutoScaleTextView
 import splitties.dimensions.dp
 import splitties.views.gravityCenter
 
 class LiquidAdapter(
-    private val theme: Theme,
+    private val scope: ThemeScope,
     private val onItemClick: LiquidKeyboard.KeyItem.(Int) -> Unit,
 ) : BaseQuickAdapter<LiquidKeyboard.KeyItem, LiquidAdapter.ViewHolder>() {
     inner class ViewHolder(
@@ -29,12 +29,12 @@ class LiquidAdapter(
         parent: ViewGroup,
         viewType: Int,
     ): ViewHolder {
-        val ui = LiquidItemUi(context, theme)
+        val ui = LiquidItemUi(context, scope)
         ui.mainText.apply {
             scaleMode = AutoScaleTextView.Mode.Proportional
             gravity = gravityCenter
             updateLayoutParams {
-                width = context.dp(theme.liquidKeyboard.singleWidth)
+                width = context.dp(scope.theme.liquidKeyboard.singleWidth)
             }
         }
         return ViewHolder(ui)

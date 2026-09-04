@@ -10,9 +10,9 @@ import android.content.res.ColorStateList
 import android.graphics.drawable.StateListDrawable
 import android.view.ViewOutlineProvider
 import com.google.android.flexbox.FlexboxLayoutManager
-import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.keyboard.GestureFrame
 import splitties.dimensions.dp
 import splitties.views.dsl.core.Ui
@@ -23,7 +23,9 @@ import splitties.views.dsl.core.wrapContent
 import splitties.views.gravityCenter
 import splitties.views.setPaddingDp
 
-class SegmentUi(override val ctx: Context, theme: Theme) : Ui {
+class SegmentUi(override val ctx: Context, private val scope: ThemeScope) : Ui {
+    private val theme: Theme get() = scope.theme
+
     private val spacing = ctx.dp(4)
 
     val textView =
@@ -39,8 +41,8 @@ class SegmentUi(override val ctx: Context, theme: Theme) : Ui {
                         intArrayOf(android.R.attr.state_selected),
                     ),
                     intArrayOf(
-                        ColorManager.getColor("key_text_color"),
-                        ColorManager.getColor("hilited_key_text_color"),
+                        scope.colors.keyTextColor,
+                        scope.colors.hilitedKeyTextColor,
                     ),
                 ),
             )
@@ -51,14 +53,14 @@ class SegmentUi(override val ctx: Context, theme: Theme) : Ui {
         background = StateListDrawable().apply {
             addState(
                 intArrayOf(-android.R.attr.state_selected),
-                ColorManager.getDecorDrawable(
+                scope.decorDrawable(
                     "key_back_color",
                     cornerRadius = ctx.dp(theme.generalStyle.roundCorner),
                 ),
             )
             addState(
                 intArrayOf(android.R.attr.state_selected),
-                ColorManager.getDecorDrawable(
+                scope.decorDrawable(
                     "hilited_key_back_color",
                     cornerRadius = dp(theme.generalStyle.roundCorner),
                 ),

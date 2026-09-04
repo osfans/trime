@@ -12,9 +12,9 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.osfans.trime.core.CandidateProto
-import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.data.theme.model.GeneralStyle
 import com.osfans.trime.ime.core.AutoScaleTextView
 import com.osfans.trime.ime.keyboard.GestureFrame
@@ -45,8 +45,10 @@ import splitties.views.horizontalPadding
 
 class CandidateItemUi(
     override val ctx: Context,
-    private val theme: Theme,
+    private val scope: ThemeScope,
 ) : Ui {
+    private val theme: Theme
+        get() = scope.theme
 
     private val textSize = theme.generalStyle.candidateTextSize
     private val commentSize = theme.generalStyle.commentTextSize
@@ -55,11 +57,11 @@ class CandidateItemUi(
     private val commentFont = FontManager.getTypeface("comment_font")
 
     // Read at use time so a scheme switch re-binds rows with the new colors.
-    private val textColor: Int get() = ColorManager.getColor("candidate_text_color")
-    private val commentColor: Int get() = ColorManager.getColor("comment_text_color")
-    private val hlCommentColor: Int get() = ColorManager.getColor("hilited_comment_text_color")
-    private val hlTextColor: Int get() = ColorManager.getColor("hilited_candidate_text_color")
-    private val hlBackColor: Int get() = ColorManager.getColor("hilited_candidate_back_color")
+    private val textColor: Int get() = scope.colors.candidateTextColor
+    private val commentColor: Int get() = scope.colors.commentTextColor
+    private val hlCommentColor: Int get() = scope.colors.hilitedCommentTextColor
+    private val hlTextColor: Int get() = scope.colors.hilitedCandidateTextColor
+    private val hlBackColor: Int get() = scope.colors.hilitedCandidateBackColor
 
     private val commentPosition = theme.generalStyle.commentPosition
     private val commentVerticalBias = theme.generalStyle.commentVerticalBias

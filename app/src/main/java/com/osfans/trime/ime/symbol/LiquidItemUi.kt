@@ -6,9 +6,9 @@
 package com.osfans.trime.ime.symbol
 
 import android.content.Context
-import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.core.AutoScaleTextView
 import com.osfans.trime.ime.keyboard.GestureFrame
 import splitties.dimensions.dp
@@ -25,8 +25,10 @@ import splitties.views.setPaddingDp
 
 class LiquidItemUi(
     override val ctx: Context,
-    private val theme: Theme,
+    private val scope: ThemeScope,
 ) : Ui {
+    private val theme: Theme get() = scope.theme
+
     val mainText = view(::AutoScaleTextView) {
         isClickable = false
         isFocusable = false
@@ -34,12 +36,12 @@ class LiquidItemUi(
         textSize = theme.generalStyle.keyTextSize
         typeface = FontManager.getTypeface("key_font")
         setPaddingDp(8, 4, 8, 4)
-        setTextColor(ColorManager.getColor("key_text_color"))
+        setTextColor(scope.colors.keyTextColor)
     }
 
     override val root = view(::GestureFrame) {
         val content = constraintLayout {
-            background = ColorManager.getDecorDrawable(
+            background = scope.decorDrawable(
                 "key_back_color",
                 "key_border_color",
                 dp(theme.generalStyle.keyBorder),

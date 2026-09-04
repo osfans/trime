@@ -8,8 +8,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.osfans.trime.R
-import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.centerInParent
 import splitties.views.dsl.constraintlayout.lParams
@@ -19,8 +19,11 @@ import splitties.views.dsl.recyclerview.recyclerView
 @SuppressLint("ViewConstructor")
 class UnrolledCandidateLayout(
     context: Context,
-    theme: Theme,
+    private val scope: ThemeScope,
 ) : ConstraintLayout(context) {
+    private val theme: Theme
+        get() = scope.theme
+
     val recyclerView =
         recyclerView {
             isVerticalScrollBarEnabled = false
@@ -29,7 +32,7 @@ class UnrolledCandidateLayout(
     init {
         id = R.id.unrolled_candidate_view
         background =
-            ColorManager.getDecorDrawable(
+            scope.decorDrawable(
                 "candidate_background",
                 "candidate_border_color",
                 dp(theme.generalStyle.candidateBorder),

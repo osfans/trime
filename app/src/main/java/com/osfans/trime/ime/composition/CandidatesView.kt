@@ -24,8 +24,7 @@ import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.theme.ColorManager
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.candidates.popup.PagedCandidatesUi
 import com.osfans.trime.ime.core.BaseInputView
 import com.osfans.trime.ime.core.TouchEventReceiverWindow
@@ -50,8 +49,8 @@ import kotlin.math.roundToInt
 class CandidatesView(
     service: TrimeInputMethodService,
     rime: RimeSession,
-    theme: Theme,
-) : BaseInputView(service, rime, theme) {
+    scope: ThemeScope,
+) : BaseInputView(service, rime, scope) {
     private val ctx = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
 
     private val layout by AppPrefs.defaultInstance().candidates.layout
@@ -90,7 +89,7 @@ class CandidatesView(
     private val preeditUi =
         PreeditUi(
             ctx,
-            theme,
+            scope,
             setupPreeditView = { setPaddingDp(3, 1, 3, 1) },
             onMoveCursor = { pos -> rime.launchOnReady { it.moveCursorPos(pos) } },
         )
@@ -98,7 +97,7 @@ class CandidatesView(
     private val candidatesUi =
         PagedCandidatesUi(
             ctx,
-            theme,
+            scope,
             onCandidateClick = { index -> rime.launchOnReady { it.selectCandidate(index, global = false) } },
             onCandidateAction = { index, text, view -> showCandidateActionMenu(index, text, view, global = false) },
             onPrevPage = { rime.launchOnReady { it.changeCandidatePage(true) } },
@@ -142,7 +141,7 @@ class CandidatesView(
     /** Restyles after a scheme switch without rebuilding this view. */
     fun refreshColors() {
         background =
-            ColorManager.getDecorDrawable(
+            scope.decorDrawable(
                 colorKey = "text_back_color",
                 borderColorKey = "candidate_border_color",
                 borderPx = dp(theme.window.border),
@@ -256,7 +255,7 @@ class CandidatesView(
         horizontalPadding = dp(theme.window.insets.horizontal)
         alpha = theme.window.alpha
         background =
-            ColorManager.getDecorDrawable(
+            scope.decorDrawable(
                 colorKey = "text_back_color",
                 borderColorKey = "candidate_border_color",
                 borderPx = dp(theme.window.border),

@@ -26,9 +26,9 @@ import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.bar.ui.AlwaysUi
 import com.osfans.trime.ime.bar.ui.CandidateUi
 import com.osfans.trime.ime.bar.ui.TabUi
@@ -65,7 +65,8 @@ class InputBarDelegate(override val di: DI) :
     InputBroadcastReceiver {
     private val context: ContextThemeWrapper by instance()
     private val service: TrimeInputMethodService by instance()
-    private val theme: Theme by instance()
+    private val scope: ThemeScope by instance()
+    private val theme: Theme get() = scope.theme
     private val windowManager: BoardWindowManager by instance()
     private val commonKeyboardActionListener: CommonKeyboardActionListener by instance()
     private val candidate: CompactCandidateDelegate by instance()
@@ -131,7 +132,7 @@ class InputBarDelegate(override val di: DI) :
     }
 
     private val alwaysUi: AlwaysUi by lazy {
-        AlwaysUi(context, theme) { action ->
+        AlwaysUi(context, scope) { action ->
             if (action.isNotEmpty()) {
                 commonKeyboardActionListener.listener.onAction(KeyActionManager.getAction(action))
             } else {
@@ -169,7 +170,7 @@ class InputBarDelegate(override val di: DI) :
     }
 
     private val candidateUi by lazy {
-        CandidateUi(context, theme, candidate.view).apply {
+        CandidateUi(context, scope, candidate.view).apply {
             unrollButton.apply {
                 onSwipe = swipeDownHideKeyboardCallback
             }
@@ -177,7 +178,7 @@ class InputBarDelegate(override val di: DI) :
     }
 
     private val tabUi by lazy {
-        TabUi(context, theme)
+        TabUi(context, scope)
     }
 
     private val barStateMachine =
@@ -248,7 +249,7 @@ class InputBarDelegate(override val di: DI) :
                     View.VISIBLE
                 }
             background =
-                ColorManager.getDecorDrawable(
+                scope.decorDrawable(
                     "candidate_background",
                     "candidate_border_color",
                     dp(theme.generalStyle.candidateBorder),
@@ -267,7 +268,7 @@ class InputBarDelegate(override val di: DI) :
     /** Restyles the bar after a scheme switch without rebuilding its views. */
     fun refreshColors() {
         view.background =
-            ColorManager.getDecorDrawable(
+            scope.decorDrawable(
                 "candidate_background",
                 "candidate_border_color",
                 context.dp(theme.generalStyle.candidateBorder),

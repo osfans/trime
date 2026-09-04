@@ -14,9 +14,9 @@ import androidx.annotation.ColorInt
 import androidx.core.text.buildSpannedString
 import androidx.core.text.inSpans
 import com.osfans.trime.core.CandidateProto
-import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.util.sp
 import splitties.dimensions.dp
 import splitties.views.dsl.core.Ui
@@ -24,8 +24,11 @@ import splitties.views.dsl.core.textView
 
 class LabeledCandidateItemUi(
     override val ctx: Context,
-    val theme: Theme,
+    private val scope: ThemeScope,
 ) : Ui {
+    private val theme: Theme
+        get() = scope.theme
+
     private val labelSize = theme.window.foreground.labelFontSize
     private val textSize = theme.window.foreground.textFontSize
     private val commentSize = theme.window.foreground.commentFontSize
@@ -34,13 +37,13 @@ class LabeledCandidateItemUi(
     private val commentFont = FontManager.getTypeface("comment_font")
 
     // Read at use time so a scheme switch re-binds rows with the new colors.
-    private val labelColor: Int get() = ColorManager.getColor("label_color")
-    private val textColor: Int get() = ColorManager.getColor("candidate_text_color")
-    private val commentColor: Int get() = ColorManager.getColor("comment_text_color")
-    private val highlightLabelColor: Int get() = ColorManager.getColor("hilited_label_color")
-    private val highlightCommentTextColor: Int get() = ColorManager.getColor("hilited_comment_text_color")
-    private val highlightCandidateTextColor: Int get() = ColorManager.getColor("hilited_candidate_text_color")
-    private val highlightCandidateBackColor: Int get() = ColorManager.getColor("hilited_candidate_back_color")
+    private val labelColor: Int get() = scope.colors.labelColor
+    private val textColor: Int get() = scope.colors.candidateTextColor
+    private val commentColor: Int get() = scope.colors.commentTextColor
+    private val highlightLabelColor: Int get() = scope.colors.hilitedLabelColor
+    private val highlightCommentTextColor: Int get() = scope.colors.hilitedCommentTextColor
+    private val highlightCandidateTextColor: Int get() = scope.colors.hilitedCandidateTextColor
+    private val highlightCandidateBackColor: Int get() = scope.colors.hilitedCandidateBackColor
 
     override val root =
         textView {

@@ -13,8 +13,8 @@ import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.core.AutoScaleTextView
 import com.osfans.trime.ime.keyboard.GestureFrame
 import splitties.dimensions.dp
@@ -38,12 +38,14 @@ import splitties.views.imageDrawable
 
 class SwitchOptionEntryUi(
     override val ctx: Context,
-    private val theme: Theme,
+    private val scope: ThemeScope,
 ) : Ui {
+    private val theme: Theme get() = scope.theme
+
     val bkg =
         frameLayout {
             background =
-                ColorManager.getDecorDrawable(
+                scope.decorDrawable(
                     "key_back_color",
                     "key_border_color",
                     dp(theme.generalStyle.keyBorder),
@@ -72,7 +74,7 @@ class SwitchOptionEntryUi(
         textView {
             textSize = 12f
             gravity = gravityCenter
-            setTextColor(ColorManager.getColor("key_text_color"))
+            setTextColor(scope.colors.keyTextColor)
         }
 
     override val root =
@@ -120,13 +122,13 @@ class SwitchOptionEntryUi(
             textIcon.visibility = View.GONE
             icon.imageDrawable = ctx.drawable(entry.icon)!!.apply {
                 mutate()
-                setTint(ColorManager.getColor("key_text_color"))
+                setTint(scope.colors.keyTextColor)
             }
         } else {
             icon.visibility = View.GONE
             textIcon.visibility = View.VISIBLE
             textIcon.text = getFirstCharacter(entry.label)
-            textIcon.setTextColor(ColorManager.getColor("key_text_color"))
+            textIcon.setTextColor(scope.colors.keyTextColor)
         }
         label.text = entry.label
     }

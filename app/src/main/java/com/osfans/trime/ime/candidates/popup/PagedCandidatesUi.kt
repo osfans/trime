@@ -19,13 +19,13 @@ import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.osfans.trime.core.CandidateProto
 import com.osfans.trime.core.Candidates
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.recyclerview.recyclerView
 
 class PagedCandidatesUi(
     override val ctx: Context,
-    val theme: Theme,
+    val scope: ThemeScope,
     private val onCandidateClick: (Int) -> Unit,
     private val onCandidateAction: (Int, String, View) -> Unit,
     private val onPrevPage: () -> Unit,
@@ -69,8 +69,8 @@ class PagedCandidatesUi(
                 parent: ViewGroup,
                 viewType: Int,
             ): UiHolder = when (viewType) {
-                0 -> UiHolder.Candidate(LabeledCandidateItemUi(ctx, theme))
-                else -> UiHolder.Pagination(PaginationUi(ctx, theme)).apply {
+                0 -> UiHolder.Candidate(LabeledCandidateItemUi(ctx, scope))
+                else -> UiHolder.Pagination(PaginationUi(ctx, scope)).apply {
                     ui.prevIcon.setOnClickListener {
                         onPrevPage.invoke()
                     }

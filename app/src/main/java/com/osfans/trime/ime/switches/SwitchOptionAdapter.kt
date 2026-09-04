@@ -10,7 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter4.BaseQuickAdapter
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 
 abstract class SwitchOptionAdapter : BaseQuickAdapter<SwitchOptionEntry, SwitchOptionAdapter.ViewHolder>() {
     inner class ViewHolder(
@@ -21,7 +21,7 @@ abstract class SwitchOptionAdapter : BaseQuickAdapter<SwitchOptionEntry, SwitchO
         context: Context,
         parent: ViewGroup,
         viewType: Int,
-    ): ViewHolder = ViewHolder(SwitchOptionEntryUi(context, theme))
+    ): ViewHolder = ViewHolder(SwitchOptionEntryUi(context, scope))
 
     override fun onBindViewHolder(
         holder: ViewHolder,
@@ -35,7 +35,7 @@ abstract class SwitchOptionAdapter : BaseQuickAdapter<SwitchOptionEntry, SwitchO
         }
     }
 
-    abstract val theme: Theme
+    abstract val scope: ThemeScope
 
     abstract fun onItemClick(
         view: View,

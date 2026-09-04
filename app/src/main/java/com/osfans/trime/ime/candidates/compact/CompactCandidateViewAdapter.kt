@@ -11,7 +11,7 @@ import androidx.core.view.updateLayoutParams
 import com.chad.library.adapter4.BaseQuickAdapter
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.osfans.trime.core.CandidateProto
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.candidates.CandidateItemUi
 import com.osfans.trime.ime.candidates.CandidateViewHolder
 import splitties.dimensions.dp
@@ -19,7 +19,7 @@ import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.wrapContent
 
 open class CompactCandidateViewAdapter(
-    val theme: Theme,
+    val scope: ThemeScope,
 ) : BaseQuickAdapter<CandidateProto, CandidateViewHolder>() {
     init {
         setHasStableIds(true)
@@ -59,7 +59,7 @@ open class CompactCandidateViewAdapter(
         parent: ViewGroup,
         viewType: Int,
     ): CandidateViewHolder {
-        val ui = CandidateItemUi(context, theme)
+        val ui = CandidateItemUi(context, scope)
         ui.root.apply {
             minimumWidth = dp(40)
             layoutParams = FlexboxLayoutManager.LayoutParams(wrapContent, matchParent)

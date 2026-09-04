@@ -7,6 +7,7 @@ package com.osfans.trime.ime.segments
 
 import android.content.Context
 import com.osfans.trime.R
+import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.bar.ui.ToolButton
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.bottomOfParent
@@ -20,20 +21,20 @@ import splitties.views.dsl.core.add
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.recyclerview.recyclerView
 
-class SegmentsUi(override val ctx: Context) : Ui {
+class SegmentsUi(override val ctx: Context, private val scope: ThemeScope) : Ui {
     val recyclerView = recyclerView {
         itemAnimator = null
     }
 
-    val selectButton = ToolButton(ctx, R.drawable.ic_baseline_select_all_24)
+    val selectButton = ToolButton(ctx, R.drawable.ic_baseline_select_all_24, scope)
 
-    val shareButton = ToolButton(ctx, R.drawable.ic_baseline_share_24)
+    val shareButton = ToolButton(ctx, R.drawable.ic_baseline_share_24, scope)
 
-    val searchButton = ToolButton(ctx, R.drawable.ic_baseline_search_24)
+    val searchButton = ToolButton(ctx, R.drawable.ic_baseline_search_24, scope)
 
-    val starButton = ToolButton(ctx, R.drawable.ic_baseline_star_24)
+    val starButton = ToolButton(ctx, R.drawable.ic_baseline_star_24, scope)
 
-    val copyButton = ToolButton(ctx, R.drawable.ic_baseline_content_copy_24)
+    val copyButton = ToolButton(ctx, R.drawable.ic_baseline_content_copy_24, scope)
 
     override val root = constraintLayout {
         add(
