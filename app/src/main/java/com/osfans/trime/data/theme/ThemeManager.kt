@@ -8,7 +8,6 @@ package com.osfans.trime.data.theme
 import android.content.res.Configuration
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.ime.symbol.LiquidData
 import com.osfans.trime.util.WeakHashSet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
