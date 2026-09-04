@@ -24,21 +24,25 @@ import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.NinePatchBitmapFactory
 import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.isNightMode
-import timber.log.Timber
 
+/**
+ * Global entry point for the colors and drawables of the active theme.
+ *
+ * The activation state itself lives in the current [ThemeScope], which
+ * [attachTheme] replaces on every theme switch; scheme switches update the
+ * same scope in place. String-keyed lookups below ([getColor], [getDrawable])
+ * resolve through that scope so that keys only a theme can define (per-key
+ * keyboard colors, image-valued entries) keep working, while [activeColorScheme]
+ * and the scope's [ThemeScope.colors] expose the typed view for UI code.
+ */
 object ColorManager {
-    private lateinit var theme: Theme
+    private var scope: ThemeScope? = null
     private val prefs = ThemeManager.prefs
-    private val backgroundFolder get() = theme.generalStyle.backgroundFolder
 
     private var isNightMode = false
 
-    private var _activeColorScheme: ColorScheme? = null
-    private var colorTable: ColorTable? = null
-    private var tableTheme: Theme? = null
-
     val activeColorScheme: ColorScheme
-        get() = requireNotNull(_activeColorScheme) { "ColorManager is not initialized" }
+        get() = requireNotNull(requireScope().activeColorScheme) { "ColorManager is not initialized" }
 
     private var bitmapCache: LruCache<String, Bitmap>? = null
 
@@ -57,12 +61,12 @@ object ColorManager {
     }
 
     private fun fireChange() {
-        onChangeListeners.forEach { it.onColorChange(theme) }
+        onChangeListeners.forEach { it.onColorChange(requireScope().theme) }
     }
 
     fun init(configuration: Configuration) {
         isNightMode = configuration.isNightMode()
-        setActiveColorScheme(resolveActiveScheme())
+        activateScheme(notify = false)
 
         val maxMemory = Runtime.getRuntime().maxMemory() / 1024
         val cacheSize = maxMemory / 8
@@ -77,62 +81,62 @@ object ColorManager {
 
     fun onSystemNightModeChange(isNight: Boolean) {
         isNightMode = isNight
-        setActiveColorScheme(resolveActiveScheme())
+        activateScheme(notify = true)
     }
 
-    private fun resolveActiveScheme(): ColorScheme = ColorSchemeResolver.resolve(
+    /** The current theme scope, or null before the first theme is attached. */
+    fun currentScope(): ThemeScope? = scope
+
+    /**
+     * Attaches a theme, replacing the current scope. Theme switches notify
+     * through ThemeManager, so no color listener fires here.
+     */
+    fun attachTheme(theme: Theme) {
+        bitmapCache?.evictAll()
+        scope = ThemeScope(theme)
+        activateScheme(notify = false)
+    }
+
+    fun setColorScheme(scheme: ColorScheme) {
+        activateScheme(scheme, notify = true)
+        prefs.normalModeColor.setValue(scheme.id)
+    }
+
+    private fun requireScope(): ThemeScope = requireNotNull(scope) { "ColorManager is not initialized" }
+
+    private fun resolveActiveScheme(theme: Theme): ColorScheme = ColorSchemeResolver.resolve(
         schemes = theme.colorSchemes,
         selectedSchemeId = prefs.normalModeColor.getValue(),
         followSystemDayNight = prefs.followSystemDayNight.getValue(),
         isNightMode = isNightMode,
     )
 
-    /** 每次切换主题后，都要调用此函数，初始化配色 */
-    fun switchTheme(theme: Theme) {
-        bitmapCache?.evictAll()
-        this.theme = theme
-        setActiveColorScheme(resolveActiveScheme())
-    }
-
-    fun setColorScheme(scheme: ColorScheme) {
-        setActiveColorScheme(scheme)
-        prefs.normalModeColor.setValue(scheme.id)
-    }
-
     /**
-     * Activates a color scheme and pre-compiles its color table. Listener
-     * notification is kept to scheme changes so theme switches (which notify
-     * through ThemeManager) do not fire twice.
+     * Re-resolves the active scheme from the prefs and current theme, or
+     * activates the given one. Listener notification fires only when the
+     * scheme actually changed.
      */
-    private fun setActiveColorScheme(scheme: ColorScheme) {
-        val schemeChanged = _activeColorScheme != scheme
-        val themeChanged = this::theme.isInitialized && tableTheme !== theme
-        if (!schemeChanged && !themeChanged) return
-        _activeColorScheme = scheme
-        if (this::theme.isInitialized) {
-            colorTable = buildColorTable(scheme)
-            tableTheme = theme
-        }
-        if (schemeChanged) fireChange()
+    private fun activateScheme(
+        scheme: ColorScheme? = null,
+        notify: Boolean,
+    ) {
+        val activeScope = scope ?: return
+        val target = scheme ?: resolveActiveScheme(activeScope.theme)
+        if (activeScope.activeColorScheme == target) return
+        activeScope.updateScheme(target)
+        if (notify) fireChange()
     }
 
-    private fun buildColorTable(scheme: ColorScheme): ColorTable = ColorTable.resolve(scheme, theme.fallbackColors) { value ->
-        runCatching { ColorUtils.parseColor(value) }.getOrNull()
-    }.also { table ->
-        if (table.unresolvedKeys.isNotEmpty()) {
-            Timber.w("Unknown color key: %s", table.unresolvedKeys.joinToString { it.key })
-        }
-        if (table.invalidValues.isNotEmpty()) {
-            Timber.w("Invalid color value: %s", table.invalidValues.joinToString { it.key })
-        }
-    }
+    private fun backgroundFolder() = requireScope().theme.generalStyle.backgroundFolder
 
     @ColorInt
     private fun resolveColor(key: String): Int {
-        val tableEntry = ColorKey.from(key)?.let { colorTable?.get(it) }
+        val tableEntry = ColorKey.from(key)?.let { requireScope().colorTable?.get(it) }
         if (tableEntry is ColorTable.Value.Color) return tableEntry.argb
         // Keys defined only by a theme resolve through the same chain rules.
-        val raw = ColorTable.resolveRaw(key, activeColorScheme.colors, theme.fallbackColors)
+        val scope = requireScope()
+        val scheme = requireNotNull(scope.activeColorScheme)
+        val raw = ColorTable.resolveRaw(key, scheme.colors, scope.theme.fallbackColors)
         return try {
             if (raw == null) throw IllegalArgumentException("$key not found")
             ColorUtils.parseColor(raw)
@@ -142,7 +146,7 @@ object ColorManager {
     }
 
     private fun resolveDrawable(key: String): Drawable? {
-        val tableEntry = ColorKey.from(key)?.let { colorTable?.get(it) }
+        val tableEntry = ColorKey.from(key)?.let { requireScope().colorTable?.get(it) }
         if (tableEntry != null) {
             return when (tableEntry) {
                 is ColorTable.Value.Color -> GradientDrawable().apply { setColor(tableEntry.argb) }
@@ -151,7 +155,9 @@ object ColorManager {
             }
         }
         // Keys defined only by a theme resolve through the same chain rules.
-        val raw = ColorTable.resolveRaw(key, activeColorScheme.colors, theme.fallbackColors)
+        val scope = requireScope()
+        val scheme = requireNotNull(scope.activeColorScheme)
+        val raw = ColorTable.resolveRaw(key, scheme.colors, scope.theme.fallbackColors)
         return parseDrawable(raw ?: key)
     }
 
@@ -183,7 +189,7 @@ object ColorManager {
     }
 
     private fun resolveImageFilePath(value: String): String {
-        val default = DataManager.userDataDir.resolve("backgrounds/$backgroundFolder/$value")
+        val default = DataManager.userDataDir.resolve("backgrounds/${backgroundFolder()}/$value")
         if (!default.exists()) {
             val fallback = DataManager.userDataDir.resolve("backgrounds/$value")
             if (fallback.exists()) return fallback.absolutePath

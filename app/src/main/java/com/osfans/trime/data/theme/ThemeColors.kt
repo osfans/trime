@@ -16,10 +16,11 @@ import androidx.annotation.ColorInt
  * resolves throw [IllegalArgumentException], exactly like
  * `ColorManager.getColor(key)` with the same key.
  *
- * Planned (R3) as the color access root for UI code, replacing the
- * string-keyed calls at the ~35 static call sites.
+ * The color access root for UI code: reach it through [ThemeScope.colors] and
+ * re-read values on every bind or draw — the instance is replaced whenever
+ * the scheme switches.
  */
-internal class ThemeColors internal constructor(
+class ThemeColors internal constructor(
     private val table: ColorTable,
 ) {
     val backColor: Int get() = color(ColorKey.BACK_COLOR)

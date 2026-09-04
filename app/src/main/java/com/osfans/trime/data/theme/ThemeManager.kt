@@ -111,7 +111,7 @@ object ThemeManager {
         val theme = resolvedTheme.theme
         KeyActionManager.resetCache()
         FontManager.resetCache(theme)
-        ColorManager.switchTheme(theme)
+        ColorManager.attachTheme(theme)
         LiquidData.init(theme)
         activeTheme = theme
     }
