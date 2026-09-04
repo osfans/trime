@@ -46,4 +46,9 @@ class CandidateUi(
                 },
             )
         }
+
+    /** Restyles the candidate bar after a scheme switch. */
+    fun refreshColors() {
+        unrollButton.refreshColors()
+    }
 }

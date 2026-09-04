@@ -150,4 +150,9 @@ class PagedCandidatesUi(
         }
         candidatesAdapter.submitList(candidates.candidates.toList())
     }
+
+    /** Re-binds visible rows so they re-render with the current scheme's colors. */
+    fun refreshColors() {
+        candidatesAdapter.notifyDataSetChanged()
+    }
 }

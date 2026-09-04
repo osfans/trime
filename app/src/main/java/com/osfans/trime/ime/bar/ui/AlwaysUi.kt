@@ -137,6 +137,14 @@ class AlwaysUi(
         updateLeftMostButton(state)
     }
 
+    /** Restyles the toolbar area after a scheme switch. */
+    fun refreshColors() {
+        leftMostButton.refreshColors()
+        hideKeyboardButton.refreshColors()
+        buttonsUi.refreshColors()
+        clipboardUi.refreshColors()
+    }
+
     private fun updateRightMostButton(state: State) {
         val hasFirstButton = buttonsUi.firstButton != null
         val showFirst = hasFirstButton && (theme.toolBar.buttons.isNotEmpty() || state != State.Toolbar)

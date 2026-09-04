@@ -12,6 +12,8 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.model.TextKeyboard
 import splitties.bitflags.hasFlag
+import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KProperty
 
 /** [鍵盤][Keyboard]中的各個按鍵，包含單擊、長按、滑動等多種[事件][KeyAction]  */
 class Key(
@@ -95,32 +97,55 @@ class Key(
         if (src(it).isEmpty()) null else ColorManager.getDrawable(src(it))
     } ?: ColorManager.getDrawable(fallback)
 
-    private val keyBackground by lazy { getDrawable({ keyBackColor }, "key_back_color") }
-    private val offKeyBackground by lazy { ColorManager.getDrawable("off_key_back_color") ?: keyBackground }
-    private val onKeyBackground by lazy { ColorManager.getDrawable("on_key_back_color") ?: keyBackground }
-    private val hlKeyBackground by lazy { getDrawable({ hlKeyBackColor }, "hilited_key_back_color") }
-    private val hlOffKeyBackground by lazy { ColorManager.getDrawable("hilited_off_key_back_color") ?: hlKeyBackground }
-    private val hlOnKeyBackground by lazy { ColorManager.getDrawable("hilited_on_key_back_color") ?: hlKeyBackground }
+    // Colors are cached per color-scheme generation: the cache re-resolves
+    // when the active scheme changes, so an invalidated keyboard view picks up
+    // the new colors without being rebuilt.
+    private class SchemeColorCache<T>(private val resolve: () -> T) : ReadOnlyProperty<Any?, T> {
+        private var generation = Long.MIN_VALUE
+        private var value: T? = null
 
-    private val keyBorderColor by lazy { getColor({ keyBorderColor }, "key_border_color") }
-    private val offKeyBorderColor by lazy { getColor("off_key_border_color", keyBorderColor) }
-    private val onKeyBorderColor by lazy { getColor("on_key_border_color", keyBorderColor) }
-    private val hlKeyBorderColor by lazy { getColor({ hlKeyBorderColor }, "hilited_key_border_color") }
-    private val hlOffKeyBorderColor by lazy { getColor("hilited_off_key_border_color", hlKeyBorderColor) }
-    private val hlOnKeyBorderColor by lazy { getColor("hilited_on_key_border_color", hlKeyBorderColor) }
+        override fun getValue(
+            thisRef: Any?,
+            property: KProperty<*>,
+        ): T {
+            val current = ColorManager.colorGeneration
+            if (generation != current) {
+                generation = current
+                value = resolve()
+            }
+            @Suppress("UNCHECKED_CAST")
+            return value as T
+        }
+    }
 
-    private val keyTextColor by lazy { getColor({ keyTextColor }, "key_text_color") }
-    private val offKeyTextColor by lazy { getColor("off_key_text_color", keyTextColor) }
-    private val onKeyTextColor by lazy { getColor("on_key_text_color", keyTextColor) }
-    private val hlKeyTextColor by lazy { getColor({ hlKeyTextColor }, "hilited_key_text_color") }
-    private val hlOffKeyTextColor by lazy { getColor("hilited_off_key_text_color", hlKeyTextColor) }
-    private val hlOnKeyTextColor by lazy { getColor("hilited_on_key_text_color", hlKeyTextColor) }
-    private val keySymbolColor by lazy { getColor({ keySymbolColor }, "key_symbol_color") }
-    private val offKeySymbolColor by lazy { getColor("off_key_symbol_color", keySymbolColor) }
-    private val onKeySymbolColor by lazy { getColor("on_key_symbol_color", keySymbolColor) }
-    private val hlKeySymbolColor by lazy { getColor({ hlKeySymbolColor }, "hilited_key_symbol_color") }
-    private val hlOffKeySymbolColor by lazy { getColor("hilited_off_key_symbol_color", hlKeySymbolColor) }
-    private val hlOnKeySymbolColor by lazy { getColor("hilited_on_key_symbol_color", hlKeySymbolColor) }
+    private fun <T> schemeColor(resolve: () -> T) = SchemeColorCache(resolve)
+
+    private val keyBackground by schemeColor { getDrawable({ keyBackColor }, "key_back_color") }
+    private val offKeyBackground by schemeColor { ColorManager.getDrawable("off_key_back_color") ?: keyBackground }
+    private val onKeyBackground by schemeColor { ColorManager.getDrawable("on_key_back_color") ?: keyBackground }
+    private val hlKeyBackground by schemeColor { getDrawable({ hlKeyBackColor }, "hilited_key_back_color") }
+    private val hlOffKeyBackground by schemeColor { ColorManager.getDrawable("hilited_off_key_back_color") ?: hlKeyBackground }
+    private val hlOnKeyBackground by schemeColor { ColorManager.getDrawable("hilited_on_key_back_color") ?: hlKeyBackground }
+
+    private val keyBorderColor by schemeColor { getColor({ keyBorderColor }, "key_border_color") }
+    private val offKeyBorderColor by schemeColor { getColor("off_key_border_color", keyBorderColor) }
+    private val onKeyBorderColor by schemeColor { getColor("on_key_border_color", keyBorderColor) }
+    private val hlKeyBorderColor by schemeColor { getColor({ hlKeyBorderColor }, "hilited_key_border_color") }
+    private val hlOffKeyBorderColor by schemeColor { getColor("hilited_off_key_border_color", hlKeyBorderColor) }
+    private val hlOnKeyBorderColor by schemeColor { getColor("hilited_on_key_border_color", hlKeyBorderColor) }
+
+    private val keyTextColor by schemeColor { getColor({ keyTextColor }, "key_text_color") }
+    private val offKeyTextColor by schemeColor { getColor("off_key_text_color", keyTextColor) }
+    private val onKeyTextColor by schemeColor { getColor("on_key_text_color", keyTextColor) }
+    private val hlKeyTextColor by schemeColor { getColor({ hlKeyTextColor }, "hilited_key_text_color") }
+    private val hlOffKeyTextColor by schemeColor { getColor("hilited_off_key_text_color", hlKeyTextColor) }
+    private val hlOnKeyTextColor by schemeColor { getColor("hilited_on_key_text_color", hlKeyTextColor) }
+    private val keySymbolColor by schemeColor { getColor({ keySymbolColor }, "key_symbol_color") }
+    private val offKeySymbolColor by schemeColor { getColor("off_key_symbol_color", keySymbolColor) }
+    private val onKeySymbolColor by schemeColor { getColor("on_key_symbol_color", keySymbolColor) }
+    private val hlKeySymbolColor by schemeColor { getColor({ hlKeySymbolColor }, "hilited_key_symbol_color") }
+    private val hlOffKeySymbolColor by schemeColor { getColor("hilited_off_key_symbol_color", hlKeySymbolColor) }
+    private val hlOnKeySymbolColor by schemeColor { getColor("hilited_on_key_symbol_color", hlKeySymbolColor) }
 
     init {
         if (selfConfig != null) {

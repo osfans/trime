@@ -276,6 +276,11 @@ class KeyboardWindow(di: DI) :
         attachKeyboard(id)
     }
 
+    /** Repaints the keyboard after a color-scheme switch; keys re-resolve their colors. */
+    fun refreshColors() {
+        currentKeyboardView?.invalidateAllKeys()
+    }
+
     override fun onStartInput(info: EditorInfo) {
         val targetKeyboard =
             when (info.imeOptions and EditorInfo.IME_FLAG_FORCE_ASCII) {

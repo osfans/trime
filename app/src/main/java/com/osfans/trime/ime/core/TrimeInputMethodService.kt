@@ -126,7 +126,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private val onColorChangeListener =
         ColorManager.OnColorChangeListener {
             ContextCompat.getMainExecutor(this).execute {
-                replaceInputViews(it)
+                // A scheme-only change restyles the tree in place; theme
+                // switches rebuild it through onThemeChangeListener.
+                inputView?.refreshColors()
+                candidatesView?.refreshColors()
             }
         }
 
