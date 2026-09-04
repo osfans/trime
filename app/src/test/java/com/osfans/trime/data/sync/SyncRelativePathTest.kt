@@ -8,6 +8,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import java.io.File
+import kotlin.io.path.createTempDirectory
 
 class SyncRelativePathTest :
     StringSpec({
@@ -38,7 +39,7 @@ class SyncRelativePathTest :
             }
         }
         "resolveContained stays within root" {
-            val root = createTempDir()
+            val root = createTempDirectory().toFile()
             try {
                 val resolved = SyncRelativePath.resolveContained(root, "default.yaml")
                 resolved.path shouldBe File(root, "default.yaml").canonicalFile.path

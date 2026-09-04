@@ -230,12 +230,13 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
             private fun handleTheme(arg: String) {
                 if (arg.isEmpty()) {
                     // 参数为空时，刷新当前主题
-                    ThemeManager.selectTheme(ThemeManager.prefs.selectedTheme.getValue())
+                    val themeId = ThemeManager.prefs.selectedTheme.getValue()
+                    service.lifecycleScope.launch { ThemeManager.selectTheme(themeId) }
                 } else {
                     // 通过主题名称查找对应的配置ID并切换主题
                     ThemeManager.getAllThemes()
-                        .find { it.name.equals(arg, ignoreCase = true) }?.let {
-                            ThemeManager.selectTheme(it.configId)
+                        .find { it.name.equals(arg, ignoreCase = true) }?.let { item ->
+                            service.lifecycleScope.launch { ThemeManager.selectTheme(item.configId) }
                         }
                 }
             }

@@ -174,6 +174,7 @@
     <string name="schemata">方案</string>
     <string name="navbar_background">導航欄背景</string>
     <string name="no_theme_to_select">當前沒有主題可選擇。</string>
+    <string name="theme_unavailable_fallback">主題“%1$s”不可用，已切換為“%2$s”。</string>
     <string name="no_color_to_select">當前沒有配色方案可選擇。</string>
     <string name="no_effect_to_select">當前沒有按鍵音效可選擇。</string>
     <string name="setup_channel">設定精靈</string>

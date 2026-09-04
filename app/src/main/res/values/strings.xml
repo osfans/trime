@@ -177,6 +177,7 @@
     <string name="schemata">Schemata</string>
     <string name="navbar_background">Navigation bar background</string>
     <string name="no_theme_to_select">Currently there is no theme to select.</string>
+    <string name="theme_unavailable_fallback">Theme “%1$s” is unavailable, switched to “%2$s”.</string>
     <string name="no_color_to_select">Currently there is no color scheme to select.</string>
     <string name="no_effect_to_select">Currently there is no key sound effect to select.</string>
     <string name="setup_channel">Setup Wizard</string>

@@ -175,6 +175,7 @@
     <string name="schemata">方案</string>
     <string name="navbar_background">导航栏背景</string>
     <string name="no_theme_to_select">当前没有主题可选择。</string>
+    <string name="theme_unavailable_fallback">主题“%1$s”不可用，已切换为“%2$s”。</string>
     <string name="no_color_to_select">当前没有配色方案可选择。</string>
     <string name="no_effect_to_select">当前没有按键音效可选择。</string>
     <string name="setup_channel">设置向导</string>
