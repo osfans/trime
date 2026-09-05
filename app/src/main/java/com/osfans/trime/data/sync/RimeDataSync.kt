@@ -282,8 +282,8 @@ object RimeDataSync {
             val userDataDir = DataManager.userDataDir
             val syncDir = SyncPathPolicy.treeRelativeSyncDir(syncDirRaw, userDataDir)
             val exportPrefix =
-                runCatching { SyncPathPolicy.ownSyncPrefix(ownId, syncDir) }.getOrElse {
-                    Timber.w("Export skipped: installation_id unreadable")
+                runCatching { SyncPathPolicy.ownSyncPrefix(ownId, syncDir) }.getOrElse { e ->
+                    Timber.w(e, "Export skipped: invalid installation_id or sync_dir")
                     return@runCatching SyncStats()
                 }
             val srcRoot = SyncPathPolicy.localOwnSyncDir(ownId, syncDirRaw, userDataDir)
