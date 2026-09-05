@@ -112,6 +112,11 @@ class BoardWindowManager(override val di: DI) : DIAware {
         broadcaster.onWindowAttached(window)
     }
 
+    /** Restyles the window currently on screen after a scheme switch. */
+    fun refreshColors() {
+        currentWindow?.refreshColors()
+    }
+
     val view: FrameLayout by lazy { context.frameLayout(R.id.input_window) }
 
     fun isAttached(window: BoardWindow) = currentWindow === window

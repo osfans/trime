@@ -277,7 +277,7 @@ class KeyboardWindow(di: DI) :
     }
 
     /** Repaints the keyboard after a color-scheme switch; keys re-resolve their colors. */
-    fun refreshColors() {
+    override fun refreshColors() {
         currentKeyboardView?.invalidateAllKeys()
     }
 

@@ -108,6 +108,11 @@ object ThemeManager {
 
     private fun applyTheme(resolvedTheme: ResolvedTheme) {
         val theme = resolvedTheme.theme
+        // A structurally equal theme suppresses the change notification below, so the
+        // UI tree keeps its views and their injected scope. Replace neither the
+        // caches nor the scope in that case, or later scheme changes would update
+        // the new global scope while existing views still read the old one.
+        if (::_activeTheme.isInitialized && _activeTheme == theme) return
         KeyActionManager.resetCache()
         FontManager.resetCache(theme)
         ColorManager.attachTheme(theme)
