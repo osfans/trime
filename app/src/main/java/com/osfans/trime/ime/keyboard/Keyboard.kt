@@ -27,35 +27,26 @@ class Keyboard(
 
     /** 按鍵默認水平間距  */
     internal val horizontalGap: Int =
-        intArrayOf(
-            selfConfig?.horizontalGap ?: 0,
-            theme.generalStyle.horizontalGap,
-        ).firstOrNull { it > 0 }?.let { context.dp(it) } ?: 0
+        resolvePositive(selfConfig?.horizontalGap, theme.generalStyle.horizontalGap) { context.dp(it) }
 
     /** 默認鍵寬  */
     private val keyWidth: Int = (allowedWidth * theme.generalStyle.keyWidth / 100).toInt()
 
     /** 默認鍵高 (NOTE: 无需 dp 转换，会被 keyboardHeight 等比例缩放) */
     private val keyHeight: Int =
-        intArrayOf(
-            selfConfig?.height?.toInt() ?: 0,
-            theme.generalStyle.keyHeight,
-        ).firstOrNull { it > 0 } ?: 0
+        resolvePositive(selfConfig?.height?.toInt(), theme.generalStyle.keyHeight)
 
     /** 默認行距  */
     internal val verticalGap: Int =
-        intArrayOf(
-            selfConfig?.verticalGap ?: 0,
-            theme.generalStyle.verticalGap,
-        ).firstOrNull { it > 0 }?.let { context.dp(it) } ?: 0
+        resolvePositive(selfConfig?.verticalGap, theme.generalStyle.verticalGap) { context.dp(it) }
 
     /** 默認按鍵圓角半徑  */
     val roundCorner: Float =
-        selfConfig?.roundCorner?.takeIf { it >= 0f } ?: theme.generalStyle.roundCorner
+        resolveNonNegative(selfConfig?.roundCorner, theme.generalStyle.roundCorner)
 
     /** 默認按鍵邊框寬度  */
     val keyBorder: Int =
-        selfConfig?.keyBorder?.takeIf { it >= 0 } ?: theme.generalStyle.keyBorder
+        resolveNonNegative(selfConfig?.keyBorder, theme.generalStyle.keyBorder)
 
     /** 鍵盤的Shift鍵  */
     var mShiftKey: Key? = null
@@ -95,10 +86,7 @@ class Keyboard(
     val landscapeKeyboard: String? = selfConfig?.landscapeKeyboard
     private val preferredSplitPercent by AppPrefs.defaultInstance().keyboard.splitSpacePercent
     private val landscapePercent =
-        intArrayOf(
-            selfConfig?.landscapeSplitPercent ?: 0,
-            preferredSplitPercent,
-        ).firstOrNull { it > 0 } ?: 0
+        resolvePositive(selfConfig?.landscapeSplitPercent, preferredSplitPercent)
 
     // Variables for pre-computing nearest keys.
     private val labelTransform = selfConfig?.labelTransform ?: TextKeyboard.LabelTransform.NONE
@@ -112,24 +100,22 @@ class Keyboard(
     val asciiKeyboard: String? = selfConfig?.asciiKeyboard // 英文鍵盤
 
     val keyboardHeight: Int =
-        intArrayOf(
-            selfConfig?.let { getKeyboardHeightFromKeyboardConfig(it) } ?: 0,
-            getKeyboardHeightFromTheme(theme),
-        ).firstOrNull { it > 0 } ?: 0
+        resolvePositive(
+            selfConfig?.let {
+                pickLandscape(it.keyboardHeight, it.keyboardHeightLand, context.isLandscapeMode())
+            },
+            pickLandscape(
+                theme.generalStyle.keyboardHeight,
+                theme.generalStyle.keyboardHeightLand,
+                context.isLandscapeMode(),
+            ),
+        ) { context.dp(it) }
 
     private val expandKeypressArea: Boolean by AppPrefs.defaultInstance().keyboard.expandKeypressArea
 
     init {
 
         if (selfConfig != null) {
-
-            fun firstNonZero(a: Float, b: Float, c: Float): Float = if (a != 0f) {
-                a
-            } else if (b != 0f) {
-                b
-            } else {
-                c
-            }
 
             val keys = selfConfig.keys
             val keyboardKeyWidth = selfConfig.width
@@ -268,14 +254,14 @@ class Keyboard(
 
                 val key = Key(this, textKey)
 
-                key.keyTextOffsetX = firstNonZero(textKey.keyTextOffsetX, selfConfig.keyTextOffsetX, theme.generalStyle.keyTextOffsetX)
-                key.keyTextOffsetY = firstNonZero(textKey.keyTextOffsetY, selfConfig.keyTextOffsetY, theme.generalStyle.keyTextOffsetY)
-                key.keySymbolOffsetX = firstNonZero(textKey.keySymbolOffsetX, selfConfig.keySymbolOffsetX, theme.generalStyle.keySymbolOffsetX)
-                key.keySymbolOffsetY = firstNonZero(textKey.keySymbolOffsetY, selfConfig.keySymbolOffsetY, theme.generalStyle.keySymbolOffsetY)
-                key.keyHintOffsetX = firstNonZero(textKey.keyHintOffsetX, selfConfig.keyHintOffsetX, theme.generalStyle.keyHintOffsetX)
-                key.keyHintOffsetY = firstNonZero(textKey.keyHintOffsetY, selfConfig.keyHintOffsetY, theme.generalStyle.keyHintOffsetY)
-                key.keyPressOffsetX = firstNonZero(textKey.keyPressOffsetX, selfConfig.keyPressOffsetX, theme.generalStyle.keyPressOffsetX)
-                key.keyPressOffsetY = firstNonZero(textKey.keyPressOffsetY, selfConfig.keyPressOffsetY, theme.generalStyle.keyPressOffsetY)
+                key.keyTextOffsetX = resolveOffset(textKey.keyTextOffsetX, selfConfig.keyTextOffsetX, theme.generalStyle.keyTextOffsetX)
+                key.keyTextOffsetY = resolveOffset(textKey.keyTextOffsetY, selfConfig.keyTextOffsetY, theme.generalStyle.keyTextOffsetY)
+                key.keySymbolOffsetX = resolveOffset(textKey.keySymbolOffsetX, selfConfig.keySymbolOffsetX, theme.generalStyle.keySymbolOffsetX)
+                key.keySymbolOffsetY = resolveOffset(textKey.keySymbolOffsetY, selfConfig.keySymbolOffsetY, theme.generalStyle.keySymbolOffsetY)
+                key.keyHintOffsetX = resolveOffset(textKey.keyHintOffsetX, selfConfig.keyHintOffsetX, theme.generalStyle.keyHintOffsetX)
+                key.keyHintOffsetY = resolveOffset(textKey.keyHintOffsetY, selfConfig.keyHintOffsetY, theme.generalStyle.keyHintOffsetY)
+                key.keyPressOffsetX = resolveOffset(textKey.keyPressOffsetX, selfConfig.keyPressOffsetX, theme.generalStyle.keyPressOffsetX)
+                key.keyPressOffsetY = resolveOffset(textKey.keyPressOffsetY, selfConfig.keyPressOffsetY, theme.generalStyle.keyPressOffsetY)
 
                 key.x = xPos
                 key.y = yPos
@@ -326,24 +312,6 @@ class Keyboard(
                 if (key.row == row) key.edgeFlags = key.edgeFlags or EDGE_BOTTOM
             }
         }
-    }
-
-    private fun getKeyboardHeightFromTheme(theme: Theme): Int {
-        var keyboardHeight = theme.generalStyle.keyboardHeight
-        if (context.isLandscapeMode()) {
-            val keyboardHeightLand = theme.generalStyle.keyboardHeightLand
-            if (keyboardHeightLand > 0) keyboardHeight = keyboardHeightLand
-        }
-        return context.dp(keyboardHeight)
-    }
-
-    private fun getKeyboardHeightFromKeyboardConfig(textKeyboard: TextKeyboard): Int {
-        var keyboardHeight = textKeyboard.keyboardHeight
-        if (context.isLandscapeMode()) {
-            val keyboardHeightLand = textKeyboard.keyboardHeightLand
-            if (keyboardHeightLand > 0) keyboardHeight = keyboardHeightLand
-        }
-        return context.dp(keyboardHeight)
     }
 
     fun setModifierKey(
