@@ -119,6 +119,8 @@
     <string name="virtual_keyboard">虛擬鍵盤</string>
     <string name="storage">儲存</string>
     <string name="data_storage_mode">資料儲存模式</string>
+    <string name="sync_from_external">從外部存儲同步</string>
+    <string name="use_app_specific_storage">使用應用專用存儲空間</string>
     <string name="sync_from_external_desc">每次部署或同步使用者資料前，從指定目錄匯入資料到內部儲存空間，並在同步使用者資料後匯出到該目錄。需要較多儲存空間。建議有經驗的使用者使用。</string>
     <string name="use_app_specific_storage_desc">直接使用應用程式內部私有儲存空間，使用者需要使用支援的檔案管理器管理資料。解除安裝應用程式時，系統可能會詢問是否保留資料，請隨時做好備份。</string>
     <string name="external_sync_select_folder_message">外部同步需要選擇資料資料夾。請選擇存放 Trime 設定檔的位置。</string>
