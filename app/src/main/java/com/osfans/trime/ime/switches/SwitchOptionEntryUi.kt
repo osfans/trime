@@ -116,6 +116,18 @@ class SwitchOptionEntryUi(
             }
         }
 
+    /** Restyles the row after a scheme switch; the icon/text-icon colors are live. */
+    fun refreshColors() {
+        bkg.background =
+            scope.decorDrawable(
+                "key_back_color",
+                "key_border_color",
+                ctx.dp(theme.generalStyle.keyBorder),
+                ctx.dp(theme.generalStyle.roundCorner),
+            )
+        label.setTextColor(scope.colors.keyTextColor)
+    }
+
     fun setEntry(entry: SwitchOptionEntry) {
         if (entry.icon != 0) {
             icon.visibility = View.VISIBLE

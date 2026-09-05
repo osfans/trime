@@ -48,6 +48,9 @@ class LiquidLayout(
     private val theme: Theme get() = scope.theme
 
     // TODO: 继承一个键盘视图嵌入到这里，而不是自定义一个视图
+    // The fixed-key items, kept so their colors can be refreshed on scheme switches.
+    private val fixedKeyItems = mutableListOf<LiquidItemUi>()
+
     private val fixedKeyBar =
         constraintLayout {
             val fixedKeys =
@@ -58,6 +61,7 @@ class LiquidLayout(
                         val presetKeyName = fixedKeys[index]
                         val presetKey = theme.presetKeys[presetKeyName]
                         val ui = LiquidItemUi(context, scope)
+                        fixedKeyItems += ui
                         ui.mainText.text = presetKey?.label ?: ""
                         ui.root.apply {
                             isRepeatable = presetKey?.repeatable ?: false
@@ -209,5 +213,11 @@ class LiquidLayout(
                 )
             }
         }
+    }
+
+    fun refreshColors() {
+        fixedKeyItems.forEach { it.refreshColors() }
+        tabsUi.refreshColors()
+        recyclerView.adapter?.notifyDataSetChanged()
     }
 }

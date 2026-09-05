@@ -90,6 +90,11 @@ class InputTabLayout(context: Context) : LinearLayout(context) {
         pager.registerOnPageChangeCallback(callback)
     }
 
+    /** Re-runs [setup] on the existing tabs, e.g. to re-apply scheme colors. */
+    fun reconfigureTabs(setup: (TabUi, Int) -> Unit) {
+        tabs.forEach { tabUi -> setup(tabUi, tabUi.position) }
+    }
+
     private fun activateTab(index: Int) {
         if (index == selected) return
         if (selected >= 0) {

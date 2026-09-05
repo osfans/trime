@@ -39,21 +39,33 @@ class LiquidItemUi(
         setTextColor(scope.colors.keyTextColor)
     }
 
+    private val content = constraintLayout {
+        background = scope.decorDrawable(
+            "key_back_color",
+            "key_border_color",
+            dp(theme.generalStyle.keyBorder),
+            dp(theme.generalStyle.roundCorner),
+        )
+        add(
+            mainText,
+            lParams(wrapContent, wrapContent) {
+                centerInParent()
+            },
+        )
+    }
+
     override val root = view(::GestureFrame) {
-        val content = constraintLayout {
-            background = scope.decorDrawable(
-                "key_back_color",
-                "key_border_color",
-                dp(theme.generalStyle.keyBorder),
-                dp(theme.generalStyle.roundCorner),
-            )
-            add(
-                mainText,
-                lParams(wrapContent, wrapContent) {
-                    centerInParent()
-                },
-            )
-        }
         add(content, lParams(matchParent, matchParent))
+    }
+
+    /** Restyles the item after a scheme switch. */
+    fun refreshColors() {
+        mainText.setTextColor(scope.colors.keyTextColor)
+        content.background = scope.decorDrawable(
+            "key_back_color",
+            "key_border_color",
+            ctx.dp(theme.generalStyle.keyBorder),
+            ctx.dp(theme.generalStyle.roundCorner),
+        )
     }
 }

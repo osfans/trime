@@ -50,4 +50,15 @@ class UnrolledCandidateLayout(
     fun resetPosition() {
         recyclerView.scrollToPosition(0)
     }
+
+    /** Restyles the container background after a scheme switch. */
+    fun refreshColors() {
+        background =
+            scope.decorDrawable(
+                "candidate_background",
+                "candidate_border_color",
+                dp(theme.generalStyle.candidateBorder),
+                dp(theme.generalStyle.candidateBorderRound),
+            )
+    }
 }

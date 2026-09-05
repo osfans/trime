@@ -61,4 +61,11 @@ class SegmentsUi(override val ctx: Context, private val scope: ThemeScope) : Ui 
         starButton.isEnabled = enabled
         copyButton.isEnabled = enabled
     }
+
+    /** Restyles the toolbar buttons after a scheme switch. */
+    fun refreshColors() {
+        listOf(selectButton, shareButton, searchButton, starButton, copyButton).forEach {
+            it.refreshColors()
+        }
+    }
 }

@@ -36,16 +36,13 @@ class LiquidTabsUi(
 
     inner class TabUi : Ui {
         override val ctx = this@LiquidTabsUi.ctx
-        private val textColor = scope.colors.candidateTextColor
-        private val hlTextColor = scope.colors.hilitedCandidateTextColor
-        private val hlBackColor = scope.colors.hilitedCandidateBackColor
         private val cornerRadius = ctx.dp(theme.generalStyle.candidateCornerRadius)
 
         val text =
             textView {
                 textSize = theme.generalStyle.candidateTextSize
                 typeface = FontManager.getTypeface("candidate_font")
-                setTextColor(textColor)
+                setTextColor(scope.colors.candidateTextColor)
             }
 
         override val root =
@@ -58,7 +55,8 @@ class LiquidTabsUi(
                         horizontalPadding = dp(theme.generalStyle.candidatePadding)
                     },
                 )
-                background = roundedRippleDrawable(hlBackColor, cornerRadius)
+                background =
+                    roundedRippleDrawable(scope.colors.hilitedCandidateBackColor, cornerRadius)
             }
 
         fun setText(str: String) {
@@ -66,10 +64,13 @@ class LiquidTabsUi(
         }
 
         fun setActive(active: Boolean) {
-            val color = if (active) hlTextColor else textColor
-            val contentColor = if (active) hlBackColor else Color.TRANSPARENT
+            val color =
+                if (active) scope.colors.hilitedCandidateTextColor else scope.colors.candidateTextColor
+            val contentColor =
+                if (active) scope.colors.hilitedCandidateBackColor else Color.TRANSPARENT
             text.setTextColor(color)
-            root.background = roundedRippleDrawable(hlBackColor, cornerRadius, contentColor)
+            root.background =
+                roundedRippleDrawable(scope.colors.hilitedCandidateBackColor, cornerRadius, contentColor)
         }
     }
 
@@ -140,5 +141,10 @@ class LiquidTabsUi(
 
     fun setOnTabClickListener(listener: ((Int) -> Unit)? = null) {
         onTabClick = listener
+    }
+
+    /** Restyles the tabs after a scheme switch; rows re-apply colors on rebind. */
+    fun refreshColors() {
+        adapter.notifyDataSetChanged()
     }
 }

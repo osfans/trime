@@ -66,6 +66,15 @@ abstract class BaseUnrolledCandidateWindow(di: DI) :
         }
     }
 
+    override fun refreshColors() {
+        if (!::candidateLayout.isInitialized) return
+        // the decorations share this drawable, so re-coloring its paint repaints the dividers
+        separatorDrawable.paint.color = scope.colors.candidateSeparatorColor
+        candidateLayout.refreshColors()
+        // visible rows re-apply their colors on rebind
+        adapter.notifyDataSetChanged()
+    }
+
     abstract fun onCreateCandidateLayout(): UnrolledCandidateLayout
 
     final override fun onCreateView(): View {
