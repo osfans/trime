@@ -45,6 +45,12 @@ sealed class BoardWindow(override val di: DI) : DIAware {
      */
     abstract fun onDetached()
 
+    /**
+     * Restyles colors after a scheme switch; subclasses with color-carrying
+     * views re-read the current scope here (see InputView.refreshColors).
+     */
+    open fun refreshColors() {}
+
     abstract class NoBarBoardWindow(di: DI) : BoardWindow(di) {
         override fun toString(): String = javaClass.name
     }

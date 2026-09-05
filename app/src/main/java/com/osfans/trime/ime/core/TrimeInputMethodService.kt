@@ -133,6 +133,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 // switches rebuild it through onThemeChangeListener.
                 inputView?.refreshColors()
                 candidatesView?.refreshColors()
+                window.window?.let {
+                    navBarManager.evaluate(it, inputDeviceManager.useVirtualKeyboard, themeScope.colors)
+                }
             }
         }
 

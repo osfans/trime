@@ -170,6 +170,8 @@ class InputView(
         keyboardBackground.imageDrawable = scope.drawable("keyboard_background")
         keyboardWindow.refreshColors()
         inputBar.refreshColors()
+        preedit.refreshColors()
+        windowManager.refreshColors()
     }
 
     init {

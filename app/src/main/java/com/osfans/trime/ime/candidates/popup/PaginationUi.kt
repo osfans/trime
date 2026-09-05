@@ -63,6 +63,11 @@ class PaginationUi(
         }
 
     fun update(paged: Candidates.Paged) {
+        // Re-apply the tint as well: a scheme switch rebinds the pagination holder
+        // (see PagedCandidatesUi.refreshColors), which only calls update().
+        val tint = ColorStateList.valueOf(scope.colors.keyTextColor)
+        prevIcon.imageTintList = tint
+        nextIcon.imageTintList = tint
         prevIcon.alpha = if (paged.hasPrevPage) 1f else disabledAlpha
         nextIcon.alpha = if (paged.hasNextPage) 1f else disabledAlpha
     }

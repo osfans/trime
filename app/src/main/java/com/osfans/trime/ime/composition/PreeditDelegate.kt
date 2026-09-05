@@ -33,25 +33,30 @@ class PreeditDelegate(override val di: DI) :
     private val theme: Theme
         get() = scope.theme
 
+    /** Applies the text-background styling; re-applied on scheme refreshes. */
+    private fun setupPreeditBackground(view: View) {
+        val startRadius = view.dp(theme.preedit.topStartRadius)
+        val endRadius = view.dp(theme.preedit.topEndRadius)
+        val radii = if (view.layoutDirection == View.LAYOUT_DIRECTION_LTR) {
+            floatArrayOf(startRadius, startRadius, endRadius, endRadius, 0f, 0f, 0f, 0f)
+        } else {
+            floatArrayOf(endRadius, endRadius, startRadius, startRadius, 0f, 0f, 0f, 0f)
+        }
+        view.background = GradientDrawable().apply {
+            setColor(scope.colors.textBackColor)
+            shape = GradientDrawable.RECTANGLE
+            cornerRadii = radii
+        }
+        view.clipToOutline = true
+        view.outlineProvider = ViewOutlineProvider.BACKGROUND
+    }
+
     val ui =
         PreeditUi(
             context,
             scope,
             setupPreeditView = {
-                val startRadius = dp(theme.preedit.topStartRadius)
-                val endRadius = dp(theme.preedit.topEndRadius)
-                val radii = if (layoutDirection == View.LAYOUT_DIRECTION_LTR) {
-                    floatArrayOf(startRadius, startRadius, endRadius, endRadius, 0f, 0f, 0f, 0f)
-                } else {
-                    floatArrayOf(endRadius, endRadius, startRadius, startRadius, 0f, 0f, 0f, 0f)
-                }
-                background = GradientDrawable().apply {
-                    setColor(scope.colors.textBackColor)
-                    shape = GradientDrawable.RECTANGLE
-                    cornerRadii = radii
-                }
-                clipToOutline = true
-                outlineProvider = ViewOutlineProvider.BACKGROUND
+                setupPreeditBackground(this)
                 horizontalPadding = dp(theme.preedit.horizontalPadding)
             },
             onMoveCursor = { pos -> rime.launchOnReady { it.moveCursorPos(pos) } },
@@ -59,6 +64,12 @@ class PreeditDelegate(override val di: DI) :
             root.alpha = theme.preedit.alpha
             root.visibility = View.INVISIBLE
         }
+
+    /** Restyles the text and its background after a scheme switch. */
+    fun refreshColors() {
+        ui.refreshColors()
+        setupPreeditBackground(ui.preedit)
+    }
 
     private val touchEventReceiverWindow = TouchEventReceiverWindow(ui.root)
 
