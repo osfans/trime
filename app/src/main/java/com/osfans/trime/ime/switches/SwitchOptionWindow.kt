@@ -182,7 +182,18 @@ class SwitchOptionWindow(di: DI) :
         updateSchemaOptionEntries()
     }
 
-    override fun onCreateView() = view
+    private var viewCreated = false
+
+    override fun onCreateView(): View {
+        viewCreated = true
+        return view
+    }
+
+    override fun refreshColors() {
+        if (!viewCreated) return
+        (view.adapter as? SwitchOptionAdapter)?.refreshColors()
+        settingsButton.refreshColors()
+    }
 
     private val settingsButton by lazy {
         ToolButton(context, R.drawable.ic_baseline_settings_24, scope).apply {

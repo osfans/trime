@@ -95,4 +95,17 @@ class ClipboardBeanUi(
         textView.text = text
         pin.visibility = if (pinned) View.VISIBLE else View.GONE
     }
+
+    /** Restyles the row after a scheme switch. */
+    fun refreshColors() {
+        textView.setTextColor(scope.colors.keyTextColor)
+        pin.drawable?.setTint(scope.colors.keySymbolColor)
+        root.background =
+            scope.decorDrawable(
+                "key_back_color",
+                "key_border_color",
+                ctx.dp(theme.generalStyle.keyBorder),
+                ctx.dp(theme.generalStyle.roundCorner),
+            )
+    }
 }

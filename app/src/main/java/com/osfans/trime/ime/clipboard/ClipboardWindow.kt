@@ -20,6 +20,7 @@ import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
+import com.osfans.trime.ime.core.InputTabLayout
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.segments.SegmentsWindow
@@ -42,6 +43,7 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
 
     private lateinit var clipboardLayout: ClipboardLayout
     private lateinit var clipboardPagesAdapter: ClipboardPagesAdapter
+    private var wasAttached = false
 
     private val prefs = AppPrefs.defaultInstance().clipboard
     private val clipboardReturnAfterPaste by prefs.clipboardReturnAfterPaste
@@ -165,16 +167,7 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
         }
         titleUi.apply {
             tabLayout.onConfigureTab(viewPager) { tabUi, position ->
-                val label = when (position) {
-                    0 -> R.string.clipboard
-                    else -> R.string.collection
-                }
-                tabUi.label.apply {
-                    setText(label)
-                    textSize = theme.generalStyle.candidateTextSize
-                    setTypeface(FontManager.getTypeface("candidate_font"), Typeface.BOLD)
-                    setTextColor(scope.colors.keyTextColor)
-                }
+                configureTab(tabUi, position)
             }
             deleteAllButton.setOnClickListener {
                 val currentItem = viewPager.currentItem
@@ -214,7 +207,25 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
         service.showDialog(dialog)
     }
 
+    private fun configureTab(
+        tabUi: InputTabLayout.TabUi,
+        position: Int,
+    ) {
+        val label =
+            when (position) {
+                0 -> R.string.clipboard
+                else -> R.string.collection
+            }
+        tabUi.label.apply {
+            setText(label)
+            textSize = theme.generalStyle.candidateTextSize
+            setTypeface(FontManager.getTypeface("candidate_font"), Typeface.BOLD)
+            setTextColor(scope.colors.keyTextColor)
+        }
+    }
+
     override fun onAttached() {
+        wasAttached = true
         clipboardLayout.viewPager.setCurrentItem(initialTab, false)
         clipboardBeansSubmitJob = service.lifecycleScope.launch {
             clipboardBeansPager.flow.collect {
@@ -233,6 +244,16 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
         collectionBeansAdapter.dismissPopupMenu()
         clipboardBeansSubmitJob?.cancel()
         collectionBeansSubmitJob?.cancel()
+    }
+
+    override fun refreshColors() {
+        if (!wasAttached) return
+        clipboardLayout.titleUi.deleteAllButton.refreshColors()
+        clipboardLayout.titleUi.tabLayout.reconfigureTabs { tabUi, position ->
+            configureTab(tabUi, position)
+        }
+        clipboardBeansAdapter.refreshColors()
+        collectionBeansAdapter.refreshColors()
     }
 
     override fun onCreateBarView(): View = clipboardLayout.titleUi.root

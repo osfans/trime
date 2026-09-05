@@ -93,6 +93,10 @@ class LiquidWindow(di: DI) :
 
     override fun onDetached() {}
 
+    override fun refreshColors() {
+        if (::liquidLayout.isInitialized) liquidLayout.refreshColors()
+    }
+
     fun setDataByIndex(i: Int) {
         val tag = LiquidData.getTagList()[i]
         currentDataType = tag.type

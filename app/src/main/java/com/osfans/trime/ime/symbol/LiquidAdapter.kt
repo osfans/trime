@@ -46,6 +46,7 @@ class LiquidAdapter(
         item: LiquidKeyboard.KeyItem?,
     ) {
         item ?: return
+        holder.ui.refreshColors()
         holder.ui.mainText.text = item.text
         holder.ui.root.setOnClickListener {
             onItemClick.invoke(item, position)

@@ -59,6 +59,7 @@ class SegmentsAdapter(
         item: String?,
     ) {
         val text = item ?: return
+        holder.ui.refreshColors()
         holder.ui.textView.text = text
         val isSelected = selection.contains(position)
         holder.ui.update(isSelected)

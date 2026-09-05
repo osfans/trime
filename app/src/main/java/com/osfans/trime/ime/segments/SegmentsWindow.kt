@@ -148,7 +148,18 @@ class SegmentsWindow(di: DI, private val source: String) : BoardWindow.BarBoardW
         ui.updateButtons(hasSelection)
     }
 
-    override fun onCreateView() = ui.root
+    private var viewCreated = false
+
+    override fun onCreateView(): View {
+        viewCreated = true
+        return ui.root
+    }
+
+    override fun refreshColors() {
+        if (!viewCreated) return
+        ui.refreshColors()
+        (ui.recyclerView.adapter as? SegmentsAdapter)?.notifyDataSetChanged()
+    }
 
     override fun onAttached() {
         val segments = NativeTokenizer.tokenize(source)

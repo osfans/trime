@@ -77,6 +77,7 @@ abstract class ClipboardAdapter(
     ) {
         val bean = getItem(position) ?: return
         with(holder.ui) {
+            refreshColors()
             setBean(excerptText(bean.text ?: ""), bean.pinned)
             root.setOnClickListener {
                 onPaste(bean)
@@ -147,5 +148,10 @@ abstract class ClipboardAdapter(
     fun dismissPopupMenu() {
         popupMenu?.dismiss()
         popupMenu = null
+    }
+
+    /** Re-colors the visible rows after a scheme switch; rows re-apply colors on bind. */
+    fun refreshColors() {
+        notifyDataSetChanged()
     }
 }

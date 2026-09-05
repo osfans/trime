@@ -29,10 +29,16 @@ abstract class SwitchOptionAdapter : BaseQuickAdapter<SwitchOptionEntry, SwitchO
         item: SwitchOptionEntry?,
     ) {
         item ?: return
+        holder.ui.refreshColors()
         holder.ui.setEntry(item)
         holder.ui.root.setOnClickListener {
             onItemClick(it, item)
         }
+    }
+
+    /** Re-colors the visible rows after a scheme switch; rows re-apply colors on bind. */
+    fun refreshColors() {
+        notifyDataSetChanged()
     }
 
     abstract val scope: ThemeScope
