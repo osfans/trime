@@ -66,22 +66,26 @@ class OpenCCDataPlugin : Plugin<Project> {
         companion object {
             private val DICTS_RAW =
                 arrayOf(
+                    "CJK_Compatibility_Ideographs",
+                    "HKPhrasesRev",
+                    "HKPhrases",
+                    "HKVariantsPhrases",
+                    "HKVariantsRevPhrases",
+                    "HKVariants",
+                    "JPShinjitaiCharacters",
+                    "JPShinjitaiPhrases",
                     "STCharacters",
                     "STPhrases",
                     "TSCharacters",
                     "TSPhrases",
-                    "TWPhrases",
                     "TWPhrasesRev",
-                    "TWVariants",
+                    "TWPhrases",
+                    "TWVariantsPhrases",
                     "TWVariantsRevPhrases",
-                    "HKVariants",
-                    "HKVariantsRevPhrases",
-                    "JPVariants",
-                    "JPShinjitaiCharacters",
-                    "JPShinjitaiPhrases",
+                    "TWVariants",
                 )
 
-            private val DICTS_GENERATED = arrayOf("TWVariantsRev", "HKVariantsRev", "JPVariantsRev")
+            private val DICTS_GENERATED = arrayOf("TWVariantsRev", "HKVariantsRev")
         }
 
         @TaskAction
