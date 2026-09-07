@@ -7,6 +7,7 @@ package com.osfans.trime.ime.keyboard
 import android.view.KeyEvent
 import com.osfans.trime.data.theme.ThemeTestSupport
 import com.osfans.trime.data.theme.model.KeyActionToken
+import com.osfans.trime.data.theme.model.PresetKey
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 
@@ -148,6 +149,14 @@ class KeyActionTest :
                 then("it resolves like the canonical preset") {
                     val action = plain("Return1")
                     action.code shouldBe KeyEvent.KEYCODE_ENTER
+                    action.command shouldBe ""
+                }
+            }
+            `when`("the send value does not resolve to a key") {
+                then("the action stays inert (no code, no command)") {
+                    val action =
+                        KeyAction(KeyActionToken.Plain("broken"), mapOf("broken" to PresetKey(send = "Bogus_Key")))
+                    action.code shouldBe 0
                     action.command shouldBe ""
                 }
             }

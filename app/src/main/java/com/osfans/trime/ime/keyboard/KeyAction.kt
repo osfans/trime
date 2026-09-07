@@ -11,6 +11,7 @@ import com.osfans.trime.data.prefs.LazyPreferenceDelegate
 import com.osfans.trime.data.theme.model.KeyActionToken
 import com.osfans.trime.data.theme.model.PresetKey
 import com.osfans.trime.util.virtualKeyCharacterMap
+import timber.log.Timber
 
 /** [按鍵][Key]的各種事件（單擊、長按、滑動等）  */
 class KeyAction(
@@ -195,6 +196,10 @@ class KeyAction(
                         modifier = modifiers
                     } else if (preset.command.isNotEmpty()) {
                         code = KeyEvent.KEYCODE_FUNCTION
+                    } else if (preset.send.isNotEmpty()) {
+                        // A send value that resolved to nothing leaves the key
+                        // inert; report it once per token (actions are cached).
+                        Timber.e("preset '%s' has an unrecognized send '%s'", token.token, preset.send)
                     }
                 } else {
                     // match like: { x: "{Control+a}" }
