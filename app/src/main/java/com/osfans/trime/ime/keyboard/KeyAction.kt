@@ -7,19 +7,21 @@ package com.osfans.trime.ime.keyboard
 import android.view.KeyEvent
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.data.prefs.LazyPreferenceDelegate
 import com.osfans.trime.data.theme.model.KeyActionToken
+import com.osfans.trime.data.theme.model.PresetKey
 import com.osfans.trime.util.virtualKeyCharacterMap
 
 /** [按鍵][Key]的各種事件（單擊、長按、滑動等）  */
 class KeyAction(
     token: KeyActionToken,
+    presetKeys: Map<String, PresetKey>,
 ) {
-    constructor(token: String) : this(KeyActionToken.Plain(token))
-
     var code = 0
         private set
     var modifier = 0
+        private set
+    var text: String = ""
         private set
     var command: String = ""
         private set
@@ -60,14 +62,22 @@ class KeyAction(
     val modifierKeyOnMask: Int
         get() = getModifierKeyOnMask(this.code)
 
-    private var text: String = ""
+    // Display label; computed lazily because the fallbacks read the Android
+    // key character map (see [ensureLabels]).
     private var label: String = ""
     private var shiftLabel = ""
+    private var labelsReady = false
+
     private var preview: String? = null
     private var states: List<String> = listOf()
 
-    private val hookShiftNum by AppPrefs.defaultInstance().keyboard.hookShiftNum
-    private val hookShiftSymbol by AppPrefs.defaultInstance().keyboard.hookShiftSymbol
+    // Resolved on first read, since the preference store needs the app context.
+    private val hookShiftNum: Boolean by LazyPreferenceDelegate {
+        AppPrefs.defaultInstance().keyboard.hookShiftNum
+    }
+    private val hookShiftSymbol: Boolean by LazyPreferenceDelegate {
+        AppPrefs.defaultInstance().keyboard.hookShiftSymbol
+    }
 
     private val rime get() = RimeDaemon.getFirstSessionOrNull()!!
 
@@ -76,6 +86,29 @@ class KeyAction(
         statusCached.schemaName.ifEmpty {
             // 如果schemaName为空，尝试使用schemaId作为显示名称
             schemaCached.schemaId.takeIf { it.isNotEmpty() && it != ".default" } ?: ""
+        }
+    }
+
+    /**
+     * Fills in the display label of a key that declared none, deriving it
+     * from the key code and the shifted character map. The calls are
+     * deferred out of the constructor so that parsing stays pure.
+     */
+    private fun ensureLabels() {
+        if (labelsReady) return
+        labelsReady = true
+        label = label.ifEmpty {
+            when (code) {
+                KeyEvent.KEYCODE_UNKNOWN, KeyEvent.KEYCODE_SPACE -> ""
+                else -> KeyCode.getDisplayLabel(code, modifier)
+            }
+        }
+        shiftLabel = label
+        if (KeyCode.isStandardKey(code) && virtualKeyCharacterMap.isPrintingKey(code)) {
+            val charCode = virtualKeyCharacterMap.get(code, modifier or KeyEvent.META_SHIFT_ON)
+            if (charCode != 0) {
+                shiftLabel = charCode.toChar().toString()
+            }
         }
     }
 
@@ -92,6 +125,7 @@ class KeyAction(
     }
 
     fun getLabel(keyboard: Keyboard): String {
+        ensureLabels()
         if (states.isNotEmpty() && toggle.isNotEmpty()) {
             return states[if (rime.run { getRuntimeOption(toggle) }) 1 else 0]
         }
@@ -118,12 +152,15 @@ class KeyAction(
         return adjustCase(displayLabel, keyboard)
     }
 
-    fun getText(keyboard: Keyboard): String = if (text.isNotEmpty()) {
-        adjustCase(text, keyboard)
-    } else if (keyboard.isShifted && code in KeyEvent.KEYCODE_A..KeyEvent.KEYCODE_Z && modifier == 0) {
-        if (rime.run { statusCached.isAsciiMode }) "" else adjustCase(label, keyboard)
-    } else {
-        text
+    fun getText(keyboard: Keyboard): String {
+        ensureLabels()
+        return if (text.isNotEmpty()) {
+            adjustCase(text, keyboard)
+        } else if (keyboard.isShifted && code in KeyEvent.KEYCODE_A..KeyEvent.KEYCODE_Z && modifier == 0) {
+            if (rime.run { statusCached.isAsciiMode }) "" else adjustCase(label, keyboard)
+        } else {
+            text
+        }
     }
 
     fun getPreview(keyboard: Keyboard): String = preview ?: getLabel(keyboard)
@@ -133,7 +170,7 @@ class KeyAction(
             is KeyActionToken.Plain -> {
                 val label: String
                 // match like: { x: BackSpace } -> preset_keys/BackSpace: {..., send: BackSpace }
-                val preset = ThemeManager.activeTheme.presetKeys[token.token]
+                val preset = presetKeys[token.token]
                 if (preset != null) {
                     command = preset.command
                     option = preset.option
@@ -178,25 +215,13 @@ class KeyAction(
                         }
                     }
                 }
-                this.label = label.ifEmpty {
-                    when (code) {
-                        KeyEvent.KEYCODE_UNKNOWN, KeyEvent.KEYCODE_SPACE -> ""
-                        else -> KeyCode.getDisplayLabel(code, modifier)
-                    }
-                }
+                this.label = label
             }
             // match: { x: { commit: a, text: b, label: c } }
             is KeyActionToken.Inline -> {
                 commit = token.token.commit ?: ""
                 text = token.token.text ?: ""
                 label = token.token.label ?: ""
-            }
-        }
-        shiftLabel = label
-        if (KeyCode.isStandardKey(code) && virtualKeyCharacterMap.isPrintingKey(code)) {
-            val charCode = virtualKeyCharacterMap.get(code, modifier or KeyEvent.META_SHIFT_ON)
-            if (charCode != 0) {
-                shiftLabel = charCode.toChar().toString()
             }
         }
     }

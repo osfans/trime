@@ -114,3 +114,25 @@ open class PreferenceDelegate<T : Any>(
         listeners.forEach { it.onChange(key, newValue) }
     }
 }
+
+/**
+ * Resolves the [PreferenceDelegate] on the first read instead of at property
+ * construction time, so the preference store may still be uninitialized when
+ * the property is declared.
+ */
+class LazyPreferenceDelegate<T : Any>(
+    private val provider: () -> PreferenceDelegate<T>,
+) : ReadWriteProperty<Any?, T> {
+    private val delegate by lazy(LazyThreadSafetyMode.NONE) { provider() }
+
+    override fun getValue(
+        thisRef: Any?,
+        property: KProperty<*>,
+    ): T = delegate.getValue(thisRef, property)
+
+    override fun setValue(
+        thisRef: Any?,
+        property: KProperty<*>,
+        value: T,
+    ) = delegate.setValue(thisRef, property, value)
+}
