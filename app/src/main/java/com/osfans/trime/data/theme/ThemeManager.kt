@@ -114,6 +114,7 @@ object ThemeManager {
         // the new global scope while existing views still read the old one.
         if (::_activeTheme.isInitialized && _activeTheme == theme) return
         KeyActionManager.resetCache()
+        KeyActionManager.presetDiagnostics(theme.presetKeys).forEach { Timber.e(it) }
         FontManager.resetCache(theme)
         ColorManager.attachTheme(theme)
         LiquidData.init(theme)
