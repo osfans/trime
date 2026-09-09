@@ -256,6 +256,14 @@ class PopupKeyboardUi(
         }
     }
 
+    override fun refreshColors() {
+        inactiveBackground.setColor(scope.colors.popupBackColor)
+        focusBackground.setColor(scope.colors.hilitedPopupBackColor)
+        keyUis.forEachIndexed { index, _ ->
+            if (index == focusedIndex) markFocus(index) else markInactive(index)
+        }
+    }
+
     override fun onChangeFocus(x: Float, y: Float): Boolean {
         // move to next row when gesture moves above 30% from bottom of current row
         var newRow = rowCount - (y / keyHeight - 0.2).roundToInt()

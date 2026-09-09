@@ -52,11 +52,13 @@ class PopupEntryUi(
         visibility = android.view.View.GONE
     }
 
+    private val popupBackground = GradientDrawable().apply {
+        cornerRadius = radius
+        setColor(scope.colors.popupBackColor)
+    }
+
     override val root = constraintLayout {
-        background = GradientDrawable().apply {
-            cornerRadius = radius
-            setColor(scope.colors.popupBackColor)
-        }
+        background = popupBackground
         outlineProvider = ViewOutlineProvider.BACKGROUND
         elevation = dp(2f)
         add(
@@ -73,6 +75,14 @@ class PopupEntryUi(
                 centerHorizontally()
             },
         )
+    }
+
+    /** Re-applies the scheme colors, as pooled popups outlive scheme switches. */
+    fun refreshColors() {
+        popupBackground.setColor(scope.colors.popupBackColor)
+        textView.setTextColor(scope.colors.popupTextColor)
+        imageView.drawable?.colorFilter =
+            PorterDuffColorFilter(scope.colors.popupTextColor, PorterDuff.Mode.SRC_IN)
     }
 
     fun setText(text: String) {

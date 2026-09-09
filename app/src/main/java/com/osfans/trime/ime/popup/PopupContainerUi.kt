@@ -85,6 +85,9 @@ abstract class PopupContainerUi(
 
     abstract fun onTrigger(): String?
 
+    /** Re-applies the scheme colors, as containers outlive scheme switches. */
+    open fun refreshColors() {}
+
     companion object {
         fun limitIndex(i: Int, limit: Int) = if (i < 0) {
             0

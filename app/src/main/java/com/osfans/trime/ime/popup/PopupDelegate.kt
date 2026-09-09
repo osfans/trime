@@ -202,6 +202,13 @@ class PopupDelegate(override val di: DI) : DIAware {
         showingEntryUi.clear()
     }
 
+    /** Re-applies the scheme colors to all popups, pooled or showing. */
+    fun refreshColors() {
+        freeEntryUi.forEach { it.refreshColors() }
+        showingEntryUi.values.forEach { it.refreshColors() }
+        showingContainerUi.values.forEach { it.refreshColors() }
+    }
+
     val listener = PopupActionListener { action ->
         with(action) {
             when (this) {
