@@ -116,6 +116,73 @@ data class GeneralStyle(
         /** The default style; decode falls back to these values key by key. */
         val DEFAULTS = GeneralStyle()
 
+        /**
+         * Every key [decode] reads, used by the theme linter to spot typos.
+         * [com.osfans.trime.data.theme.ThemeDiagnosticsTest] fails when this
+         * drifts from the literals below.
+         */
+        internal val KNOWN_KEYS: Set<String> =
+            setOf(
+                "auto_caps",
+                "background_folder",
+                "candidate_border",
+                "candidate_border_round",
+                "candidate_corner_radius",
+                "candidate_font",
+                "candidate_padding",
+                "candidate_spacing",
+                "candidate_text_size",
+                "candidate_text_vertical_bias",
+                "candidate_view_height",
+                "comment_font",
+                "comment_height",
+                "comment_position",
+                "comment_text_size",
+                "comment_vertical_bias",
+                "enter_label_mode",
+                "enter_labels",
+                "hanb_font",
+                "horizontal_gap",
+                "key_border",
+                "key_font",
+                "key_height",
+                "key_hint_offset_x",
+                "key_hint_offset_y",
+                "key_long_text_size",
+                "key_press_offset_x",
+                "key_press_offset_y",
+                "key_symbol_offset_x",
+                "key_symbol_offset_y",
+                "key_text_offset_x",
+                "key_text_offset_y",
+                "key_text_size",
+                "key_width",
+                "keyboard_height",
+                "keyboard_height_land",
+                "keyboard_padding",
+                "keyboard_padding_bottom",
+                "keyboard_padding_land",
+                "keyboard_padding_land_bottom",
+                "keyboard_padding_left",
+                "keyboard_padding_right",
+                "label_font",
+                "label_text_size",
+                "latin_font",
+                "popup_bottom_margin",
+                "popup_font",
+                "popup_height",
+                "popup_key_height",
+                "popup_text_size",
+                "popup_width",
+                "reset_ascii_mode_on_focus_change",
+                "round_corner",
+                "shadow_radius",
+                "symbol_font",
+                "symbol_text_size",
+                "text_font",
+                "vertical_gap",
+            )
+
         private fun Node?.stringList(): List<String> = this?.sequence?.mapNotNull(Node::string) ?: emptyList()
 
         fun decode(node: Node): GeneralStyle = GeneralStyle(

@@ -34,6 +34,29 @@ data class Theme(
     val toolBar: ToolBar,
 ) : Parcelable {
     companion object {
+        /**
+         * Top-level keys a theme may declare: the sections [decode] reads plus
+         * the metadata librime and the theme picker use. The theme linter
+         * reports anything else, since the runtime ignores it.
+         */
+        internal val TOP_LEVEL_KEYS: Set<String> =
+            setOf(
+                "config_version",
+                "name",
+                "author",
+                "description",
+                "version",
+                "style",
+                "preedit",
+                "window",
+                "liquid_keyboard",
+                "tool_bar",
+                "preset_keys",
+                "preset_keyboards",
+                "preset_color_schemes",
+                "fallback_colors",
+            )
+
         fun decode(node: Node.Mapping): Theme = Theme(
             name = node["name"]?.string!!,
             generalStyle = GeneralStyle.decode(node["style"]!!),

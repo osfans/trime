@@ -96,7 +96,7 @@ object ThemeLoader {
     ): ThemeLoadResult? {
         val node = sources.load(themeId, file) ?: return null
         return try {
-            ThemeLoadResult.Success(themeId, decodeSource(themeId, node) { id -> sources.load(id, null) })
+            decodeAndReport(themeId, expandSource(themeId, node) { id -> sources.load(id, null) })
         } catch (e: ThemeDslExpander.UnsupportedDsl) {
             fallBack(themeId, e, "uses DSL outside the supported subset (%s)")
         } catch (e: ThemeDslExpander.UnresolvedReference) {
@@ -117,6 +117,21 @@ object ThemeLoader {
     }
 
     /**
+     * Decodes [mapping] and reports what the runtime ignores or cannot resolve
+     * in it, so a theme is checked when it is read instead of on first use.
+     * Diagnostics never affect the result of a load.
+     */
+    internal fun decodeAndReport(
+        themeId: String,
+        mapping: Node.Mapping,
+    ): ThemeLoadResult.Success {
+        val theme = Theme.decode(mapping)
+        runCatching { ThemeDiagnostics.report(themeId, theme, mapping) }
+            .onFailure { Timber.w(it, "Theme '%s': diagnostics failed", themeId) }
+        return ThemeLoadResult.Success(themeId, theme)
+    }
+
+    /**
      * Expands [node] with [loadResource] and decodes the result. Kept separate
      * from the file lookup so tests can feed fixture resources.
      */
@@ -124,11 +139,17 @@ object ThemeLoader {
         themeId: String,
         node: Node,
         loadResource: (String) -> Node?,
-    ): Theme {
+    ): Theme = Theme.decode(expandSource(themeId, node, loadResource))
+
+    /** Applies the supported DSL subset to [node] and returns its root mapping. */
+    private fun expandSource(
+        themeId: String,
+        node: Node,
+        loadResource: (String) -> Node?,
+    ): Node.Mapping {
         val expanded = ThemeDslExpander.expand(themeId, node, loadResource)
-        val mapping = expanded.mapping
+        return expanded.mapping
             ?: throw ThemeLoadError.InvalidStructure(themeId, "YAML root is not a mapping")
-        return Theme.decode(mapping)
     }
 
     /**
@@ -258,15 +279,13 @@ object ThemeLoader {
             ThemeLoadError.InvalidStructure(themeId, "YAML root is not a mapping"),
         )
 
-        val theme =
-            try {
-                Theme.decode(mapping)
-            } catch (e: Exception) {
-                return ThemeLoadResult.Failure(
-                    themeId,
-                    ThemeLoadError.InvalidStructure(themeId, "Decode failed", e),
-                )
-            }
-        return ThemeLoadResult.Success(themeId, theme)
+        return try {
+            decodeAndReport(themeId, mapping)
+        } catch (e: Exception) {
+            ThemeLoadResult.Failure(
+                themeId,
+                ThemeLoadError.InvalidStructure(themeId, "Decode failed", e),
+            )
+        }
     }
 }

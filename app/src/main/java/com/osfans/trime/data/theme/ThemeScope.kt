@@ -47,11 +47,10 @@ class ThemeScope internal constructor(
         val table = ColorTable.resolve(scheme, theme.fallbackColors, parseColor)
         colorTable = table
         colorsValue = ThemeColors(table)
+        // Values the theme file cannot resolve are reported once at load, per
+        // scheme (see ThemeDiagnostics); this is the demand-driven remainder.
         if (table.unresolvedKeys.isNotEmpty()) {
             Timber.w("Unknown color key: %s", table.unresolvedKeys.joinToString { it.key })
-        }
-        if (table.invalidValues.isNotEmpty()) {
-            Timber.w("Invalid color value: %s", table.invalidValues.joinToString { it.key })
         }
     }
 
