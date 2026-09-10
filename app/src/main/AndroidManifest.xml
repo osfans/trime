@@ -74,6 +74,11 @@ SPDX-License-Identifier: GPL-3.0-or-later
             android:parentActivityName=".ui.main.MainActivity" />
 
         <activity
+            android:name=".ui.main.settings.theme.ThemeDiagnosticsActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.main.MainActivity" />
+
+        <activity
             android:name=".ui.main.ClipEditActivity"
             android:autoRemoveFromRecents="true"
             android:excludeFromRecents="true"

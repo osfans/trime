@@ -115,6 +115,10 @@
     <string name="exception_logcat_created">Logcat 行程已建立</string>
     <string name="about">關於</string>
     <string name="theme">鍵盤樣式</string>
+    <string name="theme_diagnostics">主題診斷</string>
+    <string name="theme_diagnostics_summary">檢查目前主題中執行階段忽略或無法解析的設定</string>
+    <string name="theme_diagnostics_no_findings">目前主題未發現問題</string>
+    <string name="theme_diagnostics_unchecked">無法對目前主題進行靜態檢查</string>
     <string name="profile">配置</string>
     <string name="virtual_keyboard">虛擬鍵盤</string>
     <string name="storage">儲存</string>

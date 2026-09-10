@@ -112,6 +112,10 @@
     <string name="virtual_keyboard">虚拟键盘</string>
     <string name="about">关于</string>
     <string name="theme">键盘样式</string>
+    <string name="theme_diagnostics">主题诊断</string>
+    <string name="theme_diagnostics_summary">检查当前主题中运行时忽略或无法解析的设置</string>
+    <string name="theme_diagnostics_no_findings">当前主题未发现问题</string>
+    <string name="theme_diagnostics_unchecked">无法对当前主题进行静态检查</string>
     <string name="profile">配置</string>
     <string name="storage">存储</string>
     <string name="data_storage_mode">数据存储模式</string>

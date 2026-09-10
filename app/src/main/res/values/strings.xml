@@ -116,6 +116,10 @@
     <string name="profile">Profile</string>
     <string name="virtual_keyboard">Virtual Keyboard</string>
     <string name="theme">Keyboard Style</string>
+    <string name="theme_diagnostics">Theme diagnostics</string>
+    <string name="theme_diagnostics_summary">Check the current theme for settings the runtime ignores or cannot resolve</string>
+    <string name="theme_diagnostics_no_findings">No problems found in the current theme</string>
+    <string name="theme_diagnostics_unchecked">The static checks could not run for this theme</string>
     <string name="about">About</string>
     <string name="storage">Storage</string>
     <string name="data_storage_mode">Data storage mode</string>
