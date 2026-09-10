@@ -62,6 +62,11 @@ object ThemeLoader {
         data class Success(
             val themeId: String,
             val theme: Theme,
+            /**
+             * What static checks found in the theme, or null when the checks
+             * could not run at all.
+             */
+            val findings: List<ThemeDiagnostics.Finding>? = null,
         ) : ThemeLoadResult
 
         data class Failure(
@@ -126,9 +131,12 @@ object ThemeLoader {
         mapping: Node.Mapping,
     ): ThemeLoadResult.Success {
         val theme = Theme.decode(mapping)
-        runCatching { ThemeDiagnostics.report(themeId, theme, mapping) }
-            .onFailure { Timber.w(it, "Theme '%s': diagnostics failed", themeId) }
-        return ThemeLoadResult.Success(themeId, theme)
+        val findings =
+            runCatching { ThemeDiagnostics.lint(theme, mapping) }
+                .onFailure { Timber.w(it, "Theme '%s': diagnostics failed", themeId) }
+                .getOrNull()
+        findings?.let { ThemeDiagnostics.log(themeId, it) }
+        return ThemeLoadResult.Success(themeId, theme, findings)
     }
 
     /**
@@ -188,15 +196,20 @@ object ThemeLoader {
 
         /**
          * @param file source file of [resourceId] when it is already known.
-         *   Included resources are always looked up by id.
+         *   Included resources are always looked up by id. An explicit file
+         *   wins over the id lookup cache.
          */
         fun load(resourceId: String, file: File?): Node? {
+            if (file != null) return readAndPatch(resourceId, file)
             if (cache.containsKey(resourceId)) return cache[resourceId]
-            val source = file ?: findSource(resourceId)
-            val node = source?.let { runCatching { Yaml.parseToYamlNode(it.readText()) }.getOrNull() }
-            val result = node?.let { applyCustomPatch(resourceId, it) }
+            val result = findSource(resourceId)?.let { readAndPatch(resourceId, it) }
             cache[resourceId] = result
             return result
+        }
+
+        private fun readAndPatch(resourceId: String, file: File): Node? {
+            val node = runCatching { Yaml.parseToYamlNode(file.readText()) }.getOrNull()
+            return node?.let { applyCustomPatch(resourceId, it) }
         }
     }
 

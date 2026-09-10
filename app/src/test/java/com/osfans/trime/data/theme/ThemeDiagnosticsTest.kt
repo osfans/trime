@@ -14,6 +14,7 @@ import com.osfans.trime.util.yaml.mapping
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import timber.log.Timber
 import java.io.File
 
@@ -357,7 +358,8 @@ class ThemeDiagnosticsTest :
                         height: 5
                         """.trimIndent(),
                     ).mapping!!
-                val lines = captured { ThemeDiagnostics.report("fixture", Theme.decode(node), node, ::parseHex) }
+                val findings = ThemeDiagnostics.lint(Theme.decode(node), node, ::parseHex)
+                val lines = captured { ThemeDiagnostics.log("fixture", findings) }
                 lines shouldBe
                     listOf(
                         "I Theme 'fixture': unknown key 'height' in ''; the runtime ignores it",
@@ -376,7 +378,42 @@ class ThemeDiagnosticsTest :
                         preset_color_schemes: {default: {back_color: "#000000"}}
                         """.trimIndent(),
                     ).mapping!!
-                captured { ThemeDiagnostics.report("clean", Theme.decode(node), node, ::parseHex) } shouldBe emptyList()
+                val findings = ThemeDiagnostics.lint(Theme.decode(node), node, ::parseHex)
+                captured { ThemeDiagnostics.log("clean", findings) } shouldBe emptyList()
+                findings shouldBe emptyList()
+            }
+        }
+
+        Given("the report of a theme") {
+            val findings =
+                lint(
+                    """
+                    config_version: "3.0"
+                    name: t
+                    height: 5
+                    style: {candidate_texts_size: 12}
+                    preset_color_schemes: {default: {back_color: "#000000"}}
+                    """.trimIndent(),
+                )
+
+            Then("the findings of a checked theme are rendered with their code") {
+                val text = ThemeDiagnostics.format("mytheme", "My Theme", findings)
+                text shouldContain "Theme: My Theme (mytheme)\n"
+                text shouldContain "Findings: 2 (1 warnings, 1 info)\n"
+                text shouldContain "[INFO] /height: unknown key 'height'"
+                text shouldContain "(UNKNOWN_TOP_LEVEL_KEY)"
+                text shouldContain "(UNKNOWN_STYLE_KEY)"
+            }
+
+            Then("a theme without findings says so") {
+                ThemeDiagnostics.format("mytheme", "My Theme", emptyList()) shouldBe
+                    "Theme: My Theme (mytheme)\nNo findings.\n"
+            }
+
+            Then("a theme whose checks could not run says so") {
+                ThemeDiagnostics.format("mytheme", "My Theme", null) shouldBe
+                    "Theme: My Theme (mytheme)\n" +
+                    "Static checks could not run for this theme.\n"
             }
         }
 

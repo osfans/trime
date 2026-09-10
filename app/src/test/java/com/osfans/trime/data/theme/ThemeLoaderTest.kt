@@ -12,8 +12,11 @@ import com.osfans.trime.util.yaml.mapping
 import com.osfans.trime.util.yaml.string
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.maps.shouldContainKey
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import timber.log.Timber
 import java.io.File
 
 class ThemeLoaderTest :
@@ -137,6 +140,24 @@ class ThemeLoaderTest :
                         noResources,
                     )
                 (result as? ThemeLoader.ThemeLoadResult.Success)?.theme?.name shouldBe "from_source"
+            }
+
+            Then("what the checks found travels with the loaded theme") {
+                val result =
+                    ThemeLoader.loadFromSource(
+                        "theme",
+                        sourceFile("name: t\nheight: 5\nstyle: {}\n"),
+                        noResources,
+                    )
+                val findings = (result as? ThemeLoader.ThemeLoadResult.Success)?.findings
+                findings.orEmpty().map { it.code } shouldContain ThemeDiagnostics.Code.UNKNOWN_TOP_LEVEL_KEY
+            }
+
+            Then("an explicit file wins over the loader cache") {
+                val loader = ThemeLoader.SourceLoader { null }
+                fun nameOf(file: File): String? = loader.load("theme", file)?.mapping?.get("name")?.string
+                nameOf(sourceFile("name: first\n")) shouldBe "first"
+                nameOf(sourceFile("name: second\n")) shouldBe "second"
             }
         }
 

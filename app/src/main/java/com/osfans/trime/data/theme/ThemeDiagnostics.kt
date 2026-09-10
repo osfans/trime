@@ -87,21 +87,46 @@ object ThemeDiagnostics {
     }
 
     /**
-     * Reports the [lint] findings of a theme, one log line each. This is the
-     * single place where findings reach the outside world; a theme is checked
-     * when it is read instead of on first use.
+     * Logs [findings] of the theme [themeId], one line each, at their severity.
+     * A theme is checked when it is read instead of on first use; the same
+     * findings are what [format] renders for a report and what the theme
+     * diagnostics screen lists.
      */
-    fun report(
+    fun log(
         themeId: String,
-        theme: Theme,
-        node: Node.Mapping,
-        parseColor: (String) -> Int? = ::parseColor,
+        findings: List<Finding>,
     ) {
-        lint(theme, node, parseColor).forEach { finding ->
+        findings.forEach { finding ->
             val message = "Theme '$themeId': ${finding.message}"
             when (finding.severity) {
                 Severity.INFO -> Timber.i(message)
                 Severity.WARNING -> Timber.w(message)
+            }
+        }
+    }
+
+    /**
+     * Renders [findings] as the text of a bug report: which theme was checked
+     * and what the checks found. [findings] is null when the checks themselves
+     * failed to run, which the report says instead of pretending all is well.
+     */
+    fun format(
+        themeId: String,
+        themeName: String,
+        findings: List<Finding>?,
+    ): String = buildString {
+        appendLine("Theme: $themeName ($themeId)")
+        when {
+            findings == null ->
+                appendLine("Static checks could not run for this theme.")
+            findings.isEmpty() -> appendLine("No findings.")
+            else -> {
+                val warnings = findings.count { it.severity == Severity.WARNING }
+                appendLine("Findings: ${findings.size} ($warnings warnings, ${findings.size - warnings} info)")
+                findings.forEach { finding ->
+                    val path = finding.path?.let { "$it: " } ?: ""
+                    appendLine("[${finding.severity}] $path${finding.message} (${finding.code})")
+                }
             }
         }
     }
