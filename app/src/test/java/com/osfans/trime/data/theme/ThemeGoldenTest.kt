@@ -19,8 +19,8 @@ import io.kotest.matchers.shouldNotBe
  *
  * - tongwenfeng.trime.yaml: no librime DSL; decodes as-is, covering anchors/aliases
  *   (style values via `*hgap`/`*jpgd4`/...) and flow mappings (`preset_keys`/`keys`).
- * - trime.yaml: two `__include` entries (librime DSL, expanded at deploy time); at source
- *   level those keyboards decode as defaults with no keys.
+ * - trime.yaml: two `__include` entries (librime DSL), expanded by [ThemeDslExpander] before
+ *   decoding: `letter` inherits /preset_keyboards/default, `scj6` is a copy of cangjie5.
  */
 class ThemeGoldenTest :
     BehaviorSpec({
@@ -98,7 +98,7 @@ class ThemeGoldenTest :
             }
         }
 
-        Given("the built-in trime.yaml (source level: two __include entries are not expanded)") {
+        Given("the built-in trime.yaml (with its two __include entries expanded)") {
             val theme = ThemeTestSupport.decodeBuiltinTheme("trime.yaml")
 
             When("the whole file is decoded") {
@@ -141,31 +141,29 @@ class ThemeGoldenTest :
                     qwerty0.labelTransform shouldBe TextKeyboard.LabelTransform.UPPERCASE
                 }
 
-                Then("the __include 'letter' keyboard applies its own sibling keys but has no keys at source level") {
-                    // `letter` holds __include + its own ascii_mode/reset_ascii_mode/lock; deployment
-                    // splices /preset_keyboards/default into it. At source level it has no keys.
+                Then("the __include 'letter' keyboard inherits the default keyboard and overrides its own keys") {
                     val letter = theme.presetKeyboards.getValue("letter")
+                    val default = theme.presetKeyboards.getValue("default")
                     letter.asciiMode shouldBe true
                     letter.resetAsciiMode shouldBe true
                     letter.lock shouldBe false
-                    letter.keys shouldBe emptyList()
+                    letter.name shouldBe default.name
+                    letter.width shouldBe default.width
+                    letter.height shouldBe default.height
+                    letter.keys.size shouldBe default.keys.size
+                    letter.keys.first().behaviors[KeyBehavior.CLICK] shouldBe
+                        default.keys.first().behaviors[KeyBehavior.CLICK]
                 }
 
-                Then("the pure __include 'scj6' keyboard decodes as a default keyboard at source level") {
-                    // `scj6` only has __include (/preset_keyboards/cangjie5); nothing to decode
-                    // at source level. ascii_mode defaults to 1 when absent ((?:1)==1).
-                    val scj6 = theme.presetKeyboards.getValue("scj6")
-                    scj6.keys shouldBe emptyList()
-                    scj6.asciiMode shouldBe true
-                    scj6.width shouldBe 0f
+                Then("the pure __include 'scj6' keyboard equals cangjie5") {
+                    theme.presetKeyboards.getValue("scj6") shouldBe
+                        theme.presetKeyboards.getValue("cangjie5")
                 }
 
-                Then("every non-include keyboard decodes a non-empty key set") {
-                    theme.presetKeyboards
-                        .filterKeys { it !in setOf("letter", "scj6") }
-                        .forEach { (id, keyboard) ->
-                            keyboard.keys shouldNotBe emptyList<TextKeyboard.TextKey>()
-                        }
+                Then("every keyboard decodes a non-empty key set") {
+                    theme.presetKeyboards.forEach { (id, keyboard) ->
+                        keyboard.keys shouldNotBe emptyList<TextKeyboard.TextKey>()
+                    }
                 }
             }
         }

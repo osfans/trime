@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-FileCopyrightText: 2015 - 2026 Rime community
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -15,33 +15,35 @@ import java.io.File
 object ThemeFilesManager {
     fun listThemes(dir: File): MutableList<ThemeItem> {
         val files = dir.listFiles { _, name -> name.endsWith("trime.yaml") } ?: return mutableListOf()
-        val deployedMap = hashMapOf<String, String>()
-        DataManager.stagingDir.list()?.forEach {
-            deployedMap[it] = it
-        }
-        DataManager.prebuiltDataDir.list()?.forEach {
-            deployedMap[it] = it
-        }
         return files
             .sortedByDescending { it.lastModified() }
-            .mapNotNull decode@{
-                val item =
-                    runCatching {
-                        val configId = it.nameWithoutExtension
-                        val name =
-                            if (deployedMap[it.name] != null) {
-                                val file = File(DataManager.resolveDeployedResourcePath(configId))
-                                val node = Yaml.parseToYamlNode(file.readText()).mapping
-                                node?.get("name")?.string ?: return@decode null
-                            } else {
-                                configId.removeSuffix(".trime")
-                            }
-                        ThemeItem(configId, name)
-                    }.getOrElse { e ->
-                        Timber.w("Failed to decode theme file ${it.absolutePath}: ${e.message}")
-                        return@decode null
-                    }
-                return@decode item
+            .map { file ->
+                val configId = file.nameWithoutExtension
+                val name = readSourceName(configId, file)
+                    ?: readDeployedName(configId)
+                    ?: configId.removeSuffix(".trime")
+                ThemeItem(configId, name)
             }.toMutableList()
+    }
+
+    /**
+     * Reads the theme name from its source file, expanding the supported DSL
+     * subset so a name provided by an `__include`d node is resolved too.
+     */
+    private fun readSourceName(configId: String, file: File): String? = runCatching { ThemeLoader.loadSourceNode(configId, file)?.mapping?.get("name")?.string }
+        .getOrElse { e ->
+            Timber.w("Failed to decode theme file ${file.absolutePath}: ${e.message}")
+            null
+        }
+
+    /** Reads the theme name from the deployed artifact, when it exists. */
+    private fun readDeployedName(configId: String): String? {
+        val file = File(DataManager.resolveDeployedResourcePath(configId))
+        if (!file.isFile) return null
+        return runCatching { Yaml.parseToYamlNode(file.readText()).mapping?.get("name")?.string }
+            .getOrElse { e ->
+                Timber.w("Failed to read deployed theme ${file.absolutePath}: ${e.message}")
+                null
+            }
     }
 }
