@@ -71,29 +71,49 @@ object ThemeLoader {
     }
 
     /**
-     * Never throws and never falls back: returns [ThemeLoadResult.Success] or
+     * Loads [themeId], preferring its source files and falling back to the
+     * librime-deployed artifact when the source cannot be read faithfully (see
+     * [loadFromSource]). Never throws: returns [ThemeLoadResult.Success] or
      * [ThemeLoadResult.Failure] with a structured [ThemeLoadError].
      */
     fun loadTheme(themeId: String): ThemeLoadResult = loadFromSource(themeId) ?: loadDeployedTheme(themeId)
 
     /**
      * Reads [themeId] and its dependencies from source files, expands the
-     * supported DSL subset and decodes the result. Returns null when the source
-     * is missing, unreadable, or uses DSL outside the supported subset, so the
-     * caller can fall back to the deployed artifact.
+     * supported DSL subset and decodes the result. Returns null whenever the
+     * source cannot be read faithfully — missing, unreadable, using DSL outside
+     * the subset, or failing to decode — so the caller falls back to the
+     * deployed artifact and librime decides what the file means.
+     *
+     * @param file source file of [themeId] when it is already known.
+     * @param sources resource lookup; the data dirs by default, a fixture loader
+     *   in tests.
      */
-    private fun loadFromSource(themeId: String): ThemeLoadResult? {
-        val sources = SourceLoader()
-        val node = sources.load(themeId, null) ?: return null
+    internal fun loadFromSource(
+        themeId: String,
+        file: File? = null,
+        sources: SourceLoader = SourceLoader(),
+    ): ThemeLoadResult? {
+        val node = sources.load(themeId, file) ?: return null
         return try {
             ThemeLoadResult.Success(themeId, decodeSource(themeId, node) { id -> sources.load(id, null) })
         } catch (e: ThemeDslExpander.UnsupportedDsl) {
-            Timber.w("Theme '%s' uses unsupported DSL (%s), falling back to the deployed artifact", themeId, e.message)
-            null
+            fallBack(themeId, e, "uses DSL outside the supported subset (%s)")
         } catch (e: ThemeDslExpander.UnresolvedReference) {
-            Timber.w("Theme '%s' has unresolved references (%s), falling back to the deployed artifact", themeId, e.message)
-            null
+            fallBack(themeId, e, "has unresolved references (%s)")
+        } catch (e: Exception) {
+            fallBack(themeId, e, "cannot be decoded from its source (%s)")
         }
+    }
+
+    /** Reports why the source was not used and asks for the deployed artifact. */
+    private fun fallBack(
+        themeId: String,
+        cause: Exception,
+        reason: String,
+    ): ThemeLoadResult? {
+        Timber.w(cause, "Theme '%s' $reason, falling back to the deployed artifact", themeId, cause.message)
+        return null
     }
 
     /**
@@ -114,21 +134,35 @@ object ThemeLoader {
     /**
      * Reads [themeId] from [file], or looks its source up in the user and
      * shared data dirs when [file] is null, and expands the supported DSL
-     * subset. Returns null when the source is missing, unreadable, or uses DSL
-     * outside the supported subset.
+     * subset, so a name that an `__include` provides is resolved as well.
+     * Returns null when the source is missing, unreadable, or uses DSL outside
+     * the supported subset.
+     *
+     * @param sources resource lookup; the data dirs by default, a fixture loader
+     *   in tests.
      */
     internal fun loadSourceNode(
         themeId: String,
         file: File? = null,
-    ): Node? = SourceLoader().load(themeId, file)
+        sources: SourceLoader = SourceLoader(),
+    ): Node? {
+        val node = sources.load(themeId, file) ?: return null
+        return runCatching {
+            ThemeDslExpander.expand(themeId, node) { id -> sources.load(id, null) }
+        }.getOrNull()
+    }
 
     /**
      * Applies the librime auto-patch convention: unless the root already has an
      * explicit `__patch`, the `patch` node of `<id>.custom.yaml` is applied on
      * top of the resource. Reads `trime.yaml` source files (user data first,
      * then shared data) the same way librime resolves resources.
+     *
+     * @param findSource source file of a resource id; the data dirs by default.
      */
-    private class SourceLoader {
+    internal class SourceLoader(
+        private val findSource: (String) -> File? = ::findSourceFile,
+    ) {
         private val cache = HashMap<String, Node?>()
 
         /**
@@ -139,33 +173,53 @@ object ThemeLoader {
             if (cache.containsKey(resourceId)) return cache[resourceId]
             val source = file ?: findSource(resourceId)
             val node = source?.let { runCatching { Yaml.parseToYamlNode(it.readText()) }.getOrNull() }
-            val result = node?.let { applyCustomPatch(resourceId, it) { id -> load(id, null) } }
+            val result = node?.let { applyCustomPatch(resourceId, it) }
             cache[resourceId] = result
             return result
         }
+    }
 
-        private fun findSource(resourceId: String): File? {
-            val relative = "$resourceId.yaml"
-            return listOf(DataManager.userDataDir, DataManager.sharedDataDir)
-                .firstNotNullOfOrNull { it.resolve(relative).takeIf(File::isFile) }
+    /** Source file of [resourceId]: the user data dir first, then the shared one. */
+    private fun findSourceFile(resourceId: String): File? = findSourceFile(resourceId, listOf(DataManager.userDataDir, DataManager.sharedDataDir))
+
+    /**
+     * Source file of [resourceId] under [roots], in order. A resource id is free
+     * text in an include directive, so a file that resolves outside the root it
+     * was found in is refused; librime still resolves such an id on its own, so
+     * the caller falls back to the deployed artifact.
+     */
+    internal fun findSourceFile(
+        resourceId: String,
+        roots: List<File>,
+    ): File? {
+        val relative = "$resourceId.yaml"
+        return roots.firstNotNullOfOrNull { root ->
+            root.resolve(relative).takeIf { it.isFile && it.isInside(root) }
         }
     }
 
+    /** Whether this file really lives in [root]: `..` and absolute ids are escapes. */
+    private fun File.isInside(root: File): Boolean = runCatching {
+        canonicalFile.toPath().startsWith(root.canonicalFile.toPath())
+    }.getOrDefault(false)
+
     /**
-     * Injects the `patch` node of `<id>.custom.yaml` as an `__patch` directive,
-     * mirroring librime's auto-patch plugin. An explicit root `__patch` wins.
+     * Injects the patch of `<id>.custom.yaml` as librime's auto-patch plugin
+     * does: the optional reference `__patch: <id>.custom:/patch?`, resolved in
+     * that resource. Reading it as a resource keeps the patch's own directives
+     * (an `__include`, for instance) relative to the file they are written in.
+     * An explicit root `__patch` wins; `.custom` files are never patched.
      */
     internal fun applyCustomPatch(
         resourceId: String,
         node: Node,
-        loadResource: (String) -> Node?,
     ): Node {
         if (resourceId.endsWith(".custom")) return node
         val root = node as? Node.Mapping ?: return node
         if (root[PATCH] != null) return node
         val patchId = resourceId.removeSuffix(".schema") + ".custom"
-        val patch = loadResource(patchId)?.mapping?.get("patch") as? Node.Mapping ?: return node
-        return Node.Mapping(root.pairs + (Node.Scalar(PATCH) to patch), root.anchor)
+        val reference = Node.Scalar("$patchId:/patch?")
+        return Node.Mapping(root.pairs + (Node.Scalar(PATCH) to reference), root.anchor)
     }
 
     /** Loads the theme from its librime-deployed artifact. */

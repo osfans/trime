@@ -80,6 +80,11 @@ class ThemeDslExpanderTest :
                 val expanded = expand("keyboard:\n  __include: missing:/foo?\n  own: 1\n")
                 expanded["keyboard"]!!.mapping!!["own"]!!.string shouldBe "1"
             }
+
+            Then("a missing patch is ignored when marked optional") {
+                val expanded = expand("keyboard:\n  own: 1\n  __patch: \"missing:/patch?\"\n")
+                expanded["keyboard"]!!.mapping!!["own"]!!.string shouldBe "1"
+            }
         }
 
         Given("a theme with circular references") {
@@ -91,24 +96,24 @@ class ThemeDslExpanderTest :
         }
 
         Given("a theme using unsupported DSL constructs") {
-            Then("an include list is rejected") {
-                shouldThrow<ThemeDslExpander.UnsupportedDsl> {
-                    expand("a: {__include: [/x, /y]}\n")
-                }
-            }
-
-            Then("unknown directives are rejected") {
-                shouldThrow<ThemeDslExpander.UnsupportedDsl> {
-                    expand("a: {__merge: /x}\n")
-                }
-            }
-
-            Then("path operators are rejected") {
-                shouldThrow<ThemeDslExpander.UnsupportedDsl> {
-                    expand("a: {list/+: [1]}\n")
-                }
-                shouldThrow<ThemeDslExpander.UnsupportedDsl> {
-                    expand("a: {key/=: 1}\n")
+            Then("every construct outside the subset is refused") {
+                listOf(
+                    // __append / __merge directives
+                    "a: {__append: [1]}",
+                    "a: {__merge: {b: 1}}",
+                    // path and list operators
+                    "a: {keys/@next: 1}",
+                    "a: {nested/key: 1}",
+                    "a: {list/+: [1]}",
+                    "a: {key/=: 1}",
+                    // a __patch list, and a patch of the wrong type
+                    "a: {__patch: [{k: 1}]}",
+                    "s: scalar\na: {__patch: /s}",
+                    // a non-scalar __include
+                    "a: {__include: [/x, /y]}",
+                    "a: {__include: {k: 1}}",
+                ).forEach { yaml ->
+                    shouldThrow<ThemeDslExpander.UnsupportedDsl> { expand(yaml) }
                 }
             }
 
@@ -118,8 +123,58 @@ class ThemeDslExpanderTest :
                 }
             }
 
+            Then("merging a mapping into a non-mapping sibling is rejected") {
+                shouldThrow<ThemeDslExpander.UnsupportedDsl> {
+                    expand("base: {keys: []}\na: {__include: /base, keys: {b: 1}}\n")
+                }
+            }
+
             Then("patching a node without an include overwrites it") {
                 expand("a: {__patch: {k: 1}}\n")["a"]!!.mapping!!["k"]!!.string shouldBe "1"
+            }
+        }
+
+        Given("a sibling key of an __include") {
+            val template = "base: {a: 1, b: 2}\n"
+
+            Then("a key without a value leaves the included value untouched") {
+                val a = expand(template + "x: {__include: /base, a: }\n")["x"]!!.mapping!!
+                a["a"]!!.string shouldBe "1"
+            }
+
+            Then("an empty string replaces the included value") {
+                val a = expand(template + "x: {__include: /base, a: \"\"}\n")["x"]!!.mapping!!
+                a["a"]!!.string shouldBe ""
+            }
+
+            Then("librime's other null spellings leave the included value untouched too") {
+                listOf("~", "null", "Null", "NULL").forEach { spelling ->
+                    val a = expand(template + "x: {__include: /base, a: $spelling}\n")["x"]!!.mapping!!
+                    a["a"]!!.string shouldBe "1"
+                }
+            }
+
+            Then("a quoted null spelling is still a string") {
+                val a = expand(template + "x: {__include: /base, a: 'null'}\n")["x"]!!.mapping!!
+                a["a"]!!.string shouldBe "null"
+            }
+        }
+
+        Given("a theme reusing a node through a YAML anchor") {
+            val expanded = expand(
+                """
+                inner: {v: 1}
+                base: &base
+                  __include: /inner
+                  extra: 2
+                copy: *base
+                """.trimIndent(),
+            )
+
+            Then("the aliased node is expanded as well, once") {
+                expanded["copy"] shouldBe expanded["base"]
+                expanded["copy"]!!.mapping!!["v"]!!.string shouldBe "1"
+                expanded["copy"]!!.mapping!!["extra"]!!.string shouldBe "2"
             }
         }
 

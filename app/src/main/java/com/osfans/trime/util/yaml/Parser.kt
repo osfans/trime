@@ -59,7 +59,10 @@ class Parser(reader: Reader, codePointLimit: Int? = null) {
 
     private fun readScalar(event: ScalarEvent): Node {
         val anchor = event.anchor
-        val node = Node.Scalar(event.value, anchor)
+        // librime reads a plain scalar as null when it is one of yaml-cpp's null
+        // spellings, whatever its explicit tag says; quoted forms are strings.
+        val isNull = event.isPlain() && event.value in NULL_SPELLINGS
+        val node = Node.Scalar(event.value, anchor, isNull)
         anchor?.let { aliases[it] = node }
         return node
     }
@@ -203,5 +206,10 @@ class Parser(reader: Reader, codePointLimit: Int? = null) {
         ->
             "$message (is the indentation level of this line or a line nearby incorrect?)"
         else -> message
+    }
+
+    private companion object {
+        /** The plain spellings librime reads as null, for instance `key: ~`. */
+        val NULL_SPELLINGS = setOf("", "~", "null", "Null", "NULL")
     }
 }

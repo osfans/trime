@@ -6,7 +6,9 @@ package com.osfans.trime.data.theme
 
 import com.osfans.trime.util.yaml.Node
 import com.osfans.trime.util.yaml.get
+import com.osfans.trime.util.yaml.isNull
 import com.osfans.trime.util.yaml.string
+import java.util.IdentityHashMap
 
 /**
  * Expands the subset of the librime config DSL that theme files use, so a
@@ -24,6 +26,14 @@ import com.osfans.trime.util.yaml.string
  * Anything beyond this subset (include lists, `/+` and `/=` path operators,
  * nested patch paths, `__merge`, ...) raises [UnsupportedDsl] so callers can
  * fall back to the librime deployment path instead of guessing semantics.
+ *
+ * Fidelity notes, all mirroring librime's config compiler:
+ * - a sibling key without a value leaves the included node untouched, while an
+ *   empty string replaces it (`MergeTree` / `EditNode`);
+ * - merging a mapping into a sibling key whose value is not a mapping fails in
+ *   librime, so it is refused here as well;
+ * - nodes are expanded once per run and shared, so YAML anchors/aliases — which
+ *   the parser resolves to one node — stay equivalent at every use site.
  */
 object ThemeDslExpander {
     /** A construct outside the supported subset; callers should fall back. */
@@ -52,14 +62,24 @@ object ThemeDslExpander {
     private class Context(private val loadResource: (String) -> Node?) {
         private val expanding = LinkedHashSet<String>()
 
+        /**
+         * Results by node identity. A parsed node is reached with the same
+         * resource and root from every place it appears (anchors and their
+         * aliases are the same object), so one pass is enough.
+         */
+        private val expanded = IdentityHashMap<Node, Node>()
+
         fun expandNode(
             node: Node,
             resourceId: String,
             root: Node,
         ): Node = when (node) {
             is Node.Scalar, is Node.Alias -> node
-            is Node.Sequence -> Node.Sequence(node.nodes.map { expandNode(it, resourceId, root) }, node.anchor)
-            is Node.Mapping -> expandMapping(node, resourceId, root)
+            is Node.Sequence ->
+                expanded.getOrPut(node) {
+                    Node.Sequence(node.nodes.map { expandNode(it, resourceId, root) }, node.anchor)
+                }
+            is Node.Mapping -> expanded.getOrPut(node) { expandMapping(node, resourceId, root) }
         }
 
         private fun expandMapping(
@@ -98,9 +118,13 @@ object ThemeDslExpander {
         ): Node {
             val patchMap = when (patch) {
                 is Node.Mapping -> patch
-                is Node.Scalar ->
-                    reference(patch, resourceId, root) as? Node.Mapping
+                is Node.Scalar -> {
+                    // A reference, usually `__patch: <id>.custom:/patch?`; absent means
+                    // "no such patch", which librime tolerates for optional references.
+                    val target = reference(patch, resourceId, root) ?: return base
+                    target as? Node.Mapping
                         ?: throw UnsupportedDsl("'$PATCH' target is not a mapping")
+                }
                 else -> throw UnsupportedDsl("unsupported '$PATCH' value")
             }
             val baseMap = base as? Node.Mapping
@@ -120,11 +144,18 @@ object ThemeDslExpander {
         private fun mergeMaps(base: Node.Mapping, overrides: Node.Mapping): Node.Mapping {
             val merged = LinkedHashMap(base.pairs)
             overrides.pairs.forEach { (key, value) ->
+                // librime leaves the included node untouched for a key without a value.
+                if (value.isNull) return@forEach
                 val existing = merged[key]
-                merged[key] = if (existing is Node.Mapping && value is Node.Mapping) {
-                    mergeMaps(existing, value)
-                } else {
-                    value
+                merged[key] = when {
+                    existing is Node.Mapping && value is Node.Mapping -> mergeMaps(existing, value)
+                    // librime cannot merge a tree into a node of another type and fails
+                    // the whole include; refuse it so the deployed path decides.
+                    value is Node.Mapping && existing != null && existing !is Node.Mapping ->
+                        throw UnsupportedDsl(
+                            "cannot merge a mapping into the non-mapping sibling key '${key.string}'",
+                        )
+                    else -> value
                 }
             }
             return Node.Mapping(merged)

@@ -11,6 +11,12 @@ sealed class Node {
     class Scalar(
         val string: String,
         override val anchor: String? = null,
+        /**
+         * True for a plain scalar the document left out or wrote as a null
+         * spelling (`key:`, `~`, `null`, `Null`, `NULL`); a quoted form is a
+         * string. Equality ignores it: a key is identified by its text.
+         */
+        val isNull: Boolean = false,
     ) : Node(),
         Comparable<Scalar> {
         override fun compareTo(other: Scalar): Int = this.string.compareTo(other.string)
@@ -82,6 +88,10 @@ val Node.alias: Node.Alias?
 
 val Node.string: String?
     get() = scalar?.string
+
+/** True when this node is a scalar without a value (`key:`, `~`, `null`). */
+val Node.isNull: Boolean
+    get() = this is Node.Scalar && this.isNull
 
 val Node.int: Int?
     get() = scalar?.parseToIntLikeOrNull(String::toIntOrNull)
