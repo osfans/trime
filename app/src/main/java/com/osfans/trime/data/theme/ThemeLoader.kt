@@ -56,6 +56,14 @@ object ThemeLoader {
             detail: String,
             cause: Throwable? = null,
         ) : ThemeLoadError(themeId, "Invalid theme structure: $detail", cause)
+
+        /**
+         * The theme declares no color scheme, so there is nothing the runtime
+         * could render it with.
+         */
+        class NoColorScheme(
+            themeId: String,
+        ) : ThemeLoadError(themeId, "No color scheme is defined")
     }
 
     sealed interface ThemeLoadResult {
@@ -125,12 +133,18 @@ object ThemeLoader {
      * Decodes [mapping] and reports what the runtime ignores or cannot resolve
      * in it, so a theme is checked when it is read instead of on first use.
      * Diagnostics never affect the result of a load.
+     *
+     * A theme that declares no color scheme is refused: it decodes, but there is
+     * nothing for the runtime to pick, so loading it would only fail later.
      */
     internal fun decodeAndReport(
         themeId: String,
         mapping: Node.Mapping,
-    ): ThemeLoadResult.Success {
+    ): ThemeLoadResult {
         val theme = Theme.decode(mapping)
+        if (theme.colorSchemes.isEmpty()) {
+            return ThemeLoadResult.Failure(themeId, ThemeLoadError.NoColorScheme(themeId))
+        }
         val findings =
             runCatching { ThemeDiagnostics.lint(theme, mapping) }
                 .onFailure { Timber.w(it, "Theme '%s': diagnostics failed", themeId) }

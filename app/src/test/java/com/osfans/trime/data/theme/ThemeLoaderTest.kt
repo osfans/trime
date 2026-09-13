@@ -16,6 +16,7 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.maps.shouldContainKey
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.types.shouldBeInstanceOf
 import timber.log.Timber
 import java.io.File
 
@@ -136,17 +137,31 @@ class ThemeLoaderTest :
                 val result =
                     ThemeLoader.loadFromSource(
                         "theme",
-                        sourceFile("name: from_source\nstyle: {}\n"),
+                        sourceFile("name: from_source\nstyle: {}\npreset_color_schemes: {default: {}}\n"),
                         noResources,
                     )
                 (result as? ThemeLoader.ThemeLoadResult.Success)?.theme?.name shouldBe "from_source"
+            }
+
+            Then("a theme that declares no color scheme is refused") {
+                // Nothing could be rendered with it, so it is reported as a load
+                // failure instead of crashing when a scheme is first needed.
+                val result =
+                    ThemeLoader.loadFromSource(
+                        "theme",
+                        sourceFile("name: no_scheme\nstyle: {}\n"),
+                        noResources,
+                    )
+                (result as? ThemeLoader.ThemeLoadResult.Failure)
+                    ?.error
+                    .shouldBeInstanceOf<ThemeLoader.ThemeLoadError.NoColorScheme>()
             }
 
             Then("what the checks found travels with the loaded theme") {
                 val result =
                     ThemeLoader.loadFromSource(
                         "theme",
-                        sourceFile("name: t\nheight: 5\nstyle: {}\n"),
+                        sourceFile("name: t\nheight: 5\nstyle: {}\npreset_color_schemes: {default: {}}\n"),
                         noResources,
                     )
                 val findings = (result as? ThemeLoader.ThemeLoadResult.Success)?.findings
@@ -284,7 +299,7 @@ class ThemeLoaderTest :
                             """.trimIndent(),
                         ).mapping!!,
                     )
-                result.theme.name shouldBe "fixture"
+                result.shouldBeInstanceOf<ThemeLoader.ThemeLoadResult.Success>().theme.name shouldBe "fixture"
                 lines.filter { "unknown key" in it } shouldBe
                     listOf(
                         "I Theme 'fixture': unknown key 'height' in ''; the runtime ignores it",

@@ -18,12 +18,17 @@ internal object ColorSchemeResolver {
     private const val LIGHT_SCHEME_KEY = "light_scheme"
     private const val DARK_SCHEME_KEY = "dark_scheme"
 
+    /**
+     * @param schemes color schemes of a theme that is known to be usable;
+     *   [ThemeLoader] refuses a theme declaring none, so this list is never empty.
+     */
     fun resolve(
         schemes: List<ColorScheme>,
         selectedSchemeId: String,
         followSystemDayNight: Boolean,
         isNightMode: Boolean,
     ): ColorScheme {
+        require(schemes.isNotEmpty()) { "The theme defines no color scheme" }
         fun scheme(id: String): ColorScheme? = schemes.find { it.id == id }
         fun linkedScheme(source: ColorScheme): ColorScheme? {
             val linkKey = if (isNightMode) DARK_SCHEME_KEY else LIGHT_SCHEME_KEY

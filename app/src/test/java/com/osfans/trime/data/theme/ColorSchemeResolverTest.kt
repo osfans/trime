@@ -7,6 +7,7 @@
 package com.osfans.trime.data.theme
 
 import com.osfans.trime.data.theme.model.ColorScheme
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 
@@ -122,6 +123,17 @@ class ColorSchemeResolverTest :
                 Then("the first scheme is used") {
                     ColorSchemeResolver.resolve(noDefault, "missing", false, false).id shouldBe "first"
                 }
+            }
+        }
+        Given("a theme that defines no color scheme at all") {
+            // ThemeLoader refuses such a theme, so reaching this point is a
+            // programming error: it says so instead of failing on the empty list.
+            Then("resolving says why instead of failing on the empty list") {
+                val e =
+                    shouldThrow<IllegalArgumentException> {
+                        ColorSchemeResolver.resolve(emptyList(), "default", false, false)
+                    }
+                e.message shouldBe "The theme defines no color scheme"
             }
         }
     })
