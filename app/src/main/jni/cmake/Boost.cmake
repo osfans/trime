@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-set(BOOST_VERSION 1.89.0)
+set(BOOST_VERSION 1.92.0)
 
 if(NOT EXISTS "boost-${BOOST_VERSION}.tar.xz")
   message(STATUS "Downloading Boost ${BOOST_VERSION} ......")
@@ -11,7 +11,7 @@ if(NOT EXISTS "boost-${BOOST_VERSION}.tar.xz")
     "https://github.com/boostorg/boost/releases/download/boost-${BOOST_VERSION}/boost-${BOOST_VERSION}-cmake.tar.xz"
     boost-${BOOST_VERSION}.tar.xz
     EXPECTED_HASH
-      SHA256=67acec02d0d118b5de9eb441f5fb707b3a1cdd884be00ca24b9a73c995511f74
+      SHA256=9bed76128d4e46755dbe818487788c6fceb6f72b378f4daa49b7e1e600d9088d
     SHOW_PROGRESS)
 
   message(STATUS "Remove older version Boost")
