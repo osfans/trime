@@ -19,17 +19,20 @@ import com.charleskorn.kaml.YamlNull
 import com.charleskorn.kaml.YamlPath
 import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.YamlTaggedNode
+import kotlinx.serialization.DeserializationStrategy
 import com.charleskorn.kaml.Yaml as KamlYaml
 
 /**
  * The YAML parser every file the app reads goes through: theme sources and
  * deployed artifacts, sound effects, sync policies.
  *
- * Anchors and aliases are permitted because theme sources build their metrics
- * and colors with them (`tongwenfeng.trime.yaml`), while kaml forbids them by
- * default. kaml keeps the switch `internal`, so the whole configuration is
- * passed positionally; every value other than [AnchorsAndAliases.Permitted] is
- * kaml's own default.
+ * Two settings deviate from kaml's defaults. Anchors and aliases are permitted
+ * because theme sources build their metrics and colors with them
+ * (`tongwenfeng.trime.yaml`), while kaml forbids them by default. Unknown keys
+ * are tolerated, because the data decoded this way is authored by users, while
+ * a theme's unknown keys are reported by the theme diagnostics instead of
+ * failing the load. kaml keeps the switch `internal`, so the whole
+ * configuration is passed positionally.
  *
  * Documents stay bounded: the input limit is set to 10 MB, the value the theme
  * reader used to configure, and alias expansion has a finite budget, so a
@@ -37,6 +40,9 @@ import com.charleskorn.kaml.Yaml as KamlYaml
  */
 object Yaml {
     fun parseToYamlNode(string: String): YamlNode = kaml.parseToYamlNode(string)
+
+    /** Decodes [string] into [T], ignoring keys its deserializer does not know. */
+    fun <T> decodeFromString(deserializer: DeserializationStrategy<T>, string: String): T = kaml.decodeFromString(deserializer, string)
 }
 
 /**
@@ -56,7 +62,7 @@ private val kaml = KamlYaml(
         /* encodeDefaults = */
         true,
         /* strictMode = */
-        true,
+        false,
         /* extensionDefinitionPrefix = */
         null,
         /* polymorphismStyle = */

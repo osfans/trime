@@ -27,8 +27,7 @@ object SoundEffectManager {
         return files
             ?.mapNotNull decode@{ f ->
                 val effect = try {
-                    val node = Yaml.parseToYamlNode(f.bufferedReader().readText())
-                    val result = SoundEffect.decode(node)
+                    val result = Yaml.decodeFromString(SoundEffect.serializer(), f.bufferedReader().readText())
                     if (result.name.isEmpty()) {
                         result.copy(name = f.name.substringBefore("."))
                     } else {

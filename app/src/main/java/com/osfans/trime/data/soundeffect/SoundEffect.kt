@@ -6,20 +6,18 @@
 package com.osfans.trime.data.soundeffect
 
 import android.view.KeyEvent
-import com.charleskorn.kaml.YamlNode
-import com.osfans.trime.util.boolean
-import com.osfans.trime.util.get
-import com.osfans.trime.util.int
-import com.osfans.trime.util.sequence
-import com.osfans.trime.util.string
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
+@Serializable
 data class SoundEffect(
     val name: String = "",
-    val sound: List<String>,
+    val sound: List<String> = listOf(),
     val folder: String,
     val melody: List<String> = listOf(),
     val keyset: List<Key>,
 ) {
+    @Serializable
     data class Key(
         val min: String = "UNKNOWN",
         val max: String = "UNKNOWN",
@@ -27,10 +25,13 @@ data class SoundEffect(
         val inOrder: Boolean,
         val sounds: List<Int>,
     ) {
+        @Transient
         private val sysKeyCodes = keys.map { KeyEvent.keyCodeFromString(it.uppercase()) }
 
+        @Transient
         private val minKeyCode = KeyEvent.keyCodeFromString(min.uppercase())
 
+        @Transient
         private val maxKeyCode = KeyEvent.keyCodeFromString(max.uppercase())
 
         fun querySoundIndex(keyCode: Int): Int {
@@ -45,35 +46,5 @@ data class SoundEffect(
                 return sounds[if (inOrder) sysKey % sounds.size else sounds.indices.random()]
             }
         }
-
-        companion object {
-            fun decode(node: YamlNode): Key = Key(
-                min = node["min"]?.string ?: "UNKNOWN",
-                max = node["max"]?.string ?: "UNKNOWN",
-                keys = node["keys"]?.sequence?.items?.mapNotNull {
-                    it.string
-                } ?: emptyList(),
-                inOrder = node["inOrder"]!!.boolean!!,
-                sounds = node["sounds"]!!.sequence!!.items.mapNotNull {
-                    it.int
-                },
-            )
-        }
-    }
-
-    companion object {
-        fun decode(node: YamlNode): SoundEffect = SoundEffect(
-            name = node["name"]?.string ?: "",
-            sound = node["sound"]?.sequence?.items?.mapNotNull {
-                it.string
-            } ?: emptyList(),
-            folder = node["folder"]?.string!!,
-            melody = node["melody"]?.sequence?.items?.mapNotNull {
-                it.string
-            } ?: emptyList(),
-            keyset = node["keyset"]!!.sequence!!.items.mapNotNull {
-                Key.decode(it)
-            },
-        )
     }
 }

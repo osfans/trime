@@ -8,6 +8,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import kotlinx.serialization.Serializable
 
 class YamlTest :
     BehaviorSpec({
@@ -84,6 +85,7 @@ class YamlTest :
                 yamlListOf(yamlScalarOf("x"), yamlScalarOf("y")).items.map { it.string } shouldBe listOf("x", "y")
             }
         }
+
         Given("a document with merge keys") {
             Then("the merged mapping is expanded, like yaml-cpp does") {
                 val node = Yaml.parseToYamlNode(
@@ -106,4 +108,22 @@ class YamlTest :
                 (thrown.message ?: "") shouldContain "Maximum number of aliases"
             }
         }
+
+        Given("a serializable class") {
+            Then("it is decoded through kaml, tolerating keys it does not know") {
+                // Sound effect descriptors are authored by users, so a key the model
+                // does not know must not fail the whole file.
+                val fixture = Yaml.decodeFromString(
+                    YamlDecodingFixture.serializer(),
+                    "name: click\nfolder: click\nunknown:\n  nested: 1\n",
+                )
+                fixture shouldBe YamlDecodingFixture(name = "click", folder = "click")
+            }
+        }
     })
+
+@Serializable
+private data class YamlDecodingFixture(
+    val name: String = "",
+    val folder: String,
+)
