@@ -6,11 +6,13 @@
 package com.osfans.trime.data.theme.model
 
 import android.os.Parcelable
-import com.osfans.trime.util.yaml.Node
-import com.osfans.trime.util.yaml.boolean
-import com.osfans.trime.util.yaml.get
-import com.osfans.trime.util.yaml.sequence
-import com.osfans.trime.util.yaml.string
+import com.charleskorn.kaml.YamlMap
+import com.charleskorn.kaml.YamlNode
+import com.osfans.trime.util.boolean
+import com.osfans.trime.util.get
+import com.osfans.trime.util.pairs
+import com.osfans.trime.util.sequence
+import com.osfans.trime.util.string
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -33,23 +35,23 @@ data class PresetKey(
     val send: String = "",
 ) : Parcelable {
     companion object {
-        fun decode(node: Node.Mapping): PresetKey = PresetKey(
-            command = node["command"]?.string ?: "",
-            option = node["option"]?.string ?: "",
-            select = node["select"]?.string ?: "",
-            toggle = node["toggle"]?.string ?: "",
-            label = node["label"]?.string ?: "",
-            preview = node["preview"]?.string,
-            shiftLock = node["shift_lock"]?.string ?: "",
-            commit = node["commit"]?.string ?: "",
-            text = node["text"]?.string ?: "",
-            sticky = node["sticky"]?.boolean ?: false,
-            repeatable = node["repeatable"]?.boolean ?: false,
-            slideCursor = node["slide_cursor"]?.boolean ?: false,
-            slideDelete = node["slide_delete"]?.boolean ?: false,
-            functional = node["functional"]?.boolean ?: false,
-            states = node["states"]?.sequence?.mapNotNull(Node::string) ?: emptyList(),
-            send = node["send"]?.string ?: "",
+        fun decode(node: YamlMap): PresetKey = PresetKey(
+            command = node.pairs["command"]?.string ?: "",
+            option = node.pairs["option"]?.string ?: "",
+            select = node.pairs["select"]?.string ?: "",
+            toggle = node.pairs["toggle"]?.string ?: "",
+            label = node.pairs["label"]?.string ?: "",
+            preview = node.pairs["preview"]?.string,
+            shiftLock = node.pairs["shift_lock"]?.string ?: "",
+            commit = node.pairs["commit"]?.string ?: "",
+            text = node.pairs["text"]?.string ?: "",
+            sticky = node.pairs["sticky"]?.boolean ?: false,
+            repeatable = node.pairs["repeatable"]?.boolean ?: false,
+            slideCursor = node.pairs["slide_cursor"]?.boolean ?: false,
+            slideDelete = node.pairs["slide_delete"]?.boolean ?: false,
+            functional = node.pairs["functional"]?.boolean ?: false,
+            states = node.pairs["states"]?.sequence?.items?.mapNotNull(YamlNode::string) ?: emptyList(),
+            send = node.pairs["send"]?.string ?: "",
         )
     }
 }

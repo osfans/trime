@@ -9,7 +9,7 @@ import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.util.FileUtils
-import com.osfans.trime.util.yaml.Yaml
+import com.osfans.trime.util.Yaml
 import timber.log.Timber
 import java.io.File
 

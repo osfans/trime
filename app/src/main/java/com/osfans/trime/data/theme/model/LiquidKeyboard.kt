@@ -6,16 +6,20 @@
 package com.osfans.trime.data.theme.model
 
 import android.os.Parcelable
+import com.charleskorn.kaml.YamlList
+import com.charleskorn.kaml.YamlMap
+import com.charleskorn.kaml.YamlNode
+import com.charleskorn.kaml.YamlScalar
 import com.osfans.trime.data.theme.LiquidData
+import com.osfans.trime.util.enum
+import com.osfans.trime.util.float
+import com.osfans.trime.util.get
+import com.osfans.trime.util.int
+import com.osfans.trime.util.mapping
+import com.osfans.trime.util.pairs
+import com.osfans.trime.util.sequence
 import com.osfans.trime.util.splitWithSurrogates
-import com.osfans.trime.util.yaml.Node
-import com.osfans.trime.util.yaml.enum
-import com.osfans.trime.util.yaml.float
-import com.osfans.trime.util.yaml.get
-import com.osfans.trime.util.yaml.int
-import com.osfans.trime.util.yaml.mapping
-import com.osfans.trime.util.yaml.sequence
-import com.osfans.trime.util.yaml.string
+import com.osfans.trime.util.string
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
 
@@ -57,33 +61,30 @@ data class LiquidKeyboard(
     }
 
     companion object {
-        fun decode(node: Node.Mapping?): LiquidKeyboard {
-            val keyBarNode = node?.get("fixed_key_bar")?.mapping
+        fun decode(node: YamlMap?): LiquidKeyboard {
+            val keyBarNode = node?.pairs?.get("fixed_key_bar")?.mapping
             val keyBar = keyBarNode?.let {
-                val position = keyBarNode["position"]?.enum<KeyBar.Position>()
+                val position = keyBarNode.pairs["position"]?.enum<KeyBar.Position>()
                     ?: KeyBar.Position.BOTTOM
-                val keys = keyBarNode["keys"]?.sequence
+                val keys = keyBarNode.pairs["keys"]?.sequence?.items
                     ?.mapNotNull { it.string } ?: emptyList()
                 KeyBar(position = position, keys = keys)
             } ?: KeyBar(emptyList(), KeyBar.Position.BOTTOM)
             val keyboards =
-                node?.get("keyboards")?.sequence?.asSequence()
+                node?.pairs?.get("keyboards")?.sequence?.items?.asSequence()
                     ?.mapNotNull { it.string }
                     ?.mapNotNull decode@{ id ->
                         try {
-                            val keyboardNode = node[id]?.mapping
-                            val type = keyboardNode?.get("type")?.enum<LiquidData.Type>()
+                            val keyboardNode = node.pairs[id]?.mapping
+                            val type = keyboardNode?.pairs?.get("type")?.enum<LiquidData.Type>()
                                 ?: return@decode null
-                            val name = keyboardNode["name"]?.string ?: id
-                            val keysNode = keyboardNode["keys"]
+                            val name = keyboardNode.pairs["name"]?.string ?: id
+                            val keysNode = keyboardNode.pairs["keys"]
                             val keys = arrayListOf<KeyItem>()
-                            if (keysNode is Node.Sequence) {
-                                keysNode.forEach { item ->
-                                    if (item is Node.Mapping) {
-                                        val map =
-                                            item.entries.associate {
-                                                it.key.string!! to it.value.string!!
-                                            }
+                            if (keysNode is YamlList) {
+                                keysNode.items.forEach { item ->
+                                    if (item is YamlMap) {
+                                        val map = item.pairs.mapValues { it.value.string!! }
                                         if (map.containsKey("click")) {
                                             val clickText = map["click"] ?: ""
                                             val labelText = map["label"] ?: ""
@@ -91,8 +92,8 @@ data class LiquidKeyboard(
                                         } else {
                                             map.forEach { keys.add(KeyItem(it.key, it.value)) }
                                         }
-                                    } else if (item is Node.Scalar) {
-                                        keys.add(KeyItem(item.string))
+                                    } else if (item is YamlScalar) {
+                                        keys.add(KeyItem(item.content))
                                     }
                                 }
                             } else {
@@ -120,9 +121,9 @@ data class LiquidKeyboard(
                         }
                     }?.toList() ?: emptyList()
             return LiquidKeyboard(
-                singleWidth = node?.get("single_width")?.int ?: 0,
-                keyHeight = node?.get("key_height")?.int ?: 0,
-                marginX = node?.get("margin_x")?.float ?: 0f,
+                singleWidth = node?.pairs?.get("single_width")?.int ?: 0,
+                keyHeight = node?.pairs?.get("key_height")?.int ?: 0,
+                marginX = node?.pairs?.get("margin_x")?.float ?: 0f,
                 fixedKeyBar = keyBar,
                 keyboards = keyboards,
             )

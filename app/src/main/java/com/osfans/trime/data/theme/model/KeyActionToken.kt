@@ -6,8 +6,11 @@
 package com.osfans.trime.data.theme.model
 
 import android.os.Parcelable
-import com.osfans.trime.util.yaml.Node
-import com.osfans.trime.util.yaml.string
+import com.charleskorn.kaml.YamlMap
+import com.charleskorn.kaml.YamlNode
+import com.charleskorn.kaml.YamlScalar
+import com.osfans.trime.util.pairs
+import com.osfans.trime.util.string
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -23,14 +26,14 @@ sealed class KeyActionToken : Parcelable {
     }
 
     companion object {
-        fun decode(node: Node?): KeyActionToken? = when (node) {
-            is Node.Scalar -> Plain(node.string)
+        fun decode(node: YamlNode?): KeyActionToken? = when (node) {
+            is YamlScalar -> Plain(node.content)
 
-            is Node.Mapping -> Inline(
+            is YamlMap -> Inline(
                 Inline.Token(
-                    commit = node["commit"]?.string,
-                    text = node["text"]?.string,
-                    label = node["label"]?.string,
+                    commit = node.pairs["commit"]?.string,
+                    text = node.pairs["text"]?.string,
+                    label = node.pairs["label"]?.string,
                 ),
             )
 

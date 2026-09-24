@@ -7,14 +7,15 @@
 package com.osfans.trime.data.theme.model
 
 import android.os.Parcelable
-import com.osfans.trime.util.yaml.Node
-import com.osfans.trime.util.yaml.boolean
-import com.osfans.trime.util.yaml.enum
-import com.osfans.trime.util.yaml.float
-import com.osfans.trime.util.yaml.get
-import com.osfans.trime.util.yaml.int
-import com.osfans.trime.util.yaml.sequence
-import com.osfans.trime.util.yaml.string
+import com.charleskorn.kaml.YamlNode
+import com.osfans.trime.util.boolean
+import com.osfans.trime.util.enum
+import com.osfans.trime.util.float
+import com.osfans.trime.util.get
+import com.osfans.trime.util.int
+import com.osfans.trime.util.pairs
+import com.osfans.trime.util.sequence
+import com.osfans.trime.util.string
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -100,14 +101,14 @@ data class GeneralStyle(
         val default: String = "default",
     ) : Parcelable {
         companion object {
-            fun decode(node: Node?): EnterLabel = EnterLabel(
-                go = node?.get("go")?.string ?: "go",
-                done = node?.get("done")?.string ?: "done",
-                next = node?.get("next")?.string ?: "next",
-                pre = node?.get("pre")?.string ?: "pre",
-                search = node?.get("search")?.string ?: "search",
-                send = node?.get("send")?.string ?: "send",
-                default = node?.get("default")?.string ?: "default",
+            fun decode(node: YamlNode?): EnterLabel = EnterLabel(
+                go = node?.pairs?.get("go")?.string ?: "go",
+                done = node?.pairs?.get("done")?.string ?: "done",
+                next = node?.pairs?.get("next")?.string ?: "next",
+                pre = node?.pairs?.get("pre")?.string ?: "pre",
+                search = node?.pairs?.get("search")?.string ?: "search",
+                send = node?.pairs?.get("send")?.string ?: "send",
+                default = node?.pairs?.get("default")?.string ?: "default",
             )
         }
     }
@@ -183,9 +184,9 @@ data class GeneralStyle(
                 "vertical_gap",
             )
 
-        private fun Node?.stringList(): List<String> = this?.sequence?.mapNotNull(Node::string) ?: emptyList()
+        private fun YamlNode?.stringList(): List<String> = this?.sequence?.items?.mapNotNull(YamlNode::string) ?: emptyList()
 
-        fun decode(node: Node): GeneralStyle = GeneralStyle(
+        fun decode(node: YamlNode): GeneralStyle = GeneralStyle(
             autoCaps = node["auto_caps"]?.boolean ?: DEFAULTS.autoCaps,
             candidateBorder = node["candidate_border"]?.int ?: DEFAULTS.candidateBorder,
             candidateBorderRound = node["candidate_border_round"]?.float ?: DEFAULTS.candidateBorderRound,

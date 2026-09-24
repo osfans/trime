@@ -9,8 +9,8 @@ import com.osfans.trime.data.theme.ThemeDiagnostics.Code
 import com.osfans.trime.data.theme.ThemeDiagnostics.Severity
 import com.osfans.trime.data.theme.model.GeneralStyle
 import com.osfans.trime.ime.keyboard.KeyCode
-import com.osfans.trime.util.yaml.Yaml
-import com.osfans.trime.util.yaml.mapping
+import com.osfans.trime.util.Yaml
+import com.osfans.trime.util.mapping
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
@@ -467,7 +467,7 @@ class ThemeDiagnosticsTest :
         Given("the key vocabularies") {
             Then("GeneralStyle.KNOWN_KEYS matches the keys decode reads") {
                 val literals =
-                    Regex("""node\["([a-z_0-9]+)"]""")
+                    Regex("""node(?:\.pairs)?\["([a-z_0-9]+)"]""")
                         .findAll(File("src/main/java/com/osfans/trime/data/theme/model/GeneralStyle.kt").readText())
                         .map { it.groupValues[1] }
                         .toSet()
@@ -476,7 +476,7 @@ class ThemeDiagnosticsTest :
 
             Then("Theme.TOP_LEVEL_KEYS matches the keys decode reads") {
                 val literals =
-                    Regex("""node\["([a-z_0-9]+)"]""")
+                    Regex("""node(?:\.pairs)?\["([a-z_0-9]+)"]""")
                         .findAll(File("src/main/java/com/osfans/trime/data/theme/Theme.kt").readText())
                         .map { it.groupValues[1] }
                         .toSet()

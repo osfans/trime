@@ -6,12 +6,13 @@
 
 package com.osfans.trime.data.theme
 
+import com.charleskorn.kaml.YamlMap
 import com.osfans.trime.data.theme.model.ColorScheme
 import com.osfans.trime.data.theme.model.GeneralStyle
 import com.osfans.trime.util.ColorUtils
-import com.osfans.trime.util.yaml.Node
-import com.osfans.trime.util.yaml.mapping
-import com.osfans.trime.util.yaml.string
+import com.osfans.trime.util.mapping
+import com.osfans.trime.util.pairs
+import com.osfans.trime.util.string
 import timber.log.Timber
 
 /**
@@ -75,7 +76,7 @@ object ThemeDiagnostics {
      */
     fun lint(
         theme: Theme,
-        node: Node.Mapping,
+        node: YamlMap,
         parseColor: (String) -> Int? = ::parseColor,
     ): List<Finding> = buildList {
         lintTopLevelKeys(node)
@@ -134,14 +135,13 @@ object ThemeDiagnostics {
     }
 
     private fun MutableList<Finding>.reportUnknownKeys(
-        node: Node.Mapping?,
+        node: YamlMap?,
         known: Set<String>,
         path: String,
         code: Code,
         severity: Severity,
     ) {
-        node?.pairs?.keys?.forEach { key ->
-            val name = key.string ?: return@forEach
+        node?.pairs?.keys?.forEach { name ->
             if (name in known) return@forEach
             add(
                 Finding(
@@ -154,7 +154,7 @@ object ThemeDiagnostics {
         }
     }
 
-    private fun MutableList<Finding>.lintTopLevelKeys(node: Node.Mapping) {
+    private fun MutableList<Finding>.lintTopLevelKeys(node: YamlMap) {
         // `__include`/`__patch` are expansion directives: they never survive
         // expansion, but a theme may still carry them for the librime backend.
         reportUnknownKeys(
@@ -166,9 +166,9 @@ object ThemeDiagnostics {
         )
     }
 
-    private fun MutableList<Finding>.lintStyleKeys(node: Node.Mapping) {
+    private fun MutableList<Finding>.lintStyleKeys(node: YamlMap) {
         reportUnknownKeys(
-            node["style"]?.mapping,
+            node.pairs["style"]?.mapping,
             GeneralStyle.KNOWN_KEYS,
             path = "style",
             code = Code.UNKNOWN_STYLE_KEY,
@@ -181,8 +181,8 @@ object ThemeDiagnostics {
      * only uses it as a deploy cache key, so this is where it is checked
      * against the version this build can read.
      */
-    private fun MutableList<Finding>.lintConfigVersion(node: Node.Mapping) {
-        val raw = node["config_version"]?.string
+    private fun MutableList<Finding>.lintConfigVersion(node: YamlMap) {
+        val raw = node.pairs["config_version"]?.string
         if (raw == null) {
             add(
                 Finding(

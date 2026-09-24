@@ -6,11 +6,16 @@
 
 package com.osfans.trime.data.theme
 
+import com.charleskorn.kaml.YamlMap
+import com.charleskorn.kaml.YamlNode
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.base.DataManager
-import com.osfans.trime.util.yaml.Node
-import com.osfans.trime.util.yaml.Yaml
-import com.osfans.trime.util.yaml.mapping
+import com.osfans.trime.util.Yaml
+import com.osfans.trime.util.get
+import com.osfans.trime.util.mapping
+import com.osfans.trime.util.pairs
+import com.osfans.trime.util.yamlMapOf
+import com.osfans.trime.util.yamlScalarOf
 import timber.log.Timber
 import java.io.File
 
@@ -139,7 +144,7 @@ object ThemeLoader {
      */
     internal fun decodeAndReport(
         themeId: String,
-        mapping: Node.Mapping,
+        mapping: YamlMap,
     ): ThemeLoadResult {
         val theme = Theme.decode(mapping)
         if (theme.colorSchemes.isEmpty()) {
@@ -159,16 +164,16 @@ object ThemeLoader {
      */
     internal fun decodeSource(
         themeId: String,
-        node: Node,
-        loadResource: (String) -> Node?,
+        node: YamlNode,
+        loadResource: (String) -> YamlNode?,
     ): Theme = Theme.decode(expandSource(themeId, node, loadResource))
 
     /** Applies the supported DSL subset to [node] and returns its root mapping. */
     private fun expandSource(
         themeId: String,
-        node: Node,
-        loadResource: (String) -> Node?,
-    ): Node.Mapping {
+        node: YamlNode,
+        loadResource: (String) -> YamlNode?,
+    ): YamlMap {
         val expanded = ThemeDslExpander.expand(themeId, node, loadResource)
         return expanded.mapping
             ?: throw ThemeLoadError.InvalidStructure(themeId, "YAML root is not a mapping")
@@ -188,7 +193,7 @@ object ThemeLoader {
         themeId: String,
         file: File? = null,
         sources: SourceLoader = SourceLoader(),
-    ): Node? {
+    ): YamlNode? {
         val node = sources.load(themeId, file) ?: return null
         return runCatching {
             ThemeDslExpander.expand(themeId, node) { id -> sources.load(id, null) }
@@ -206,14 +211,14 @@ object ThemeLoader {
     internal class SourceLoader(
         private val findSource: (String) -> File? = ::findSourceFile,
     ) {
-        private val cache = HashMap<String, Node?>()
+        private val cache = HashMap<String, YamlNode?>()
 
         /**
          * @param file source file of [resourceId] when it is already known.
          *   Included resources are always looked up by id. An explicit file
          *   wins over the id lookup cache.
          */
-        fun load(resourceId: String, file: File?): Node? {
+        fun load(resourceId: String, file: File?): YamlNode? {
             if (file != null) return readAndPatch(resourceId, file)
             if (cache.containsKey(resourceId)) return cache[resourceId]
             val result = findSource(resourceId)?.let { readAndPatch(resourceId, it) }
@@ -221,7 +226,7 @@ object ThemeLoader {
             return result
         }
 
-        private fun readAndPatch(resourceId: String, file: File): Node? {
+        private fun readAndPatch(resourceId: String, file: File): YamlNode? {
             val node = runCatching { Yaml.parseToYamlNode(file.readText()) }.getOrNull()
             return node?.let { applyCustomPatch(resourceId, it) }
         }
@@ -260,14 +265,13 @@ object ThemeLoader {
      */
     internal fun applyCustomPatch(
         resourceId: String,
-        node: Node,
-    ): Node {
+        node: YamlNode,
+    ): YamlNode {
         if (resourceId.endsWith(".custom")) return node
-        val root = node as? Node.Mapping ?: return node
-        if (root[PATCH] != null) return node
+        val root = node as? YamlMap ?: return node
+        if (root.pairs[PATCH] != null) return node
         val patchId = resourceId.removeSuffix(".schema") + ".custom"
-        val reference = Node.Scalar("$patchId:/patch?")
-        return Node.Mapping(root.pairs + (Node.Scalar(PATCH) to reference), root.anchor)
+        return yamlMapOf(root.pairs + (PATCH to yamlScalarOf("$patchId:/patch?")))
     }
 
     /** Loads the theme from its librime-deployed artifact. */

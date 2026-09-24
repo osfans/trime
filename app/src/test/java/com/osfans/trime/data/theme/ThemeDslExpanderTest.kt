@@ -4,11 +4,13 @@
 
 package com.osfans.trime.data.theme
 
-import com.osfans.trime.util.yaml.Node
-import com.osfans.trime.util.yaml.Yaml
-import com.osfans.trime.util.yaml.get
-import com.osfans.trime.util.yaml.mapping
-import com.osfans.trime.util.yaml.string
+import com.charleskorn.kaml.YamlList
+import com.charleskorn.kaml.YamlNode
+import com.osfans.trime.util.Yaml
+import com.osfans.trime.util.get
+import com.osfans.trime.util.mapping
+import com.osfans.trime.util.pairs
+import com.osfans.trime.util.string
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
@@ -20,7 +22,7 @@ class ThemeDslExpanderTest :
             yaml: String,
             resourceId: String = "theme",
             resources: Map<String, String> = emptyMap(),
-        ): Node = ThemeDslExpander.expand(resourceId, Yaml.parseToYamlNode(yaml)) { id ->
+        ): YamlNode = ThemeDslExpander.expand(resourceId, Yaml.parseToYamlNode(yaml)) { id ->
             resources[id]?.let { Yaml.parseToYamlNode(it) }
         }
 
@@ -40,15 +42,15 @@ class ThemeDslExpanderTest :
             )
 
             Then("the included keys are inherited and sibling keys override them") {
-                val letter = expanded["letter"]!!.mapping!!
-                letter["name"]!!.string shouldBe "base"
-                letter["ascii_mode"]!!.string shouldBe "1"
+                val letter = expanded.pairs!!["letter"]!!.mapping!!
+                letter.pairs["name"]!!.string shouldBe "base"
+                letter.pairs["ascii_mode"]!!.string shouldBe "1"
             }
 
             Then("mappings merge recursively") {
-                val nested = expanded["letter"]!!.mapping!!["nested"]!!.mapping!!
-                nested["a"]!!.string shouldBe "1"
-                nested["b"]!!.string shouldBe "3"
+                val nested = expanded.pairs!!["letter"]!!.mapping!!.pairs["nested"]!!.mapping!!
+                nested.pairs["a"]!!.string shouldBe "1"
+                nested.pairs["b"]!!.string shouldBe "3"
             }
         }
 
@@ -67,7 +69,7 @@ class ThemeDslExpanderTest :
                     "keyboard:\n  __include: base.yaml:/preset_keyboards/default\n",
                     resources = resources,
                 )
-                expanded["keyboard"]!!.mapping!!["name"]!!.string shouldBe "from_base"
+                expanded.pairs!!["keyboard"]!!.mapping!!.pairs["name"]!!.string shouldBe "from_base"
             }
 
             Then("a missing resource fails") {
@@ -78,12 +80,12 @@ class ThemeDslExpanderTest :
 
             Then("a missing resource is ignored when marked optional") {
                 val expanded = expand("keyboard:\n  __include: missing:/foo?\n  own: 1\n")
-                expanded["keyboard"]!!.mapping!!["own"]!!.string shouldBe "1"
+                expanded.pairs!!["keyboard"]!!.mapping!!.pairs["own"]!!.string shouldBe "1"
             }
 
             Then("a missing patch is ignored when marked optional") {
                 val expanded = expand("keyboard:\n  own: 1\n  __patch: \"missing:/patch?\"\n")
-                expanded["keyboard"]!!.mapping!!["own"]!!.string shouldBe "1"
+                expanded.pairs!!["keyboard"]!!.mapping!!.pairs["own"]!!.string shouldBe "1"
             }
         }
 
@@ -130,7 +132,7 @@ class ThemeDslExpanderTest :
             }
 
             Then("patching a node without an include overwrites it") {
-                expand("a: {__patch: {k: 1}}\n")["a"]!!.mapping!!["k"]!!.string shouldBe "1"
+                expand("a: {__patch: {k: 1}}\n")["a"]!!.mapping!!.pairs["k"]!!.string shouldBe "1"
             }
         }
 
@@ -139,24 +141,24 @@ class ThemeDslExpanderTest :
 
             Then("a key without a value leaves the included value untouched") {
                 val a = expand(template + "x: {__include: /base, a: }\n")["x"]!!.mapping!!
-                a["a"]!!.string shouldBe "1"
+                a.pairs["a"]!!.string shouldBe "1"
             }
 
             Then("an empty string replaces the included value") {
                 val a = expand(template + "x: {__include: /base, a: \"\"}\n")["x"]!!.mapping!!
-                a["a"]!!.string shouldBe ""
+                a.pairs["a"]!!.string shouldBe ""
             }
 
             Then("librime's other null spellings leave the included value untouched too") {
                 listOf("~", "null", "Null", "NULL").forEach { spelling ->
                     val a = expand(template + "x: {__include: /base, a: $spelling}\n")["x"]!!.mapping!!
-                    a["a"]!!.string shouldBe "1"
+                    a.pairs["a"]!!.string shouldBe "1"
                 }
             }
 
             Then("a quoted null spelling is still a string") {
                 val a = expand(template + "x: {__include: /base, a: 'null'}\n")["x"]!!.mapping!!
-                a["a"]!!.string shouldBe "null"
+                a.pairs["a"]!!.string shouldBe "null"
             }
         }
 
@@ -172,9 +174,10 @@ class ThemeDslExpanderTest :
             )
 
             Then("the aliased node is expanded as well, once") {
-                expanded["copy"] shouldBe expanded["base"]
-                expanded["copy"]!!.mapping!!["v"]!!.string shouldBe "1"
-                expanded["copy"]!!.mapping!!["extra"]!!.string shouldBe "2"
+                // kaml resolves an alias to an equal but distinct node, so the two
+                // copies are expanded separately and are equal by content, not identity.
+                expanded.pairs!!["copy"]!!.mapping!!.pairs["v"]!!.string shouldBe "1"
+                expanded.pairs!!["copy"]!!.mapping!!.pairs["extra"]!!.string shouldBe "2"
             }
         }
 
@@ -190,14 +193,14 @@ class ThemeDslExpanderTest :
                 val expanded = expand(
                     template + "\nletter:\n  __include: /preset_keyboards/default\n  __patch: {name: literal}\n",
                 )
-                expanded["letter"]!!.mapping!!["name"]!!.string shouldBe "literal"
+                expanded.pairs!!["letter"]!!.mapping!!.pairs["name"]!!.string shouldBe "literal"
             }
 
             Then("a referenced patch overwrites keys") {
                 val expanded = expand(
                     template + "\nletter:\n  __include: /preset_keyboards/default\n  __patch: /patches/p\n",
                 )
-                expanded["letter"]!!.mapping!!["name"]!!.string shouldBe "patched"
+                expanded.pairs!!["letter"]!!.mapping!!.pairs["name"]!!.string shouldBe "patched"
             }
         }
 
@@ -214,12 +217,12 @@ class ThemeDslExpanderTest :
                         - {__include: /middle}
                     """.trimIndent(),
                 )
-                val item = expanded["outer"]!!.mapping!!["list"]!!.mapping
+                val item = expanded.pairs!!["outer"]!!.mapping!!.pairs["list"]!!.mapping
                 item shouldBe null
-                val sequence = expanded["outer"]!!.mapping!!["list"] as Node.Sequence
+                val sequence = expanded.pairs!!["outer"]!!.mapping!!.pairs["list"] as YamlList
                 val merged = sequence[0].mapping!!
-                merged["v"]!!.string shouldBe "1"
-                merged["extra"]!!.string shouldBe "2"
+                merged.pairs["v"]!!.string shouldBe "1"
+                merged.pairs["extra"]!!.string shouldBe "2"
             }
         }
 
@@ -228,18 +231,18 @@ class ThemeDslExpanderTest :
             val expanded = ThemeDslExpander.expand("trime", Yaml.parseToYamlNode(file.readText())) { null }
 
             Then("the 'letter' keyboard inherits the default keyboard") {
-                val keyboards = expanded["preset_keyboards"]!!.mapping!!
-                val default = keyboards["default"]!!.mapping!!
-                val letter = keyboards["letter"]!!.mapping!!
-                letter["ascii_mode"]!!.string shouldBe "1"
-                letter["keys"] shouldBe default["keys"]
-                letter["name"] shouldBe default["name"]
-                letter["height"] shouldBe default["height"]
+                val keyboards = expanded.pairs!!["preset_keyboards"]!!.mapping!!
+                val default = keyboards.pairs["default"]!!.mapping!!
+                val letter = keyboards.pairs["letter"]!!.mapping!!
+                letter.pairs["ascii_mode"]!!.string shouldBe "1"
+                letter.pairs["keys"] shouldBe default.pairs["keys"]
+                letter.pairs["name"] shouldBe default.pairs["name"]
+                letter.pairs["height"] shouldBe default.pairs["height"]
             }
 
             Then("the pure include 'scj6' equals its target keyboard") {
-                val keyboards = expanded["preset_keyboards"]!!.mapping!!
-                keyboards["scj6"] shouldBe keyboards["cangjie5"]
+                val keyboards = expanded.pairs!!["preset_keyboards"]!!.mapping!!
+                keyboards.pairs["scj6"] shouldBe keyboards.pairs["cangjie5"]
             }
 
             Then("the expansion is accepted by the theme decoder") {

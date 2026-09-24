@@ -9,7 +9,8 @@ package com.osfans.trime.data.theme
 import com.osfans.trime.data.theme.model.TextKeyboard
 import com.osfans.trime.data.theme.model.TextKeyboard.TextKey
 import com.osfans.trime.ime.keyboard.KeyBehavior
-import com.osfans.trime.util.yaml.Node
+import com.osfans.trime.util.yamlMapOf
+import com.osfans.trime.util.yamlScalarOf
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -24,7 +25,7 @@ import io.kotest.matchers.shouldNotBe
 class TextKeyboardTest :
     BehaviorSpec({
         Given("an empty keyboard section") {
-            val keyboard = TextKeyboard.decode(Node.Mapping())
+            val keyboard = TextKeyboard.decode(yamlMapOf())
 
             Then("decode equals the constructor defaults") {
                 keyboard shouldBe TextKeyboard.DEFAULTS
@@ -35,7 +36,7 @@ class TextKeyboardTest :
             }
 
             Then("its default text key equals the constructor defaults") {
-                val key = TextKey.decode(Node.Mapping())
+                val key = TextKey.decode(yamlMapOf())
                 key.copy(behaviors = emptyMap()) shouldBe TextKey.DEFAULTS
                 key.hasClickAction shouldBe false
             }
@@ -44,11 +45,11 @@ class TextKeyboardTest :
         Given("a keyboard with explicit keys") {
             val keyboard =
                 TextKeyboard.decode(
-                    Node.Mapping(
-                        Node.Scalar("columns") to Node.Scalar("12"),
-                        Node.Scalar("round_corner") to Node.Scalar("4"),
-                        Node.Scalar("key_border") to Node.Scalar("1"),
-                        Node.Scalar("ascii_mode") to Node.Scalar("0"),
+                    yamlMapOf(
+                        "columns" to yamlScalarOf("12"),
+                        "round_corner" to yamlScalarOf("4"),
+                        "key_border" to yamlScalarOf("1"),
+                        "ascii_mode" to yamlScalarOf("0"),
                     ),
                 )
 
@@ -68,9 +69,9 @@ class TextKeyboardTest :
         Given("a key with a click action") {
             val key =
                 TextKey.decode(
-                    Node.Mapping(
-                        Node.Scalar("round_corner") to Node.Scalar("0"),
-                        Node.Scalar("click") to Node.Scalar("a"),
+                    yamlMapOf(
+                        "round_corner" to yamlScalarOf("0"),
+                        "click" to yamlScalarOf("a"),
                     ),
                 )
 

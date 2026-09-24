@@ -157,7 +157,7 @@ dependencies {
     implementation(libs.timber)
     implementation(libs.xxpermissions)
     implementation(libs.kodein.di)
-    implementation(libs.snakeyaml)
+    implementation(libs.kaml)
     implementation(libs.splitties.bitflags)
     implementation(libs.splitties.systemservices)
     implementation(libs.splitties.views.dsl)

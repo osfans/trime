@@ -6,12 +6,12 @@
 package com.osfans.trime.data.soundeffect
 
 import android.view.KeyEvent
-import com.osfans.trime.util.yaml.Node
-import com.osfans.trime.util.yaml.boolean
-import com.osfans.trime.util.yaml.get
-import com.osfans.trime.util.yaml.int
-import com.osfans.trime.util.yaml.sequence
-import com.osfans.trime.util.yaml.string
+import com.charleskorn.kaml.YamlNode
+import com.osfans.trime.util.boolean
+import com.osfans.trime.util.get
+import com.osfans.trime.util.int
+import com.osfans.trime.util.sequence
+import com.osfans.trime.util.string
 
 data class SoundEffect(
     val name: String = "",
@@ -47,14 +47,14 @@ data class SoundEffect(
         }
 
         companion object {
-            fun decode(node: Node): Key = Key(
+            fun decode(node: YamlNode): Key = Key(
                 min = node["min"]?.string ?: "UNKNOWN",
                 max = node["max"]?.string ?: "UNKNOWN",
-                keys = node["keys"]?.sequence?.mapNotNull {
+                keys = node["keys"]?.sequence?.items?.mapNotNull {
                     it.string
                 } ?: emptyList(),
                 inOrder = node["inOrder"]!!.boolean!!,
-                sounds = node["sounds"]!!.sequence!!.mapNotNull {
+                sounds = node["sounds"]!!.sequence!!.items.mapNotNull {
                     it.int
                 },
             )
@@ -62,16 +62,16 @@ data class SoundEffect(
     }
 
     companion object {
-        fun decode(node: Node): SoundEffect = SoundEffect(
+        fun decode(node: YamlNode): SoundEffect = SoundEffect(
             name = node["name"]?.string ?: "",
-            sound = node["sound"]?.sequence?.mapNotNull {
+            sound = node["sound"]?.sequence?.items?.mapNotNull {
                 it.string
             } ?: emptyList(),
             folder = node["folder"]?.string!!,
-            melody = node["melody"]?.sequence?.mapNotNull {
+            melody = node["melody"]?.sequence?.items?.mapNotNull {
                 it.string
             } ?: emptyList(),
-            keyset = node["keyset"]!!.sequence!!.mapNotNull {
+            keyset = node["keyset"]!!.sequence!!.items.mapNotNull {
                 Key.decode(it)
             },
         )

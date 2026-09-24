@@ -5,9 +5,9 @@
 package com.osfans.trime.data.sync
 
 import com.osfans.trime.data.base.DataManager
-import com.osfans.trime.util.yaml.Yaml
-import com.osfans.trime.util.yaml.mapping
-import com.osfans.trime.util.yaml.string
+import com.osfans.trime.util.Yaml
+import com.osfans.trime.util.get
+import com.osfans.trime.util.string
 import timber.log.Timber
 import java.io.File
 
@@ -24,13 +24,13 @@ object SyncPathPolicy {
 
     fun readInstallationId(text: String): String? {
         val node = Yaml.parseToYamlNode(text)
-        val id = node.mapping?.get("installation_id")?.string?.trim().orEmpty()
+        val id = node["installation_id"]?.string?.trim().orEmpty()
         return id.takeIf { it.isNotEmpty() }
     }
 
     fun readSyncDir(text: String): String {
         val node = Yaml.parseToYamlNode(text)
-        val dir = node.mapping?.get("sync_dir")?.string?.trim().orEmpty()
+        val dir = node["sync_dir"]?.string?.trim().orEmpty()
         return cleanSyncDir(dir)
     }
 

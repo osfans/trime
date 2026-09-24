@@ -5,9 +5,9 @@
 
 package com.osfans.trime.data.theme
 
-import com.osfans.trime.util.yaml.Node
-import com.osfans.trime.util.yaml.Yaml
-import com.osfans.trime.util.yaml.mapping
+import com.charleskorn.kaml.YamlMap
+import com.osfans.trime.util.Yaml
+import com.osfans.trime.util.mapping
 import java.io.File
 
 /**
@@ -21,7 +21,7 @@ object ThemeTestSupport {
     fun decodeThemeFile(relativePath: String): Theme = themeAndNode(relativePath).first
 
     /** Decodes [relativePath] and also returns the expanded node it came from. */
-    fun themeAndNode(relativePath: String): Pair<Theme, Node.Mapping> {
+    fun themeAndNode(relativePath: String): Pair<Theme, YamlMap> {
         val file = File(relativePath)
         check(file.isFile) { "Theme fixture not found: $relativePath (cwd=${File(".").absolutePath})" }
         val node = Yaml.parseToYamlNode(file.readText())

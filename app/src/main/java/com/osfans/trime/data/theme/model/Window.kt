@@ -6,10 +6,11 @@
 package com.osfans.trime.data.theme.model
 
 import android.os.Parcelable
-import com.osfans.trime.util.yaml.Node
-import com.osfans.trime.util.yaml.float
-import com.osfans.trime.util.yaml.get
-import com.osfans.trime.util.yaml.int
+import com.charleskorn.kaml.YamlNode
+import com.osfans.trime.util.float
+import com.osfans.trime.util.get
+import com.osfans.trime.util.int
+import com.osfans.trime.util.pairs
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -30,9 +31,9 @@ data class Window(
         val horizontal: Int = 0,
     ) : Parcelable {
         companion object {
-            fun decode(node: Node?): Padding = Padding(
-                vertical = node?.get("vertical")?.int ?: 0,
-                horizontal = node?.get("horizontal")?.int ?: 0,
+            fun decode(node: YamlNode?): Padding = Padding(
+                vertical = node?.pairs?.get("vertical")?.int ?: 0,
+                horizontal = node?.pairs?.get("horizontal")?.int ?: 0,
             )
         }
     }
@@ -44,28 +45,28 @@ data class Window(
         val commentFontSize: Float = 20f,
     ) : Parcelable {
         companion object {
-            fun decode(node: Node?): Foreground = Foreground(
-                labelFontSize = node?.get("label_font_size")?.float ?: 20f,
-                textFontSize = node?.get("text_font_size")?.float ?: 20f,
-                commentFontSize = node?.get("comment_font_size")?.float ?: 20f,
+            fun decode(node: YamlNode?): Foreground = Foreground(
+                labelFontSize = node?.pairs?.get("label_font_size")?.float ?: 20f,
+                textFontSize = node?.pairs?.get("text_font_size")?.float ?: 20f,
+                commentFontSize = node?.pairs?.get("comment_font_size")?.float ?: 20f,
             )
         }
     }
 
     companion object {
-        fun decode(node: Node?): Window = Window(
-            insets = node?.get("insets")?.let {
+        fun decode(node: YamlNode?): Window = Window(
+            insets = node?.pairs?.get("insets")?.let {
                 Padding.decode(it)
             } ?: Padding(4, 4),
-            itemPadding = node?.get("item_padding")?.let {
+            itemPadding = node?.pairs?.get("item_padding")?.let {
                 Padding.decode(it)
             } ?: Padding(2, 4),
-            minWidth = node?.get("min_width")?.int ?: 0,
-            cornerRadius = node?.get("corner_radius")?.float ?: 0f,
-            border = node?.get("border")?.int ?: 0,
-            shadow = node?.get("shadow")?.float ?: 0f,
-            alpha = node?.get("alpha")?.float ?: 1f,
-            foreground = Foreground.decode(node?.get("foreground")),
+            minWidth = node?.pairs?.get("min_width")?.int ?: 0,
+            cornerRadius = node?.pairs?.get("corner_radius")?.float ?: 0f,
+            border = node?.pairs?.get("border")?.int ?: 0,
+            shadow = node?.pairs?.get("shadow")?.float ?: 0f,
+            alpha = node?.pairs?.get("alpha")?.float ?: 1f,
+            foreground = Foreground.decode(node?.pairs?.get("foreground")),
         )
     }
 }
