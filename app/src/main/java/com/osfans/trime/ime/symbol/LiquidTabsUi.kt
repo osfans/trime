@@ -9,9 +9,9 @@ import android.graphics.Color
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter4.BaseQuickAdapter
-import com.osfans.trime.data.theme.LiquidData
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
+import com.osfans.trime.data.theme.model.LiquidKeyboard
 import com.osfans.trime.ime.keyboard.GestureFrame
 import com.osfans.trime.util.roundedRippleDrawable
 import splitties.dimensions.dp
@@ -80,7 +80,7 @@ class LiquidTabsUi(
     ) : RecyclerView.ViewHolder(ui.root)
 
     private val adapter by lazy {
-        object : BaseQuickAdapter<LiquidData.Tag, TabUiHolder>() {
+        object : BaseQuickAdapter<LiquidKeyboard.Tag, TabUiHolder>() {
             private var selected = -1
 
             override fun onCreateViewHolder(
@@ -92,7 +92,7 @@ class LiquidTabsUi(
             override fun onBindViewHolder(
                 holder: TabUiHolder,
                 position: Int,
-                item: LiquidData.Tag?,
+                item: LiquidKeyboard.Tag?,
             ) {
                 holder.ui.apply {
                     setText(item!!.label)
@@ -103,7 +103,7 @@ class LiquidTabsUi(
                 }
             }
 
-            override fun submitList(list: List<LiquidData.Tag>?, commitCallback: Runnable?) {
+            override fun submitList(list: List<LiquidKeyboard.Tag>?, commitCallback: Runnable?) {
                 selected = -1
                 super.submitList(list, commitCallback)
             }
@@ -129,7 +129,7 @@ class LiquidTabsUi(
             isHorizontalScrollBarEnabled = false
         }
 
-    fun setTags(tags: List<LiquidData.Tag>) {
+    fun setTags(tags: List<LiquidKeyboard.Tag>) {
         adapter.submitList(tags)
     }
 

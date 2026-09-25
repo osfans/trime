@@ -19,9 +19,9 @@ import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
-import com.osfans.trime.data.theme.LiquidData
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.data.theme.model.LiquidKeyboard
 import com.osfans.trime.ime.clipboard.ClipboardWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
@@ -204,10 +204,10 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
                     windowManager.attachWindow(ClipboardWindow(di))
                     return
                 }
-                val liquidTagList = LiquidData.getTagList()
+                val liquidTagList = theme.liquidKeyboard.getTagList()
                 val index = liquidTagList.indexOfFirst { tag ->
                     tag.label == arg || runCatching {
-                        LiquidData.Type.valueOf(arg.uppercase())
+                        LiquidKeyboard.DataType.valueOf(arg.uppercase())
                     }.getOrNull() == tag.type
                 }
 
