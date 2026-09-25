@@ -7,7 +7,6 @@
 package com.osfans.trime.data.theme
 
 import androidx.annotation.ColorInt
-import com.osfans.trime.data.theme.model.ColorScheme
 import java.util.EnumMap
 
 /**
@@ -109,7 +108,7 @@ internal class ColorTable private constructor(
             val unresolvedKeys = mutableListOf<ColorKey>()
             val invalidValues = mutableListOf<ColorKey>()
             for (key in ColorKey.entries) {
-                val raw = resolveRaw(key.key, scheme.colors, fallbackColors)
+                val raw = resolveRaw(key.key, scheme, fallbackColors)
                 if (raw == null) {
                     unresolvedKeys += key
                     continue

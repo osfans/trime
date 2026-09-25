@@ -19,7 +19,6 @@ import androidx.collection.LruCache
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.math.MathUtils
 import com.osfans.trime.data.base.DataManager
-import com.osfans.trime.data.theme.model.ColorScheme
 import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.NinePatchBitmapFactory
 import com.osfans.trime.util.WeakHashSet
@@ -106,9 +105,14 @@ object ColorManager {
         activateScheme(notify = false)
     }
 
-    fun setColorScheme(scheme: ColorScheme) {
-        activateScheme(scheme, notify = true)
-        prefs.normalModeColor.setValue(scheme.id)
+    /**
+     * Switches to the scheme [schemeId] and remembers it as the user's choice.
+     * The scheme is resolved from the preference afterwards, so the day/night
+     * links a scheme may declare are honoured, like an automatic switch.
+     */
+    fun setColorScheme(schemeId: String) {
+        prefs.normalModeColor.setValue(schemeId)
+        activateScheme(notify = true)
     }
 
     private fun requireScope(): ThemeScope = requireNotNull(scope) { "ColorManager is not initialized" }
@@ -152,7 +156,7 @@ object ColorManager {
         if (tableEntry is ColorTable.Value.Color) return tableEntry.argb
         // Keys defined only by a theme resolve through the same chain rules.
         val scheme = requireNotNull(scope.activeColorScheme)
-        val raw = ColorTable.resolveRaw(key, scheme.colors, scope.theme.fallbackColors)
+        val raw = ColorTable.resolveRaw(key, scheme, scope.theme.fallbackColors)
         return try {
             if (raw == null) throw IllegalArgumentException("$key not found")
             ColorUtils.parseColor(raw)
@@ -176,7 +180,7 @@ object ColorManager {
         }
         // Keys defined only by a theme resolve through the same chain rules.
         val scheme = requireNotNull(scope.activeColorScheme)
-        val raw = ColorTable.resolveRaw(key, scheme.colors, scope.theme.fallbackColors)
+        val raw = ColorTable.resolveRaw(key, scheme, scope.theme.fallbackColors)
         return parseDrawable(scope, raw ?: key)
     }
 

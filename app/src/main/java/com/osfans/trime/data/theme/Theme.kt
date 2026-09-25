@@ -8,7 +8,6 @@ package com.osfans.trime.data.theme
 import android.os.Parcelable
 import com.charleskorn.kaml.YamlMap
 import com.osfans.trime.data.theme.Theme.Companion.decode
-import com.osfans.trime.data.theme.model.ColorScheme
 import com.osfans.trime.data.theme.model.GeneralStyle
 import com.osfans.trime.data.theme.model.KeyActionToken
 import com.osfans.trime.data.theme.model.LiquidKeyboard
@@ -35,7 +34,7 @@ data class Theme(
     val liquidKeyboard: LiquidKeyboard,
     val presetKeys: Map<String, PresetKey>,
     val presetKeyboards: Map<String, TextKeyboard>,
-    val colorSchemes: List<ColorScheme>,
+    val colorSchemes: PresetColorSchemes,
     val fallbackColors: Map<String, String>,
     val toolBar: ToolBar,
 ) : Parcelable {
@@ -93,9 +92,9 @@ data class Theme(
             presetKeyboards = node.pairs["preset_keyboards"]?.mapping?.pairs?.mapValues {
                 TextKeyboard.decode(it.value.mapping!!)
             } ?: emptyMap(),
-            colorSchemes = node.pairs["preset_color_schemes"]?.mapping?.pairs?.map { (id, scheme) ->
-                ColorScheme(id, scheme.mapping!!.pairs.mapValues { it.value.string!! })
-            } ?: emptyList(),
+            colorSchemes = node.pairs["preset_color_schemes"]?.mapping?.pairs?.mapValues { (_, colorMap) ->
+                colorMap.pairs?.mapValues { it.value.string ?: "" } ?: emptyMap()
+            } ?: emptyMap(),
             fallbackColors = node.pairs["fallback_colors"]?.mapping?.pairs?.mapValues {
                 it.value.string!!
             } ?: emptyMap(),

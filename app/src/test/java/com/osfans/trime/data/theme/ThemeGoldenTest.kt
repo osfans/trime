@@ -80,9 +80,9 @@ class ThemeGoldenTest :
 
                 Then("all 46 color schemes are decoded, with the default scheme intact") {
                     theme.colorSchemes.size shouldBe 46
-                    val defaultScheme = theme.colorSchemes.first { it.id == "default" }
-                    defaultScheme.colors["name"] shouldBe "标准配色！"
-                    defaultScheme.colors["dark_scheme"] shouldBe "steam"
+                    val defaultScheme = theme.colorSchemes.entries.first { it.key == "default" }
+                    defaultScheme.value["name"] shouldBe "标准配色！"
+                    defaultScheme.value["dark_scheme"] shouldBe "steam"
                 }
 
                 Then("fallback colors override table is decoded") {

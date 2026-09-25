@@ -6,7 +6,6 @@
 
 package com.osfans.trime.data.theme
 
-import com.osfans.trime.data.theme.model.ColorScheme
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
@@ -18,10 +17,13 @@ import io.kotest.matchers.shouldBe
  */
 class ColorSchemeResolverTest :
     BehaviorSpec({
-        fun scheme(id: String, vararg links: Pair<String, String>) = ColorScheme(id, links.toMap())
+        // The marker color keeps the fixtures distinguishable: the resolver
+        // returns the colors of the scheme it picked, and these tests assert
+        // which one that is.
+        fun scheme(id: String, vararg links: Pair<String, String>) = id to (links.toMap() + ("name" to id))
 
         val fixtures =
-            listOf(
+            mapOf(
                 scheme("default", "dark_scheme" to "steam"),
                 scheme("steam", "light_scheme" to "default"),
                 scheme("day_night", "light_scheme" to "dawn", "dark_scheme" to "dusk"),
@@ -29,99 +31,106 @@ class ColorSchemeResolverTest :
                 scheme("dusk"),
                 scheme("plain"),
             )
+
+        /** The colors of the fixture scheme [id], for asserting which one was picked. */
+        fun colorsOf(id: String) = fixtures.getValue(id)
+
         fun resolve(
             selected: String,
             follow: Boolean,
             night: Boolean,
-        ) = ColorSchemeResolver.resolve(fixtures, selected, follow, night).id
+        ) = ColorSchemeResolver.resolve(fixtures, selected, follow, night)
 
         Given("followSystemDayNight is off") {
             When("the selected scheme exists") {
                 Then("it is used regardless of night state") {
-                    resolve("plain", follow = false, night = false) shouldBe "plain"
-                    resolve("plain", follow = false, night = true) shouldBe "plain"
+                    resolve("plain", follow = false, night = false) shouldBe colorsOf("plain")
+                    resolve("plain", follow = false, night = true) shouldBe colorsOf("plain")
                 }
             }
             When("the selected scheme id is unknown") {
                 Then("the default scheme is used") {
-                    resolve("missing", follow = false, night = false) shouldBe "default"
+                    resolve("missing", follow = false, night = false) shouldBe colorsOf("default")
                 }
             }
         }
         Given("followSystemDayNight is on and the selected scheme defines both links") {
             When("daytime") {
                 Then("the light scheme is used") {
-                    resolve("day_night", follow = true, night = false) shouldBe "dawn"
+                    resolve("day_night", follow = true, night = false) shouldBe colorsOf("dawn")
                 }
             }
             When("night") {
                 Then("the dark scheme is used") {
-                    resolve("day_night", follow = true, night = true) shouldBe "dusk"
+                    resolve("day_night", follow = true, night = true) shouldBe colorsOf("dusk")
                 }
             }
         }
         Given("followSystemDayNight is on and the selected scheme is light-only (a dark scheme)") {
             When("daytime") {
                 Then("its light_scheme is used") {
-                    resolve("steam", follow = true, night = false) shouldBe "default"
+                    resolve("steam", follow = true, night = false) shouldBe colorsOf("default")
                 }
             }
             When("night") {
                 Then("the scheme itself is used") {
-                    resolve("steam", follow = true, night = true) shouldBe "steam"
+                    resolve("steam", follow = true, night = true) shouldBe colorsOf("steam")
                 }
             }
         }
         Given("followSystemDayNight is on and the selected scheme is dark-only (a light scheme)") {
-            val lightOnly = listOf(
+            val lightOnly = mapOf(
                 scheme("base", "dark_scheme" to "nightly"),
                 scheme("nightly"),
             )
             fun resolveLightOnly(
                 night: Boolean,
-            ) = ColorSchemeResolver.resolve(lightOnly, "base", true, night).id
+            ) = ColorSchemeResolver.resolve(lightOnly, "base", true, night)
 
             When("daytime") {
                 Then("the scheme itself is used") {
-                    resolveLightOnly(false) shouldBe "base"
+                    resolveLightOnly(false) shouldBe lightOnly.getValue("base")
                 }
             }
             When("night") {
                 Then("its dark_scheme is used") {
-                    resolveLightOnly(true) shouldBe "nightly"
+                    resolveLightOnly(true) shouldBe lightOnly.getValue("nightly")
                 }
             }
         }
         Given("followSystemDayNight is on and the selected scheme defines no links") {
-            When("the default scheme defines a dark_scheme") {
-                Then("daytime falls back to the default scheme itself") {
-                    resolve("plain", follow = true, night = false) shouldBe "default"
-                }
-                Then("night falls back to the default scheme's dark_scheme") {
-                    resolve("plain", follow = true, night = true) shouldBe "steam"
+            When("the mode changes") {
+                Then("the explicit choice is kept instead of following the default scheme") {
+                    resolve("plain", follow = true, night = false) shouldBe colorsOf("plain")
+                    resolve("plain", follow = true, night = true) shouldBe colorsOf("plain")
                 }
             }
         }
         Given("followSystemDayNight is on and the selected scheme id is unknown") {
             Then("the same default-based fallback applies") {
-                resolve("missing", follow = true, night = false) shouldBe "default"
-                resolve("missing", follow = true, night = true) shouldBe "steam"
+                resolve("missing", follow = true, night = false) shouldBe colorsOf("default")
+                resolve("missing", follow = true, night = true) shouldBe colorsOf("steam")
             }
         }
         Given("followSystemDayNight is on and a link points at an unknown scheme id") {
-            val brokenLink = listOf(scheme("default", "dark_scheme" to "ghost"), scheme("plain"))
-            When("the linked scheme is missing") {
-                Then("the resolution falls back through the default scheme") {
-                    ColorSchemeResolver.resolve(brokenLink, "plain", true, true).id shouldBe "default"
-                    ColorSchemeResolver.resolve(brokenLink, "plain", true, false).id shouldBe "default"
+            val brokenLink =
+                mapOf(
+                    scheme("default", "dark_scheme" to "steam"),
+                    scheme("steam"),
+                    scheme("plain", "dark_scheme" to "ghost"),
+                )
+            When("the selected scheme's link is missing") {
+                Then("the selected scheme itself is used") {
+                    ColorSchemeResolver.resolve(brokenLink, "plain", true, true) shouldBe brokenLink.getValue("plain")
+                    ColorSchemeResolver.resolve(brokenLink, "plain", true, false) shouldBe brokenLink.getValue("plain")
                 }
             }
         }
         Given("there is no scheme named default") {
-            val noDefault = listOf(scheme("first"), scheme("second"))
+            val noDefault = mapOf(scheme("first"), scheme("second"))
             When("the selected scheme id is unknown and follow is off") {
                 Then("the first scheme is used") {
-                    ColorSchemeResolver.resolve(noDefault, "missing", false, false).id shouldBe "first"
+                    ColorSchemeResolver.resolve(noDefault, "missing", false, false) shouldBe noDefault.getValue("first")
                 }
             }
         }
@@ -131,7 +140,7 @@ class ColorSchemeResolverTest :
             Then("resolving says why instead of failing on the empty list") {
                 val e =
                     shouldThrow<IllegalArgumentException> {
-                        ColorSchemeResolver.resolve(emptyList(), "default", false, false)
+                        ColorSchemeResolver.resolve(emptyMap(), "default", false, false)
                     }
                 e.message shouldBe "The theme defines no color scheme"
             }

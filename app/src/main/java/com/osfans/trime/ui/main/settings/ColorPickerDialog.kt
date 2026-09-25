@@ -18,9 +18,9 @@ object ColorPickerDialog {
         context: Context,
         afterConfirm: (suspend () -> Unit)? = null,
     ): AlertDialog {
-        val presetSchemes = ThemeManager.activeTheme.colorSchemes
+        val presetSchemes = ThemeManager.activeTheme.colorSchemes.entries.toList()
         val currentScheme = ColorManager.activeColorScheme
-        val currentIndex = presetSchemes.indexOfFirst { it.id == currentScheme.id }
+        val currentIndex = presetSchemes.indexOfFirst { it.value == currentScheme }
         return AlertDialog
             .Builder(context)
             .apply {
@@ -29,14 +29,13 @@ object ColorPickerDialog {
                     setMessage(R.string.no_color_to_select)
                 } else {
                     setSingleChoiceItems(
-                        presetSchemes.map { it.colors["name"] }.toTypedArray(),
+                        presetSchemes.map { it.value["name"] }.toTypedArray(),
                         currentIndex,
                     ) { dialog, which ->
                         scope.launch {
                             afterConfirm?.invoke()
                             if (which != currentIndex) {
-                                val newScheme = presetSchemes[which]
-                                ColorManager.setColorScheme(newScheme)
+                                ColorManager.setColorScheme(presetSchemes[which].key)
                             }
                             dialog.dismiss()
                         }

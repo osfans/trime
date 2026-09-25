@@ -6,7 +6,6 @@
 
 package com.osfans.trime.data.theme
 
-import com.osfans.trime.data.theme.model.ColorScheme
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotContain
@@ -20,7 +19,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
  */
 class ColorTableTest :
     BehaviorSpec({
-        fun scheme(vararg pairs: Pair<String, String>) = ColorScheme("test", pairs.toMap())
+        fun scheme(vararg pairs: Pair<String, String>) = pairs.toMap()
 
         /**
          * Fake ColorUtils.parseColor: supports #RRGGBB / #AARRGGBB and the
@@ -158,12 +157,12 @@ class ColorTableTest :
             for (themeName in listOf("trime.yaml", "tongwenfeng.trime.yaml")) {
                 val theme = ThemeTestSupport.decodeBuiltinTheme(themeName)
                 When("the theme $themeName is loaded") {
-                    for (scheme in theme.colorSchemes) {
-                        val table = ColorTable.resolve(scheme, theme.fallbackColors, parseHex)
-                        Then("scheme '${scheme.id}' resolves every key like the legacy walk") {
+                    for ((id, colors) in theme.colorSchemes) {
+                        val table = ColorTable.resolve(colors, theme.fallbackColors, parseHex)
+                        Then("scheme '$id' resolves every key like the legacy walk") {
                             for (entry in ColorKey.entries) {
-                                val expected = legacyWalk(entry.key, scheme.colors, theme.fallbackColors)
-                                ColorTable.resolveRaw(entry.key, scheme.colors, theme.fallbackColors) shouldBe expected
+                                val expected = legacyWalk(entry.key, colors, theme.fallbackColors)
+                                ColorTable.resolveRaw(entry.key, colors, theme.fallbackColors) shouldBe expected
                                 if (expected == null) {
                                     table.unresolvedKeys shouldContain entry
                                 } else {
@@ -178,7 +177,8 @@ class ColorTableTest :
         Given("candidate_border_color, which UI code requests but the built-in themes never define") {
             When("a built-in theme is resolved") {
                 val theme = ThemeTestSupport.decodeBuiltinTheme("trime.yaml")
-                val table = ColorTable.resolve(theme.colorSchemes.first(), theme.fallbackColors, parseHex)
+                val colors = theme.colorSchemes.values.first()
+                val table = ColorTable.resolve(colors, theme.fallbackColors, parseHex)
                 Then("the key is reported unresolved and resolves to None") {
                     table.unresolvedKeys shouldContain ColorKey.CANDIDATE_BORDER_COLOR
                     table[ColorKey.CANDIDATE_BORDER_COLOR] shouldBe ColorTable.Value.None

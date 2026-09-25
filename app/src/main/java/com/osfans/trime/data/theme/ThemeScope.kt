@@ -7,7 +7,6 @@
 package com.osfans.trime.data.theme
 
 import android.graphics.drawable.Drawable
-import com.osfans.trime.data.theme.model.ColorScheme
 import com.osfans.trime.util.ColorUtils
 import timber.log.Timber
 

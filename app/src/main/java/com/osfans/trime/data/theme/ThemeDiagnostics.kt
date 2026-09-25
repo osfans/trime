@@ -7,7 +7,6 @@
 package com.osfans.trime.data.theme
 
 import com.charleskorn.kaml.YamlMap
-import com.osfans.trime.data.theme.model.ColorScheme
 import com.osfans.trime.data.theme.model.GeneralStyle
 import com.osfans.trime.data.theme.model.PresetKey
 import com.osfans.trime.ime.keyboard.KeyCode
@@ -248,7 +247,7 @@ object ThemeDiagnostics {
             return
         }
 
-        val ids = schemes.map(ColorScheme::id).toSet()
+        val ids = schemes.keys
         if ("default" !in ids) {
             add(
                 Finding(
@@ -261,14 +260,14 @@ object ThemeDiagnostics {
         }
         schemes.forEach { scheme ->
             listOf("light_scheme", "dark_scheme").forEach { link ->
-                val target = scheme.colors[link]
+                val target = scheme.value[link]
                 if (!target.isNullOrEmpty() && target !in ids) {
                     add(
                         Finding(
                             Severity.WARNING,
                             Code.MISSING_SCHEME_LINK,
-                            "scheme '${scheme.id}' links to missing scheme '$target' via '$link'",
-                            "preset_color_schemes/${scheme.id}/$link",
+                            "scheme '${scheme.key}' links to missing scheme '$target' via '$link'",
+                            "preset_color_schemes/${scheme.key}/$link",
                         ),
                     )
                 }
@@ -283,19 +282,19 @@ object ThemeDiagnostics {
         // file: it is reported at the key that carries it, which may be a theme
         // fallback entry rather than the key the runtime asks for. The keys
         // that inherit the value are left out, so it is reported once.
-        schemes.forEach { scheme ->
-            ColorTable.resolve(scheme, theme.fallbackColors, parseColor)
+        schemes.forEach { (id, colors) ->
+            ColorTable.resolve(colors, theme.fallbackColors, parseColor)
                 .invalidValues
                 .mapNotNull { key ->
-                    ColorTable.resolveRawSource(key.key, scheme.colors, theme.fallbackColors)
+                    ColorTable.resolveRawSource(key.key, colors, theme.fallbackColors)
                 }
                 .distinct()
                 .forEach { (source, raw) ->
-                    val definedByScheme = scheme.colors[source]?.isNotEmpty() == true
-                    val where = if (definedByScheme) "scheme '${scheme.id}'" else "fallback_colors"
+                    val definedByScheme = colors[source]?.isNotEmpty() == true
+                    val where = if (definedByScheme) "scheme '$id'" else "fallback_colors"
                     val path =
                         if (definedByScheme) {
-                            "preset_color_schemes/${scheme.id}/$source"
+                            "preset_color_schemes/$id/$source"
                         } else {
                             "fallback_colors/$source"
                         }
@@ -319,7 +318,7 @@ object ThemeDiagnostics {
      */
     private fun MutableList<Finding>.lintFallbackTargets(
         theme: Theme,
-        schemes: List<ColorScheme>,
+        schemes: Map<String, Map<String, String>>,
     ) {
         val fallbacks = theme.fallbackColors
         fallbacks.forEach { (from, target) ->
@@ -332,7 +331,7 @@ object ThemeDiagnostics {
             val resolvable =
                 ColorTable.isImageValue(target) ||
                     schemes.any { scheme ->
-                        ColorTable.resolveRaw(target, scheme.colors, fallbacks) != null
+                        ColorTable.resolveRaw(target, scheme.value, fallbacks) != null
                     }
             if (resolvable) return@forEach
             add(
