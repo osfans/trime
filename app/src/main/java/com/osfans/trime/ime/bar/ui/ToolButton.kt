@@ -18,7 +18,6 @@ import androidx.annotation.DrawableRes
 import androidx.core.view.isVisible
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.utils.sizeDp
-import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.data.theme.model.ToolBar
@@ -107,7 +106,7 @@ class ToolButton(context: Context, private val scope: ThemeScope) : GestureFrame
         fontSize = fg.fontSize
         label.textSize = fontSize
 
-        label.typeface = FontManager.getTypeface("toolbar_font")
+        label.typeface = scope.theme.fonts.toolbar
 
         applyConfigColors(config)
     }

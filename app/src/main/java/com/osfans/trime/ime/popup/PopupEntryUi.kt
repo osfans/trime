@@ -13,7 +13,6 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.view.isVisible
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.utils.sizeDp
-import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.core.AutoScaleTextView
@@ -45,7 +44,7 @@ class PopupEntryUi(
         textSize = theme.generalStyle.popupTextSize
         gravity = gravityCenter
         setTextColor(scope.colors.popupTextColor)
-        typeface = FontManager.getTypeface("POPUP_FONT")
+        typeface = theme.fonts.popup
     }
 
     val imageView = view(::AppCompatImageView) {

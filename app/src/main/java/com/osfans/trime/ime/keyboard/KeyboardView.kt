@@ -54,7 +54,7 @@ class KeyboardView(
         }
     }
 
-    private fun createKeyView(index: Int, key: Key): KeyView = KeyView(context, key = key, keyboard = keyboard, keyboardView = this, keyboardActionListener = keyboardActionListener).apply {
+    private fun createKeyView(index: Int, key: Key): KeyView = KeyView(context, theme, key, keyboard, this, keyboardActionListener).apply {
         id = index
 
         val totalWidth = key.width + key.extraWidthLeft + key.extraWidthRight

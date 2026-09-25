@@ -12,7 +12,6 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.osfans.trime.core.CandidateProto
-import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.data.theme.model.GeneralStyle
@@ -53,9 +52,6 @@ class CandidateItemUi(
     private val textSize = theme.generalStyle.candidateTextSize
     private val commentSize = theme.generalStyle.commentTextSize
 
-    private val textFont = FontManager.getTypeface("candidate_font")
-    private val commentFont = FontManager.getTypeface("comment_font")
-
     // Read at use time so a scheme switch re-binds rows with the new colors.
     private val textColor: Int get() = scope.colors.candidateTextColor
     private val commentColor: Int get() = scope.colors.commentTextColor
@@ -71,7 +67,7 @@ class CandidateItemUi(
         view(::AutoScaleTextView) {
             id = View.generateViewId()
             this.textSize = this@CandidateItemUi.textSize
-            typeface = textFont
+            typeface = theme.fonts.candidate
             isSingleLine = true
             gravity = gravityCenter
             scaleMode = AutoScaleTextView.Mode.Proportional
@@ -81,7 +77,7 @@ class CandidateItemUi(
         view(::AutoScaleTextView) {
             id = View.generateViewId()
             this.textSize = commentSize
-            typeface = commentFont
+            typeface = theme.fonts.comment
             isSingleLine = true
             gravity = gravityCenter
             scaleMode = AutoScaleTextView.Mode.Proportional

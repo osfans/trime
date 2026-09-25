@@ -17,7 +17,6 @@ import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DatabaseBean
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.core.InputTabLayout
@@ -220,7 +219,7 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
         tabUi.label.apply {
             setText(label)
             textSize = theme.generalStyle.candidateTextSize
-            setTypeface(FontManager.getTypeface("candidate_font"), Typeface.BOLD)
+            setTypeface(theme.fonts.candidate, Typeface.BOLD)
             setTextColor(scope.colors.keyTextColor)
         }
     }

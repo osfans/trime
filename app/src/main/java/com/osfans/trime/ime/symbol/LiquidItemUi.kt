@@ -6,7 +6,6 @@
 package com.osfans.trime.ime.symbol
 
 import android.content.Context
-import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.core.AutoScaleTextView
@@ -34,7 +33,7 @@ class LiquidItemUi(
         isFocusable = false
         background = null
         textSize = theme.generalStyle.keyTextSize
-        typeface = FontManager.getTypeface("key_font")
+        typeface = theme.fonts.key
         setPaddingDp(8, 4, 8, 4)
         setTextColor(scope.colors.keyTextColor)
     }

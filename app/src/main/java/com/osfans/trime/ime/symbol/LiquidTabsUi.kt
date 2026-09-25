@@ -9,7 +9,6 @@ import android.graphics.Color
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter4.BaseQuickAdapter
-import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.LiquidData
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
@@ -41,7 +40,7 @@ class LiquidTabsUi(
         val text =
             textView {
                 textSize = theme.generalStyle.candidateTextSize
-                typeface = FontManager.getTypeface("candidate_font")
+                typeface = theme.fonts.candidate
                 setTextColor(scope.colors.candidateTextColor)
             }
 

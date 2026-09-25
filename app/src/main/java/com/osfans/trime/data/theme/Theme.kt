@@ -7,7 +7,7 @@ package com.osfans.trime.data.theme
 
 import android.os.Parcelable
 import com.charleskorn.kaml.YamlMap
-import com.charleskorn.kaml.YamlNode
+import com.osfans.trime.data.theme.Theme.Companion.decode
 import com.osfans.trime.data.theme.model.ColorScheme
 import com.osfans.trime.data.theme.model.GeneralStyle
 import com.osfans.trime.data.theme.model.LiquidKeyboard
@@ -19,6 +19,7 @@ import com.osfans.trime.data.theme.model.Window
 import com.osfans.trime.util.mapping
 import com.osfans.trime.util.pairs
 import com.osfans.trime.util.string
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 /** 主题和样式配置  */
@@ -35,6 +36,10 @@ data class Theme(
     val fallbackColors: Map<String, String>,
     val toolBar: ToolBar,
 ) : Parcelable {
+
+    @IgnoredOnParcel
+    val fonts by lazy { ThemeFonts(this) }
+
     companion object {
         /**
          * Top-level keys a theme may declare: the sections [decode] reads plus

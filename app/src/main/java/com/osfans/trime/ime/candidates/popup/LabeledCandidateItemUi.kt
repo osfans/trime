@@ -14,7 +14,6 @@ import androidx.annotation.ColorInt
 import androidx.core.text.buildSpannedString
 import androidx.core.text.inSpans
 import com.osfans.trime.core.CandidateProto
-import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.util.sp
@@ -32,9 +31,9 @@ class LabeledCandidateItemUi(
     private val labelSize = theme.window.foreground.labelFontSize
     private val textSize = theme.window.foreground.textFontSize
     private val commentSize = theme.window.foreground.commentFontSize
-    private val labelFont = FontManager.getTypeface("label_font")
-    private val textFont = FontManager.getTypeface("candidate_font")
-    private val commentFont = FontManager.getTypeface("comment_font")
+    private val labelFont = theme.fonts.label
+    private val textFont = theme.fonts.candidate
+    private val commentFont = theme.fonts.comment
 
     // Read at use time so a scheme switch re-binds rows with the new colors.
     private val labelColor: Int get() = scope.colors.labelColor

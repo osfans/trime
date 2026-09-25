@@ -16,10 +16,8 @@ import android.graphics.drawable.GradientDrawable
 import android.view.KeyEvent
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.utils.sizeDp
-import com.osfans.trime.daemon.RimeDaemon
-import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.KeyActionManager
+import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.popup.PopupAction
 import com.osfans.trime.ime.popup.PopupDelegate
@@ -30,6 +28,7 @@ import timber.log.Timber
 @SuppressLint("ClickableViewAccessibility", "ViewConstructor")
 class KeyView(
     context: Context,
+    private val theme: Theme,
     private val key: Key,
     private val keyboard: Keyboard,
     private val keyboardView: KeyboardView,
@@ -41,8 +40,6 @@ class KeyView(
 
     private val popup: PopupDelegate
         get() = keyboardView.popup
-
-    private val rime get() = RimeDaemon.getFirstSessionOrNull()!!
 
     private val deletedTextBuffer = ArrayDeque<String>()
 
@@ -321,7 +318,7 @@ class KeyView(
             textPaint.apply {
                 color = textColor
                 this.textSize = textSize
-                typeface = FontManager.getTypeface("key_font")
+                typeface = theme.fonts.key
                 clearShadowLayer()
             }
 
@@ -391,7 +388,7 @@ class KeyView(
             symbolPaint.apply {
                 color = textColor
                 this.textSize = textSize
-                typeface = FontManager.getTypeface("symbol_font")
+                typeface = theme.fonts.symbol
             }
 
             val lines = text.split("\n")
