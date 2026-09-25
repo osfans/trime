@@ -37,8 +37,8 @@ class TextKeyboardTest :
 
             Then("its default text key equals the constructor defaults") {
                 val key = TextKey.decode(yamlMapOf())
-                key.copy(behaviors = emptyMap()) shouldBe TextKey.DEFAULTS
-                key.hasClickAction shouldBe false
+                key shouldBe TextKey.DEFAULTS
+                key.click shouldBe null
             }
         }
 
@@ -77,8 +77,7 @@ class TextKeyboardTest :
 
             Then("explicit keys are preserved") {
                 key.roundCorner shouldBe 0f
-                key.behaviors[KeyBehavior.CLICK] shouldNotBe null
-                key.hasClickAction shouldBe true
+                key.click shouldNotBe null
             }
 
             Then("unset keys keep their sentinel defaults") {

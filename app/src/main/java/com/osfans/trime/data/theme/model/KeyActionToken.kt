@@ -27,7 +27,7 @@ sealed class KeyActionToken : Parcelable {
 
     companion object {
         fun decode(node: YamlNode?): KeyActionToken? = when (node) {
-            is YamlScalar -> Plain(node.content)
+            is YamlScalar if (node.content.isNotEmpty()) -> Plain(node.content)
 
             is YamlMap -> Inline(
                 Inline.Token(

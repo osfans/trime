@@ -72,8 +72,8 @@ class ThemeGoldenTest :
                     keyboard.asciiMode shouldBe false
                     keyboard.keys.size shouldBe 37
                     val firstKey = keyboard.keys.first()
-                    firstKey.behaviors[KeyBehavior.CLICK] shouldBe KeyActionToken.Plain("q")
-                    firstKey.behaviors[KeyBehavior.LONG_CLICK] shouldBe KeyActionToken.Plain("1")
+                    firstKey.click shouldBe KeyActionToken.Plain("q")
+                    firstKey.longClick shouldBe KeyActionToken.Plain("1")
                     firstKey.keyBackColor shouldBe "bh1"
                     firstKey.keyTextColor shouldBe "th1"
                 }
@@ -132,9 +132,9 @@ class ThemeGoldenTest :
                     default.lock shouldBe true
                     default.asciiMode shouldBe false
                     default.keys.size shouldBe 47
-                    default.keys.first().behaviors[KeyBehavior.CLICK] shouldBe
+                    default.keys.first().click shouldBe
                         KeyActionToken.Plain("1")
-                    default.keys.first().behaviors[KeyBehavior.LONG_CLICK] shouldBe
+                    default.keys.first().longClick shouldBe
                         KeyActionToken.Plain("!")
 
                     val qwerty0 = theme.presetKeyboards.getValue("qwerty0")
@@ -151,8 +151,7 @@ class ThemeGoldenTest :
                     letter.width shouldBe default.width
                     letter.height shouldBe default.height
                     letter.keys.size shouldBe default.keys.size
-                    letter.keys.first().behaviors[KeyBehavior.CLICK] shouldBe
-                        default.keys.first().behaviors[KeyBehavior.CLICK]
+                    letter.keys.first().click shouldBe default.keys.first().click
                 }
 
                 Then("the pure __include 'scj6' keyboard equals cangjie5") {

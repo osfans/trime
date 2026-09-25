@@ -8,7 +8,6 @@ package com.osfans.trime.data.theme.model
 import android.os.Parcelable
 import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode
-import com.osfans.trime.ime.keyboard.KeyBehavior
 import com.osfans.trime.util.boolean
 import com.osfans.trime.util.enum
 import com.osfans.trime.util.float
@@ -85,8 +84,20 @@ data class TextKeyboard(
         val hlKeyBorderColor: String = "",
         val hlKeySymbolColor: String = "",
         val popup: List<String> = emptyList(),
-        val behaviors: Map<KeyBehavior, KeyActionToken?> = emptyMap(),
-        val hasClickAction: Boolean = behaviors[KeyBehavior.CLICK] != null,
+        // behaviors
+        val click: KeyActionToken? = null,
+        val doubleClick: KeyActionToken? = null,
+        val lazyDoubleClick: KeyActionToken? = null,
+        val longClick: KeyActionToken? = null,
+        val swipeUp: KeyActionToken? = null,
+        val swipeDown: KeyActionToken? = null,
+        val swipeLeft: KeyActionToken? = null,
+        val swipeRight: KeyActionToken? = null,
+        val composing: KeyActionToken? = null,
+        val hasMenu: KeyActionToken? = null,
+        val paging: KeyActionToken? = null,
+        val combo: KeyActionToken? = null,
+        val ascii: KeyActionToken? = null,
     ) : Parcelable {
         companion object {
             val DEFAULTS = TextKey()
@@ -119,16 +130,19 @@ data class TextKeyboard(
                 hlKeyBorderColor = node.pairs["hilited_key_border_color"]?.string ?: DEFAULTS.hlKeyBorderColor,
                 hlKeySymbolColor = node.pairs["hilited_key_symbol_color"]?.string ?: DEFAULTS.hlKeySymbolColor,
                 popup = node.pairs["popup"]?.sequence?.items?.mapNotNull(YamlNode::string) ?: DEFAULTS.popup,
-                behaviors = KeyBehavior.entries
-                    .associateWith { KeyActionToken.decode(node[it.name.lowercase()]) }
-                    .filter { (behavior, token) ->
-                        token?.let {
-                            when (it) {
-                                is KeyActionToken.Plain -> it.token.isNotEmpty()
-                                is KeyActionToken.Inline -> listOfNotNull(it.token.commit, it.token.text, it.token.label).isNotEmpty()
-                            }
-                        } ?: (behavior == KeyBehavior.CLICK)
-                    },
+                click = KeyActionToken.decode(node.pairs["click"]),
+                doubleClick = KeyActionToken.decode(node.pairs["double_click"]),
+                lazyDoubleClick = KeyActionToken.decode(node.pairs["lazy_double_click"]),
+                longClick = KeyActionToken.decode(node.pairs["long_click"]),
+                swipeUp = KeyActionToken.decode(node.pairs["swipe_up"]),
+                swipeDown = KeyActionToken.decode(node.pairs["swipe_down"]),
+                swipeLeft = KeyActionToken.decode(node.pairs["swipe_left"]),
+                swipeRight = KeyActionToken.decode(node.pairs["swipe_right"]),
+                composing = KeyActionToken.decode(node.pairs["composing"]),
+                hasMenu = KeyActionToken.decode(node.pairs["has_menu"]),
+                paging = KeyActionToken.decode(node.pairs["paging"]),
+                combo = KeyActionToken.decode(node.pairs["combo"]),
+                ascii = KeyActionToken.decode(node.pairs["ascii"]),
             )
         }
     }
