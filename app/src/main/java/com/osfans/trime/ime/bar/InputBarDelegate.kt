@@ -26,7 +26,6 @@ import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.bar.ui.AlwaysUi
@@ -134,7 +133,7 @@ class InputBarDelegate(override val di: DI) :
     private val alwaysUi: AlwaysUi by lazy {
         AlwaysUi(context, scope) { action ->
             if (action.isNotEmpty()) {
-                commonKeyboardActionListener.listener.onAction(KeyActionManager.getAction(action))
+                commonKeyboardActionListener.listener.onAction(theme.resolveAction(action))
             } else {
                 windowManager.attachWindow(SwitchOptionWindow(di))
             }

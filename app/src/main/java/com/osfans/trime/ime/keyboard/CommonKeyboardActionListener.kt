@@ -19,8 +19,8 @@ import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
-import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.LiquidData
+import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.clipboard.ClipboardWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
@@ -50,6 +50,7 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
 
     private val context: ContextThemeWrapper by instance()
     private val service: TrimeInputMethodService by instance()
+    private val theme: Theme by instance()
     private val rime: RimeSession by instance()
     private val windowManager: BoardWindowManager by instance()
     private val keyboardWindow: KeyboardWindow by instance()
@@ -432,7 +433,7 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
                     service.postRimeJob {
                         if (value.run { startsWith('{') && endsWith('}') }) {
                             val token = value.removeSurrounding("{", "}")
-                            onAction(KeyActionManager.getAction(token))
+                            onAction(theme.resolveAction(token))
                         } else if (!value[0].isAsciiPrintable()) {
                             service.commitText(value)
                         } else {

@@ -9,6 +9,8 @@ package com.osfans.trime.data.theme
 import com.charleskorn.kaml.YamlMap
 import com.osfans.trime.data.theme.model.ColorScheme
 import com.osfans.trime.data.theme.model.GeneralStyle
+import com.osfans.trime.data.theme.model.PresetKey
+import com.osfans.trime.ime.keyboard.KeyCode
 import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.mapping
 import com.osfans.trime.util.pairs
@@ -21,7 +23,7 @@ import timber.log.Timber
  * values it cannot resolve, and which references point at nothing.
  *
  * The checks reuse the validators of the runtime itself — the color tables
- * ([ColorTable]) and the preset checks ([KeyActionManager.presetDiagnostics]) —
+ * ([ColorTable]) and the preset checks ([presetDiagnostics]) —
  * so the linter cannot disagree with what the keyboard actually does. A finding
  * can therefore depend on the platform: a preset send is checked against the key
  * names the runtime resolves, and part of them only exist on a device.
@@ -344,8 +346,21 @@ object ThemeDiagnostics {
         }
     }
 
+    /**
+     * Lists presets whose send value can never resolve to a key, so that a
+     * theme is checked once at activation time instead of on first use.
+     */
+    fun presetDiagnostics(presetKeys: Map<String, PresetKey>): List<String> = presetKeys.mapNotNull { (name, preset) ->
+        val (keycode, modifiers) = KeyCode.parse(preset.send)
+        if (preset.send.isNotEmpty() && keycode == 0 && modifiers == 0) {
+            "preset '$name' has an unrecognized send '${preset.send}'"
+        } else {
+            null
+        }
+    }
+
     private fun MutableList<Finding>.lintPresetSends(theme: Theme) {
-        KeyActionManager.presetDiagnostics(theme.presetKeys).forEach { message ->
+        presetDiagnostics(theme.presetKeys).forEach { message ->
             add(
                 Finding(
                     Severity.WARNING,

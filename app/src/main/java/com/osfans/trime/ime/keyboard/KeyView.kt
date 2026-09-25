@@ -16,7 +16,6 @@ import android.graphics.drawable.GradientDrawable
 import android.view.KeyEvent
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.utils.sizeDp
-import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.popup.PopupAction
@@ -95,7 +94,7 @@ class KeyView(
                     val triggerAction = PopupAction.TriggerAction(id)
                     popup.listener.onPopupAction(triggerAction)
                     triggerAction.outAction?.let { action ->
-                        keyboardActionListener.onAction(KeyActionManager.getAction(action))
+                        keyboardActionListener.onAction(theme.resolveAction(action))
                         dismissPopupPreview()
                     }
                     setPressedState(false)
@@ -132,8 +131,8 @@ class KeyView(
         onSlide = { delta, _, _ ->
             if (isSlideCursor) {
                 when {
-                    delta > 0 -> keyboardActionListener.onAction(KeyActionManager.getAction("Right"))
-                    delta < 0 -> keyboardActionListener.onAction(KeyActionManager.getAction("Left"))
+                    delta > 0 -> keyboardActionListener.onAction(theme.resolveAction("Right"))
+                    delta < 0 -> keyboardActionListener.onAction(theme.resolveAction("Left"))
                 }
             } else if (isSlideDelete) {
                 val ic = service.currentInputConnection

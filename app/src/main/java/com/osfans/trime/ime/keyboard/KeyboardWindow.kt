@@ -13,11 +13,9 @@ import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import com.osfans.trime.R
-import com.osfans.trime.core.CompositionProto
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.daemon.RimeSession
-import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.model.TextKeyboard
 import com.osfans.trime.ime.broadcast.EnterKeyDisplayDelegate
@@ -392,7 +390,7 @@ class KeyboardWindow(di: DI) :
                 if (what.isNotEmpty() && value.value) {
                     commonKeyboardActionListener
                         .listener
-                        .onAction(KeyActionManager.getAction(what))
+                        .onAction(theme.resolveAction(what))
                 }
             }
         }

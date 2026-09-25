@@ -16,7 +16,7 @@ class KeyActionManagerTest :
         // mocked; the Rime key table is the path under test.
         beforeTest { KeyCode.androidKeyNameToCode = { 0 } }
 
-        fun diagnostics(vararg presets: Pair<String, PresetKey>) = KeyActionManager.presetDiagnostics(mapOf(*presets))
+        fun diagnostics(vararg presets: Pair<String, PresetKey>) = ThemeDiagnostics.presetDiagnostics(mapOf(*presets))
 
         given("the built-in themes") {
             `when`("every preset is inspected at activation") {
@@ -26,7 +26,7 @@ class KeyActionManagerTest :
                     // only on a device. Any other hit would be a real typo.
                     listOf("trime.yaml", "tongwenfeng.trime.yaml").forEach { file ->
                         val theme = ThemeTestSupport.decodeBuiltinTheme(file)
-                        KeyActionManager.presetDiagnostics(theme.presetKeys).forEach { hit ->
+                        ThemeDiagnostics.presetDiagnostics(theme.presetKeys).forEach { hit ->
                             hit.substringAfter("send '").substringBefore("'") shouldBe
                                 hit.substringAfter("send '").substringBefore("'").uppercase()
                         }

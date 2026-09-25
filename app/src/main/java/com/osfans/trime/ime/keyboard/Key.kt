@@ -9,7 +9,7 @@ import android.view.KeyEvent
 import androidx.annotation.ColorInt
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.theme.ColorManager
-import com.osfans.trime.data.theme.KeyActionManager
+import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.model.TextKeyboard
 import splitties.bitflags.hasFlag
 import kotlin.properties.ReadOnlyProperty
@@ -19,6 +19,7 @@ import kotlin.reflect.KProperty
 @Suppress("ktlint:standard:mixed-condition-operators")
 class Key(
     private val parent: Keyboard,
+    private val theme: Theme,
     private val selfConfig: TextKeyboard.TextKey? = null,
 ) {
     private val rime get() = RimeDaemon.getFirstSessionOrNull()!!
@@ -28,7 +29,7 @@ class Key(
     val keyActions: Map<KeyBehavior, KeyAction> =
         selfConfig?.behaviors?.mapNotNull { (key, value) ->
             if (value != null) {
-                key to KeyActionManager.getAction(value)
+                key to theme.resolveAction(value)
             } else {
                 null
             }

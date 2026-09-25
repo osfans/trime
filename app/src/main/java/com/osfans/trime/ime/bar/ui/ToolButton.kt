@@ -18,7 +18,6 @@ import androidx.annotation.DrawableRes
 import androidx.core.view.isVisible
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.utils.sizeDp
-import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.data.theme.model.ToolBar
 import com.osfans.trime.ime.core.AutoScaleTextView
@@ -86,7 +85,7 @@ class ToolButton(context: Context, private val scope: ThemeScope) : GestureFrame
         scope: ThemeScope,
     ) : this(context, scope) {
         this.config = config
-        val keyAction = KeyActionManager.getAction(config.action)
+        val keyAction = scope.theme.resolveAction(config.action)
         isRepeatable = keyAction.isRepeatable
 
         val fg = config.foreground

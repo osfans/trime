@@ -252,7 +252,7 @@ class Keyboard(
                     continue
                 }
 
-                val key = Key(this, textKey)
+                val key = Key(this, theme, textKey)
 
                 key.keyTextOffsetX = resolveOffset(textKey.keyTextOffsetX, selfConfig.keyTextOffsetX, theme.generalStyle.keyTextOffsetX)
                 key.keyTextOffsetY = resolveOffset(textKey.keyTextOffsetY, selfConfig.keyTextOffsetY, theme.generalStyle.keyTextOffsetY)

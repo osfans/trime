@@ -10,15 +10,18 @@ import com.charleskorn.kaml.YamlMap
 import com.osfans.trime.data.theme.Theme.Companion.decode
 import com.osfans.trime.data.theme.model.ColorScheme
 import com.osfans.trime.data.theme.model.GeneralStyle
+import com.osfans.trime.data.theme.model.KeyActionToken
 import com.osfans.trime.data.theme.model.LiquidKeyboard
 import com.osfans.trime.data.theme.model.Preedit
 import com.osfans.trime.data.theme.model.PresetKey
 import com.osfans.trime.data.theme.model.TextKeyboard
 import com.osfans.trime.data.theme.model.ToolBar
 import com.osfans.trime.data.theme.model.Window
+import com.osfans.trime.ime.keyboard.KeyAction
 import com.osfans.trime.util.mapping
 import com.osfans.trime.util.pairs
 import com.osfans.trime.util.string
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -39,6 +42,19 @@ data class Theme(
 
     @IgnoredOnParcel
     val fonts by lazy { ThemeFonts(this) }
+
+    @IgnoredOnParcel
+    private val actionCache = lazy {
+        // Keys are resolved from the keyboard thread and from Rime's own job
+        // thread (see CommonKeyboardActionListener), so the cache is concurrent.
+        ConcurrentHashMap<KeyActionToken, KeyAction>()
+    }
+
+    fun resolveAction(token: KeyActionToken) = actionCache.value.computeIfAbsent(token) {
+        KeyAction(it, presetKeys)
+    }
+
+    fun resolveAction(tokenString: String) = resolveAction(KeyActionToken.Plain(tokenString))
 
     companion object {
         /**
