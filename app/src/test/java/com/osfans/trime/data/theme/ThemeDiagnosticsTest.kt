@@ -5,12 +5,11 @@
 package com.osfans.trime.data.theme
 
 import android.util.Log
+import com.charleskorn.kaml.yamlMap
 import com.osfans.trime.data.theme.ThemeDiagnostics.Code
 import com.osfans.trime.data.theme.ThemeDiagnostics.Severity
 import com.osfans.trime.data.theme.model.GeneralStyle
 import com.osfans.trime.ime.keyboard.KeyCode
-import com.osfans.trime.util.Yaml
-import com.osfans.trime.util.mapping
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
@@ -35,8 +34,9 @@ class ThemeDiagnosticsTest :
         }
 
         fun lint(yaml: String): List<ThemeDiagnostics.Finding> {
-            val node = Yaml.parseToYamlNode(yaml).mapping!!
-            return ThemeDiagnostics.lint(Theme.decode(node), node, ::parseHex)
+            val node = ThemeTestSupport.yaml.parseToYamlNode(yaml)
+            val theme = ThemeTestSupport.yaml.decodeFromYamlNode<Theme>(node)
+            return ThemeDiagnostics.lint(theme, node.yamlMap, ::parseHex)
         }
 
         fun lintCodes(yaml: String): List<Code> = lint(yaml).map(ThemeDiagnostics.Finding::code)
@@ -349,7 +349,7 @@ class ThemeDiagnosticsTest :
 
             Then("each finding is logged once, at its severity") {
                 val node =
-                    Yaml.parseToYamlNode(
+                    ThemeTestSupport.yaml.parseToYamlNode(
                         """
                         config_version: "3.0"
                         name: t
@@ -357,8 +357,9 @@ class ThemeDiagnosticsTest :
                         preset_color_schemes: {default: {back_color: "#000000", hilited_back_color: "nope"}}
                         height: 5
                         """.trimIndent(),
-                    ).mapping!!
-                val findings = ThemeDiagnostics.lint(Theme.decode(node), node, ::parseHex)
+                    )
+                val theme = ThemeTestSupport.yaml.decodeFromYamlNode<Theme>(node)
+                val findings = ThemeDiagnostics.lint(theme, node.yamlMap, ::parseHex)
                 val lines = captured { ThemeDiagnostics.log("fixture", findings) }
                 lines shouldBe
                     listOf(
@@ -370,15 +371,16 @@ class ThemeDiagnosticsTest :
 
             Then("a theme the runtime can read is silent") {
                 val node =
-                    Yaml.parseToYamlNode(
+                    ThemeTestSupport.yaml.parseToYamlNode(
                         """
                         config_version: "3.0"
                         name: t
                         style: {candidate_text_size: 12}
                         preset_color_schemes: {default: {back_color: "#000000"}}
                         """.trimIndent(),
-                    ).mapping!!
-                val findings = ThemeDiagnostics.lint(Theme.decode(node), node, ::parseHex)
+                    )
+                val theme = ThemeTestSupport.yaml.decodeFromYamlNode<Theme>(node)
+                val findings = ThemeDiagnostics.lint(theme, node.yamlMap, ::parseHex)
                 captured { ThemeDiagnostics.log("clean", findings) } shouldBe emptyList()
                 findings shouldBe emptyList()
             }
@@ -461,26 +463,6 @@ class ThemeDiagnosticsTest :
                             .map { "${it.severity} ${it.code} ${it.path}" }
                     rest shouldBe expected
                 }
-            }
-        }
-
-        Given("the key vocabularies") {
-            Then("GeneralStyle.KNOWN_KEYS matches the keys decode reads") {
-                val literals =
-                    Regex("""node(?:\.pairs)?\["([a-z_0-9]+)"]""")
-                        .findAll(File("src/main/java/com/osfans/trime/data/theme/model/GeneralStyle.kt").readText())
-                        .map { it.groupValues[1] }
-                        .toSet()
-                GeneralStyle.KNOWN_KEYS shouldBe literals
-            }
-
-            Then("Theme.TOP_LEVEL_KEYS matches the keys decode reads") {
-                val literals =
-                    Regex("""node(?:\.pairs)?\["([a-z_0-9]+)"]""")
-                        .findAll(File("src/main/java/com/osfans/trime/data/theme/Theme.kt").readText())
-                        .map { it.groupValues[1] }
-                        .toSet()
-                Theme.TOP_LEVEL_KEYS shouldBe literals + setOf("config_version", "author", "description", "version")
             }
         }
     })

@@ -6,7 +6,7 @@ package com.osfans.trime.data.theme
 
 import com.charleskorn.kaml.YamlList
 import com.charleskorn.kaml.YamlNode
-import com.osfans.trime.util.Yaml
+import com.charleskorn.kaml.yamlMap
 import com.osfans.trime.util.get
 import com.osfans.trime.util.mapping
 import com.osfans.trime.util.pairs
@@ -22,8 +22,11 @@ class ThemeDslExpanderTest :
             yaml: String,
             resourceId: String = "theme",
             resources: Map<String, String> = emptyMap(),
-        ): YamlNode = ThemeDslExpander.expand(resourceId, Yaml.parseToYamlNode(yaml)) { id ->
-            resources[id]?.let { Yaml.parseToYamlNode(it) }
+        ): YamlNode = ThemeDslExpander.expand(
+            resourceId,
+            ThemeTestSupport.yaml.parseToYamlNode(yaml),
+        ) { id ->
+            resources[id]?.let { ThemeTestSupport.yaml.parseToYamlNode(it) }
         }
 
         Given("a theme with an __include to a local path") {
@@ -228,7 +231,7 @@ class ThemeDslExpanderTest :
 
         Given("the built-in trime.yaml") {
             val file = File("src/main/assets/shared/trime.yaml")
-            val expanded = ThemeDslExpander.expand("trime", Yaml.parseToYamlNode(file.readText())) { null }
+            val expanded = ThemeDslExpander.expand("trime", ThemeTestSupport.yaml.parseToYamlNode(file.readText())) { null }
 
             Then("the 'letter' keyboard inherits the default keyboard") {
                 val keyboards = expanded.pairs!!["preset_keyboards"]!!.mapping!!
@@ -246,7 +249,7 @@ class ThemeDslExpanderTest :
             }
 
             Then("the expansion is accepted by the theme decoder") {
-                val theme = Theme.decode(expanded.mapping!!)
+                val theme = ThemeTestSupport.yaml.decodeFromYamlNode<Theme>(expanded.yamlMap)
                 theme.presetKeyboards.getValue("letter").keys.size shouldBe
                     theme.presetKeyboards.getValue("default").keys.size
                 theme.presetKeyboards.getValue("scj6").keys.size shouldBe

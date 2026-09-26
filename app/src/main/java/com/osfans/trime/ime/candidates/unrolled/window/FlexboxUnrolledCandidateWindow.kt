@@ -34,7 +34,7 @@ class FlexboxUnrolledCandidateWindow(di: DI) : BaseUnrolledCandidateWindow(di) {
             ): CandidateViewHolder = super.onCreateViewHolder(parent, viewType).apply {
                 itemView.apply {
                     minimumWidth = dp(40)
-                    val itemHeight = dp(theme.generalStyle.run { candidateViewHeight + commentHeight })
+                    val itemHeight = dp(theme.style.run { candidateViewHeight + commentHeight })
                     layoutParams =
                         FlexboxLayoutManager
                             .LayoutParams(wrapContent, itemHeight)

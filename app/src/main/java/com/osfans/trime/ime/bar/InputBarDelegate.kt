@@ -71,7 +71,7 @@ class InputBarDelegate(override val di: DI) :
     private val candidate: CompactCandidateDelegate by instance()
     private val rime: RimeSession by instance()
 
-    val themedHeight = theme.generalStyle.run { candidateViewHeight + commentHeight }
+    val themedHeight = theme.style.run { candidateViewHeight + commentHeight }
 
     private val prefs = AppPrefs.defaultInstance()
 
@@ -253,8 +253,8 @@ class InputBarDelegate(override val di: DI) :
                 scope.decorDrawable(
                     "candidate_background",
                     "candidate_border_color",
-                    dp(theme.generalStyle.candidateBorder),
-                    dp(theme.generalStyle.candidateBorderRound),
+                    dp(theme.style.candidateBorder),
+                    dp(theme.style.candidateBorderRound),
                 )
             add(alwaysUi.root, lParams(matchParent, matchParent))
             add(candidateUi.root, lParams(matchParent, matchParent))
@@ -272,8 +272,8 @@ class InputBarDelegate(override val di: DI) :
             scope.decorDrawable(
                 "candidate_background",
                 "candidate_border_color",
-                context.dp(theme.generalStyle.candidateBorder),
-                context.dp(theme.generalStyle.candidateBorderRound),
+                context.dp(theme.style.candidateBorder),
+                context.dp(theme.style.candidateBorderRound),
             )
         alwaysUi.refreshColors()
         candidateUi.refreshColors()

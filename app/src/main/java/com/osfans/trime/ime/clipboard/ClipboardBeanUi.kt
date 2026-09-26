@@ -80,8 +80,8 @@ class ClipboardBeanUi(
                 scope.decorDrawable(
                     "key_back_color",
                     "key_border_color",
-                    dp(theme.generalStyle.keyBorder),
-                    dp(theme.generalStyle.roundCorner),
+                    dp(theme.style.keyBorder),
+                    dp(theme.style.roundCorner),
                 )
             add(layout, lParams(matchParent, matchParent))
             layoutParams = lParams(matchParent, wrapContent)
@@ -103,8 +103,8 @@ class ClipboardBeanUi(
             scope.decorDrawable(
                 "key_back_color",
                 "key_border_color",
-                ctx.dp(theme.generalStyle.keyBorder),
-                ctx.dp(theme.generalStyle.roundCorner),
+                ctx.dp(theme.style.keyBorder),
+                ctx.dp(theme.style.roundCorner),
             )
     }
 }

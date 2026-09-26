@@ -37,19 +37,19 @@ class PopupDelegate(override val di: DI) : DIAware {
     private val showingContainerUi = HashMap<Int, PopupContainerUi>()
 
     private val popupBottomMargin by lazy {
-        context.dp(theme.generalStyle.popupBottomMargin)
+        context.dp(theme.style.popupBottomMargin)
     }
     private val popupWidth by lazy {
-        context.dp(theme.generalStyle.popupWidth)
+        context.dp(theme.style.popupWidth)
     }
     private val popupHeight by lazy {
-        context.dp(theme.generalStyle.popupHeight)
+        context.dp(theme.style.popupHeight)
     }
     private val popupKeyHeight by lazy {
-        context.dp(theme.generalStyle.popupKeyHeight)
+        context.dp(theme.style.popupKeyHeight)
     }
     private val popupRadius by lazy {
-        context.dp(theme.generalStyle.roundCorner)
+        context.dp(theme.style.roundCorner)
     }
     private val hideThreshold = 100L
 

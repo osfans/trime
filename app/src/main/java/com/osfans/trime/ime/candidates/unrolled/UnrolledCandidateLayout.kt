@@ -35,8 +35,8 @@ class UnrolledCandidateLayout(
             scope.decorDrawable(
                 "candidate_background",
                 "candidate_border_color",
-                dp(theme.generalStyle.candidateBorder),
-                dp(theme.generalStyle.candidateBorderRound),
+                dp(theme.style.candidateBorder),
+                dp(theme.style.candidateBorderRound),
             )
 
         add(
@@ -57,8 +57,8 @@ class UnrolledCandidateLayout(
             scope.decorDrawable(
                 "candidate_background",
                 "candidate_border_color",
-                dp(theme.generalStyle.candidateBorder),
-                dp(theme.generalStyle.candidateBorderRound),
+                dp(theme.style.candidateBorder),
+                dp(theme.style.candidateBorderRound),
             )
     }
 }

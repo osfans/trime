@@ -28,7 +28,7 @@ class ClipboardTitleUi(override val ctx: Context, private val scope: ThemeScope)
 
     val deleteAllButton = ToolButton(ctx, R.drawable.ic_baseline_delete_sweep_24, scope)
 
-    private val size = theme.generalStyle.run { candidateViewHeight + commentHeight }
+    private val size = theme.style.run { candidateViewHeight + commentHeight }
 
     override val root = constraintLayout {
         add(

@@ -6,8 +6,6 @@ package com.osfans.trime.data.theme
 
 import android.util.Log
 import com.charleskorn.kaml.YamlNode
-import com.osfans.trime.util.Yaml
-import com.osfans.trime.util.get
 import com.osfans.trime.util.mapping
 import com.osfans.trime.util.pairs
 import com.osfans.trime.util.string
@@ -16,14 +14,13 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.maps.shouldContainKey
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import timber.log.Timber
 import java.io.File
 
 class ThemeLoaderTest :
     BehaviorSpec({
-        fun node(yaml: String): YamlNode = Yaml.parseToYamlNode(yaml)
+        fun node(yaml: String): YamlNode = ThemeTestSupport.yaml.parseToYamlNode(yaml)
 
         fun resources(vararg pairs: Pair<String, String>): (String) -> YamlNode? {
             val map = pairs.toMap()
@@ -233,7 +230,7 @@ class ThemeLoaderTest :
                 decoded.name shouldBe "base"
                 val letter = decoded.presetKeyboards.getValue("letter")
                 letter.name shouldBe "default"
-                letter.asciiMode shouldBe true
+                letter.asciiMode shouldBe 1
             }
 
             Then("decodeSource resolves cross-resource references through the loader") {
@@ -254,7 +251,7 @@ class ThemeLoaderTest :
                 decoded.name shouldBe "base"
                 val letter = decoded.presetKeyboards.getValue("letter")
                 letter.name shouldBe "shared"
-                letter.asciiMode shouldBe true
+                letter.asciiMode shouldBe 1
                 letter.keys.size shouldBe 1
             }
         }

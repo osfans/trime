@@ -6,7 +6,6 @@
 package com.osfans.trime.data.theme
 
 import com.osfans.trime.data.base.DataManager
-import com.osfans.trime.util.Yaml
 import com.osfans.trime.util.get
 import com.osfans.trime.util.string
 import timber.log.Timber
@@ -40,7 +39,7 @@ object ThemeFilesManager {
     private fun readDeployedName(configId: String): String? {
         val file = File(DataManager.resolveDeployedResourcePath(configId))
         if (!file.isFile) return null
-        return runCatching { Yaml.parseToYamlNode(file.readText()).get("name")?.string }
+        return runCatching { ThemeYaml.parser.parseToYamlNode(file.readText())["name"]?.string }
             .getOrElse { e ->
                 Timber.w("Failed to read deployed theme ${file.absolutePath}: ${e.message}")
                 null

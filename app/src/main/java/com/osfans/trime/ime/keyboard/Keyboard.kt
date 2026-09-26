@@ -10,6 +10,7 @@ import android.view.KeyEvent
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.model.TextKeyboard
+import com.osfans.trime.data.theme.model.orAbsent
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
@@ -27,26 +28,26 @@ class Keyboard(
 
     /** 按鍵默認水平間距  */
     internal val horizontalGap: Int =
-        resolvePositive(selfConfig?.horizontalGap, theme.generalStyle.horizontalGap) { context.dp(it) }
+        resolvePositive(selfConfig?.horizontalGap, theme.style.horizontalGap) { context.dp(it) }
 
     /** 默認鍵寬  */
-    private val keyWidth: Int = (allowedWidth * theme.generalStyle.keyWidth / 100).toInt()
+    private val keyWidth: Int = (allowedWidth * theme.style.keyWidth / 100).toInt()
 
     /** 默認鍵高 (NOTE: 无需 dp 转换，会被 keyboardHeight 等比例缩放) */
     private val keyHeight: Int =
-        resolvePositive(selfConfig?.height?.toInt(), theme.generalStyle.keyHeight)
+        resolvePositive(selfConfig?.height?.toInt(), theme.style.keyHeight)
 
     /** 默認行距  */
     internal val verticalGap: Int =
-        resolvePositive(selfConfig?.verticalGap, theme.generalStyle.verticalGap) { context.dp(it) }
+        resolvePositive(selfConfig?.verticalGap, theme.style.verticalGap) { context.dp(it) }
 
     /** 默認按鍵圓角半徑  */
     val roundCorner: Float =
-        resolveNonNegative(selfConfig?.roundCorner, theme.generalStyle.roundCorner)
+        resolveNonNegative(selfConfig?.roundCorner, theme.style.roundCorner)
 
     /** 默認按鍵邊框寬度  */
     val keyBorder: Int =
-        resolveNonNegative(selfConfig?.keyBorder, theme.generalStyle.keyBorder)
+        resolveNonNegative(selfConfig?.keyBorder, theme.style.keyBorder)
 
     /** 鍵盤的Shift鍵  */
     var mShiftKey: Key? = null
@@ -79,7 +80,7 @@ class Keyboard(
     var firstPressedKeyIndex: Int = -1
 
     /** Keyboard default ascii mode  */
-    val asciiMode = selfConfig?.asciiMode ?: false
+    val asciiMode = selfConfig?.asciiMode == 1
     val resetAsciiMode = selfConfig?.resetAsciiMode ?: true
     var lastAsciiMode: Boolean = asciiMode
 
@@ -105,8 +106,8 @@ class Keyboard(
                 pickLandscape(it.keyboardHeight, it.keyboardHeightLand, context.isLandscapeMode())
             },
             pickLandscape(
-                theme.generalStyle.keyboardHeight,
-                theme.generalStyle.keyboardHeightLand,
+                theme.style.keyboardHeight,
+                theme.style.keyboardHeightLand,
                 context.isLandscapeMode(),
             ),
         ) { context.dp(it) }
@@ -144,7 +145,7 @@ class Keyboard(
 
                 // determine the width weight of this key
                 val keyWidthWeight =
-                    if (key.width == 0f && key.click != null) keyboardKeyWidth else key.width
+                    if (key.width == 0f && key.click.orAbsent != null) keyboardKeyWidth else key.width
 
                 val widthPx = (keyWidthWeight * allowedWidth / MAX_TOTAL_WEIGHT).toInt()
 
@@ -165,7 +166,7 @@ class Keyboard(
                 totalKeyWidth += keyWidthWeight
 
                 // only clickable keys count toward column count
-                if (key.click != null) {
+                if (key.click.orAbsent != null) {
                     column++
                 }
 
@@ -213,7 +214,7 @@ class Keyboard(
             for (textKey in keys) {
 
                 val keyWidthWeight =
-                    if (textKey.width == 0f && textKey.click != null) keyboardKeyWidth else textKey.width
+                    if (textKey.width == 0f && textKey.click.orAbsent != null) keyboardKeyWidth else textKey.width
 
                 var widthPx = (keyWidthWeight * oneWeightWidthPx).toInt()
 
@@ -246,7 +247,7 @@ class Keyboard(
                     }
                 }
 
-                if (textKey.click == null) {
+                if (textKey.click.orAbsent == null) {
                     if (expandKeypressArea) spacers.add(Triple(xPos, widthPx, row))
                     xPos += widthPx
                     continue
@@ -254,14 +255,14 @@ class Keyboard(
 
                 val key = Key(this, theme, textKey)
 
-                key.keyTextOffsetX = resolveOffset(textKey.keyTextOffsetX, selfConfig.keyTextOffsetX, theme.generalStyle.keyTextOffsetX)
-                key.keyTextOffsetY = resolveOffset(textKey.keyTextOffsetY, selfConfig.keyTextOffsetY, theme.generalStyle.keyTextOffsetY)
-                key.keySymbolOffsetX = resolveOffset(textKey.keySymbolOffsetX, selfConfig.keySymbolOffsetX, theme.generalStyle.keySymbolOffsetX)
-                key.keySymbolOffsetY = resolveOffset(textKey.keySymbolOffsetY, selfConfig.keySymbolOffsetY, theme.generalStyle.keySymbolOffsetY)
-                key.keyHintOffsetX = resolveOffset(textKey.keyHintOffsetX, selfConfig.keyHintOffsetX, theme.generalStyle.keyHintOffsetX)
-                key.keyHintOffsetY = resolveOffset(textKey.keyHintOffsetY, selfConfig.keyHintOffsetY, theme.generalStyle.keyHintOffsetY)
-                key.keyPressOffsetX = resolveOffset(textKey.keyPressOffsetX, selfConfig.keyPressOffsetX, theme.generalStyle.keyPressOffsetX)
-                key.keyPressOffsetY = resolveOffset(textKey.keyPressOffsetY, selfConfig.keyPressOffsetY, theme.generalStyle.keyPressOffsetY)
+                key.keyTextOffsetX = resolveOffset(textKey.keyTextOffsetX, selfConfig.keyTextOffsetX, theme.style.keyTextOffsetX)
+                key.keyTextOffsetY = resolveOffset(textKey.keyTextOffsetY, selfConfig.keyTextOffsetY, theme.style.keyTextOffsetY)
+                key.keySymbolOffsetX = resolveOffset(textKey.keySymbolOffsetX, selfConfig.keySymbolOffsetX, theme.style.keySymbolOffsetX)
+                key.keySymbolOffsetY = resolveOffset(textKey.keySymbolOffsetY, selfConfig.keySymbolOffsetY, theme.style.keySymbolOffsetY)
+                key.keyHintOffsetX = resolveOffset(textKey.keyHintOffsetX, selfConfig.keyHintOffsetX, theme.style.keyHintOffsetX)
+                key.keyHintOffsetY = resolveOffset(textKey.keyHintOffsetY, selfConfig.keyHintOffsetY, theme.style.keyHintOffsetY)
+                key.keyPressOffsetX = resolveOffset(textKey.keyPressOffsetX, selfConfig.keyPressOffsetX, theme.style.keyPressOffsetX)
+                key.keyPressOffsetY = resolveOffset(textKey.keyPressOffsetY, selfConfig.keyPressOffsetY, theme.style.keyPressOffsetY)
 
                 key.x = xPos
                 key.y = yPos

@@ -52,13 +52,13 @@ class TabUi(
     private val titleText = textView {
         typeface = Typeface.defaultFromStyle(Typeface.BOLD)
         gravity = gravityVerticalCenter
-        textSize = theme.generalStyle.candidateTextSize
+        textSize = theme.style.candidateTextSize
         setTextColor(scope.colors.keyTextColor)
     }
 
     private var external: View? = null
 
-    private val size = ctx.dp(theme.generalStyle.run { candidateViewHeight + commentHeight })
+    private val size = ctx.dp(theme.style.run { candidateViewHeight + commentHeight })
 
     override val root =
         constraintLayout {

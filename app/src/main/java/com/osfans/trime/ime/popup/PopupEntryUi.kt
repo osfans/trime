@@ -41,7 +41,7 @@ class PopupEntryUi(
 
     val textView = view(::AutoScaleTextView) {
         scaleMode = AutoScaleTextView.Mode.Proportional
-        textSize = theme.generalStyle.popupTextSize
+        textSize = theme.style.popupTextSize
         gravity = gravityCenter
         setTextColor(scope.colors.popupTextColor)
         typeface = theme.fonts.popup
@@ -88,7 +88,7 @@ class PopupEntryUi(
         if (text.isIconFont) {
             imageView.setImageDrawable(
                 IconicsDrawable(ctx, text.toIconName()).apply {
-                    sizeDp = theme.generalStyle.popupTextSize.toInt()
+                    sizeDp = theme.style.popupTextSize.toInt()
                     colorFilter = PorterDuffColorFilter(scope.colors.popupTextColor, PorterDuff.Mode.SRC_IN)
                 },
             )

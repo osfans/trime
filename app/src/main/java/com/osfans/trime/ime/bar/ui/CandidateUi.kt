@@ -44,7 +44,7 @@ class CandidateUi(
                 compatView,
                 lParams {
                     centerVertically()
-                    startOfParent(dp(theme.generalStyle.candidatePadding / 2))
+                    startOfParent(dp(theme.style.candidatePadding / 2))
                     before(unrollButton)
                 },
             )

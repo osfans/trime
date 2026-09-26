@@ -32,7 +32,7 @@ class LiquidItemUi(
         isClickable = false
         isFocusable = false
         background = null
-        textSize = theme.generalStyle.keyTextSize
+        textSize = theme.style.keyTextSize
         typeface = theme.fonts.key
         setPaddingDp(8, 4, 8, 4)
         setTextColor(scope.colors.keyTextColor)
@@ -42,8 +42,8 @@ class LiquidItemUi(
         background = scope.decorDrawable(
             "key_back_color",
             "key_border_color",
-            dp(theme.generalStyle.keyBorder),
-            dp(theme.generalStyle.roundCorner),
+            dp(theme.style.keyBorder),
+            dp(theme.style.roundCorner),
         )
         add(
             mainText,
@@ -63,8 +63,8 @@ class LiquidItemUi(
         content.background = scope.decorDrawable(
             "key_back_color",
             "key_border_color",
-            ctx.dp(theme.generalStyle.keyBorder),
-            ctx.dp(theme.generalStyle.roundCorner),
+            ctx.dp(theme.style.keyBorder),
+            ctx.dp(theme.style.roundCorner),
         )
     }
 }

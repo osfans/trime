@@ -118,7 +118,7 @@ object ColorManager {
     private fun requireScope(): ThemeScope = requireNotNull(scope) { "ColorManager is not initialized" }
 
     private fun resolveActiveScheme(theme: Theme): ColorScheme = ColorSchemeResolver.resolve(
-        schemes = theme.colorSchemes,
+        schemes = theme.presetColorSchemes,
         selectedSchemeId = prefs.normalModeColor.getValue(),
         followSystemDayNight = prefs.followSystemDayNight.getValue(),
         isNightMode = isNightMode,
@@ -141,7 +141,7 @@ object ColorManager {
         if (notify) fireChange()
     }
 
-    private fun backgroundFolder(scope: ThemeScope) = scope.theme.generalStyle.backgroundFolder
+    private fun backgroundFolder(scope: ThemeScope) = scope.theme.style.backgroundFolder
 
     /**
      * Resolves a color key against the given scope. Exposed so UI code can

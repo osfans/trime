@@ -34,7 +34,7 @@ class ButtonsBarUi(
 
     val firstButton: ToolButton?
 
-    private val defaultButtonSize = theme.generalStyle.run { candidateViewHeight + commentHeight }
+    private val defaultButtonSize = theme.style.run { candidateViewHeight + commentHeight }
 
     private fun toolButton(
         buttonConfig: ToolBar.Button?,

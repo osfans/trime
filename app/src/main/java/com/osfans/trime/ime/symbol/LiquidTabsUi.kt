@@ -35,11 +35,11 @@ class LiquidTabsUi(
 
     inner class TabUi : Ui {
         override val ctx = this@LiquidTabsUi.ctx
-        private val cornerRadius = ctx.dp(theme.generalStyle.candidateCornerRadius)
+        private val cornerRadius = ctx.dp(theme.style.candidateCornerRadius)
 
         val text =
             textView {
-                textSize = theme.generalStyle.candidateTextSize
+                textSize = theme.style.candidateTextSize
                 typeface = theme.fonts.candidate
                 setTextColor(scope.colors.candidateTextColor)
             }
@@ -51,7 +51,7 @@ class LiquidTabsUi(
                     text,
                     lParams {
                         gravity = gravityCenter
-                        horizontalPadding = dp(theme.generalStyle.candidatePadding)
+                        horizontalPadding = dp(theme.style.candidatePadding)
                     },
                 )
                 background =

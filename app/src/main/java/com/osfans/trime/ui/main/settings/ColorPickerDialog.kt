@@ -18,7 +18,7 @@ object ColorPickerDialog {
         context: Context,
         afterConfirm: (suspend () -> Unit)? = null,
     ): AlertDialog {
-        val presetSchemes = ThemeManager.activeTheme.colorSchemes.entries.toList()
+        val presetSchemes = ThemeManager.activeTheme.presetColorSchemes.entries.toList()
         val currentScheme = ColorManager.activeColorScheme
         val currentIndex = presetSchemes.indexOfFirst { it.value == currentScheme }
         return AlertDialog

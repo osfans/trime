@@ -4,6 +4,14 @@
 
 package com.osfans.trime.util
 
+import com.charleskorn.kaml.AmbiguousQuoteStyle
+import com.charleskorn.kaml.AnchorsAndAliases
+import com.charleskorn.kaml.MultiLineStringStyle
+import com.charleskorn.kaml.PolymorphismStyle
+import com.charleskorn.kaml.SequenceStyle
+import com.charleskorn.kaml.SingleLineStringStyle
+import com.charleskorn.kaml.Yaml
+import com.charleskorn.kaml.YamlConfiguration
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
@@ -12,7 +20,44 @@ import kotlinx.serialization.Serializable
 
 class YamlTest :
     BehaviorSpec({
-        fun node(yaml: String) = Yaml.parseToYamlNode(yaml)["key"]!!
+        val kaml = Yaml(
+            configuration = YamlConfiguration(
+                /* encodeDefaults = */
+                true,
+                /* strictMode = */
+                false,
+                /* extensionDefinitionPrefix = */
+                null,
+                /* polymorphismStyle = */
+                PolymorphismStyle.Tag,
+                /* polymorphismPropertyName = */
+                "type",
+                /* encodingIndentationSize = */
+                2,
+                /* breakScalarsAt = */
+                80,
+                /* sequenceStyle = */
+                SequenceStyle.Block,
+                /* singleLineStringStyle = */
+                SingleLineStringStyle.DoubleQuoted,
+                /* multiLineStringStyle = */
+                MultiLineStringStyle.DoubleQuoted,
+                /* ambiguousQuoteStyle = */
+                AmbiguousQuoteStyle.DoubleQuoted,
+                /* sequenceBlockIndent = */
+                0,
+                /* anchorsAndAliases = */
+                AnchorsAndAliases.Permitted(maxAliasCount = 1000u),
+                /* yamlNamingStrategy = */
+                null,
+                /* codePointLimit = */
+                10 * 1024 * 1024,
+                /* decodeEnumCaseInsensitive = */
+                false,
+            ),
+        )
+
+        fun node(yaml: String) = kaml.parseToYamlNode(yaml)["key"]!!
         fun isNull(yaml: String): Boolean = node(yaml).isNull
 
         Given("a plain scalar without a value") {
@@ -70,7 +115,7 @@ class YamlTest :
 
         Given("a node accessed by key or index") {
             Then("it looks the child up when it can, and gives null when it cannot") {
-                val document = Yaml.parseToYamlNode("a:\n  b: 1\nc: [x, y]\n")
+                val document = kaml.parseToYamlNode("a:\n  b: 1\nc: [x, y]\n")
                 document["a"]!!.mapping!!.pairs.mapValues { it.value.string } shouldBe mapOf("b" to "1")
                 document["c"]!!.sequence!!.items.map { it.string } shouldBe listOf("x", "y")
                 document["c"]!!["1"]!!.string shouldBe "y"
@@ -88,7 +133,7 @@ class YamlTest :
 
         Given("a document with merge keys") {
             Then("the merged mapping is expanded, like yaml-cpp does") {
-                val node = Yaml.parseToYamlNode(
+                val node = kaml.parseToYamlNode(
                     "defaults: &defaults\n  a: 1\n  b: 2\nnode:\n  <<: *defaults\n  b: 3\n",
                 )
                 val merged = node["node"]!!.mapping!!.pairs
@@ -104,7 +149,7 @@ class YamlTest :
                 // the budget of 1000 by plain repetition.
                 val references = (0 until 1100).joinToString("\n") { "key$it: *base" }
                 val document = "base: &base [1, 2, 3]\n$references\n"
-                val thrown = shouldThrow<Throwable> { Yaml.parseToYamlNode(document) }
+                val thrown = shouldThrow<Throwable> { kaml.parseToYamlNode(document) }
                 (thrown.message ?: "") shouldContain "Maximum number of aliases"
             }
         }
@@ -113,7 +158,7 @@ class YamlTest :
             Then("it is decoded through kaml, tolerating keys it does not know") {
                 // Sound effect descriptors are authored by users, so a key the model
                 // does not know must not fail the whole file.
-                val fixture = Yaml.decodeFromString(
+                val fixture = kaml.decodeFromString(
                     YamlDecodingFixture.serializer(),
                     "name: click\nfolder: click\nunknown:\n  nested: 1\n",
                 )

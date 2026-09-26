@@ -231,9 +231,9 @@ class KeyAction(
 
             // match: { x: { commit: a, text: b, label: c } }
             is KeyActionToken.Inline -> {
-                commit = token.token.commit ?: ""
-                text = token.token.text ?: ""
-                label = token.token.label ?: ""
+                commit = token.commit ?: ""
+                text = token.text ?: ""
+                label = token.label ?: ""
             }
         }
     }

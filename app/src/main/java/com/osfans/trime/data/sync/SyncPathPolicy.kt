@@ -4,8 +4,8 @@
 
 package com.osfans.trime.data.sync
 
+import com.charleskorn.kaml.Yaml
 import com.osfans.trime.data.base.DataManager
-import com.osfans.trime.util.Yaml
 import com.osfans.trime.util.get
 import com.osfans.trime.util.string
 import timber.log.Timber
@@ -18,18 +18,25 @@ import java.io.File
 object SyncPathPolicy {
     const val DEFAULT_SYNC_DIR = "sync"
 
+    /**
+     * `installation.yaml` is written by librime, not by hand: it carries no DSL
+     * and no anchors, so kaml's defaults apply here. Themes go through
+     * [com.osfans.trime.data.theme.ThemeYaml] instead.
+     */
+    private val yaml = Yaml.default
+
     fun readOwnInstallationId(): String? = readInstallationId(localInstallationFile())
 
     fun readOwnSyncDir(): String = readSyncDir(localInstallationFile())
 
     fun readInstallationId(text: String): String? {
-        val node = Yaml.parseToYamlNode(text)
+        val node = yaml.parseToYamlNode(text)
         val id = node["installation_id"]?.string?.trim().orEmpty()
         return id.takeIf { it.isNotEmpty() }
     }
 
     fun readSyncDir(text: String): String {
-        val node = Yaml.parseToYamlNode(text)
+        val node = yaml.parseToYamlNode(text)
         val dir = node["sync_dir"]?.string?.trim().orEmpty()
         return cleanSyncDir(dir)
     }

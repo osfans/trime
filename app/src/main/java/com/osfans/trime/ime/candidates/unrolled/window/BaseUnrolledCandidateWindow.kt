@@ -58,7 +58,7 @@ abstract class BaseUnrolledCandidateWindow(di: DI) :
 
     protected val separatorDrawable by lazy {
         ShapeDrawable(RectShape()).apply {
-            val spacing = theme.generalStyle.candidateSpacing
+            val spacing = theme.style.candidateSpacing
             val intrinsicSize = max(spacing, context.dp(spacing)).toInt()
             intrinsicWidth = intrinsicSize
             intrinsicHeight = intrinsicSize

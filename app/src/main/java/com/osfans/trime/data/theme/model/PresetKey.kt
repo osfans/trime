@@ -5,17 +5,9 @@
 
 package com.osfans.trime.data.theme.model
 
-import android.os.Parcelable
-import com.charleskorn.kaml.YamlMap
-import com.charleskorn.kaml.YamlNode
-import com.osfans.trime.util.boolean
-import com.osfans.trime.util.get
-import com.osfans.trime.util.pairs
-import com.osfans.trime.util.sequence
-import com.osfans.trime.util.string
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
-@Parcelize
+@Serializable
 data class PresetKey(
     val command: String = "",
     val option: String = "",
@@ -31,27 +23,7 @@ data class PresetKey(
     val slideCursor: Boolean = false,
     val slideDelete: Boolean = false,
     val functional: Boolean = false,
+    @Serializable(with = LenientStringListSerializer::class)
     val states: List<String> = emptyList(),
     val send: String = "",
-) : Parcelable {
-    companion object {
-        fun decode(node: YamlMap): PresetKey = PresetKey(
-            command = node.pairs["command"]?.string ?: "",
-            option = node.pairs["option"]?.string ?: "",
-            select = node.pairs["select"]?.string ?: "",
-            toggle = node.pairs["toggle"]?.string ?: "",
-            label = node.pairs["label"]?.string ?: "",
-            preview = node.pairs["preview"]?.string,
-            shiftLock = node.pairs["shift_lock"]?.string ?: "",
-            commit = node.pairs["commit"]?.string ?: "",
-            text = node.pairs["text"]?.string ?: "",
-            sticky = node.pairs["sticky"]?.boolean ?: false,
-            repeatable = node.pairs["repeatable"]?.boolean ?: false,
-            slideCursor = node.pairs["slide_cursor"]?.boolean ?: false,
-            slideDelete = node.pairs["slide_delete"]?.boolean ?: false,
-            functional = node.pairs["functional"]?.boolean ?: false,
-            states = node.pairs["states"]?.sequence?.items?.mapNotNull(YamlNode::string) ?: emptyList(),
-            send = node.pairs["send"]?.string ?: "",
-        )
-    }
-}
+)

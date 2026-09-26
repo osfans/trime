@@ -15,7 +15,7 @@ import timber.log.Timber
 import java.io.File
 
 class ThemeFonts(private val theme: Theme) {
-    private val style = theme.generalStyle
+    private val style = theme.style
 
     private data class FileState(
         val path: String,
@@ -38,34 +38,34 @@ class ThemeFonts(private val theme: Theme) {
         }
 
     val hanb: Typeface
-        get() = getTypeface(style.hanbFont)
+        get() = getTypeface(style.hanbFont.toList())
 
     val latin: Typeface
-        get() = getTypeface(style.latinFont)
+        get() = getTypeface(style.latinFont.toList())
 
     val candidate: Typeface
-        get() = getTypeface(style.candidateFont)
+        get() = getTypeface(style.candidateFont.toList())
 
     val comment: Typeface
-        get() = getTypeface(style.commentFont)
+        get() = getTypeface(style.commentFont.toList())
 
     val key: Typeface
-        get() = getTypeface(style.keyFont)
+        get() = getTypeface(style.keyFont.toList())
 
     val label: Typeface
-        get() = getTypeface(style.labelFont)
+        get() = getTypeface(style.labelFont.toList())
 
     val popup: Typeface
-        get() = getTypeface(style.popupFont)
+        get() = getTypeface(style.popupFont.toList())
 
     val symbol: Typeface
-        get() = getTypeface(style.symbolFont)
+        get() = getTypeface(style.symbolFont.toList())
 
     val text: Typeface
-        get() = getTypeface(style.textFont)
+        get() = getTypeface(style.textFont.toList())
 
     val toolbar: Typeface
-        get() = getTypeface(theme.toolBar.buttonFont)
+        get() = getTypeface(theme.toolBar.buttonFont.toList())
 
     private fun makeFileStateList(names: List<String>): List<FileState> = names.asSequence()
         .map { File(fontDir, it) }
@@ -90,7 +90,7 @@ class ThemeFonts(private val theme: Theme) {
             val newTypeface = if (key.files.isEmpty()) {
                 Typeface.DEFAULT
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val bulk = makeFileStateList(style.latinFont + fonts + style.hanbFont)
+                val bulk = makeFileStateList(style.latinFont.toList() + fonts + style.hanbFont.toList())
                 val fontFamilies = bulk.map { getFontFamily(it) }
                 Typeface.CustomFallbackBuilder(fontFamilies.first())
                     .apply {

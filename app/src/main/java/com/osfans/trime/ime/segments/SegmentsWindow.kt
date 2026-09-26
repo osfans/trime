@@ -121,7 +121,7 @@ class SegmentsWindow(di: DI, private val source: String) : BoardWindow.BarBoardW
             flexDirection = FlexDirection.ROW_REVERSE
             alignItems = AlignItems.CENTER
             val buttons = listOf(ui.selectButton, ui.copyButton, ui.starButton, ui.searchButton, ui.shareButton)
-            val size = theme.generalStyle.run { candidateViewHeight + commentHeight }
+            val size = theme.style.run { candidateViewHeight + commentHeight }
             buttons.forEachIndexed { index, button ->
                 val lParams = FlexboxLayout.LayoutParams(dp(size), dp(size))
                 if (index > 0) {

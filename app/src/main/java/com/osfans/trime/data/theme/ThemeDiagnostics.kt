@@ -235,7 +235,7 @@ object ThemeDiagnostics {
         theme: Theme,
         parseColor: (String) -> Int?,
     ) {
-        val schemes = theme.colorSchemes
+        val schemes = theme.presetColorSchemes
         if (schemes.isEmpty()) {
             add(
                 Finding(

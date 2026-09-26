@@ -207,7 +207,7 @@ class SwitchOptionWindow(di: DI) :
 
     private val barExternalView by lazy {
         context.constraintLayout {
-            val size = dp(theme.generalStyle.run { candidateViewHeight + commentHeight })
+            val size = dp(theme.style.run { candidateViewHeight + commentHeight })
             add(
                 settingsButton,
                 lParams(size, size) {

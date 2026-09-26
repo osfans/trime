@@ -6,7 +6,6 @@
 package com.osfans.trime.data.theme
 
 import com.charleskorn.kaml.YamlMap
-import com.osfans.trime.util.Yaml
 import com.osfans.trime.util.mapping
 import java.io.File
 
@@ -18,17 +17,20 @@ import java.io.File
  * (the unit-test working directory).
  */
 object ThemeTestSupport {
+    /** The parser themes are read with in production, so fixtures see the same configuration. */
+    val yaml = ThemeYaml.parser
+
     fun decodeThemeFile(relativePath: String): Theme = themeAndNode(relativePath).first
 
     /** Decodes [relativePath] and also returns the expanded node it came from. */
     fun themeAndNode(relativePath: String): Pair<Theme, YamlMap> {
         val file = File(relativePath)
         check(file.isFile) { "Theme fixture not found: $relativePath (cwd=${File(".").absolutePath})" }
-        val node = Yaml.parseToYamlNode(file.readText())
+        val node = yaml.parseToYamlNode(file.readText())
         val expanded = ThemeDslExpander.expand(file.nameWithoutExtension, node) { null }
         val mapping = expanded.mapping
             ?: error("$relativePath: YAML root is not a mapping")
-        return Theme.decode(mapping) to mapping
+        return yaml.decodeFromYamlNode<Theme>(mapping) to mapping
     }
 
     /** Decodes a built-in theme source file (app/src/main/assets/shared/). */

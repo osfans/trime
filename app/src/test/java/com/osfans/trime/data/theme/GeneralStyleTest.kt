@@ -7,11 +7,14 @@
 package com.osfans.trime.data.theme
 
 import com.osfans.trime.data.theme.model.GeneralStyle
+import com.osfans.trime.data.theme.model.MaybeStringList
 import com.osfans.trime.util.yamlMapOf
 import com.osfans.trime.util.yamlScalarOf
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import kotlinx.serialization.SerializationException
 
 /**
  * GeneralStyle decode baseline: field-level values from the built-in trime.yaml
@@ -24,7 +27,7 @@ class GeneralStyleTest :
             val theme = ThemeTestSupport.decodeBuiltinTheme("trime.yaml")
 
             When("its style section is decoded") {
-                val style = theme.generalStyle
+                val style = theme.style
 
                 Then("plain scalar values from the file are preserved") {
                     style shouldNotBe null
@@ -49,11 +52,9 @@ class GeneralStyleTest :
                     style.keyboardPaddingLand shouldBe 40
                 }
 
-                Then("fonts declared as a single scalar decode to an empty list") {
-                    // By design (since 2bcdf382) fonts must be lists, e.g. `candidate_font: [han.ttf]`;
-                    // a scalar like `candidate_font: han.ttf` decodes to an empty list (system font).
-                    style.candidateFont shouldBe emptyList()
-                    style.keyFont shouldBe emptyList()
+                Then("fonts declared as a single scalar decode to a single element") {
+                    style.candidateFont shouldBe MaybeStringList.Scalar("han.ttf")
+                    style.keyFont shouldBe MaybeStringList.Scalar("symbol.ttf")
                 }
 
                 Then("theme header is decoded") {
@@ -62,34 +63,40 @@ class GeneralStyleTest :
             }
         }
 
+        Given("a style whose fonts are written in the other supported shapes") {
+            val nullFont = ThemeTestSupport.yaml.decodeFromYamlNode<GeneralStyle>(
+                ThemeTestSupport.yaml.parseToYamlNode("candidate_font:\n"),
+            )
+            val listFont = ThemeTestSupport.yaml.decodeFromYamlNode<GeneralStyle>(
+                ThemeTestSupport.yaml.parseToYamlNode("candidate_font: [a.ttf, b.ttf]\n"),
+            )
+
+            Then("a font without a value decodes to no font instead of failing") {
+                nullFont.candidateFont shouldBe MaybeStringList.Empty
+            }
+
+            Then("a font declared as a list decodes to a sequence") {
+                listFont.candidateFont shouldBe MaybeStringList.Sequence(listOf("a.ttf", "b.ttf"))
+            }
+        }
+
         Given("a theme with empty/incorrect style values") {
-            val theme = ThemeTestSupport.decodeThemeFile("src/test/assets/incorrect.yaml")
-
-            When("its style section is decoded") {
-                val style = theme.generalStyle
-
-                Then("malformed values fall back to defaults without exception") {
-                    style.autoCaps shouldBe false
-                    style.candidateTextSize shouldBe 15f
-                    style.candidateBorder shouldBe 0
-                    style.candidateFont shouldBe emptyList()
-                    style.commentPosition shouldBe GeneralStyle.CommentPosition.RIGHT
-                    style.enterLabel shouldNotBe null
-                    style.enterLabel.go shouldBe "go"
-                    style.enterLabel.default shouldBe "default"
+            Then("malformed values raise serialization exception") {
+                shouldThrow<SerializationException> {
+                    ThemeTestSupport.decodeThemeFile("src/test/assets/incorrect.yaml")
                 }
             }
         }
 
         Given("an empty style section") {
-            val style = GeneralStyle.decode(yamlMapOf())
+            val style = ThemeTestSupport.yaml.decodeFromYamlNode<GeneralStyle>(yamlMapOf())
 
             Then("decode equals the constructor defaults") {
-                style shouldBe GeneralStyle.DEFAULTS
+                style shouldBe GeneralStyle()
             }
             Then("decode fills explicit keys but keeps the defaults for the rest") {
                 val style =
-                    GeneralStyle.decode(
+                    ThemeTestSupport.yaml.decodeFromYamlNode<GeneralStyle>(
                         yamlMapOf(
                             "candidate_text_size" to yamlScalarOf("20"),
                         ),

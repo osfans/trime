@@ -10,8 +10,6 @@ import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.base.DataManager
-import com.osfans.trime.util.Yaml
-import com.osfans.trime.util.get
 import com.osfans.trime.util.mapping
 import com.osfans.trime.util.pairs
 import com.osfans.trime.util.yamlMapOf
@@ -146,8 +144,8 @@ object ThemeLoader {
         themeId: String,
         mapping: YamlMap,
     ): ThemeLoadResult {
-        val theme = Theme.decode(mapping)
-        if (theme.colorSchemes.isEmpty()) {
+        val theme = ThemeYaml.parser.decodeFromYamlNode<Theme>(mapping)
+        if (theme.presetColorSchemes.isEmpty()) {
             return ThemeLoadResult.Failure(themeId, ThemeLoadError.NoColorScheme(themeId))
         }
         val findings =
@@ -166,7 +164,7 @@ object ThemeLoader {
         themeId: String,
         node: YamlNode,
         loadResource: (String) -> YamlNode?,
-    ): Theme = Theme.decode(expandSource(themeId, node, loadResource))
+    ): Theme = ThemeYaml.parser.decodeFromYamlNode(expandSource(themeId, node, loadResource))
 
     /** Applies the supported DSL subset to [node] and returns its root mapping. */
     private fun expandSource(
@@ -227,7 +225,7 @@ object ThemeLoader {
         }
 
         private fun readAndPatch(resourceId: String, file: File): YamlNode? {
-            val node = runCatching { Yaml.parseToYamlNode(file.readText()) }.getOrNull()
+            val node = runCatching { ThemeYaml.parser.parseToYamlNode(file.readText()) }.getOrNull()
             return node?.let { applyCustomPatch(resourceId, it) }
         }
     }
@@ -298,7 +296,7 @@ object ThemeLoader {
 
         val node =
             try {
-                Yaml.parseToYamlNode(content)
+                ThemeYaml.parser.parseToYamlNode(content)
             } catch (e: Exception) {
                 return ThemeLoadResult.Failure(
                     themeId,

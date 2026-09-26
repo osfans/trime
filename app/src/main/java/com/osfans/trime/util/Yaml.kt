@@ -5,13 +5,7 @@
 
 package com.osfans.trime.util
 
-import com.charleskorn.kaml.AmbiguousQuoteStyle
-import com.charleskorn.kaml.AnchorsAndAliases
-import com.charleskorn.kaml.MultiLineStringStyle
-import com.charleskorn.kaml.PolymorphismStyle
-import com.charleskorn.kaml.SequenceStyle
-import com.charleskorn.kaml.SingleLineStringStyle
-import com.charleskorn.kaml.YamlConfiguration
+import com.charleskorn.kaml.YamlInput
 import com.charleskorn.kaml.YamlList
 import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode
@@ -19,80 +13,8 @@ import com.charleskorn.kaml.YamlNull
 import com.charleskorn.kaml.YamlPath
 import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.YamlTaggedNode
-import kotlinx.serialization.DeserializationStrategy
-import com.charleskorn.kaml.Yaml as KamlYaml
-
-/**
- * The YAML parser every file the app reads goes through: theme sources and
- * deployed artifacts, sound effects, sync policies.
- *
- * Two settings deviate from kaml's defaults. Anchors and aliases are permitted
- * because theme sources build their metrics and colors with them
- * (`tongwenfeng.trime.yaml`), while kaml forbids them by default. Unknown keys
- * are tolerated, because the data decoded this way is authored by users, while
- * a theme's unknown keys are reported by the theme diagnostics instead of
- * failing the load. kaml keeps the switch `internal`, so the whole
- * configuration is passed positionally.
- *
- * Documents stay bounded: the input limit is set to 10 MB, the value the theme
- * reader used to configure, and alias expansion has a finite budget, so a
- * hostile file cannot make parsing exhaust memory.
- */
-object Yaml {
-    fun parseToYamlNode(string: String): YamlNode = kaml.parseToYamlNode(string)
-
-    /** Decodes [string] into [T], ignoring keys its deserializer does not know. */
-    fun <T> decodeFromString(deserializer: DeserializationStrategy<T>, string: String): T = kaml.decodeFromString(deserializer, string)
-}
-
-/**
- * Alias budget for theme sources: it used to be 200, which real themes exceeded,
- * and kaml's own default of 100 is below what `tongwenfeng.trime.yaml` resolves.
- * An alias is counted together with the accumulated weight of the nodes it
- * resolves, so a document whose aliases expand into more aliases still fails
- * early, while hand-written themes stay far below.
- */
-private const val MAX_ALIAS_COUNT = 1000u
-
-/** Input limit of the theme reader this replaced. */
-private const val CODE_POINT_LIMIT = 10 * 1024 * 1024
-
-private val kaml = KamlYaml(
-    configuration = YamlConfiguration(
-        /* encodeDefaults = */
-        true,
-        /* strictMode = */
-        false,
-        /* extensionDefinitionPrefix = */
-        null,
-        /* polymorphismStyle = */
-        PolymorphismStyle.Tag,
-        /* polymorphismPropertyName = */
-        "type",
-        /* encodingIndentationSize = */
-        2,
-        /* breakScalarsAt = */
-        80,
-        /* sequenceStyle = */
-        SequenceStyle.Block,
-        /* singleLineStringStyle = */
-        SingleLineStringStyle.DoubleQuoted,
-        /* multiLineStringStyle = */
-        MultiLineStringStyle.DoubleQuoted,
-        /* ambiguousQuoteStyle = */
-        AmbiguousQuoteStyle.DoubleQuoted,
-        /* sequenceBlockIndent = */
-        0,
-        /* anchorsAndAliases = */
-        AnchorsAndAliases.Permitted(maxAliasCount = MAX_ALIAS_COUNT),
-        /* yamlNamingStrategy = */
-        null,
-        /* codePointLimit = */
-        CODE_POINT_LIMIT,
-        /* decodeEnumCaseInsensitive = */
-        false,
-    ),
-)
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.encoding.Decoder
 
 /**
  * Null spellings yaml-cpp, and therefore librime, recognises but kaml does not:
@@ -161,6 +83,13 @@ val YamlMap.pairs: Map<String, YamlNode>
 /** Entries of this node when it is a mapping, `null` otherwise. */
 val YamlNode.pairs: Map<String, YamlNode>?
     get() = (this as? YamlMap)?.pairs
+
+/**
+ * The YAML node a kaml decoder carries. Serializers that decide themselves what
+ * an empty value means need it, because kaml hands over the node only here.
+ */
+internal fun Decoder.yamlNode(): YamlNode = (this as? YamlInput)?.node
+    ?: throw SerializationException("Expect a YAML decoder")
 
 fun yamlScalarOf(content: String): YamlScalar = YamlScalar(content, YamlPath.root)
 

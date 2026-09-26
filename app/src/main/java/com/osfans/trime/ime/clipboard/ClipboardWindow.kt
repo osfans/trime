@@ -218,7 +218,7 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
             }
         tabUi.label.apply {
             setText(label)
-            textSize = theme.generalStyle.candidateTextSize
+            textSize = theme.style.candidateTextSize
             setTypeface(theme.fonts.candidate, Typeface.BOLD)
             setTextColor(scope.colors.keyTextColor)
         }

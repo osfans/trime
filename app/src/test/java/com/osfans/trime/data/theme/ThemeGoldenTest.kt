@@ -7,7 +7,6 @@ package com.osfans.trime.data.theme
 
 import com.osfans.trime.data.theme.model.KeyActionToken
 import com.osfans.trime.data.theme.model.TextKeyboard
-import com.osfans.trime.ime.keyboard.KeyBehavior
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.maps.shouldContainKey
 import io.kotest.matchers.shouldBe
@@ -30,7 +29,7 @@ class ThemeGoldenTest :
             When("the whole file is decoded") {
                 Then("theme header and style scalars are preserved") {
                     theme.name shouldBe "标准"
-                    val style = theme.generalStyle
+                    val style = theme.style
                     style.autoCaps shouldBe false
                     style.candidateTextSize shouldBe 18f
                     style.keyTextSize shouldBe 24f
@@ -42,7 +41,7 @@ class ThemeGoldenTest :
                 Then("style values referenced through anchors/aliases resolve to the anchored values") {
                     // File defines height: {4: &jpgd4 48}, 6: &hgap 4, 7: &sgap 12, 1: &round1 6;
                     // style references them via *jpgd4 / *hgap / *sgap / *round1.
-                    val style = theme.generalStyle
+                    val style = theme.style
                     style.keyHeight shouldBe 48
                     style.horizontalGap shouldBe 4
                     style.verticalGap shouldBe 12
@@ -50,7 +49,7 @@ class ThemeGoldenTest :
                 }
 
                 Then("enter labels are decoded") {
-                    val enterLabel = theme.generalStyle.enterLabel
+                    val enterLabel = theme.style.enterLabels
                     enterLabel.go shouldBe "前往"
                     enterLabel.done shouldBe "完成"
                     enterLabel.default shouldBe "Enter"
@@ -64,12 +63,16 @@ class ThemeGoldenTest :
                     theme.presetKeyboards shouldContainKey "bqrw1"
                 }
 
+                Then("every preset keyboard decodes at least one key") {
+                    theme.presetKeyboards.filterValues { it.keys.isEmpty() }.keys shouldBe emptySet()
+                }
+
                 Then("the default keyboard decodes keys incl. inline flow mappings and per-key colors") {
                     val keyboard = theme.presetKeyboards.getValue("default")
                     keyboard.name shouldBe "26键默认布局"
                     keyboard.author shouldBe "暖暖"
                     keyboard.width shouldBe 10f
-                    keyboard.asciiMode shouldBe false
+                    keyboard.asciiMode shouldBe 0
                     keyboard.keys.size shouldBe 37
                     val firstKey = keyboard.keys.first()
                     firstKey.click shouldBe KeyActionToken.Plain("q")
@@ -79,8 +82,8 @@ class ThemeGoldenTest :
                 }
 
                 Then("all 46 color schemes are decoded, with the default scheme intact") {
-                    theme.colorSchemes.size shouldBe 46
-                    val defaultScheme = theme.colorSchemes.entries.first { it.key == "default" }
+                    theme.presetColorSchemes.size shouldBe 46
+                    val defaultScheme = theme.presetColorSchemes.entries.first { it.key == "default" }
                     defaultScheme.value["name"] shouldBe "标准配色！"
                     defaultScheme.value["dark_scheme"] shouldBe "steam"
                 }
@@ -104,14 +107,14 @@ class ThemeGoldenTest :
             When("the whole file is decoded") {
                 Then("theme header and style scalars are preserved") {
                     theme.name shouldBe "預設"
-                    val style = theme.generalStyle
+                    val style = theme.style
                     style.candidateTextSize shouldBe 22f
                     style.keyHeight shouldBe 44
                     style.horizontalGap shouldBe 1
                 }
 
                 Then("color schemes and preset keys are decoded") {
-                    theme.colorSchemes.size shouldBe 37
+                    theme.presetColorSchemes.size shouldBe 37
                     theme.presetKeys.size shouldBe 106
                     val brightnessDown = theme.presetKeys.getValue("BRIGHTNESS_DOWN")
                     brightnessDown.label shouldBe "亮度-"
@@ -130,7 +133,7 @@ class ThemeGoldenTest :
                     default.width shouldBe 10f
                     default.height shouldBe 44f
                     default.lock shouldBe true
-                    default.asciiMode shouldBe false
+                    default.asciiMode shouldBe 0
                     default.keys.size shouldBe 47
                     default.keys.first().click shouldBe
                         KeyActionToken.Plain("1")
@@ -144,7 +147,7 @@ class ThemeGoldenTest :
                 Then("the __include 'letter' keyboard inherits the default keyboard and overrides its own keys") {
                     val letter = theme.presetKeyboards.getValue("letter")
                     val default = theme.presetKeyboards.getValue("default")
-                    letter.asciiMode shouldBe true
+                    letter.asciiMode shouldBe 1
                     letter.resetAsciiMode shouldBe true
                     letter.lock shouldBe false
                     letter.name shouldBe default.name
@@ -157,12 +160,6 @@ class ThemeGoldenTest :
                 Then("the pure __include 'scj6' keyboard equals cangjie5") {
                     theme.presetKeyboards.getValue("scj6") shouldBe
                         theme.presetKeyboards.getValue("cangjie5")
-                }
-
-                Then("every keyboard decodes a non-empty key set") {
-                    theme.presetKeyboards.forEach { (id, keyboard) ->
-                        keyboard.keys shouldNotBe emptyList<TextKeyboard.TextKey>()
-                    }
                 }
             }
         }

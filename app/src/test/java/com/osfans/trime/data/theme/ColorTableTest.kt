@@ -157,7 +157,7 @@ class ColorTableTest :
             for (themeName in listOf("trime.yaml", "tongwenfeng.trime.yaml")) {
                 val theme = ThemeTestSupport.decodeBuiltinTheme(themeName)
                 When("the theme $themeName is loaded") {
-                    for ((id, colors) in theme.colorSchemes) {
+                    for ((id, colors) in theme.presetColorSchemes) {
                         val table = ColorTable.resolve(colors, theme.fallbackColors, parseHex)
                         Then("scheme '$id' resolves every key like the legacy walk") {
                             for (entry in ColorKey.entries) {
@@ -177,7 +177,7 @@ class ColorTableTest :
         Given("candidate_border_color, which UI code requests but the built-in themes never define") {
             When("a built-in theme is resolved") {
                 val theme = ThemeTestSupport.decodeBuiltinTheme("trime.yaml")
-                val colors = theme.colorSchemes.values.first()
+                val colors = theme.presetColorSchemes.values.first()
                 val table = ColorTable.resolve(colors, theme.fallbackColors, parseHex)
                 Then("the key is reported unresolved and resolves to None") {
                     table.unresolvedKeys shouldContain ColorKey.CANDIDATE_BORDER_COLOR

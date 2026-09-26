@@ -27,7 +27,7 @@ class EnterKeyDisplayDelegate(override val di: DI) : DIAware {
         CUSTOM_PREFERRED,
     }
 
-    val mode: Mode = runCatching { Mode.entries[theme.generalStyle.enterLabelMode] }.getOrDefault(Mode.ACTION_LABEL_NEVER)
+    val mode: Mode = runCatching { Mode.entries[theme.style.enterLabelMode] }.getOrDefault(Mode.ACTION_LABEL_NEVER)
 
     var keyLabel: String = DEFAULT_LABEL
         private set
@@ -36,7 +36,7 @@ class EnterKeyDisplayDelegate(override val di: DI) : DIAware {
 
     private fun labelFromEditorInfo(info: EditorInfo): String {
         if (info.imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
-            return theme.generalStyle.enterLabel.default
+            return theme.style.enterLabels.default
         } else {
             val action = info.imeOptions and EditorInfo.IME_MASK_ACTION
             val actionLabel = info.actionLabel
@@ -49,7 +49,7 @@ class EnterKeyDisplayDelegate(override val di: DI) : DIAware {
                     return if (!actionLabel.isNullOrEmpty()) {
                         actionLabel.toString()
                     } else {
-                        theme.generalStyle.enterLabel.default
+                        theme.style.enterLabels.default
                     }
                 }
 
@@ -57,26 +57,26 @@ class EnterKeyDisplayDelegate(override val di: DI) : DIAware {
                 Mode.ACTION_LABEL_NEVER,
                 -> {
                     return when (action) {
-                        EditorInfo.IME_ACTION_DONE -> theme.generalStyle.enterLabel.done
+                        EditorInfo.IME_ACTION_DONE -> theme.style.enterLabels.done
 
-                        EditorInfo.IME_ACTION_GO -> theme.generalStyle.enterLabel.go
+                        EditorInfo.IME_ACTION_GO -> theme.style.enterLabels.go
 
-                        EditorInfo.IME_ACTION_NEXT -> theme.generalStyle.enterLabel.next
+                        EditorInfo.IME_ACTION_NEXT -> theme.style.enterLabels.next
 
-                        EditorInfo.IME_ACTION_PREVIOUS -> theme.generalStyle.enterLabel.pre
+                        EditorInfo.IME_ACTION_PREVIOUS -> theme.style.enterLabels.pre
 
-                        EditorInfo.IME_ACTION_SEARCH -> theme.generalStyle.enterLabel.search
+                        EditorInfo.IME_ACTION_SEARCH -> theme.style.enterLabels.search
 
-                        EditorInfo.IME_ACTION_SEND -> theme.generalStyle.enterLabel.send
+                        EditorInfo.IME_ACTION_SEND -> theme.style.enterLabels.send
 
                         else -> {
                             if (mode == Mode.ACTION_LABEL_NEVER) {
-                                theme.generalStyle.enterLabel.default
+                                theme.style.enterLabels.default
                             } else {
                                 if (!actionLabel.isNullOrEmpty()) {
                                     actionLabel.toString()
                                 } else {
-                                    theme.generalStyle.enterLabel.default
+                                    theme.style.enterLabels.default
                                 }
                             }
                         }

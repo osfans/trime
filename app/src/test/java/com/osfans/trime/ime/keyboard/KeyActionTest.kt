@@ -130,11 +130,9 @@ class KeyActionTest :
                     val action =
                         KeyAction(
                             KeyActionToken.Inline(
-                                KeyActionToken.Inline.Token(
-                                    commit = "a",
-                                    text = "b",
-                                    label = "c",
-                                ),
+                                commit = "a",
+                                text = "b",
+                                label = "c",
                             ),
                             presetKeys,
                         )

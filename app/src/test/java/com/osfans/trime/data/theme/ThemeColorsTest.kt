@@ -65,7 +65,7 @@ class ThemeColorsTest :
         }
         Given("the built-in tongwenfeng theme") {
             val theme = ThemeTestSupport.decodeBuiltinTheme("tongwenfeng.trime.yaml")
-            val colors = theme.colorSchemes.getValue("default")
+            val colors = theme.presetColorSchemes.getValue("default")
             val view = ThemeColors(ColorTable.resolve(colors, theme.fallbackColors, parseHex))
             Then("the day scheme colors resolve to the parsed scheme values") {
                 view.candidateTextColor shouldBe parseHex(colors.getValue("candidate_text_color"))
