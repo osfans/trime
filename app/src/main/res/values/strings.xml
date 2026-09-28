@@ -159,9 +159,6 @@
     <string name="setup__data_path_import_failed">Failed to import data folder</string>
     <string name="select_another_directory_to_sync">Change another directory to import?</string>
     <string name="select_another_directory">Change</string>
-    <string name="reset_data_path_cancelled_message">No data folder was selected. External sync requires a folder. Pick one again, or switch to app-specific storage.</string>
-    <string name="reset_data_path_pick_again">Pick folder again</string>
-    <string name="reset_data_path_use_app_storage" translatable="false">@string/use_app_specific_storage</string>
     <string name="data_path_not_selected">No data folder selected</string>
     <string name="sync_user_data_success">User data synced successfully</string>
     <string name="sync_user_data_success_external">User data synced to external folder</string>

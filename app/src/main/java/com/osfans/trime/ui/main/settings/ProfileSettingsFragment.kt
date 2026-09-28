@@ -41,8 +41,8 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
     private val lastSyncTime by prefs.lastBackgroundSyncTime
     private val lastSyncStatus by prefs.lastBackgroundSyncStatus
 
-    private var pendingPickerCancelToAppStorage = false
-    private var pendingResetDataPath = false
+    /** Set while the picker runs as part of switching the storage mode to external sync. */
+    private var pendingExternalSyncSetup = false
 
     private val onBackgroundSyncEnable = PreferenceDelegate.OnChangeListener<Boolean> { _, v ->
         editSyncIntervalPreference.isEnabled = v
@@ -103,34 +103,36 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
         lifecycleScope.launch {
             val picked = storageAccess.pickDirectory()
             if (picked == null) {
-                when {
-                    pendingResetDataPath -> promptResetDataPathCancelled()
-                    pendingPickerCancelToAppStorage -> fallbackToAppStorage()
+                // Cancelling the picker never nags: the current folder stays as it is, and a
+                // storage mode switch the user did not finish setting up is undone silently.
+                if (pendingExternalSyncSetup) {
+                    pendingExternalSyncSetup = false
+                    cancelExternalSyncSetup()
                 }
-            } else {
-                val ctx = requireContext()
-                val cancelToAppStorage = pendingPickerCancelToAppStorage
-                lifecycleScope.launch {
-                    withLoadingDialog(ctx) {
-                        runCatching {
-                            withContext(Dispatchers.IO) {
-                                RimeDataSync.persistTreeUri(picked.uri)
-                                RimeDataSync.importToLocal().getOrThrow()
-                                viewModel.rime.runOnReady { deploy(skipImport = true) }
-                            }
-                        }.onSuccess {
+                return@launch
+            }
+            val ctx = requireContext()
+            val externalSyncSetup = pendingExternalSyncSetup
+            pendingExternalSyncSetup = false
+            lifecycleScope.launch {
+                withLoadingDialog(ctx) {
+                    runCatching {
+                        withContext(Dispatchers.IO) {
+                            RimeDataSync.persistTreeUri(picked.uri)
+                            RimeDataSync.importToLocal().getOrThrow()
+                            viewModel.rime.runOnReady { deploy(skipImport = true) }
+                        }
+                    }.onSuccess {
+                        updateDataPathSummary()
+                        ctx.toast(R.string.setup__data_path_imported)
+                    }.onFailure {
+                        if (externalSyncSetup) {
+                            fallbackToAppStorage()
+                        } else {
+                            // Keep the picked folder: it stays the user's choice, and a folder
+                            // that keeps failing makes the deploy path fall back on its own.
                             updateDataPathSummary()
-                            ctx.toast(R.string.setup__data_path_imported)
-                        }.onFailure {
-                            if (cancelToAppStorage) {
-                                fallbackToAppStorage()
-                            } else {
-                                withContext(Dispatchers.IO) {
-                                    RimeDataSync.clearExternalTree()
-                                }
-                                updateDataPathSummary()
-                                ctx.toast(R.string.setup__data_path_import_failed)
-                            }
+                            ctx.toast(R.string.setup__data_path_import_failed)
                         }
                     }
                 }
@@ -138,35 +140,15 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
         }
     }
 
-    private fun resetAndPickDataPath() {
-        pendingPickerCancelToAppStorage = false
-        pendingResetDataPath = true
-        pickDataPath()
-    }
-
     private fun promptSelectAnotherDirectory() {
         AlertDialog
             .Builder(requireContext())
             .setMessage(R.string.select_another_directory_to_sync)
             .setPositiveButton(R.string.select_another_directory) { _, _ ->
-                RimeDataSync.clearExternalTree()
-                updateDataPathSummary()
-                resetAndPickDataPath()
+                // The current folder stays in place until the user picks another one.
+                pickDataPath()
             }.setNegativeButton(android.R.string.cancel, null)
             .show()
-    }
-
-    private fun promptResetDataPathCancelled() {
-        AlertDialog
-            .Builder(requireContext())
-            .setMessage(R.string.reset_data_path_cancelled_message)
-            .setPositiveButton(R.string.reset_data_path_pick_again) { _, _ ->
-                resetAndPickDataPath()
-            }.setNegativeButton(R.string.reset_data_path_use_app_storage) { _, _ ->
-                fallbackToAppStorage()
-            }.setOnCancelListener {
-                resetAndPickDataPath()
-            }.show()
     }
 
     private fun promptExternalSyncFolderSelection() {
@@ -175,18 +157,22 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
             .Builder(ctx)
             .setMessage(R.string.external_sync_select_folder_message)
             .setPositiveButton(R.string.setup__select_data_path) { _, _ ->
-                pendingPickerCancelToAppStorage = true
-                pendingResetDataPath = false
+                pendingExternalSyncSetup = true
                 pickDataPath()
             }.setNegativeButton(android.R.string.cancel) { _, _ ->
-                fallbackToAppStorage()
+                cancelExternalSyncSetup()
             }.setOnCancelListener {
-                fallbackToAppStorage()
+                cancelExternalSyncSetup()
             }.show()
     }
 
+    /** Falls back to app-specific storage when the user gives up on choosing a folder. */
+    private fun cancelExternalSyncSetup() {
+        prefs.dataStorageMode.setValue(DataStorageMode.APP_STORAGE)
+        updateStorageModeUi()
+    }
+
     private fun fallbackToAppStorage() {
-        RimeDataSync.clearExternalTree()
         RimeDataSync.onStorageModeChanged(
             DataStorageMode.EXTERNAL_SYNC,
             DataStorageMode.APP_STORAGE,
@@ -235,7 +221,8 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                                 oldMode == DataStorageMode.EXTERNAL_SYNC &&
                                 mode == DataStorageMode.APP_STORAGE
                             ) {
-                                RimeDataSync.clearExternalTree()
+                                // The picked folder and its grant are kept, so switching back to
+                                // external sync does not ask the user to pick it again.
                                 updateDataPathSummary()
                             }
                             true

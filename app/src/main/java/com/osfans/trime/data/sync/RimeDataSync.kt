@@ -100,18 +100,13 @@ object RimeDataSync {
         }
     }
 
-    fun clearExternalTree() {
-        treeUri()?.let(StorageAccess::releasePersistedPermission)
-        prefs.externalRimeTreeUri.setValue("")
-        prefs.externalRimeDisplayName.setValue("")
-        clearIndex()
-    }
-
-    /** Drops the picked folder and continues with app-specific storage. */
+    /**
+     * Continues with app-specific storage. The picked folder and its grant are kept, so switching
+     * back to external sync does not ask the user to pick a folder again.
+     */
     fun fallbackToAppStorage(reason: Throwable? = null) {
         if (!usesExternalSync()) return
         Timber.w(reason, "External sync unavailable; falling back to app-specific storage")
-        clearExternalTree()
         onStorageModeChanged(DataStorageMode.EXTERNAL_SYNC, DataStorageMode.APP_STORAGE)
         prefs.dataStorageMode.setValue(DataStorageMode.APP_STORAGE)
         DeployNotification.showExternalSyncFallback()
@@ -698,7 +693,7 @@ object RimeDataSync {
     /**
      * File-backed index of the synced paths, keyed by the tree URI of the picked folder.
      *
-     * Not thread-safe: neither [loadIndex], [saveIndex] nor [clearIndex] may run concurrently.
+     * Not thread-safe: neither [loadIndex] nor [saveIndex] may run concurrently.
      */
     private const val INDEX_FILE = "rime_sync_index.json"
 
@@ -723,10 +718,6 @@ object RimeDataSync {
 
     private fun saveIndex(data: SyncIndexData) {
         indexFile.writeText(indexJson.encodeToString(data))
-    }
-
-    private fun clearIndex() {
-        saveIndex(SyncIndexData())
     }
 
     private fun withCurrentTree(entries: Map<String, SyncEntry>): SyncIndexData = SyncIndexData(
