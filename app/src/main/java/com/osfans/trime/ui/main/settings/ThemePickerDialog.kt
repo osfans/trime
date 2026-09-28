@@ -45,7 +45,7 @@ object ThemePickerDialog {
                             val newItem = allThemes[which]
                             withContext(Dispatchers.IO) {
                                 if (RimeDataSync.usesExternalSync()) {
-                                    RimeDataSync.importThemeToLocal(context, newItem.configId)
+                                    RimeDataSync.importThemeToLocal(newItem.configId)
                                         .onFailure { Timber.w(it, "Theme import failed for ${newItem.configId}") }
                                 }
                             }

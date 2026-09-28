@@ -8,7 +8,6 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import java.io.File
-import java.io.FileInputStream
 import kotlin.io.path.createTempDirectory
 
 class AtomicLocalFileCopyTest :
@@ -21,10 +20,9 @@ class AtomicLocalFileCopyTest :
                 val payload = "hello sync\n".repeat(1024)
                 source.writeText(payload)
 
-                val bytes =
-                    FileInputStream(source).use { input ->
-                        AtomicLocalFileCopy.copyFromInput(input, dest)
-                    }
+                val bytes = AtomicLocalFileCopy.writeFromStream(dest) { output ->
+                    source.inputStream().use { it.copyTo(output) }
+                }
 
                 bytes shouldBe source.length()
                 dest.readText() shouldBe payload
@@ -41,8 +39,8 @@ class AtomicLocalFileCopyTest :
                 source.writeText("replacement")
                 dest.writeText("old")
 
-                FileInputStream(source).use { input ->
-                    AtomicLocalFileCopy.copyFromInput(input, dest)
+                AtomicLocalFileCopy.writeFromStream(dest) { output ->
+                    source.inputStream().use { it.copyTo(output) }
                 }
 
                 dest.readText() shouldBe "replacement"
@@ -59,8 +57,8 @@ class AtomicLocalFileCopyTest :
                 val source = File(dir, "source.txt")
                 source.writeText("new content")
 
-                FileInputStream(source).use { input ->
-                    AtomicLocalFileCopy.copyFromInput(input, File(dir, "dest.txt"))
+                AtomicLocalFileCopy.writeFromStream(File(dir, "dest.txt")) { output ->
+                    source.inputStream().use { it.copyTo(output) }
                 }
 
                 sibling.readText() shouldBe "sibling"

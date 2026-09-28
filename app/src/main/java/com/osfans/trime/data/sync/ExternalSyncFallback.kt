@@ -4,19 +4,17 @@
 
 package com.osfans.trime.data.sync
 
-import android.content.Context
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.util.DeployNotification
 import timber.log.Timber
 
 object ExternalSyncFallback {
     suspend fun fallbackToAppStorage(
-        context: Context,
         reason: Throwable? = null,
     ) {
-        if (!RimeDataSync.usesExternalSync(context)) return
+        if (!RimeDataSync.usesExternalSync()) return
         Timber.w(reason, "External sync unavailable; falling back to app-specific storage")
-        RimeDataSync.clearExternalTree(context)
+        RimeDataSync.clearExternalTree()
         UserDbMigration.onStorageModeChanged(
             DataStorageMode.EXTERNAL_SYNC,
             DataStorageMode.APP_STORAGE,

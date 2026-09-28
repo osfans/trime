@@ -107,7 +107,7 @@ object RimeDaemon {
                     delay(STARTUP_RETRY_DELAY_MS)
                     if (sessions.isEmpty()) return@launch
                     if (realRime.lifecycle.currentState != RimeLifecycle.State.STOPPED) return@launch
-                    if (!RimeDataSync.isStorageAvailable(appContext)) {
+                    if (!RimeDataSync.isStorageAvailable()) {
                         Timber.d("Rime startup retry ${attempt + 1}: storage still unavailable")
                         return@repeat
                     }

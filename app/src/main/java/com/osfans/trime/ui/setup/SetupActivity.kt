@@ -52,8 +52,8 @@ class SetupActivity : FragmentActivity() {
             val picked = storageAccess.pickDirectory() ?: return@launch
             runCatching {
                 withContext(Dispatchers.IO) {
-                    RimeDataSync.persistTreeUri(this@SetupActivity, picked.uri)
-                    RimeDataSync.importToLocal(this@SetupActivity).getOrThrow()
+                    RimeDataSync.persistTreeUri(picked.uri)
+                    RimeDataSync.importToLocal().getOrThrow()
                 }
                 refreshCurrentFragment()
                 updateButtons()
@@ -61,7 +61,7 @@ class SetupActivity : FragmentActivity() {
                 skipButton.visibility = View.VISIBLE
             }.onFailure {
                 withContext(Dispatchers.IO) {
-                    RimeDataSync.clearExternalTree(this@SetupActivity)
+                    RimeDataSync.clearExternalTree()
                 }
                 refreshCurrentFragment()
                 updateButtons()

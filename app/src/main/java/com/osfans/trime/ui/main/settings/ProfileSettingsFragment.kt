@@ -115,8 +115,8 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                     withLoadingDialog(ctx) {
                         runCatching {
                             withContext(Dispatchers.IO) {
-                                RimeDataSync.persistTreeUri(ctx, picked.uri)
-                                RimeDataSync.importToLocal(ctx).getOrThrow()
+                                RimeDataSync.persistTreeUri(picked.uri)
+                                RimeDataSync.importToLocal().getOrThrow()
                                 viewModel.rime.runOnReady { deploy(skipImport = true) }
                             }
                         }.onSuccess {
@@ -127,7 +127,7 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                                 fallbackToAppStorage()
                             } else {
                                 withContext(Dispatchers.IO) {
-                                    RimeDataSync.clearExternalTree(ctx)
+                                    RimeDataSync.clearExternalTree()
                                 }
                                 updateDataPathSummary()
                                 ctx.toast(R.string.setup__data_path_import_failed)
@@ -150,7 +150,7 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
             .Builder(requireContext())
             .setMessage(R.string.select_another_directory_to_sync)
             .setPositiveButton(R.string.select_another_directory) { _, _ ->
-                RimeDataSync.clearExternalTree(requireContext())
+                RimeDataSync.clearExternalTree()
                 updateDataPathSummary()
                 resetAndPickDataPath()
             }.setNegativeButton(android.R.string.cancel, null)
@@ -187,7 +187,7 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
     }
 
     private fun fallbackToAppStorage() {
-        RimeDataSync.clearExternalTree(requireContext())
+        RimeDataSync.clearExternalTree()
         UserDbMigration.onStorageModeChanged(
             DataStorageMode.EXTERNAL_SYNC,
             DataStorageMode.APP_STORAGE,
@@ -236,7 +236,7 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                                 oldMode == DataStorageMode.EXTERNAL_SYNC &&
                                 mode == DataStorageMode.APP_STORAGE
                             ) {
-                                RimeDataSync.clearExternalTree(ctx)
+                                RimeDataSync.clearExternalTree()
                                 updateDataPathSummary()
                             }
                             true
@@ -269,7 +269,7 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                                     when {
                                         !success -> R.string.sync_user_data_failure
 
-                                        RimeDataSync.usesExternalSync(ctx) ->
+                                        RimeDataSync.usesExternalSync() ->
                                             R.string.sync_user_data_success_external
 
                                         else -> R.string.sync_user_data_success
@@ -383,7 +383,7 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
         updateStorageModeUi()
         val ctx = requireContext()
         if (
-            RimeDataSync.usesExternalSync(ctx) &&
+            RimeDataSync.usesExternalSync() &&
             prefs.externalRimeTreeUri.getValue().isNotEmpty() &&
             !RimeDataSync.hasExternalAccess()
         ) {

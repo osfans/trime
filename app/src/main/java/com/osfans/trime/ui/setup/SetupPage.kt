@@ -10,7 +10,6 @@ import androidx.fragment.app.FragmentActivity
 import com.osfans.trime.R
 import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.util.InputMethodUtils
-import com.osfans.trime.util.appContext
 
 enum class SetupPage {
     Mode,
@@ -56,7 +55,7 @@ enum class SetupPage {
     }
 
     fun isDone() = when (this) {
-        Mode -> RimeDataSync.isStorageChoiceDone(appContext)
+        Mode -> RimeDataSync.isStorageChoiceDone()
         Enable -> InputMethodUtils.checkIsTrimeEnabled()
         Select -> InputMethodUtils.checkIsTrimeSelected()
     }

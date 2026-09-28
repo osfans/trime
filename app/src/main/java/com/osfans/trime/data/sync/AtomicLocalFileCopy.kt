@@ -4,13 +4,27 @@
 
 package com.osfans.trime.data.sync
 
+import android.net.Uri
+import com.osfans.trime.storage.StorageAccess
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.util.UUID
 
 object AtomicLocalFileCopy {
+    /**
+     * Copies the SAF document [srcUri] into [destFile] through a temporary file next to it,
+     * so that a reader of [destFile] never observes a partially written file.
+     *
+     * @return the number of bytes written
+     */
+    suspend fun copyFromSaf(
+        srcUri: Uri,
+        destFile: File,
+    ): Long = StorageAccess.readFile(srcUri) { input ->
+        writeFromStream(destFile) { output -> input.copyTo(output) }
+    }
+
     fun writeFromStream(
         destFile: File,
         copy: (OutputStream) -> Unit,
@@ -72,12 +86,5 @@ object AtomicLocalFileCopy {
                 }
             }
         }
-    }
-
-    fun copyFromInput(
-        source: FileInputStream,
-        destFile: File,
-    ): Long = writeFromStream(destFile) { output ->
-        source.copyTo(output)
     }
 }

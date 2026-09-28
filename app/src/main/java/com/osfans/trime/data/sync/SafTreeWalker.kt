@@ -1,40 +1,18 @@
-// SPDX-FileCopyrightText: 2015 - 2025 Rime community
+// SPDX-FileCopyrightText: 2015 - 2026 Rime community
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 package com.osfans.trime.data.sync
 
-import android.content.ContentResolver
 import android.net.Uri
-import android.provider.DocumentsContract
-import java.util.ArrayDeque
-
-data class SafFileEntry(
-    val documentId: String,
-    val displayName: String,
-    val mimeType: String,
-    val size: Long,
-    val lastModified: Long,
-    val relativePath: String,
-)
-
-data class SafTreeListing(
-    val files: List<SafFileEntry>,
-    val directoryIds: Map<String, String>,
-)
+import com.osfans.trime.storage.StorageAccess
+import com.osfans.trime.storage.StorageWalkEntry
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.toList
 
 object SafTreeWalker {
     private const val SKIP_DIR = "build"
     private const val SKIP_DIR_SUBSTRING = ".userdb"
-
-    private val documentProjection =
-        arrayOf(
-            DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-            DocumentsContract.Document.COLUMN_DISPLAY_NAME,
-            DocumentsContract.Document.COLUMN_MIME_TYPE,
-            DocumentsContract.Document.COLUMN_SIZE,
-            DocumentsContract.Document.COLUMN_LAST_MODIFIED,
-        )
 
     fun shouldSkip(
         relativePath: String,
@@ -50,144 +28,29 @@ object SafTreeWalker {
         return dirSegments.any { it.contains(SKIP_DIR_SUBSTRING) }
     }
 
-    /**
-     * Whether [relativePath] should be listed. [skipPrefix] drops that path and its
-     * descendants. [limitToPrefix] keeps only ancestors of the prefix, the prefix
-     * itself, and descendants. Applied before enqueue so skipped directories are
-     * never queried.
-     */
+    /** Whether [relativePath] should be visited; [skipPrefix] drops that path and its descendants. */
     fun shouldVisit(
         relativePath: String,
         skipPrefix: String? = null,
-        limitToPrefix: String? = null,
     ): Boolean {
-        if (!skipPrefix.isNullOrEmpty() &&
-            (relativePath == skipPrefix || relativePath.startsWith("$skipPrefix/"))
-        ) {
-            return false
-        }
-        if (!limitToPrefix.isNullOrEmpty()) {
-            val selfOrDescendant =
-                relativePath == limitToPrefix || relativePath.startsWith("$limitToPrefix/")
-            val ancestor = limitToPrefix.startsWith("$relativePath/")
-            if (!selfOrDescendant && !ancestor) return false
-        }
-        return true
+        if (skipPrefix.isNullOrEmpty()) return true
+        return relativePath != skipPrefix && !relativePath.startsWith("$skipPrefix/")
     }
 
-    fun listFiles(
-        contentResolver: ContentResolver,
-        treeUri: Uri,
-        rootDocumentId: String,
+    /** Whether [entry] takes part in the sync, both as a file to copy and as a path to keep. */
+    fun shouldSync(
+        entry: StorageWalkEntry,
         skipUserDb: Boolean = true,
         skipPrefix: String? = null,
-        limitToPrefix: String? = null,
-    ): List<SafFileEntry> = listTree(
-        contentResolver,
-        treeUri,
-        rootDocumentId,
-        skipUserDb,
-        skipPrefix,
-        limitToPrefix,
-    ).files
+    ): Boolean = !shouldSkip(entry.relativePath, entry.file.isDir, skipUserDb) &&
+        shouldVisit(entry.relativePath, skipPrefix)
 
-    fun listTree(
-        contentResolver: ContentResolver,
+    /** Walks the external [treeUri] and lists every entry that should take part in the sync. */
+    suspend fun listExternalEntries(
         treeUri: Uri,
-        rootDocumentId: String,
         skipUserDb: Boolean = true,
         skipPrefix: String? = null,
-        limitToPrefix: String? = null,
-    ): SafTreeListing {
-        val result = mutableListOf<SafFileEntry>()
-        val directoryIds = mutableMapOf("" to rootDocumentId)
-        val queue = ArrayDeque<Pair<String, String>>()
-        queue.add("" to rootDocumentId)
-
-        while (queue.isNotEmpty()) {
-            val (relativePath, parentId) = queue.removeFirst()
-            val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, parentId)
-            val cursor =
-                contentResolver.query(childrenUri, documentProjection, null, null, null)
-                    ?: throw SafQueryException(childrenUri, relativePath.ifEmpty { "." })
-            cursor.use {
-                val idCol = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
-                val nameCol = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
-                val mimeCol = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE)
-                val sizeCol = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_SIZE)
-                val modCol = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_LAST_MODIFIED)
-                while (cursor.moveToNext()) {
-                    val documentId = cursor.getString(idCol)
-                    val name = cursor.getString(nameCol)
-                    val mimeType = cursor.getString(mimeCol)
-                    val childPath =
-                        if (relativePath.isEmpty()) {
-                            name
-                        } else {
-                            "$relativePath/$name"
-                        }
-                    val isDirectory = DocumentsContract.Document.MIME_TYPE_DIR == mimeType
-                    if (shouldSkip(childPath, isDirectory, skipUserDb)) continue
-                    if (!shouldVisit(childPath, skipPrefix, limitToPrefix)) continue
-                    if (isDirectory) {
-                        directoryIds[childPath] = documentId
-                        queue.add(childPath to documentId)
-                    } else {
-                        result.add(
-                            SafFileEntry(
-                                documentId = documentId,
-                                displayName = name,
-                                mimeType = mimeType,
-                                size = cursor.getLong(sizeCol),
-                                lastModified = cursor.getLong(modCol),
-                                relativePath = childPath,
-                            ),
-                        )
-                    }
-                }
-            }
-        }
-        return SafTreeListing(result, directoryIds)
-    }
-
-    fun findFileEntry(
-        contentResolver: ContentResolver,
-        treeUri: Uri,
-        parentDocumentId: String,
-        displayName: String,
-    ): SafFileEntry? {
-        val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, parentDocumentId)
-        val cursor =
-            contentResolver.query(childrenUri, documentProjection, null, null, null)
-                ?: throw SafQueryException(childrenUri, displayName)
-        cursor.use {
-            val idCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
-            val nameCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
-            val mimeCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE)
-            val sizeCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_SIZE)
-            val modCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_LAST_MODIFIED)
-            while (it.moveToNext()) {
-                val name = it.getString(nameCol)
-                if (name == displayName) {
-                    return SafFileEntry(
-                        documentId = it.getString(idCol),
-                        displayName = name,
-                        mimeType = it.getString(mimeCol),
-                        size = it.getLong(sizeCol),
-                        lastModified = it.getLong(modCol),
-                        relativePath = name,
-                    )
-                }
-            }
-        }
-        return null
-    }
-
-    fun findChildDocumentId(
-        contentResolver: ContentResolver,
-        treeUri: Uri,
-        parentDocumentId: String,
-        displayName: String,
-    ): String? = findFileEntry(contentResolver, treeUri, parentDocumentId, displayName)
-        ?.documentId
+    ): List<StorageWalkEntry> = StorageAccess.walk(treeUri)
+        .filter { shouldSync(it, skipUserDb, skipPrefix) }
+        .toList()
 }
