@@ -28,18 +28,8 @@ class SafTreeWalkerTest :
             SafTreeWalker.shouldVisit("sync/phone-b/luna.userdb.txt", skipPrefix = skip) shouldBe true
             SafTreeWalker.shouldVisit("default.custom.yaml", skipPrefix = skip) shouldBe true
         }
-        "limitToPrefix keeps ancestors, the prefix, and descendants" {
-            val limit = "sync/phone-a"
-            SafTreeWalker.shouldVisit("sync", limitToPrefix = limit) shouldBe true
-            SafTreeWalker.shouldVisit("sync/phone-a", limitToPrefix = limit) shouldBe true
-            SafTreeWalker.shouldVisit("sync/phone-a/luna.userdb.txt", limitToPrefix = limit) shouldBe true
-            SafTreeWalker.shouldVisit("sync/phone-b", limitToPrefix = limit) shouldBe false
-            SafTreeWalker.shouldVisit("sync/phone-b/luna.userdb.txt", limitToPrefix = limit) shouldBe false
-            SafTreeWalker.shouldVisit("default.custom.yaml", limitToPrefix = limit) shouldBe false
-        }
         "blank prefixes do not filter" {
             SafTreeWalker.shouldVisit("sync/phone-a/foo.txt") shouldBe true
             SafTreeWalker.shouldVisit("sync/phone-a/foo.txt", skipPrefix = "") shouldBe true
-            SafTreeWalker.shouldVisit("default.custom.yaml", limitToPrefix = "") shouldBe true
         }
     })

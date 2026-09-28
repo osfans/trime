@@ -13,7 +13,6 @@ import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.ui.common.OnItemChangedListener
 import com.osfans.trime.ui.main.settings.ProgressFragment
 import com.osfans.trime.util.NaiveDustman
-import com.osfans.trime.util.appContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -107,8 +106,8 @@ class SchemaListFragment :
                             setEnabledSchemata(schemaIds)
                             deploy(skipImport = true)
                         }
-                        if (RimeDataSync.usesExternalSync(appContext)) {
-                            RimeDataSync.exportConfigFilesToExternal(appContext).getOrThrow()
+                        if (RimeDataSync.usesExternalSync()) {
+                            RimeDataSync.exportConfigFilesToExternal().getOrThrow()
                         }
                     } finally {
                         RimeDaemon.destroySession(sessionName)

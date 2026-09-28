@@ -37,12 +37,12 @@ class BackgroundSyncWork(
         if (!enable) {
             return Result.failure()
         }
-        if (RimeDataSync.usesExternalSync(applicationContext) &&
-            !RimeDataSync.hasExternalAccess(applicationContext)
+        if (RimeDataSync.usesExternalSync() &&
+            !RimeDataSync.hasExternalAccess()
         ) {
-            ExternalSyncFallback.fallbackToAppStorage(applicationContext)
+            ExternalSyncFallback.fallbackToAppStorage()
         }
-        if (!RimeDataSync.isStorageAvailable(applicationContext)) {
+        if (!RimeDataSync.isStorageAvailable()) {
             Timber.w("Background sync skipped: storage not available")
             return Result.retry()
         }
