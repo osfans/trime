@@ -159,8 +159,6 @@
     <string name="setup__data_path_import_failed">資料夾匯入失敗</string>
     <string name="select_another_directory_to_sync">要選擇另一個資料夾進行同步嗎？</string>
     <string name="select_another_directory">選擇</string>
-    <string name="reset_data_path_cancelled_message">未選擇資料夾。外部同步需要選擇資料夾。請重新選擇，或切換為使用應用程式專屬儲存空間。</string>
-    <string name="reset_data_path_pick_again">重新選擇資料夾</string>
     <string name="data_path_not_selected">未選擇資料夾</string>
     <string name="sync_user_data_success">使用者資料同步成功</string>
     <string name="sync_user_data_success_external">使用者資料已同步到外部資料夾</string>

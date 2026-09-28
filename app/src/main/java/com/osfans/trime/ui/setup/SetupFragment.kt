@@ -37,12 +37,7 @@ class SetupFragment : Fragment() {
                     R.id.app_specific_storage_option -> DataStorageMode.APP_STORAGE
                     else -> return@setOnCheckedChangeListener
                 }
-                if (oldMode == DataStorageMode.EXTERNAL_SYNC &&
-                    newMode == DataStorageMode.APP_STORAGE
-                ) {
-                    prefs.userDbMigrated.setValue(false)
-                    RimeDataSync.clearExternalTree()
-                }
+                RimeDataSync.onStorageModeChanged(oldMode, newMode)
                 prefs.dataStorageMode.setValue(newMode)
                 sync()
                 (requireActivity() as SetupActivity).updateButtons()

@@ -60,9 +60,8 @@ class SetupActivity : FragmentActivity() {
                 toast(R.string.setup__data_path_imported)
                 skipButton.visibility = View.VISIBLE
             }.onFailure {
-                withContext(Dispatchers.IO) {
-                    RimeDataSync.clearExternalTree()
-                }
+                // Keep the picked folder: the user is not forced to pick again, and a folder that
+                // keeps failing makes the deploy path fall back to app-specific storage on its own.
                 refreshCurrentFragment()
                 updateButtons()
                 toast(R.string.setup__data_path_import_failed)

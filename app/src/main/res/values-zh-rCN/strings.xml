@@ -158,8 +158,6 @@
     <string name="setup__data_path_import_failed">数据文件夹导入失败</string>
     <string name="select_another_directory_to_sync">要选择另一个文件夹进行同步吗？</string>
     <string name="select_another_directory">选择</string>
-    <string name="reset_data_path_cancelled_message">未选择数据文件夹。外部同步需要选择文件夹。请重新选择，或切换为使用应用专属存储空间。</string>
-    <string name="reset_data_path_pick_again">重新选择文件夹</string>
     <string name="data_path_not_selected">未选择数据文件夹</string>
     <string name="sync_user_data_success">用户数据同步成功</string>
     <string name="sync_user_data_success_external">用户数据已同步到外部文件夹</string>
