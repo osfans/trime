@@ -84,11 +84,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    // hack workaround lint gradle 8.0.2
-    lint {
-        checkReleaseBuilds = false
-    }
-
     testOptions {
         unitTests.all {
             it.useJUnitPlatform()
