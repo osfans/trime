@@ -10,15 +10,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 
-class BoundedCopyPoolTest :
+class RimeDataSyncPoolTest :
     StringSpec({
         "mapParallel waits for all workers before returning" {
             runBlocking {
                 val items = (0 until 64).toList()
                 val results =
-                    BoundedCopyPool.mapParallel(
+                    RimeDataSync.mapParallel(
                         items,
-                        parallelism = 4,
                         dispatcher = Dispatchers.Default,
                     ) { item ->
                         delay(5)
@@ -30,7 +29,7 @@ class BoundedCopyPoolTest :
 
         "mapParallel returns empty list for empty input" {
             runBlocking {
-                BoundedCopyPool.mapParallel(emptyList<Int>(), parallelism = 4) { it } shouldBe emptyList()
+                RimeDataSync.mapParallel(emptyList<Int>()) { it } shouldBe emptyList()
             }
         }
     })

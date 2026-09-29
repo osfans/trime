@@ -9,7 +9,6 @@ import com.osfans.trime.BuildConfig
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.opencc.OpenCCDictManager
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.sync.ExternalSyncFallback
 import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.ime.core.InlinePreeditMode
 import com.osfans.trime.util.appContext
@@ -97,14 +96,14 @@ class Rime :
     override suspend fun deploy(skipImport: Boolean) = RimeMaintenanceMutex.withLock {
         if (RimeDataSync.usesExternalSync()) {
             if (!RimeDataSync.hasExternalAccess()) {
-                ExternalSyncFallback.fallbackToAppStorage()
+                RimeDataSync.fallbackToAppStorage()
             }
         }
         if (RimeDataSync.usesExternalSync() && !skipImport) {
             val importResult =
                 RimeDataSync.importToLocal(keepNotificationUntilDeploySuccess = true)
             if (importResult.isFailure) {
-                ExternalSyncFallback.fallbackToAppStorage(importResult.exceptionOrNull())
+                RimeDataSync.fallbackToAppStorage(importResult.exceptionOrNull())
             } else {
                 Timber.i("Import finished: ${importResult.getOrNull()}")
             }
@@ -151,7 +150,7 @@ class Rime :
     override suspend fun syncUserData(): Boolean = RimeMaintenanceMutex.withLock {
         // Keep the local user data dir a fresh copy of the external tree before
         // syncing. The first sync also migrates the user databases (imported
-        // once, never synced afterwards, see UserDbMigration); every subsequent
+        // once, never synced afterwards, see RimeDataSync); every subsequent
         // sync imports incrementally (SyncIndex) before the rime maintenance
         // runs. The import progress notification is suppressed so syncing does
         // not show a deploy notification.

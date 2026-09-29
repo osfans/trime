@@ -13,11 +13,9 @@ import android.graphics.Color
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.osfans.trime.R
-import com.osfans.trime.data.sync.SyncStats
 import com.osfans.trime.ui.main.MainActivity
 import com.osfans.trime.ui.main.NavigationRoute
 import splitties.systemservices.notificationManager
-import timber.log.Timber
 
 fun createNotificationChannel(
     id: String,
@@ -96,29 +94,10 @@ object DeployNotification {
     }
 
     fun notifyPartialCopyIfNeeded(
-        stats: SyncStats,
+        failed: Int,
         operation: String,
-    ): SyncStats {
-        if (stats.failed <= 0) {
-            Timber.i(
-                "%s: copied=%d skipped=%d deleted=%d bytesCopied=%d",
-                operation,
-                stats.copied,
-                stats.skipped,
-                stats.deleted,
-                stats.bytesCopied,
-            )
-            return stats
-        }
-        Timber.w(
-            "%s completed with failures: failed=%d copied=%d skipped=%d deleted=%d bytesCopied=%d",
-            operation,
-            stats.failed,
-            stats.copied,
-            stats.skipped,
-            stats.deleted,
-            stats.bytesCopied,
-        )
+    ) {
+        if (failed <= 0) return
         ensureChannel()
         NotificationCompat
             .Builder(appContext, CHANNEL_ID)
@@ -131,7 +110,7 @@ object DeployNotification {
                     .bigText(
                         appContext.getString(
                             R.string.sync_partial_copy_failure_detail,
-                            stats.failed,
+                            failed,
                             operation,
                         ),
                     ),
@@ -139,7 +118,6 @@ object DeployNotification {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
             .let { notificationManager.notify(PARTIAL_COPY_MESSAGE_ID, it) }
-        return stats
     }
 
     fun showExternalSyncFallback() {

@@ -1,6 +1,7 @@
-// SPDX-FileCopyrightText: 2015 - 2025 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2026 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.data.sync
 
@@ -10,25 +11,44 @@ import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.storage.StorageAccess
 import com.osfans.trime.storage.StorageWalkEntry
 import com.osfans.trime.util.DeployNotification
+import com.osfans.trime.util.FileUtils
+import com.osfans.trime.util.appContext
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import timber.log.Timber
 import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
+import java.util.Collections
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
-data class SyncStats(
-    val copied: Int = 0,
-    val skipped: Int = 0,
-    val deleted: Int = 0,
-    val failed: Int = 0,
-    val bytesCopied: Long = 0,
-)
-
+/**
+ * Mirrors the user data dir against the folder the user picked in [DataStorageMode.EXTERNAL_SYNC]:
+ * files are imported before a rime maintenance and exported after a successful one.
+ */
 object RimeDataSync {
     private const val DEFAULT_MIME = "application/octet-stream"
+
+    /** Internal rime directories that never take part in the sync. */
+    private const val SKIP_DIR = "build"
+    private const val SKIP_DIR_SUBSTRING = ".userdb"
 
     private val parallelism = Runtime.getRuntime().availableProcessors().coerceIn(4, 8)
 
     private val prefs get() = AppPrefs.defaultInstance().profile
+
+    // region Storage mode and picked folder
+
+    fun usesExternalSync(): Boolean = prefs.dataStorageMode.getValue() == DataStorageMode.EXTERNAL_SYNC
 
     fun treeUri(): Uri? = prefs.externalRimeTreeUri.getValue().takeIf { it.isNotEmpty() }?.let(Uri::parse)
 
@@ -41,7 +61,7 @@ object RimeDataSync {
 
     fun isRuntimeReady(): Boolean = DataManager.resolvedUserDataDir() != null && DataManager.resolvedSharedDataDir() != null
 
-    fun usesExternalSync(): Boolean = prefs.dataStorageMode.getValue() == DataStorageMode.EXTERNAL_SYNC
+    fun isStorageAvailable(): Boolean = isRuntimeReady() && (!usesExternalSync() || hasExternalAccess())
 
     /**
      * Whether the user finished the storage-mode setup step.
@@ -62,35 +82,6 @@ object RimeDataSync {
         prefs.externalRimeTreeUri.getValue(),
     )
 
-    fun isStorageAvailable(): Boolean = isRuntimeReady() && (!usesExternalSync() || hasExternalAccess())
-
-    suspend fun syncUserDataWithOptionalExport(syncUserData: suspend () -> Boolean): Boolean {
-        val dictSyncOk = syncUserData()
-        if (!dictSyncOk) {
-            Timber.w("Export skipped: Rime user sync failed")
-            return false
-        }
-        val exportOk =
-            when {
-                !usesExternalSync() -> true
-
-                !hasExternalAccess() -> {
-                    Timber.w("Export skipped: no data path selected")
-                    false
-                }
-
-                else -> exportToExternal().isSuccess
-            }
-        return exportOk
-    }
-
-    fun clearExternalTree() {
-        treeUri()?.let(StorageAccess::releasePersistedPermission)
-        prefs.externalRimeTreeUri.setValue("")
-        prefs.externalRimeDisplayName.setValue("")
-        SyncIndex.clear()
-    }
-
     /**
      * Remembers the folder picked by the user.
      *
@@ -105,9 +96,49 @@ object RimeDataSync {
             StorageAccess.releasePersistedPermission(previous)
         }
         if (previous?.toString() != uri.toString()) {
-            SyncIndex.save(SyncIndexData(treeUri = uri.toString()))
+            saveIndex(SyncIndexData(treeUri = uri.toString()))
         }
     }
+
+    fun clearExternalTree() {
+        treeUri()?.let(StorageAccess::releasePersistedPermission)
+        prefs.externalRimeTreeUri.setValue("")
+        prefs.externalRimeDisplayName.setValue("")
+        clearIndex()
+    }
+
+    /** Drops the picked folder and continues with app-specific storage. */
+    fun fallbackToAppStorage(reason: Throwable? = null) {
+        if (!usesExternalSync()) return
+        Timber.w(reason, "External sync unavailable; falling back to app-specific storage")
+        clearExternalTree()
+        onStorageModeChanged(DataStorageMode.EXTERNAL_SYNC, DataStorageMode.APP_STORAGE)
+        prefs.dataStorageMode.setValue(DataStorageMode.APP_STORAGE)
+        DeployNotification.showExternalSyncFallback()
+    }
+
+    /**
+     * Leaving external sync invalidates the `.userdb` migration: the local database
+     * is authoritative afterwards, so a later switch back has to import it again.
+     */
+    fun onStorageModeChanged(
+        from: DataStorageMode,
+        to: DataStorageMode,
+    ) {
+        if (from == DataStorageMode.EXTERNAL_SYNC && to == DataStorageMode.APP_STORAGE) {
+            prefs.userDbMigrated.setValue(false)
+        }
+    }
+
+    private fun shouldImportUserDb(): Boolean = !prefs.userDbMigrated.getValue()
+
+    private fun markUserDbImported() {
+        prefs.userDbMigrated.setValue(true)
+    }
+
+    // endregion
+
+    // region Sync entry points
 
     suspend fun importToLocal(
         keepNotificationUntilDeploySuccess: Boolean = false,
@@ -122,8 +153,8 @@ object RimeDataSync {
                 val treeUri = treeUri() ?: error("No data path selected")
                 check(hasExternalAccess()) { "No access to data path" }
                 val destRoot = DataManager.userDataDir
-                val index = SyncIndex.load()
-                val skipUserDb = !UserDbMigration.shouldImportUserDb()
+                val index = loadIndex()
+                val skipUserDb = !shouldImportUserDb()
                 val ownId = SyncPathPolicy.readOwnInstallationId()
                 val syncDir =
                     SyncPathPolicy.treeRelativeSyncDir(
@@ -134,26 +165,28 @@ object RimeDataSync {
                     ownId?.takeIf { it.isNotEmpty() }?.let {
                         runCatching { SyncPathPolicy.ownSyncPrefix(it, syncDir) }.getOrNull()
                     }
-                val entries = SafTreeWalker.listExternalEntries(treeUri, skipUserDb, skipPrefix)
+                val entries = listExternalEntries(treeUri, skipUserDb, skipPrefix)
                 val externalPaths = entries.map { it.relativePath }.toSet()
                 val toCopy = entries.filter {
                     !it.file.isDir && SyncPathPolicy.shouldImport(it.relativePath, ownId, syncDir)
                 }
                 val createdDirs = LocalDirectoryGate()
                 val copyResults =
-                    BoundedCopyPool.mapParallel(toCopy, parallelism) { entry ->
+                    mapParallel(toCopy) { entry ->
                         importExternalFile(entry, destRoot, index, createdDirs)
                     }
-                val removeResult = OrphanCleaner.removeLocalOrphans(destRoot, externalPaths, ownId, syncDir)
-                SyncIndex.save(SyncIndex.withCurrentTree(mergeIndexEntries(index.entries, copyResults)))
+                val removeResult = removeLocalOrphans(destRoot, externalPaths, ownId, syncDir)
+                saveIndex(withCurrentTree(mergeIndexEntries(index.entries, copyResults)))
                 val importStats = mergeStats(copyResults.map { it.result })
-                if (UserDbMigration.shouldImportUserDb() && importStats.failed == 0) {
-                    UserDbMigration.markImported()
+                if (shouldImportUserDb() && importStats.failed == 0) {
+                    markUserDbImported()
                 }
+                val stats = importStats + removeResult
                 DeployNotification.notifyPartialCopyIfNeeded(
-                    importStats + removeResult.toCopyResult(),
+                    stats.failed,
                     "importToLocal",
                 )
+                stats
             }.onFailure { Timber.e(it, "importToLocal failed") }
         }.also { result ->
             if (!keepNotificationUntilDeploySuccess || result.isFailure) {
@@ -173,7 +206,7 @@ object RimeDataSync {
             val treeUri = treeUri() ?: error("No data path selected")
             check(hasExternalAccess()) { "No access to data path" }
             val srcRoot = DataManager.userDataDir
-            val index = SyncIndex.load()
+            val index = loadIndex()
             val copyResults =
                 DataManager.POST_SCHEMA_DEPLOY_EXPORT_FILES.map { fileName ->
                     val sourceFile = srcRoot.resolve(fileName)
@@ -190,7 +223,7 @@ object RimeDataSync {
                         )
                     }
                 }
-            SyncIndex.save(SyncIndex.withCurrentTree(mergeIndexEntries(index.entries, copyResults)))
+            saveIndex(withCurrentTree(mergeIndexEntries(index.entries, copyResults)))
             mergeStats(copyResults.map { it.result }).also { stats ->
                 Timber.d(
                     "exportConfigFilesToExternal: copied=${stats.copied}, " +
@@ -212,7 +245,7 @@ object RimeDataSync {
                 Timber.d("Theme file '$configId.yaml' not found at external root, skip import")
                 return@runCatching SyncStats()
             }
-            val index = SyncIndex.load()
+            val index = loadIndex()
             val copyResult =
                 importExternalFile(
                     entry = StorageWalkEntry(themeFile, themeFile.name),
@@ -220,11 +253,13 @@ object RimeDataSync {
                     index = index,
                     createdDirs = LocalDirectoryGate(),
                 )
-            SyncIndex.save(SyncIndex.withCurrentTree(mergeIndexEntries(index.entries, listOf(copyResult))))
+            saveIndex(withCurrentTree(mergeIndexEntries(index.entries, listOf(copyResult))))
+            val stats = mergeStats(listOf(copyResult.result))
             DeployNotification.notifyPartialCopyIfNeeded(
-                mergeStats(listOf(copyResult.result)),
+                stats.failed,
                 "importThemeToLocal for '$configId'",
             )
+            stats
         }.onFailure { Timber.e(it, "importThemeToLocal failed for '$configId'") }
     }
 
@@ -253,7 +288,7 @@ object RimeDataSync {
                 Timber.w("Export skipped: local sync dir does not exist: ${srcRoot.path}")
                 return@runCatching SyncStats()
             }
-            val index = SyncIndex.load()
+            val index = loadIndex()
             val localFiles = listLocalFiles(srcRoot)
             if (localFiles.isEmpty()) {
                 return@runCatching SyncStats()
@@ -268,7 +303,7 @@ object RimeDataSync {
                 }
             val dirUris = ensureRemoteDirectories(treeUri, pending.map { (_, relativePath) -> relativePath })
             val copyResults =
-                BoundedCopyPool.mapParallel(pending, parallelism) { (file, relativePath) ->
+                mapParallel(pending) { (file, relativePath) ->
                     exportLocalFile(
                         sourceFile = file,
                         destDirUri = dirUris[relativePath.substringBeforeLast('/', "")] ?: treeUri,
@@ -277,10 +312,10 @@ object RimeDataSync {
                         force = false,
                     )
                 }
-            SyncIndex.save(SyncIndex.withCurrentTree(mergeIndexEntries(index.entries, copyResults)))
+            saveIndex(withCurrentTree(mergeIndexEntries(index.entries, copyResults)))
             mergeStats(copyResults.map { it.result }).also { stats ->
                 DeployNotification.notifyPartialCopyIfNeeded(
-                    stats,
+                    stats.failed,
                     "exportToExternal",
                 )
                 check(stats.failed == 0) { "Failed to export ${stats.failed} file(s)" }
@@ -288,18 +323,9 @@ object RimeDataSync {
         }.onFailure { Timber.e(it, "exportToExternal failed") }
     }
 
-    private data class CopyResult(
-        val copied: Int = 0,
-        val skipped: Int = 0,
-        val deleted: Int = 0,
-        val failed: Int = 0,
-        val bytesCopied: Long = 0,
-    )
+    // endregion
 
-    private data class IndexedCopyResult(
-        val result: CopyResult,
-        val indexEntry: Pair<String, SyncEntry>?,
-    )
+    // region Per-file copy
 
     /** Copies one external file into the local user data dir. */
     private suspend fun importExternalFile(
@@ -319,7 +345,7 @@ object RimeDataSync {
                 return IndexedCopyResult(CopyResult(failed = 1), null)
             }
         return runCatching {
-            if (!SyncIndex.shouldCopy(relativePath, size, lastModified, index) &&
+            if (!shouldCopy(relativePath, size, lastModified, index) &&
                 destFile.exists() &&
                 destFile.length() == size &&
                 destFile.lastModified() >= lastModified
@@ -335,7 +361,7 @@ object RimeDataSync {
                     createdDirs.ensure(destRoot, SyncRelativePath.normalize(parentRelative))
                 }
             }
-            val bytes = AtomicLocalFileCopy.copyFromSaf(entry.file.uri, destFile)
+            val bytes = copyFromSaf(entry.file.uri, destFile)
             destFile.setLastModified(entry.file.lastModified)
             IndexedCopyResult(
                 CopyResult(copied = 1, bytesCopied = bytes),
@@ -358,7 +384,7 @@ object RimeDataSync {
         val size = sourceFile.length()
         val lastModified = sourceFile.lastModified()
         return runCatching {
-            val changed = force || SyncIndex.shouldCopy(relativePath, size, lastModified, index)
+            val changed = force || shouldCopy(relativePath, size, lastModified, index)
             if (!changed) {
                 val remote = StorageAccess.child(destDirUri, sourceFile.name)
                 if (remote != null && remote.length == size) {
@@ -402,6 +428,322 @@ object RimeDataSync {
             StorageAccess.mkdirp(treeUri, *relativeDir.split('/').toTypedArray()).uri
         }
 
+    /**
+     * Copies the SAF document [srcUri] into [destFile] through a temporary file next to it,
+     * so that a reader of [destFile] never observes a partially written file.
+     *
+     * @return the number of bytes written
+     */
+    private suspend fun copyFromSaf(
+        srcUri: Uri,
+        destFile: File,
+    ): Long = StorageAccess.readFile(srcUri) { input ->
+        writeFromStream(destFile) { output -> input.copyTo(output) }
+    }
+
+    /**
+     * Writes [destFile] from [copy] without ever exposing a partially written file: the content
+     * first goes to a temporary file next to it and that file replaces [destFile] only when it is
+     * complete. The original content is restored when the copy fails.
+     *
+     * @return the number of bytes written
+     */
+    internal fun writeFromStream(
+        destFile: File,
+        copy: (OutputStream) -> Unit,
+    ): Long {
+        val parent = destFile.parentFile ?: error("No parent for ${destFile.path}")
+        val operationId = UUID.randomUUID().toString()
+        val incoming = File(parent, ".trime-new-$operationId.tmp")
+        val backup = File(parent, ".trime-bak-$operationId.tmp")
+        parent.mkdirs()
+        var expectedBytes = -1L
+        var backedUp = false
+        try {
+            FileOutputStream(incoming).use { output ->
+                copy(output)
+            }
+            expectedBytes = incoming.length()
+
+            if (destFile.exists()) {
+                if (!destFile.renameTo(backup)) {
+                    error("Failed to back up ${destFile.path}")
+                }
+                backedUp = true
+            }
+
+            if (!incoming.renameTo(destFile)) {
+                incoming.inputStream().use { input ->
+                    FileOutputStream(destFile).use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                incoming.delete()
+            }
+
+            if (backup.exists()) {
+                backup.delete()
+            }
+
+            return expectedBytes
+        } catch (e: Exception) {
+            if (backedUp && backup.exists()) {
+                if (!destFile.exists() || destFile.length() != expectedBytes) {
+                    if (destFile.exists()) {
+                        destFile.delete()
+                    }
+                    backup.renameTo(destFile)
+                }
+            }
+            if (!backedUp && incoming.exists()) {
+                incoming.delete()
+            }
+            throw e
+        } finally {
+            if (expectedBytes >= 0 && destFile.exists() && destFile.length() == expectedBytes) {
+                if (incoming.exists()) {
+                    incoming.delete()
+                }
+                if (backup.exists()) {
+                    backup.delete()
+                }
+            }
+        }
+    }
+
+    /** Applies [transform] to every item with a bounded number of workers, keeping the input order. */
+    internal suspend fun <T, R> mapParallel(
+        items: List<T>,
+        dispatcher: CoroutineDispatcher = Dispatchers.IO,
+        transform: suspend (T) -> R,
+    ): List<R> {
+        if (items.isEmpty()) return emptyList()
+        val results = arrayOfNulls<Any?>(items.size)
+        coroutineScope {
+            val channel = Channel<Pair<Int, T>>(capacity = parallelism * 2)
+            repeat(parallelism.coerceAtMost(items.size)) {
+                launch(dispatcher) {
+                    for ((index, item) in channel) {
+                        results[index] = transform(item)
+                    }
+                }
+            }
+            items.forEachIndexed { index, item ->
+                channel.send(index to item)
+            }
+            channel.close()
+        }
+        @Suppress("UNCHECKED_CAST")
+        return results.map { checkNotNull(it) as R }
+    }
+
+    /** Creates every local directory only once, even when the copies run in parallel. */
+    private class LocalDirectoryGate {
+        private val createdDirs = Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
+        private val locks = ConcurrentHashMap<String, Any>()
+
+        fun ensure(
+            root: File,
+            relativeDir: String,
+        ) {
+            if (relativeDir.isEmpty()) return
+            val lock = locks[relativeDir] ?: locks.putIfAbsent(relativeDir, Any()) ?: locks[relativeDir]!!
+            synchronized(lock) {
+                if (!createdDirs.add(relativeDir)) {
+                    return
+                }
+                val dir = SyncRelativePath.resolveContained(root, relativeDir)
+                check(dir.mkdirs() || dir.isDirectory) { "Failed to create directory $relativeDir" }
+            }
+        }
+    }
+
+    private fun listLocalFiles(root: File): List<File> {
+        if (!root.exists()) return emptyList()
+        return root
+            .walkTopDown()
+            .filter { it.isFile }
+            .filter {
+                val relative = it.relativeTo(root).path.replace('\\', '/')
+                !shouldSkip(relative)
+            }.toList()
+    }
+
+    // endregion
+
+    // region Orphan cleanup
+
+    /**
+     * Deletes local files that are not part of the external [externalPaths] listing,
+     * keeping [SyncPathPolicy.shouldPreserveLocal] paths and empty directories in check.
+     */
+    internal fun removeLocalOrphans(
+        root: File,
+        externalPaths: Set<String>,
+        ownId: String? = null,
+        syncDir: String = SyncPathPolicy.DEFAULT_SYNC_DIR,
+    ): CopyResult {
+        if (!root.exists()) return CopyResult()
+        var deleted = 0
+        var failed = 0
+        root
+            .walkBottomUp()
+            .filter { it != root }
+            .filter {
+                val relative = it.relativeTo(root).path.replace('\\', '/')
+                !shouldSkip(relative, it.isDirectory)
+            }.forEach { file ->
+                val relative =
+                    runCatching {
+                        SyncRelativePath.normalize(file.relativeTo(root).path.replace('\\', '/'))
+                    }.getOrElse {
+                        Timber.w(it, "Skip orphan cleanup for unsafe path")
+                        return@forEach
+                    }
+                when {
+                    file.isFile && SyncPathPolicy.shouldPreserveLocal(relative, ownId, syncDir) -> Unit
+
+                    file.isFile && relative !in externalPaths -> {
+                        val deleteResult = FileUtils.delete(file)
+                        if (deleteResult.isSuccess) {
+                            deleted++
+                            Timber.i("Delete orphan $relative")
+                        } else {
+                            failed++
+                            Timber.w(deleteResult.exceptionOrNull(), "Failed to delete orphan $relative")
+                        }
+                    }
+
+                    file.isDirectory && file.list()?.isEmpty() == true -> {
+                        if (file.delete()) {
+                            deleted++
+                        } else {
+                            failed++
+                            Timber.w("Failed to delete empty directory $relative")
+                        }
+                    }
+                }
+            }
+        return CopyResult(deleted = deleted, failed = failed)
+    }
+
+    // endregion
+
+    // region Path rules
+
+    /** Whether [relativePath] belongs to an internal folder that the sync must not touch. */
+    internal fun shouldSkip(
+        relativePath: String,
+        isDirectory: Boolean = false,
+        skipUserDb: Boolean = true,
+    ): Boolean {
+        val normalized = relativePath.trimStart('/').trim().removePrefix("./")
+        if (normalized.isEmpty()) return false
+        val segments = normalized.split('/')
+        if (segments.any { it == SKIP_DIR }) return true
+        if (!skipUserDb) return false
+        val dirSegments = if (isDirectory) segments else segments.dropLast(1)
+        return dirSegments.any { it.contains(SKIP_DIR_SUBSTRING) }
+    }
+
+    /** Whether [relativePath] should be visited; [skipPrefix] drops that path and its descendants. */
+    internal fun shouldVisit(
+        relativePath: String,
+        skipPrefix: String? = null,
+    ): Boolean {
+        if (skipPrefix.isNullOrEmpty()) return true
+        return relativePath != skipPrefix && !relativePath.startsWith("$skipPrefix/")
+    }
+
+    private fun shouldSync(
+        entry: StorageWalkEntry,
+        skipUserDb: Boolean,
+        skipPrefix: String?,
+    ): Boolean = !shouldSkip(entry.relativePath, entry.file.isDir, skipUserDb) &&
+        shouldVisit(entry.relativePath, skipPrefix)
+
+    /**
+     * Walks the external [treeUri] and lists every entry that should take part in the sync.
+     *
+     * Subtrees rejected by [shouldSync] are never queried, so excluded `build`/`*.userdb`
+     * directories neither cost a provider query each nor fail the walk when inaccessible.
+     */
+    private suspend fun listExternalEntries(
+        treeUri: Uri,
+        skipUserDb: Boolean,
+        skipPrefix: String?,
+    ): List<StorageWalkEntry> {
+        val keepEntry: (StorageWalkEntry) -> Boolean = { shouldSync(it, skipUserDb, skipPrefix) }
+        return StorageAccess.walk(treeUri) { entry, _ -> keepEntry(entry) }
+            .filter(keepEntry)
+            .toList()
+    }
+
+    // endregion
+
+    // region Sync index and stats
+
+    @Serializable
+    private data class SyncEntry(
+        val size: Long,
+        val lastModified: Long,
+    )
+
+    @Serializable
+    private data class SyncIndexData(
+        val treeUri: String = "",
+        val entries: Map<String, SyncEntry> = emptyMap(),
+    )
+
+    /**
+     * File-backed index of the synced paths, keyed by the tree URI of the picked folder.
+     *
+     * Not thread-safe: neither [loadIndex], [saveIndex] nor [clearIndex] may run concurrently.
+     */
+    private const val INDEX_FILE = "rime_sync_index.json"
+
+    private val indexJson = Json { ignoreUnknownKeys = true }
+
+    private val indexFile: File
+        get() = File(appContext.filesDir, INDEX_FILE)
+
+    private fun loadIndex(): SyncIndexData {
+        val stored =
+            indexFile
+                .takeIf { it.exists() }
+                ?.readText()
+                ?.let { runCatching { indexJson.decodeFromString<SyncIndexData>(it) }.getOrNull() }
+                ?: SyncIndexData()
+        val currentTreeUri = treeUri()?.toString().orEmpty()
+        if (stored.treeUri != currentTreeUri) {
+            return SyncIndexData(treeUri = currentTreeUri)
+        }
+        return stored
+    }
+
+    private fun saveIndex(data: SyncIndexData) {
+        indexFile.writeText(indexJson.encodeToString(data))
+    }
+
+    private fun clearIndex() {
+        saveIndex(SyncIndexData())
+    }
+
+    private fun withCurrentTree(entries: Map<String, SyncEntry>): SyncIndexData = SyncIndexData(
+        treeUri = treeUri()?.toString().orEmpty(),
+        entries = entries,
+    )
+
+    private fun shouldCopy(
+        relativePath: String,
+        size: Long,
+        lastModified: Long,
+        index: SyncIndexData,
+    ): Boolean {
+        val cached = index.entries[relativePath] ?: return true
+        return cached.size != size || cached.lastModified != lastModified
+    }
+
     private fun mergeIndexEntries(
         existing: Map<String, SyncEntry>,
         results: List<IndexedCopyResult>,
@@ -412,19 +754,6 @@ object RimeDataSync {
         }
         return merged
     }
-
-    private fun listLocalFiles(root: File): List<File> {
-        if (!root.exists()) return emptyList()
-        return root
-            .walkTopDown()
-            .filter { it.isFile }
-            .filter {
-                val relative = it.relativeTo(root).path.replace('\\', '/')
-                !SafTreeWalker.shouldSkip(relative)
-            }.toList()
-    }
-
-    private fun OrphanCleaner.Result.toCopyResult(): CopyResult = CopyResult(deleted = deleted, failed = failed)
 
     private fun mergeStats(results: List<CopyResult>): SyncStats = results.fold(SyncStats()) { acc, r ->
         acc.copy(
@@ -439,5 +768,32 @@ object RimeDataSync {
     private operator fun SyncStats.plus(other: CopyResult): SyncStats = copy(
         deleted = deleted + other.deleted,
         failed = failed + other.failed,
+    )
+
+    // endregion
+
+    // region Copy results
+
+    internal data class CopyResult(
+        val copied: Int = 0,
+        val skipped: Int = 0,
+        val deleted: Int = 0,
+        val failed: Int = 0,
+        val bytesCopied: Long = 0,
+    )
+
+    private data class IndexedCopyResult(
+        val result: CopyResult,
+        val indexEntry: Pair<String, SyncEntry>?,
+    )
+
+    // endregion
+
+    data class SyncStats(
+        val copied: Int = 0,
+        val skipped: Int = 0,
+        val deleted: Int = 0,
+        val failed: Int = 0,
+        val bytesCopied: Long = 0,
     )
 }

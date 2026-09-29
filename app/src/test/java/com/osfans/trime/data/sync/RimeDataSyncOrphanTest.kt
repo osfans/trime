@@ -9,7 +9,7 @@ import io.kotest.matchers.shouldBe
 import java.io.File
 import kotlin.io.path.createTempDirectory
 
-class OrphanCleanerTest :
+class RimeDataSyncOrphanTest :
     StringSpec({
         "preserves installation.yaml even when missing from external listing" {
             val root = createTempDirectory().toFile()
@@ -19,7 +19,7 @@ class OrphanCleanerTest :
                 File(root, "orphan.yaml").writeText("orphan")
 
                 val result =
-                    OrphanCleaner.removeLocalOrphans(
+                    RimeDataSync.removeLocalOrphans(
                         root,
                         externalPaths = emptySet(),
                     )
@@ -40,7 +40,7 @@ class OrphanCleanerTest :
                 File(root, "orphan.yaml").writeText("orphan")
 
                 val result =
-                    OrphanCleaner.removeLocalOrphans(
+                    RimeDataSync.removeLocalOrphans(
                         root,
                         externalPaths = emptySet(),
                         ownId = "phone-a",
