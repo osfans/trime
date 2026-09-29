@@ -7,7 +7,6 @@ package com.osfans.trime.ui.main.settings
 
 import android.net.Uri
 import android.os.Bundle
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -22,6 +21,7 @@ import com.osfans.trime.data.sync.DataStorageMode
 import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.data.sync.SafDisplayPath
 import com.osfans.trime.data.sync.UserDbMigration
+import com.osfans.trime.storage.StorageAccess
 import com.osfans.trime.ui.common.PaddingPreferenceFragment
 import com.osfans.trime.ui.common.withLoadingDialog
 import com.osfans.trime.ui.main.MainViewModel
@@ -37,7 +37,7 @@ import kotlinx.coroutines.withContext
 
 class ProfileSettingsFragment : PaddingPreferenceFragment() {
     private val viewModel: MainViewModel by activityViewModels()
-    private val prefs = AppPrefs.Companion.defaultInstance().profile
+    private val prefs = AppPrefs.defaultInstance().profile
     private val backgroundSyncEnable = prefs.periodicBackgroundSync
     private val lastSyncTime by prefs.lastBackgroundSyncTime
     private val lastSyncStatus by prefs.lastBackgroundSyncStatus
@@ -65,20 +65,10 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
             updateStorageModeUi()
         }
 
-    private val dataPathPicker =
-        registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
-            if (uri == null) {
-                when {
-                    pendingResetDataPath -> promptResetDataPathCancelled()
-                    pendingPickerCancelToAppStorage -> fallbackToAppStorage()
-                }
-                return@registerForActivityResult
-            }
-            handleTreePicked(uri, pendingPickerCancelToAppStorage)
-        }
-
     private lateinit var editSyncIntervalPreference: EditTextIntPreference
     private lateinit var dataPathPreference: Preference
+
+    private val storageAccess = StorageAccess(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,47 +100,49 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
             prefs.dataStorageMode.getValue().name
     }
 
-    private fun launchDataPathPicker(cancelToAppStorage: Boolean) {
-        pendingPickerCancelToAppStorage = cancelToAppStorage
-        pendingResetDataPath = false
-        dataPathPicker.launch(null as Uri?)
-    }
-
-    private fun launchResetDataPathPicker() {
-        pendingPickerCancelToAppStorage = false
-        pendingResetDataPath = true
-        dataPathPicker.launch(null as Uri?)
-    }
-
-    private fun handleTreePicked(
-        uri: Uri,
-        onCancelToAppStorage: Boolean,
-    ) {
-        val ctx = requireContext()
+    private fun pickDataPath() {
         lifecycleScope.launch {
-            withLoadingDialog(ctx) {
-                runCatching {
-                    withContext(Dispatchers.IO) {
-                        RimeDataSync.persistTreeUri(ctx, uri)
-                        RimeDataSync.importToLocal(ctx).getOrThrow()
-                        viewModel.rime.runOnReady { deploy(skipImport = true) }
-                    }
-                }.onSuccess {
-                    updateDataPathSummary()
-                    ctx.toast(R.string.setup__data_path_imported)
-                }.onFailure {
-                    if (onCancelToAppStorage) {
-                        fallbackToAppStorage()
-                    } else {
-                        withContext(Dispatchers.IO) {
-                            RimeDataSync.clearExternalTree(ctx)
+            val picked = storageAccess.pickDirectory()
+            if (picked == null) {
+                when {
+                    pendingResetDataPath -> promptResetDataPathCancelled()
+                    pendingPickerCancelToAppStorage -> fallbackToAppStorage()
+                }
+            } else {
+                val ctx = requireContext()
+                val cancelToAppStorage = pendingPickerCancelToAppStorage
+                lifecycleScope.launch {
+                    withLoadingDialog(ctx) {
+                        runCatching {
+                            withContext(Dispatchers.IO) {
+                                RimeDataSync.persistTreeUri(ctx, picked.uri)
+                                RimeDataSync.importToLocal(ctx).getOrThrow()
+                                viewModel.rime.runOnReady { deploy(skipImport = true) }
+                            }
+                        }.onSuccess {
+                            updateDataPathSummary()
+                            ctx.toast(R.string.setup__data_path_imported)
+                        }.onFailure {
+                            if (cancelToAppStorage) {
+                                fallbackToAppStorage()
+                            } else {
+                                withContext(Dispatchers.IO) {
+                                    RimeDataSync.clearExternalTree(ctx)
+                                }
+                                updateDataPathSummary()
+                                ctx.toast(R.string.setup__data_path_import_failed)
+                            }
                         }
-                        updateDataPathSummary()
-                        ctx.toast(R.string.setup__data_path_import_failed)
                     }
                 }
             }
         }
+    }
+
+    private fun resetAndPickDataPath() {
+        pendingPickerCancelToAppStorage = false
+        pendingResetDataPath = true
+        pickDataPath()
     }
 
     private fun promptSelectAnotherDirectory() {
@@ -160,7 +152,7 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
             .setPositiveButton(R.string.select_another_directory) { _, _ ->
                 RimeDataSync.clearExternalTree(requireContext())
                 updateDataPathSummary()
-                launchResetDataPathPicker()
+                resetAndPickDataPath()
             }.setNegativeButton(android.R.string.cancel, null)
             .show()
     }
@@ -170,11 +162,11 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
             .Builder(requireContext())
             .setMessage(R.string.reset_data_path_cancelled_message)
             .setPositiveButton(R.string.reset_data_path_pick_again) { _, _ ->
-                launchResetDataPathPicker()
+                resetAndPickDataPath()
             }.setNegativeButton(R.string.reset_data_path_use_app_storage) { _, _ ->
                 fallbackToAppStorage()
             }.setOnCancelListener {
-                launchResetDataPathPicker()
+                resetAndPickDataPath()
             }.show()
     }
 
@@ -184,7 +176,9 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
             .Builder(ctx)
             .setMessage(R.string.external_sync_select_folder_message)
             .setPositiveButton(R.string.setup__select_data_path) { _, _ ->
-                launchDataPathPicker(cancelToAppStorage = true)
+                pendingPickerCancelToAppStorage = true
+                pendingResetDataPath = false
+                pickDataPath()
             }.setNegativeButton(android.R.string.cancel) { _, _ ->
                 fallbackToAppStorage()
             }.setOnCancelListener {
@@ -391,7 +385,7 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
         if (
             RimeDataSync.usesExternalSync(ctx) &&
             prefs.externalRimeTreeUri.getValue().isNotEmpty() &&
-            !RimeDataSync.hasExternalAccess(ctx)
+            !RimeDataSync.hasExternalAccess()
         ) {
             ctx.toast(R.string.data_path_permission_revoked)
         }

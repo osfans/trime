@@ -41,7 +41,7 @@ class SetupFragment : Fragment() {
                     newMode == DataStorageMode.APP_STORAGE
                 ) {
                     prefs.userDbMigrated.setValue(false)
-                    RimeDataSync.clearExternalTree(requireContext())
+                    RimeDataSync.clearExternalTree()
                 }
                 prefs.dataStorageMode.setValue(newMode)
                 sync()
