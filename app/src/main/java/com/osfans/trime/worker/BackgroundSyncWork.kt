@@ -14,7 +14,6 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.sync.ExternalSyncFallback
 import com.osfans.trime.data.sync.RimeDataSync
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
@@ -40,7 +39,7 @@ class BackgroundSyncWork(
         if (RimeDataSync.usesExternalSync() &&
             !RimeDataSync.hasExternalAccess()
         ) {
-            ExternalSyncFallback.fallbackToAppStorage()
+            RimeDataSync.fallbackToAppStorage()
         }
         if (!RimeDataSync.isStorageAvailable()) {
             Timber.w("Background sync skipped: storage not available")

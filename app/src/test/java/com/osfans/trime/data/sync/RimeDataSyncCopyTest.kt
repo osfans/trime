@@ -10,7 +10,7 @@ import io.kotest.matchers.shouldBe
 import java.io.File
 import kotlin.io.path.createTempDirectory
 
-class AtomicLocalFileCopyTest :
+class RimeDataSyncCopyTest :
     StringSpec({
         "copies file content via temp-dir round trip" {
             val dir = createTempDirectory().toFile()
@@ -20,7 +20,7 @@ class AtomicLocalFileCopyTest :
                 val payload = "hello sync\n".repeat(1024)
                 source.writeText(payload)
 
-                val bytes = AtomicLocalFileCopy.writeFromStream(dest) { output ->
+                val bytes = RimeDataSync.writeFromStream(dest) { output ->
                     source.inputStream().use { it.copyTo(output) }
                 }
 
@@ -39,7 +39,7 @@ class AtomicLocalFileCopyTest :
                 source.writeText("replacement")
                 dest.writeText("old")
 
-                AtomicLocalFileCopy.writeFromStream(dest) { output ->
+                RimeDataSync.writeFromStream(dest) { output ->
                     source.inputStream().use { it.copyTo(output) }
                 }
 
@@ -57,7 +57,7 @@ class AtomicLocalFileCopyTest :
                 val source = File(dir, "source.txt")
                 source.writeText("new content")
 
-                AtomicLocalFileCopy.writeFromStream(File(dir, "dest.txt")) { output ->
+                RimeDataSync.writeFromStream(File(dir, "dest.txt")) { output ->
                     source.inputStream().use { it.copyTo(output) }
                 }
 
@@ -74,7 +74,7 @@ class AtomicLocalFileCopyTest :
                 dest.writeText("original")
 
                 shouldThrow<RuntimeException> {
-                    AtomicLocalFileCopy.writeFromStream(dest) {
+                    RimeDataSync.writeFromStream(dest) {
                         throw RuntimeException("write failed")
                     }
                 }
