@@ -91,7 +91,6 @@ object RimeDataSync {
     suspend fun persistTreeUri(uri: Uri) {
         val previous = treeUri()
         prefs.externalRimeTreeUri.setValue(uri.toString())
-        prefs.externalRimeDisplayName.setValue(StorageAccess.stat(uri)?.name.orEmpty())
         if (previous != null && previous != uri) {
             StorageAccess.releasePersistedPermission(previous)
         }
