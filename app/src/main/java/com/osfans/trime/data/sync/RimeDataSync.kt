@@ -8,11 +8,11 @@ package com.osfans.trime.data.sync
 import android.net.Uri
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.storage.StorageAccess
-import com.osfans.trime.storage.StorageWalkEntry
 import com.osfans.trime.util.DeployNotification
 import com.osfans.trime.util.FileUtils
 import com.osfans.trime.util.appContext
+import io.planck.storageaccess.StorageAccess
+import io.planck.storageaccess.StorageWalkEntry
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel

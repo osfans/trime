@@ -18,13 +18,13 @@ plugins {
 
 android {
     namespace = "com.osfans.trime"
-    compileSdk = 36
+    compileSdk = 37
     buildToolsVersion = "36.0.0"
 
     defaultConfig {
         applicationId = "com.osfans.trime"
         minSdk = 21
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 20261101
         versionName = "3.3.13"
 
@@ -158,6 +158,7 @@ dependencies {
     implementation(libs.xxpermissions)
     implementation(libs.kodein.di)
     implementation(libs.kaml)
+    implementation(libs.storageaccess)
     implementation(libs.splitties.bitflags)
     implementation(libs.splitties.systemservices)
     implementation(libs.splitties.views.dsl)

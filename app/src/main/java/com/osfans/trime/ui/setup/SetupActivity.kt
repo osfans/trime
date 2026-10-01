@@ -25,7 +25,6 @@ import androidx.viewpager2.widget.ViewPager2
 import com.osfans.trime.R
 import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.databinding.ActivitySetupBinding
-import com.osfans.trime.storage.StorageAccess
 import com.osfans.trime.ui.main.MainActivity
 import com.osfans.trime.ui.setup.SetupPage.Companion.firstUndonePage
 import com.osfans.trime.ui.setup.SetupPage.Companion.isLastPage
@@ -33,6 +32,7 @@ import com.osfans.trime.util.appContext
 import com.osfans.trime.util.createNotificationChannel
 import com.osfans.trime.util.startActivity
 import com.osfans.trime.util.toast
+import io.planck.storageaccess.StorageAccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
