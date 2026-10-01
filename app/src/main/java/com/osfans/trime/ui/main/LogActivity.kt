@@ -10,8 +10,6 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -27,9 +25,8 @@ import com.osfans.trime.util.DeviceInfo
 import com.osfans.trime.util.Logcat
 import com.osfans.trime.util.iso8601UTCDateTime
 import com.osfans.trime.util.toast
-import kotlinx.coroutines.Dispatchers
+import io.planck.storageaccess.StorageAccess
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import splitties.systemservices.clipboardManager
 
 /**
@@ -39,33 +36,15 @@ import splitties.systemservices.clipboardManager
  * Source: [fcitx5-android/LogActivity](https://github.com/fcitx5-android/fcitx5-android/blob/24457e13b7c3f9f59a6f220db7caad3d02f27651/app/src/main/java/org/fcitx/fcitx5/android/ui/main/LogActivity.kt)
  */
 class LogActivity : AppCompatActivity() {
-    private lateinit var launcher: ActivityResultLauncher<String>
     private lateinit var logView: LogView
+
+    private val storageAccess = StorageAccess(this)
 
     companion object {
         const val FROM_CRASH = "from_crash"
         const val FROM_DEPLOY = "from_deploy"
         const val CRASH_STACK_TRACE = "crash_stack_trace"
         const val DEPLOY_FAILURE_TRACE = "deploy_failure_trace"
-    }
-
-    private fun registerLauncher() {
-        launcher =
-            registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
-                if (uri == null) return@registerForActivityResult
-                lifecycleScope.launch {
-                    runCatching {
-                        withContext(Dispatchers.IO) {
-                            contentResolver.openOutputStream(uri)!!.use { os ->
-                                os.bufferedWriter().use {
-                                    it.write(DeviceInfo.get(this@LogActivity))
-                                    it.write(logView.currentLog)
-                                }
-                            }
-                        }
-                    }.let { toast(it) }
-                }
-            }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,7 +100,20 @@ class LogActivity : AppCompatActivity() {
                 logView.clear()
             }
             exportButton.setOnClickListener {
-                launcher.launch("$packageName-${iso8601UTCDateTime()}.txt")
+                lifecycleScope.launch {
+                    runCatching {
+                        val log = storageAccess.createFile(
+                            filename = "$packageName-${iso8601UTCDateTime()}.txt",
+                            mimeType = "text/plain",
+                        ) ?: return@launch
+                        StorageAccess.writeFile(log.uri) { outs ->
+                            outs.bufferedWriter().use {
+                                it.write(DeviceInfo.get(this@LogActivity))
+                                it.write(logView.currentLog)
+                            }
+                        }
+                    }.let { toast(it) }
+                }
             }
             copyButton.setOnClickListener {
                 val data = ClipData.newPlainText("log", logView.currentLog)
@@ -134,6 +126,5 @@ class LogActivity : AppCompatActivity() {
                 logView.scrollToBottom()
             }
         }
-        registerLauncher()
     }
 }

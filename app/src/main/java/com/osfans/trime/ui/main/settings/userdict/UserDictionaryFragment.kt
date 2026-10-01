@@ -5,16 +5,11 @@
 
 package com.osfans.trime.ui.main.settings.userdict
 
-import android.content.ContentResolver
-import android.net.Uri
 import android.os.Bundle
-import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
@@ -22,16 +17,14 @@ import com.osfans.trime.data.userdict.UserDictManager
 import com.osfans.trime.util.importErrorDialog
 import com.osfans.trime.util.item
 import com.osfans.trime.util.toast
+import io.planck.storageaccess.StorageAccess
+import io.planck.storageaccess.StorageDocument
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class UserDictionaryFragment : Fragment() {
-    private lateinit var restoreLauncher: ActivityResultLauncher<String>
-
-    private lateinit var importLauncher: ActivityResultLauncher<String>
-
-    private lateinit var exportLauncher: ActivityResultLauncher<String>
+    private val storageAccess = StorageAccess(this)
 
     private var popupMenu: PopupMenu? = null
 
@@ -64,11 +57,31 @@ class UserDictionaryFragment : Fragment() {
                 }
                 menu.item(R.string.import_) {
                     beingImported = dictName
-                    importLauncher.launch("text/plain")
+                    lifecycleScope.launch {
+                        val picked = storageAccess.pickFile(mimeTypes = arrayOf("text/palin"))
+                            ?: return@launch
+                        importFromDoc(picked)
+                    }
                 }
                 menu.item(R.string.export) {
                     beingExported = dictName
-                    exportLauncher.launch("$dictName.txt")
+                    val ctx = requireContext()
+                    lifecycleScope.launch {
+                        try {
+                            val doc = storageAccess.createFile(
+                                filename = "$dictName.txt",
+                                mimeType = "text/plain",
+                            ) ?: return@launch
+                            val count = withContext(Dispatchers.IO) {
+                                ctx.contentResolver.openOutputStream(doc.uri)!!.buffered().use { outs ->
+                                    UserDictManager.exportUserDict(outs, dictName, doc.name)
+                                }
+                            }.getOrThrow()
+                            ui.showSnackBar(ctx.getString(R.string.exported_n_entries, count))
+                        } catch (e: Throwable) {
+                            ctx.toast(e)
+                        }
+                    }
                 }
                 popup.setOnDismissListener {
                     if (it === popupMenu) popupMenu = null
@@ -79,7 +92,11 @@ class UserDictionaryFragment : Fragment() {
             }
         }.apply {
             fab.setOnClickListener {
-                restoreLauncher.launch("text/plain")
+                lifecycleScope.launch {
+                    val picked = storageAccess.pickFile(mimeTypes = arrayOf("text/plain"))
+                        ?: return@launch
+                    importFromDoc(picked, merge = true)
+                }
             }
         }
     }
@@ -88,72 +105,26 @@ class UserDictionaryFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View {
-        registerLauncher()
-        return ui.root
-    }
+    ): View = ui.root
 
-    private fun registerLauncher() {
-        restoreLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            if (uri == null) return@registerForActivityResult
-            importFromUri(uri, merge = true)
-        }
-        importLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            if (uri == null) return@registerForActivityResult
-            importFromUri(uri)
-        }
-        exportLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
-            if (uri == null) return@registerForActivityResult
-            val ctx = requireContext()
-            val cr = ctx.contentResolver
-            val dictName = beingExported ?: return@registerForActivityResult
-            beingExported = null
-            lifecycleScope.launch {
-                val fileName = cr.queryFileName(uri) ?: return@launch
-                try {
-                    val count = withContext(Dispatchers.IO) {
-                        val outputStream = cr.openOutputStream(uri)!!
-                        UserDictManager.exportUserDict(
-                            outputStream,
-                            dictName,
-                            fileName,
-                        ).getOrThrow()
-                    }
-                    ui.showSnackBar(ctx.getString(R.string.exported_n_entries, count))
-                } catch (e: Exception) {
-                    ctx.toast(e)
-                }
-            }
-        }
-    }
-
-    private fun importFromUri(uri: Uri, merge: Boolean = false) {
+    private fun importFromDoc(doc: StorageDocument, merge: Boolean = false) {
         val ctx = requireContext()
-        val cr = ctx.contentResolver
         lifecycleScope.launch {
-            val fileName = cr.queryFileName(uri) ?: return@launch
             try {
                 if (merge) {
-                    val result = withContext(Dispatchers.IO) {
-                        cr.openInputStream(uri)!!.use { inputStream ->
-                            UserDictManager.restoreUserDict(inputStream, fileName)
-                        }
+                    val result = StorageAccess.readFile(doc.uri) { ins ->
+                        UserDictManager.restoreUserDict(ins, doc.name)
                     }
                     if (result.isSuccess) {
-                        ui.showSnackBar(ctx.getString(R.string.restored_from_x, fileName))
+                        ui.showSnackBar(ctx.getString(R.string.restored_from_x, doc.name))
                         ui.adapter.submitList(UserDictManager.getUserDictList().toList())
                     }
                 } else {
                     val dictName = beingImported ?: return@launch
                     beingImported = null
-                    val count = withContext(Dispatchers.IO) {
-                        cr.openInputStream(uri)!!.use { inputStream ->
-                            UserDictManager.importUserDict(
-                                inputStream,
-                                dictName,
-                                fileName,
-                            ).getOrThrow()
-                        }
+                    val count = StorageAccess.readFile(doc.uri) { ins ->
+                        UserDictManager.importUserDict(ins, dictName, doc.name)
+                            .getOrThrow()
                     }
                     ui.showSnackBar(ctx.getString(R.string.import_n_entries, count))
                 }
@@ -161,11 +132,5 @@ class UserDictionaryFragment : Fragment() {
                 ctx.importErrorDialog(e)
             }
         }
-    }
-
-    fun ContentResolver.queryFileName(uri: Uri): String? = query(uri, null, null, null, null)?.use {
-        val index = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-        it.moveToFirst()
-        it.getString(index)
     }
 }
