@@ -20,7 +20,6 @@ import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.prefs.PreferenceDelegate
 import com.osfans.trime.data.sync.DataStorageMode
 import com.osfans.trime.data.sync.RimeDataSync
-import com.osfans.trime.storage.StorageAccess
 import com.osfans.trime.ui.common.PaddingPreferenceFragment
 import com.osfans.trime.ui.common.withLoadingDialog
 import com.osfans.trime.ui.main.MainViewModel
@@ -30,6 +29,7 @@ import com.osfans.trime.util.addPreference
 import com.osfans.trime.util.buildDocumentsProviderIntent
 import com.osfans.trime.util.customFormatTimeInDefault
 import com.osfans.trime.util.toast
+import io.planck.storageaccess.StorageAccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
