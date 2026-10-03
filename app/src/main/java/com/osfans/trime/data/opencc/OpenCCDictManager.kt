@@ -20,7 +20,7 @@ object OpenCCDictManager {
     }
 
     private val sharedDir = File(DataManager.sharedDataDir, "opencc").also { it.mkdirs() }
-    private val userDir get() = File(DataManager.userDataDir, "opencc").also { it.mkdirs() }
+    private val userDir = File(DataManager.userDataDir, "opencc").also { it.mkdirs() }
 
     fun sharedDictionaries(): List<Dictionary> = sharedDir
         .listFiles()

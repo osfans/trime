@@ -15,7 +15,6 @@ import com.osfans.trime.core.RimeLifecycle
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.lifecycleScope
 import com.osfans.trime.core.whenReady
-import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.ui.main.LogActivity
 import com.osfans.trime.util.DeployNotification
 import com.osfans.trime.util.appContext
@@ -23,8 +22,6 @@ import com.osfans.trime.util.readText
 import com.osfans.trime.util.subprocess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -48,8 +45,6 @@ import kotlin.concurrent.withLock
  * Adapted from [fcitx5-android/FcitxDaemon.kt](https://github.com/fcitx5-android/fcitx5-android/blob/364afb44dcf0d9e3db3d43a21a32601b2190cbdf/app/src/main/java/org/fcitx/fcitx5/android/daemon/FcitxDaemon.kt)
  */
 object RimeDaemon {
-    private const val STARTUP_RETRY_DELAY_MS = 1_000L
-    private const val STARTUP_RETRY_MAX_ATTEMPTS = 30
 
     private val realRime by lazy { Rime() }
 
@@ -58,9 +53,6 @@ object RimeDaemon {
     private val sessions = mutableMapOf<String, RimeSession>()
 
     private val lock = ReentrantLock()
-
-    @Volatile
-    private var startupRetryJob: Job? = null
 
     private fun establish(name: String) = object : RimeSession {
         private inline fun <T> ensureEstablished(block: () -> T) = if (name in sessions) {
@@ -91,46 +83,13 @@ object RimeDaemon {
             get() = realRime.lifecycle.lifecycleScope
     }
 
-    private fun tryStartRimeLocked(): Boolean {
-        if (realRime.lifecycle.currentState != RimeLifecycle.State.STOPPED) {
-            return true
-        }
-        return realRime.startup()
-    }
-
-    private fun scheduleStartupRetry() {
-        if (startupRetryJob?.isActive == true) return
-        Timber.i("Scheduling Rime startup retry until storage is available")
-        startupRetryJob =
-            TrimeApplication.getInstance().coroutineScope.launch {
-                repeat(STARTUP_RETRY_MAX_ATTEMPTS) { attempt ->
-                    delay(STARTUP_RETRY_DELAY_MS)
-                    if (sessions.isEmpty()) return@launch
-                    if (realRime.lifecycle.currentState != RimeLifecycle.State.STOPPED) return@launch
-                    if (!RimeDataSync.isStorageAvailable()) {
-                        Timber.d("Rime startup retry ${attempt + 1}: storage still unavailable")
-                        return@repeat
-                    }
-                    val started =
-                        lock.withLock {
-                            if (sessions.isEmpty()) return@launch
-                            tryStartRimeLocked()
-                        }
-                    if (started) {
-                        Timber.i("Rime started after storage became available")
-                        return@launch
-                    }
-                }
-                Timber.w("Rime startup retry exhausted while sessions remain connected")
-            }
-    }
-
     fun createSession(name: String): RimeSession = lock.withLock {
         if (name in sessions) {
             return@withLock sessions.getValue(name)
         }
-        if (!tryStartRimeLocked()) {
-            scheduleStartupRetry()
+        if (realRime.lifecycle.currentState == RimeLifecycle.State.STOPPED) {
+            Timber.d("RimeDaemon start rime")
+            realRime.startup()
         }
         val session = establish(name)
         sessions[name] = session
@@ -143,8 +102,7 @@ object RimeDaemon {
         }
         sessions -= name
         if (sessions.isEmpty()) {
-            startupRetryJob?.cancel()
-            startupRetryJob = null
+            Timber.d("RimeDaemon stop rime")
             realRime.finalize()
         }
     }
@@ -193,14 +151,16 @@ object RimeDaemon {
             }
         }
         realRime.finalize()
-        if (!tryStartRimeLocked()) {
-            scheduleStartupRetry()
-        }
+        realRime.startup()
         TrimeApplication.getInstance().coroutineScope.launch {
             realRime.lifecycle.whenReady {
                 notificationManager.cancel(id)
             }
         }
+    }
+
+    fun stopRime() {
+        realRime.finalize()
     }
 
     private suspend fun handleRimeMessage(it: RimeMessage<*>) {

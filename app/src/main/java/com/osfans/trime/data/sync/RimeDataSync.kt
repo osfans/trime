@@ -59,9 +59,7 @@ object RimeDataSync {
         }
     }
 
-    fun isRuntimeReady(): Boolean = DataManager.resolvedUserDataDir() != null && DataManager.resolvedSharedDataDir() != null
-
-    fun isStorageAvailable(): Boolean = isRuntimeReady() && (!usesExternalSync() || hasExternalAccess())
+    fun isStorageAvailable(): Boolean = !usesExternalSync() || hasExternalAccess()
 
     /**
      * Whether the user finished the storage-mode setup step.
