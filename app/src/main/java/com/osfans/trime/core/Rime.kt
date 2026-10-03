@@ -11,7 +11,6 @@ import com.osfans.trime.data.opencc.OpenCCDictManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.ime.core.InlinePreeditMode
-import com.osfans.trime.util.appContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -312,7 +311,12 @@ class Rime :
             fullCheck: $fullCheck
             """.trimIndent(),
         )
-        startupRime(sharedDataDir, userDataDir, BuildConfig.BUILD_VERSION_NAME, fullCheck)
+        startupRime(
+            sharedDataDir,
+            userDataDir,
+            BuildConfig.BUILD_VERSION_NAME,
+            fullCheck,
+        )
     }
 
     private fun processKeyInner(value: Int, modifiers: Int, isVirtual: Boolean): Boolean {
