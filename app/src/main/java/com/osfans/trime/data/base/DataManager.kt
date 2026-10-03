@@ -6,33 +6,14 @@ package com.osfans.trime.data.base
 
 import android.content.res.AssetManager
 import android.os.Build
+import com.osfans.trime.TrimeApplication
 import com.osfans.trime.util.FileUtils
-import com.osfans.trime.util.ResourceUtils
 import com.osfans.trime.util.appContext
 import kotlinx.serialization.json.Json
 import timber.log.Timber
 import java.io.File
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
-
-/**
- * Resolve [name] under [parent].
- *
- * Returns null when [parent] is null, cannot be created, or the resulting directory
- * is not writable. Callers must not cache a failed result permanently; retry when
- * storage may have become available (for example after reboot).
- */
-internal fun resolveWritableChildDir(
-    parent: File?,
-    name: String,
-): File? {
-    if (parent == null) return null
-    if (!parent.exists() && !parent.mkdirs()) return null
-    if (!parent.canWrite()) return null
-    val dir = File(parent, name)
-    if (!dir.exists() && !dir.mkdirs()) return null
-    return dir.takeIf { it.canWrite() }
-}
 
 object DataManager {
     const val DEFAULT_CUSTOM_FILE_NAME = "default.custom.yaml"
@@ -46,8 +27,6 @@ object DataManager {
         )
 
     private const val DATA_CHECKSUMS_NAME = "checksums.json"
-    private const val SHARED_DIR_NAME = "shared"
-    private const val USER_DIR_NAME = "rime"
 
     private const val SCHEMA_LIST_CUSTOM_PATCH = """
       patch:
@@ -61,6 +40,8 @@ object DataManager {
     private val json by lazy { Json }
 
     private fun deserializeDataChecksums(raw: String): DataChecksums = json.decodeFromString<DataChecksums>(raw)
+
+    private fun serializeDataChecksums(checksums: DataChecksums): String = json.encodeToString(checksums)
 
     // If Android version supports direct boot, we put the hierarchy in device encrypted storage
     // instead of credential encrypted storage so that data can be accessed before user unlock
@@ -77,44 +58,13 @@ object DataManager {
         .use { it.readText() }
         .let { deserializeDataChecksums(it) }
 
-    @Volatile
-    private var cachedSharedDataDir: File? = null
+    private val externalFilesDir get() = TrimeApplication.getInstance().externalFilesDir
 
-    @Volatile
-    private var cachedUserDataDir: File? = null
+    val sharedDataDir = File(externalFilesDir, "shared").also { it.mkdirs() }
+    val userDataDir = File(externalFilesDir, "rime").also { it.mkdirs() }
 
-    private fun resolveAppScopedDir(
-        cached: File?,
-        name: String,
-        store: (File) -> Unit,
-    ): File? {
-        cached?.takeIf { it.canWrite() }?.let { return it }
-        val resolved =
-            resolveWritableChildDir(appContext.getExternalFilesDir(null), name) ?: return null
-        store(resolved)
-        return resolved
-    }
-
-    /** Writable shared assets dir, or null when external app files are not ready yet. */
-    fun resolvedSharedDataDir(): File? = resolveAppScopedDir(cachedSharedDataDir, SHARED_DIR_NAME) { cachedSharedDataDir = it }
-
-    /** Writable Rime user dir, or null when external app files are not ready yet. */
-    fun resolvedUserDataDir(): File? = resolveAppScopedDir(cachedUserDataDir, USER_DIR_NAME) { cachedUserDataDir = it }
-
-    val sharedDataDir: File
-        get() =
-            resolvedSharedDataDir()
-                ?: error("Shared data dir is not available")
-
-    /** App-scoped path used by Rime at runtime. */
-    val userDataDir: File
-        get() =
-            resolvedUserDataDir()
-                ?: error("User data dir is not available")
-
-    val prebuiltDataDir: File
-        get() = File(sharedDataDir, "build")
-    val stagingDir get() = File(userDataDir, "build")
+    val prebuiltDataDir = File(sharedDataDir, "build")
+    val stagingDir = File(userDataDir, "build")
 
     /**
      * Return the absolute path of the compiled config file
@@ -134,9 +84,9 @@ object DataManager {
     }
 
     fun sync() = lock.withLock {
-        val oldChecksumsFile = File(dataDir, DATA_CHECKSUMS_NAME)
+        val destChecksumsFile = File(dataDir, DATA_CHECKSUMS_NAME)
         val oldChecksums =
-            oldChecksumsFile
+            destChecksumsFile
                 .runCatching { deserializeDataChecksums(bufferedReader().use { it.readText() }) }
                 .getOrElse { DataChecksums("", emptyMap()) }
 
@@ -147,18 +97,17 @@ object DataManager {
             when (it) {
                 is DataDiff.CreateFile,
                 is DataDiff.UpdateFile,
-                -> {
-                    val destPath = sharedDataDir.resolveSibling(it.path).absolutePath
-                    ResourceUtils.copyFile(it.path, destPath)
-                }
+                -> appContext.assets.copyFile(it.path)
 
                 is DataDiff.DeleteDir,
                 is DataDiff.DeleteFile,
-                -> FileUtils.delete(sharedDataDir.resolve(it.path.substringAfterLast('/'))).getOrThrow()
+                -> removePath(it.path).getOrThrow()
             }
         }
 
-        ResourceUtils.copyFile(DATA_CHECKSUMS_NAME, dataDir.resolve(DATA_CHECKSUMS_NAME).absolutePath)
+        destChecksumsFile.bufferedWriter().use {
+            it.write(serializeDataChecksums(newChecksums))
+        }
 
         val custom = userDataDir.resolve(DEFAULT_CUSTOM_FILE_NAME)
         if (!custom.exists()) {
@@ -169,4 +118,15 @@ object DataManager {
 
         Timber.d("Synced!")
     }
+
+    private fun AssetManager.copyFile(filename: String) {
+        open(filename).use { i ->
+            File(externalFilesDir, filename)
+                .also { it.parentFile?.mkdirs() }
+                .outputStream()
+                .use { o -> i.copyTo(o) }
+        }
+    }
+
+    private fun removePath(path: String) = FileUtils.delete(externalFilesDir.resolve(path))
 }
