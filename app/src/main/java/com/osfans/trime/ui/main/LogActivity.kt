@@ -25,7 +25,7 @@ import com.osfans.trime.util.DeviceInfo
 import com.osfans.trime.util.Logcat
 import com.osfans.trime.util.iso8601UTCDateTime
 import com.osfans.trime.util.toast
-import io.planck.storageaccess.StorageAccess
+import io.github.whiredplanck.storageaccess.StorageAccess
 import kotlinx.coroutines.launch
 import splitties.systemservices.clipboardManager
 

@@ -29,7 +29,7 @@ import com.osfans.trime.util.addPreference
 import com.osfans.trime.util.buildDocumentsProviderIntent
 import com.osfans.trime.util.customFormatTimeInDefault
 import com.osfans.trime.util.toast
-import io.planck.storageaccess.StorageAccess
+import io.github.whiredplanck.storageaccess.StorageAccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
