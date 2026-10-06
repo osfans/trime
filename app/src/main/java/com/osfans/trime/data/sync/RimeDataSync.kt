@@ -11,8 +11,8 @@ import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.util.DeployNotification
 import com.osfans.trime.util.FileUtils
 import com.osfans.trime.util.appContext
-import io.planck.storageaccess.StorageAccess
-import io.planck.storageaccess.StorageWalkEntry
+import io.github.whiredplanck.storageaccess.StorageAccess
+import io.github.whiredplanck.storageaccess.StorageWalkEntry
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel

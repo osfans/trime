@@ -17,8 +17,8 @@ import com.osfans.trime.data.userdict.UserDictManager
 import com.osfans.trime.util.importErrorDialog
 import com.osfans.trime.util.item
 import com.osfans.trime.util.toast
-import io.planck.storageaccess.StorageAccess
-import io.planck.storageaccess.StorageDocument
+import io.github.whiredplanck.storageaccess.StorageAccess
+import io.github.whiredplanck.storageaccess.StorageDocument
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -73,8 +73,10 @@ class UserDictionaryFragment : Fragment() {
                                 mimeType = "text/plain",
                             ) ?: return@launch
                             val count = withContext(Dispatchers.IO) {
-                                ctx.contentResolver.openOutputStream(doc.uri)!!.buffered().use { outs ->
-                                    UserDictManager.exportUserDict(outs, dictName, doc.name)
+                                StorageAccess.writeFile(doc.uri) {
+                                    it.buffered().use { outs ->
+                                        UserDictManager.exportUserDict(outs, dictName, doc.name)
+                                    }
                                 }
                             }.getOrThrow()
                             ui.showSnackBar(ctx.getString(R.string.exported_n_entries, count))

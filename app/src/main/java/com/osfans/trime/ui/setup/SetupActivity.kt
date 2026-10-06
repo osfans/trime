@@ -32,7 +32,7 @@ import com.osfans.trime.util.appContext
 import com.osfans.trime.util.createNotificationChannel
 import com.osfans.trime.util.startActivity
 import com.osfans.trime.util.toast
-import io.planck.storageaccess.StorageAccess
+import io.github.whiredplanck.storageaccess.StorageAccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
