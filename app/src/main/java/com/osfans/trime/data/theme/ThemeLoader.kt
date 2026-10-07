@@ -159,9 +159,12 @@ object ThemeLoader {
                 if (themeV2.colorSchemas.isEmpty()) {
                     return ThemeLoadResult.Failure(themeId, ThemeLoadError.NoColorScheme(themeId))
                 }
-                // V2 diagnostics land with the V2 linter (a later phase); the
-                // runtime still refuses a theme without color schemes.
-                ThemeLoadResult.Success(themeId, themeV2, null)
+                val findings =
+                    runCatching { ThemeDiagnostics.lintV2(themeV2, mapping) }
+                        .onFailure { Timber.w(it, "Theme '%s': diagnostics failed", themeId) }
+                        .getOrNull()
+                findings?.let { ThemeDiagnostics.log(themeId, it) }
+                ThemeLoadResult.Success(themeId, themeV2, findings)
             }
 
             ThemeFormat.LEGACY -> {

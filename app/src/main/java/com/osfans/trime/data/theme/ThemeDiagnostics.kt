@@ -9,6 +9,8 @@ package com.osfans.trime.data.theme
 import com.charleskorn.kaml.YamlMap
 import com.osfans.trime.data.theme.model.GeneralStyle
 import com.osfans.trime.data.theme.model.PresetKey
+import com.osfans.trime.data.theme.model.TextKeyboard
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.ime.keyboard.KeyCode
 import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.mapping
@@ -84,8 +86,25 @@ object ThemeDiagnostics {
         lintStyleKeys(node)
         lintConfigVersion(node)
         lintColorSchemes(theme, parseColor)
-        lintPresetSends(theme)
-        lintKeyboardReferences(theme)
+        lintPresetSends(theme.presetKeys, "preset_keys")
+        lintKeyboardReferences(theme.presetKeyboards, "preset_keyboards")
+    }
+
+    /**
+     * Lints a decoded V2 [theme] together with the [node] it was decoded from.
+     * Mirrors [lint] for the V2 format: top-level keys, section keys, the
+     * light/dark color palettes, preset sends and keyboard references.
+     */
+    fun lintV2(
+        theme: ThemeV2,
+        node: YamlMap,
+        parseColor: (String) -> Int? = ::parseColor,
+    ): List<Finding> = buildList {
+        lintV2TopLevelKeys(node)
+        lintV2SectionKeys(node)
+        lintV2ColorSchemes(theme, parseColor)
+        lintPresetSends(theme.keys, "keys")
+        lintKeyboardReferences(theme.keyboards, "keyboards")
     }
 
     /**
@@ -175,6 +194,52 @@ object ThemeDiagnostics {
             code = Code.UNKNOWN_STYLE_KEY,
             severity = Severity.WARNING,
         )
+    }
+
+    /** V2 分段的已知键（camelCase），用于提示主题作者拼写错误。 */
+    private val V2_SECTION_KEYS: Map<String, Set<String>> =
+        mapOf(
+            "keyboard" to
+                setOf(
+                    "autoCaps", "horizontalGap", "padding", "paddingLeft", "paddingRight",
+                    "paddingBottom", "paddingLandscape", "paddingLandscapeBottom", "keyBorder",
+                    "keyHeight", "keyWidth", "textSize", "longTextSize", "symbolTextSize",
+                    "labelTextSize", "textOffsetX", "textOffsetY", "symbolOffsetX", "symbolOffsetY",
+                    "hintOffsetX", "hintOffsetY", "pressOffsetX", "pressOffsetY", "height",
+                    "heightLandscape", "roundCorner", "shadowRadius", "verticalGap",
+                    "resetAsciiModeOnFocusChange", "backgroundFolder",
+                ),
+            "candidateBar" to
+                setOf(
+                    "border", "borderRound", "cornerRadius", "padding", "spacing", "textSize",
+                    "textVerticalBias", "viewHeight", "commentHeight", "commentPosition",
+                    "commentTextSize", "commentVerticalBias",
+                ),
+            "popup" to setOf("bottomMargin", "width", "height", "keyHeight", "textSize"),
+            "fonts" to setOf("candidate", "comment", "hanb", "key", "label", "latin", "popup", "symbol", "text"),
+            "enterKey" to setOf("mode", "labels"),
+        )
+
+    private fun MutableList<Finding>.lintV2TopLevelKeys(node: YamlMap) {
+        reportUnknownKeys(
+            node,
+            ThemeV2.TOP_LEVEL_KEYS + "__include" + "__patch",
+            path = "",
+            code = Code.UNKNOWN_TOP_LEVEL_KEY,
+            severity = Severity.INFO,
+        )
+    }
+
+    private fun MutableList<Finding>.lintV2SectionKeys(node: YamlMap) {
+        V2_SECTION_KEYS.forEach { (section, knownKeys) ->
+            reportUnknownKeys(
+                node.pairs[section]?.mapping,
+                knownKeys,
+                path = section,
+                code = Code.UNKNOWN_STYLE_KEY,
+                severity = Severity.WARNING,
+            )
+        }
     }
 
     /**
@@ -282,27 +347,33 @@ object ThemeDiagnostics {
         // file: it is reported at the key that carries it, which may be a theme
         // fallback entry rather than the key the runtime asks for. The keys
         // that inherit the value are left out, so it is reported once.
+        //
+        // The legacy scheme stores snake_case keys, while ColorTable resolves
+        // camelCase keys; normalize first so the runtime lookup agrees.
         schemes.forEach { (id, colors) ->
-            ColorTable.resolve(colors, theme.fallbackColors, parseColor)
+            val camelColors = colors.mapKeys { (k, _) -> k.snakeToCamel() }
+            val camelFallbacks = theme.fallbackColors.mapKeys { (k, _) -> k.snakeToCamel() }
+            ColorTable.resolve(camelColors, camelFallbacks, parseColor)
                 .invalidValues
                 .mapNotNull { key ->
-                    ColorTable.resolveRawSource(key.key, colors, theme.fallbackColors)
+                    ColorTable.resolveRawSource(key.camelKey, camelColors, camelFallbacks)
                 }
                 .distinct()
                 .forEach { (source, raw) ->
-                    val definedByScheme = colors[source]?.isNotEmpty() == true
+                    val snakeSource = source.camelToSnake()
+                    val definedByScheme = camelColors[source]?.isNotEmpty() == true
                     val where = if (definedByScheme) "scheme '$id'" else "fallback_colors"
                     val path =
                         if (definedByScheme) {
-                            "preset_color_schemes/$id/$source"
+                            "preset_color_schemes/$id/$snakeSource"
                         } else {
-                            "fallback_colors/$source"
+                            "fallback_colors/$snakeSource"
                         }
                     add(
                         Finding(
                             Severity.WARNING,
                             Code.INVALID_COLOR_VALUE,
-                            "$where: '$source' cannot be parsed as a color (value '$raw')",
+                            "$where: '$snakeSource' cannot be parsed as a color (value '$raw')",
                             path,
                         ),
                     )
@@ -321,6 +392,9 @@ object ThemeDiagnostics {
         schemes: Map<String, Map<String, String>>,
     ) {
         val fallbacks = theme.fallbackColors
+        // ColorTable resolves camelCase keys; normalize both sides first.
+        val camelSchemes = schemes.mapValues { (_, v) -> v.mapKeys { (k, _) -> k.snakeToCamel() } }
+        val camelFallbacks = fallbacks.mapKeys { (k, _) -> k.snakeToCamel() }
         fallbacks.forEach { (from, target) ->
             if (target.isEmpty()) return@forEach
             // `target` is fine when walking it reaches a value the way the
@@ -330,8 +404,8 @@ object ThemeDiagnostics {
             // entry pointing into it.
             val resolvable =
                 ColorTable.isImageValue(target) ||
-                    schemes.any { scheme ->
-                        ColorTable.resolveRaw(target, scheme.value, fallbacks) != null
+                    camelSchemes.any { scheme ->
+                        ColorTable.resolveRaw(target, scheme.value, camelFallbacks) != null
                     }
             if (resolvable) return@forEach
             add(
@@ -340,6 +414,75 @@ object ThemeDiagnostics {
                     Code.BROKEN_FALLBACK_TARGET,
                     "fallback_colors: '$from' points at '$target', which no scheme defines",
                     "fallback_colors/$from",
+                ),
+            )
+        }
+    }
+
+    /**
+     * V2 配色检查：`colorSchemas` 只有 `light`/`dark` 两个调色板，键已是
+     * camelCase，直接交给 [ColorTable] 解析，与运行时一致。
+     */
+    private fun MutableList<Finding>.lintV2ColorSchemas(
+        theme: ThemeV2,
+        parseColor: (String) -> Int?,
+    ) {
+        if (theme.colorSchemas.isEmpty()) {
+            add(
+                Finding(
+                    Severity.WARNING,
+                    Code.NO_COLOR_SCHEME,
+                    "no 'colorSchemas'; the keyboard cannot resolve any color",
+                ),
+            )
+            return
+        }
+        listOf("light" to theme.colorSchemas.light, "dark" to theme.colorSchemas.dark).forEach { (id, colors) ->
+            ColorTable.resolve(colors, theme.fallbackColors, parseColor)
+                .invalidValues
+                .mapNotNull { key ->
+                    ColorTable.resolveRawSource(key.camelKey, colors, theme.fallbackColors)
+                }
+                .distinct()
+                .forEach { (source, raw) ->
+                    val definedByScheme = colors[source]?.isNotEmpty() == true
+                    val where = if (definedByScheme) "scheme '$id'" else "fallbackColors"
+                    val path =
+                        if (definedByScheme) {
+                            "colorSchemas/$id/$source"
+                        } else {
+                            "fallbackColors/$source"
+                        }
+                    add(
+                        Finding(
+                            Severity.WARNING,
+                            Code.INVALID_COLOR_VALUE,
+                            "$where: '$source' cannot be parsed as a color (value '$raw')",
+                            path,
+                        ),
+                    )
+                }
+        }
+        lintV2FallbackTargets(theme)
+    }
+
+    private fun MutableList<Finding>.lintV2FallbackTargets(theme: ThemeV2) {
+        val fallbacks = theme.fallbackColors
+        val schemes = listOf(theme.colorSchemas.light, theme.colorSchemas.dark)
+        fallbacks.forEach { (from, target) ->
+            if (target.isEmpty()) return@forEach
+            val resolvable =
+                ColorTable.isImageValue(target) ||
+                    schemes.any { scheme ->
+                        ColorTable.resolveRaw(target, scheme, fallbacks) != null
+                    }
+            if (resolvable) return@forEach
+            add(
+                Finding(
+                    Severity.WARNING,
+                    Code.BROKEN_FALLBACK_TARGET,
+                    "fallbackColors: '$from' points at '$target', which no scheme defines",
+                    "fallbackColors/$from",
                 ),
             )
         }
@@ -358,21 +501,26 @@ object ThemeDiagnostics {
         }
     }
 
-    private fun MutableList<Finding>.lintPresetSends(theme: Theme) {
-        presetDiagnostics(theme.presetKeys).forEach { message ->
+    private fun MutableList<Finding>.lintPresetSends(
+        presetKeys: Map<String, PresetKey>,
+        section: String,
+    ) {
+        presetDiagnostics(presetKeys).forEach { message ->
             add(
                 Finding(
                     Severity.WARNING,
                     Code.UNRESOLVABLE_PRESET_SEND,
                     message,
-                    "preset_keys/${message.substringAfter('\'').substringBefore('\'')}",
+                    "$section/${message.substringAfter('\'').substringBefore('\'')}",
                 ),
             )
         }
     }
 
-    private fun MutableList<Finding>.lintKeyboardReferences(theme: Theme) {
-        val keyboards = theme.presetKeyboards
+    private fun MutableList<Finding>.lintKeyboardReferences(
+        keyboards: Map<String, TextKeyboard>,
+        section: String,
+    ) {
         keyboards.forEach { (id, keyboard) ->
             listOf(
                 "import_preset" to keyboard.importPreset,
@@ -385,12 +533,12 @@ object ThemeDiagnostics {
                         Severity.WARNING,
                         Code.MISSING_KEYBOARD_REFERENCE,
                         "keyboard '$id' references missing keyboard '$target' via '$key'",
-                        "preset_keyboards/$id/$key",
+                        "$section/$id/$key",
                     ),
                 )
             }
         }
-        lintKeyboardCycles(theme)
+        lintKeyboardCycles(keyboards, section)
     }
 
     /**
@@ -398,8 +546,10 @@ object ThemeDiagnostics {
      * imports itself never ends. Reported once per cycle, at the entry that
      * closes it; the runtime has no guard either.
      */
-    private fun MutableList<Finding>.lintKeyboardCycles(theme: Theme) {
-        val keyboards = theme.presetKeyboards
+    private fun MutableList<Finding>.lintKeyboardCycles(
+        keyboards: Map<String, TextKeyboard>,
+        section: String,
+    ) {
         val reported = mutableSetOf<Set<String>>()
         keyboards.keys.forEach { start ->
             val chain = linkedSetOf<String>()
@@ -419,11 +569,20 @@ object ThemeDiagnostics {
                     "preset keyboards import each other in a cycle " +
                         cycle.joinToString(" -> ", prefix = "(", postfix = ")") { "'$it'" } +
                         " via 'import_preset'; the reference never resolves",
-                    "preset_keyboards/$last/import_preset",
+                    "$section/$last/import_preset",
                 ),
             )
         }
     }
 
     private fun parseColor(value: String): Int? = runCatching { ColorUtils.parseColor(value) }.getOrNull()
+
+    /** `back_color` → `backColor`. */
+    private fun String.snakeToCamel(): String =
+        split("_").let { parts ->
+            parts.first() + parts.drop(1).joinToString("") { it.replaceFirstChar { c -> c.uppercase() } }
+        }
+
+    /** `backColor` → `back_color` (for reporting legacy file paths). */
+    private fun String.camelToSnake(): String = replace(Regex("([A-Z])"), "_$1").lowercase()
 }
