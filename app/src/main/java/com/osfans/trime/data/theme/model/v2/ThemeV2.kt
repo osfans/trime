@@ -52,13 +52,17 @@ data class ThemeV2(
     val symbolKeyboard: LiquidKeyboard = LiquidKeyboard(),
 ) {
     // === 兼容视图：渲染层迁移期的过渡接口（Phase 4 逐节迁移后删除） ===
+    // 这些属性是反向组装的派生视图，不参与序列化；`fonts` 尤其不能与上面的
+    // `@SerialName("fonts") fontFaces` 产生键名歧义，故显式标注 @Transient。
 
     /** 旧 `style` 段视图，由 V2 分段反向组装。 */
+    @Transient
     val style: GeneralStyle by lazy {
         GeneralStyleAdapter.fromV2(keyboard, candidateBar, popup, fontFaces, enterKey)
     }
 
     /** 字体加载器（渲染层通过 `theme.fonts.xxx` 访问，返回 [android.graphics.Typeface]）。 */
+    @Transient
     val fonts: ThemeFonts by lazy { ThemeFonts(this) }
 
     /** 旧 `tool_bar` 段别名。 */

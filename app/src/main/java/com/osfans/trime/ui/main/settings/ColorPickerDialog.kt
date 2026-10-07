@@ -10,6 +10,7 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.util.isNightMode
 import kotlinx.coroutines.launch
 
 object ColorPickerDialog {
@@ -21,8 +22,16 @@ object ColorPickerDialog {
         afterConfirm: (suspend () -> Unit)? = null,
     ): AlertDialog {
         val labels = listOf(context.getString(R.string.light), context.getString(R.string.dark))
-        val activeTheme = ThemeManager.activeTheme
-        val currentIndex = if (ColorManager.activeColorScheme == activeTheme.colorSchemas.dark) 1 else 0
+        val prefs = ThemeManager.prefs
+        // 当前生效配色：跟随系统时看夜间状态，否则看用户显式选择。
+        // 不能用配色 Map 内容比较，那会在 light/dark 内容相同时误判。
+        val isDark =
+            if (prefs.followSystemDayNight.getValue()) {
+                context.resources.configuration.isNightMode()
+            } else {
+                prefs.normalModeColor.getValue() == "dark"
+            }
+        val currentIndex = if (isDark) 1 else 0
         return AlertDialog
             .Builder(context)
             .apply {
