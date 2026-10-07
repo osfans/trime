@@ -405,6 +405,25 @@ class Keyboard(
         return if (on) setModifier(keycode, keepOn) else setModifier(keycode, keyDown)
     }
 
+    /**
+     * 强制锁定修饰键（如双击 Shift 锁定大写），不做 toggle。
+     * @param keycode 修饰键的 KeyEvent 掩码
+     * @return 修饰键状态是否改变
+     */
+    fun lockModifierKey(keycode: Int): Boolean {
+        val modifierKey =
+            when (keycode) {
+                KeyEvent.META_SHIFT_ON -> mShiftKey
+                KeyEvent.META_ALT_ON -> mAltKey
+                KeyEvent.META_CTRL_ON -> mCtrlKey
+                KeyEvent.META_META_ON -> mMetaKey
+                KeyEvent.KEYCODE_SYM -> mSymKey
+                else -> null
+            }
+        modifierKey?.forceOn()
+        return setModifier(keycode, true)
+    }
+
     fun refreshModifier(): Boolean {
         // 这里改为了一次性重置全部修饰键状态并返回TRUE刷新UI，可能有bug
         var result = false

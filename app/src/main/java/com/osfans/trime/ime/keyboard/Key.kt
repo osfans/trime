@@ -49,6 +49,18 @@ class Key(
         bind(KeyBehavior.PAGING, keyDef.paging)
         bind(KeyBehavior.COMBO, keyDef.combo)
         bind(KeyBehavior.ASCII, keyDef.ascii)
+
+        // 对齐主流输入法：Shift 键默认支持双击锁定大写（Caps Lock）。
+        // 仅当主题未显式配置 double_click / lazy_double_click 时生效，
+        // 双击复用单击的动作，由 KeyView 对双击强制锁定。
+        val clickAction = this[KeyBehavior.CLICK]
+        if (clickAction != null &&
+            (clickAction.code == KeyEvent.KEYCODE_SHIFT_LEFT || clickAction.code == KeyEvent.KEYCODE_SHIFT_RIGHT) &&
+            !containsKey(KeyBehavior.DOUBLE_CLICK) &&
+            !containsKey(KeyBehavior.LAZY_DOUBLE_CLICK)
+        ) {
+            put(KeyBehavior.LAZY_DOUBLE_CLICK, clickAction)
+        }
     }
 
     var edgeFlags = 0
@@ -181,6 +193,11 @@ class Key(
     fun setOn(on: Boolean): Boolean {
         isOn = if (on && isOn) false else on
         return isOn
+    }
+
+    /** 强制开启（锁定），不做 toggle。用于双击 Shift 锁定大写。 */
+    fun forceOn() {
+        isOn = true
     }
 
     private val keyOffsetX: Float

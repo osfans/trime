@@ -196,10 +196,17 @@ class KeyView(
         Timber.d("processKeyAction: label=${key.getLabel()}, code=${action.code}, type=$behavior")
 
         if (action.isModifierKey) {
-            keyboard.clickModifierKey(
-                action.isShiftLock xor (behavior == KeyBehavior.LONG_CLICK),
-                action.modifierKeyOnMask,
-            )
+            when (behavior) {
+                // 双击强制锁定，对齐主流输入法：单击切换、双击锁定大写、长按临时/锁定
+                KeyBehavior.DOUBLE_CLICK, KeyBehavior.LAZY_DOUBLE_CLICK ->
+                    keyboard.lockModifierKey(action.modifierKeyOnMask)
+
+                else ->
+                    keyboard.clickModifierKey(
+                        action.isShiftLock xor (behavior == KeyBehavior.LONG_CLICK),
+                        action.modifierKeyOnMask,
+                    )
+            }
             keyboardView.invalidateAllKeys()
             return
         }
