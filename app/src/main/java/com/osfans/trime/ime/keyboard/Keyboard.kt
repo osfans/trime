@@ -18,6 +18,14 @@ import splitties.dimensions.dp
 import kotlin.math.abs
 import kotlin.math.pow
 
+/**
+ * 键盘高度占「屏幕可视高度」的上限比例。
+ *
+ * 高度按屏幕宽度百分比计算，在横屏（屏宽 > 屏高）时会得出比屏幕还高的结果，
+ * 因此用屏幕高度再做一次封顶，避免键盘顶满整个屏幕。
+ */
+private const val MAX_KEYBOARD_HEIGHT_OF_SCREEN = 0.6f
+
 /** 從YAML中加載鍵盤配置，包含多個[按鍵][Key]。  */
 @Suppress("ktlint:standard:property-naming")
 class Keyboard(
@@ -116,10 +124,10 @@ class Keyboard(
      */
     private fun resolveKeyboardHeight(): Int {
         val userRatio = ThemeManager.prefs.keyboardHeightRatio.getValue()
-        if (userRatio > 0) return allowedWidth * userRatio / 100
+        if (userRatio > 0) return ratioHeight(userRatio)
 
         val themeRatio = theme.style.keyboardHeightRatio
-        if (themeRatio > 0) return allowedWidth * themeRatio / 100
+        if (themeRatio > 0) return ratioHeight(themeRatio)
 
         return resolvePositive(
             selfConfig?.let {
@@ -131,6 +139,14 @@ class Keyboard(
                 context.isLandscapeMode(),
             ),
         ) { context.dp(it) }
+    }
+
+    /** 把「占屏幕宽度百分比」换算为键盘高度，并以屏幕可视高度做封顶。 */
+    private fun ratioHeight(ratio: Int): Int {
+        val byWidth = allowedWidth * ratio / 100
+        val maxByScreenHeight =
+            (context.resources.displayMetrics.heightPixels * MAX_KEYBOARD_HEIGHT_OF_SCREEN).toInt()
+        return if (maxByScreenHeight > 0) minOf(byWidth, maxByScreenHeight) else byWidth
     }
 
     private val expandKeypressArea: Boolean by ThemeManager.prefs.expandKeypressArea

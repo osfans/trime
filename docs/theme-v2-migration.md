@@ -40,6 +40,23 @@
 - `fonts`：`*_font`（九种字体声明）。
 - `enterKey`：`enter_label_mode`、`enter_labels`。
 
+### 键盘高度：推荐用 `keyboardHeightRatio`
+
+`keyboard.height`（dp）在不同 dpi / 屏幕尺寸上会拉伸变形，因为键宽本就按屏幕宽度百分比计算
+（`keyWidth` 是百分比）。因此新增 `keyboard.keyboardHeightRatio`：**键盘高度 = 屏幕宽度 × ratio%**，
+> 0 时优先于 `height` / `heightLandscape`。
+
+```yaml
+keyboard:
+  keyWidth: 10.0
+  height: 250          # 回退值：ratio 为 0 或旧主题时使用
+  heightLandscape: 200
+  keyboardHeightRatio: 65
+```
+
+优先级：**用户设置「键盘高度」（设置项，0 = 跟随主题）> 主题 `keyboardHeightRatio` > 固定 dp**。
+横屏等宽屏场景会自动以屏幕可视高度的 60% 封顶，避免键盘顶满屏幕。
+
 ### 颜色键：snake_case → camelCase（52 个）
 
 `back_color → backColor`、`key_text_color → keyTextColor`、`hilited_candidate_text_color → hilitedCandidateTextColor` 等，规则为去掉下划线并驼峰化。
