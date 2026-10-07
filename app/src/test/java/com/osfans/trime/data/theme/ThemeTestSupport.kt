@@ -34,9 +34,16 @@ object ThemeTestSupport {
         return yaml.decodeFromYamlNode<Theme>(mapping) to mapping
     }
 
-    /** Decodes a built-in theme source file (app/src/main/assets/shared/). */
-    fun decodeBuiltinTheme(fileName: String): Theme = decodeThemeFile("src/main/assets/shared/$fileName")
+    /**
+     * Decodes a legacy-format test fixture (app/src/test/assets/). The built-in
+     * themes shipped under app/src/main/assets/shared are now V2 format, so the
+     * legacy snake_case fixtures that exercise the legacy parser live here.
+     */
+    fun decodeBuiltinTheme(fileName: String): Theme = decodeThemeFile("src/test/assets/$fileName")
 
-    /** Decodes a built-in theme and adapts it to the unified V2 model. */
-    fun decodeBuiltinThemeV2(fileName: String): ThemeV2 = LegacyThemeAdapter.toV2(decodeBuiltinTheme(fileName))
+    /** Decodes a built-in V2 theme source file (app/src/main/assets/shared/). */
+    fun decodeBuiltinThemeV2(fileName: String): ThemeV2 {
+        val node = ThemeYamlV2.parser.parseToYamlNode(File("src/main/assets/shared/$fileName").readText())
+        return ThemeYamlV2.parser.decodeFromYamlNode<ThemeV2>(node)
+    }
 }

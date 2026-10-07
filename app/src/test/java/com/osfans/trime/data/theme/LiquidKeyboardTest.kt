@@ -172,7 +172,7 @@ class LiquidKeyboardTest :
 
         Given("the built in trime theme") {
             Then("its keyboards are exactly the ids its source lists, in order") {
-                val (theme, node) = ThemeTestSupport.themeAndNode("src/main/assets/shared/trime.yaml")
+                val (theme, node) = ThemeTestSupport.themeAndNode("src/test/assets/trime.yaml")
                 val liquid = node.pairs["liquid_keyboard"]
                 theme.liquidKeyboard.keyboards.map { it.id } shouldBe
                     liquid?.pairs?.get("keyboards")?.sequence?.items?.mapNotNull { it.string }

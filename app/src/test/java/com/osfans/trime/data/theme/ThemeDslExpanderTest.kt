@@ -230,7 +230,7 @@ class ThemeDslExpanderTest :
         }
 
         Given("the built-in trime.yaml") {
-            val file = File("src/main/assets/shared/trime.yaml")
+            val file = File("src/test/assets/trime.yaml")
             val expanded = ThemeDslExpander.expand("trime", ThemeTestSupport.yaml.parseToYamlNode(file.readText())) { null }
 
             Then("the 'letter' keyboard inherits the default keyboard") {
