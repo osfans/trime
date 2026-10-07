@@ -79,6 +79,8 @@ class Key(
     var gap = 0
     var row = 0
     var column = 0
+    /** 该键纵向跨越的行数（1 为不跨行），由主题键定义 `rowSpan` 决定。 */
+    var rowSpan = 1
 
     var extraWidthLeft = 0
     var extraWidthRight = 0

@@ -166,52 +166,15 @@ class Keyboard(
             val oneWeightWidthPx =
                 allowedWidth.toFloat() / (MAX_TOTAL_WEIGHT * (1 + splitRatio))
 
-            // total width weight for each row.
-            val rowWidthTotalWeight = mutableListOf<Float>()
+            // 第一趟：定出每个键所在的行、列与宽度，并为跨行键预留下方各行的 x 区间。
+            // 第二趟只消费这份结果，换行不再被算两遍，避免两趟判定出现分歧。
+            val plan = planRows(keys, keyboardKeyWidth, maxColumns, oneWeightWidthPx)
 
             // raw height of each row before scaling
-            val rowRawHeight = mutableListOf<Int>()
+            val rowRawHeight = plan.rowRawHeight
 
-            var x = 0
-            var column = 0
-            var rowHeight = keyHeight
-            var totalKeyWidth = 0f
-
-            // determine row count, row heights, total row weights; does not create Key objects
-            for (key in keys) {
-
-                // determine the width weight of this key
-                val keyWidthWeight =
-                    if (key.width == 0f && key.click.orAbsent != null) keyboardKeyWidth else key.width
-
-                val widthPx = (keyWidthWeight * allowedWidth / MAX_TOTAL_WEIGHT).toInt()
-
-                // wrap to next row if column or width limit is reached
-                if (column >= maxColumns || x + widthPx > allowedWidth) {
-                    rowWidthTotalWeight.add(totalKeyWidth)
-                    rowRawHeight.add(rowHeight)
-                    x = 0
-                    column = 0
-                    totalKeyWidth = 0f
-                }
-
-                // first key of a row defines the row height
-                if (column == 0) {
-                    rowHeight = if (key.height > 0) key.height.toInt() else keyHeight
-                }
-
-                totalKeyWidth += keyWidthWeight
-
-                // only clickable keys count toward column count
-                if (key.click.orAbsent != null) {
-                    column++
-                }
-
-                x += widthPx
-            }
-
-            rowWidthTotalWeight.add(totalKeyWidth)
-            rowRawHeight.add(rowHeight)
+            // total width weight for each row.
+            val rowWidthTotalWeight = plan.rowWidthTotalWeight
 
             val rows = rowRawHeight.size
             val rawHeightSum = rowRawHeight.sum()
@@ -235,7 +198,6 @@ class Keyboard(
             var yPos = 0
 
             var row = 0
-            column = 0
 
             var rowWeightAccumulo = 0f
             var currentRowHeight = rowHeightScaled[0]
@@ -248,19 +210,19 @@ class Keyboard(
             val spacers = mutableListOf<Triple<Int, Int, Int>>()
 
             // create Key objects, assign position, size, offsets
-            for (textKey in keys) {
+            for (placement in plan.placements) {
 
-                val keyWidthWeight =
-                    if (textKey.width == 0f && textKey.click.orAbsent != null) keyboardKeyWidth else textKey.width
+                val textKey = keys[placement.keyIndex]
 
-                var widthPx = (keyWidthWeight * oneWeightWidthPx).toInt()
+                val keyWidthWeight = placement.weight
 
-                // wrap to next row if limits are exceeded
-                if (column >= maxColumns || xPos + widthPx > allowedWidth) {
+                var widthPx = placement.widthPx
+
+                // 换行已在第一趟决定，这里只推进 y（跨行可能让行号跳过多个空行）
+                if (placement.row > row) {
                     xPos = 0
-                    yPos += currentRowHeight
-                    row++
-                    column = 0
+                    yPos += (row until placement.row).sumOf { rowHeightScaled[it] }
+                    row = placement.row
                     rowWeightAccumulo = 0f
                     splitInserted = false
                     currentRowHeight = rowHeightScaled[row]
@@ -284,7 +246,7 @@ class Keyboard(
                     }
                 }
 
-                if (textKey.click.orAbsent == null) {
+                if (!placement.clickable) {
                     if (expandKeypressArea) spacers.add(Triple(xPos, widthPx, row))
                     xPos += widthPx
                     continue
@@ -298,6 +260,7 @@ class Keyboard(
                 key.keySymbolOffsetY = resolveOffset(textKey.keySymbolOffsetY, selfConfig.keySymbolOffsetY, theme.style.keySymbolOffsetY)
                 key.keyHintOffsetX = resolveOffset(textKey.keyHintOffsetX, selfConfig.keyHintOffsetX, theme.style.keyHintOffsetX)
                 key.keyHintOffsetY = resolveOffset(textKey.keyHintOffsetY, selfConfig.keyHintOffsetY, theme.style.keyHintOffsetY)
+
                 key.keyPressOffsetX = resolveOffset(textKey.keyPressOffsetX, selfConfig.keyPressOffsetX, theme.style.keyPressOffsetX)
                 key.keyPressOffsetY = resolveOffset(textKey.keyPressOffsetY, selfConfig.keyPressOffsetY, theme.style.keyPressOffsetY)
 
@@ -308,11 +271,11 @@ class Keyboard(
                 val rightGap = abs(allowedWidth - xPos - widthPx)
                 key.width = if (rightGap <= allowedWidth / 100) allowedWidth - xPos else widthPx
 
-                key.height = currentRowHeight
+                key.rowSpan = placement.rowSpan
+                key.height = spanHeight(row, placement.rowSpan, rowHeightScaled)
                 key.row = row
-                key.column = column
+                key.column = placement.column
 
-                column++
                 xPos += key.width
 
                 mKeys.add(key)
@@ -349,10 +312,43 @@ class Keyboard(
                 key.index = index
                 if (key.column == 0) key.edgeFlags = key.edgeFlags or EDGE_LEFT
                 if (key.row == 0) key.edgeFlags = key.edgeFlags or EDGE_TOP
-                if (key.row == row) key.edgeFlags = key.edgeFlags or EDGE_BOTTOM
+                if (key.row + key.rowSpan - 1 >= rows - 1) key.edgeFlags = key.edgeFlags or EDGE_BOTTOM
             }
         }
     }
+
+    /**
+     * 把主题里的键定义翻译成纯数据后交给 [planKeyRows]：换行与跨行预留都发生在
+     * 那里，这里只做类型转换。
+     */
+    private fun planRows(
+        keys: List<TextKeyboard.TextKey>,
+        keyboardKeyWidth: Float,
+        maxColumns: Int,
+        oneWeightWidthPx: Float,
+    ): RowPlan {
+        val metrics =
+            keys.map { key ->
+                val clickable = key.click.orAbsent != null
+                val weight = if (key.width == 0f && clickable) keyboardKeyWidth else key.width
+                KeyMetrics(
+                    weight = weight,
+                    height = key.height,
+                    clickable = clickable,
+                    rowSpan = if (clickable) key.rowSpan.coerceAtLeast(1) else 1,
+                )
+            }
+        return planKeyRows(
+            keys = metrics,
+            allowedWidth = allowedWidth,
+            widthUnitPx = oneWeightWidthPx,
+            wrapWidthUnitPx = allowedWidth.toFloat() / MAX_TOTAL_WEIGHT,
+            maxColumns = maxColumns,
+            defaultRowHeight = keyHeight,
+        )
+    }
+
+
 
     fun setModifierKey(
         c: Int,

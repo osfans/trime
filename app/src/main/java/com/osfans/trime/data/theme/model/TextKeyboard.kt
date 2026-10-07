@@ -49,6 +49,15 @@ data class TextKeyboard(
     data class TextKey(
         val width: Float = 0f,
         val height: Float = 0f,
+        /**
+         * 该键纵向跨越的行数，默认 1（不跨行）。
+         *
+         * 大于 1 时，键高为所跨各行高度之和，且下方各行同一 x 区间会被预留出来，
+         * 后续键自动跳过，不会压在该键上。典型用途：九宫格右侧的确认/换行键占两行。
+         *
+         * legacy 主题写作 `row_span`。
+         */
+        val rowSpan: Int = 1,
         val roundCorner: Float = -1f,
         val keyBorder: Int = -1,
         val label: String = "",

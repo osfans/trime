@@ -57,6 +57,32 @@ keyboard:
 优先级：**用户设置「键盘高度」（设置项，0 = 跟随主题）> 主题 `keyboardHeightRatio` > 固定 dp**。
 横屏等宽屏场景会自动以屏幕可视高度的 60% 封顶，避免键盘顶满屏幕。
 
+### 按键跨行：`rowSpan`
+
+键支持 `rowSpan`（legacy 写作 `row_span`），默认 1。大于 1 时该键纵向占多行，键高为所跨各行
+高度之和，下方各行同一 x 区间会被预留出来，后续键自动跳过，不会压在跨行键身上。
+
+```yaml
+keyboards:
+  nine_grid:
+    name: 九宫格
+    keys:
+      # ... 前 8 个键
+      - {click: Return, rowSpan: 2}   # 确认键占两行
+      - {click: space}
+      - {click: BackSpace}
+```
+
+要点：
+
+- 跨行键会**吃掉格子**：上例中确认键占住第 3 行第 3 列与第 4 行第 3 列，末行只剩两个位置，
+  原本 12 个键的九宫格要少写一个键，否则多出来的键会被挤到新增的第 5 行（行高随之被压矮）。
+- `rowSpan` 超出末行会被收敛到末行，不会算出超高的键。
+- 不可点击的键（只占位的 spacer）忽略 `rowSpan`，也不计入列数。
+- 横屏分屏（中缝）与跨行同时启用时，中缝之后的键可能有轻微偏移——分屏 gap 是按行插入的。
+- 该能力对所有走 `keyboards` / `preset_keyboards` 的键盘生效（主键盘、数字、符号、编辑等）；
+  符号/表情面板（liquid keyboard）是独立的流式布局，不受影响。
+
 ### 颜色键：snake_case → camelCase（52 个）
 
 `back_color → backColor`、`key_text_color → keyTextColor`、`hilited_candidate_text_color → hilitedCandidateTextColor` 等，规则为去掉下划线并驼峰化。
