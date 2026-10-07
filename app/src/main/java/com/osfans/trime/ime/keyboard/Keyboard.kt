@@ -102,7 +102,26 @@ class Keyboard(
     val asciiKeyboard: String? = selfConfig?.asciiKeyboard // 英文鍵盤
 
     val keyboardHeight: Int =
-        resolvePositive(
+        resolveKeyboardHeight()
+
+    /**
+     * 键盘总高度。优先级：
+     * 1. 用户偏好「键盘高度」（占屏幕宽度百分比，> 0 时生效）；
+     * 2. 主题的 [GeneralStyle.keyboardHeightRatio]（占屏幕宽度百分比）；
+     * 3. 固定 dp 高度（向后兼容 [GeneralStyle.keyboardHeight] / keyboardHeightLand）。
+     *
+     * 键宽本就按 `allowedWidth * keyWidth / 100`（屏幕宽度百分比）自适应，因此让
+     * 键盘高度也按屏幕宽度比例，才能保证键的宽高比在不同尺寸屏幕上一致，消除
+     * 固定 dp 高度带来的变形、拉伸。
+     */
+    private fun resolveKeyboardHeight(): Int {
+        val userRatio = ThemeManager.prefs.keyboardHeightRatio.getValue()
+        if (userRatio > 0) return allowedWidth * userRatio / 100
+
+        val themeRatio = theme.style.keyboardHeightRatio
+        if (themeRatio > 0) return allowedWidth * themeRatio / 100
+
+        return resolvePositive(
             selfConfig?.let {
                 pickLandscape(it.keyboardHeight, it.keyboardHeightLand, context.isLandscapeMode())
             },
@@ -112,6 +131,7 @@ class Keyboard(
                 context.isLandscapeMode(),
             ),
         ) { context.dp(it) }
+    }
 
     private val expandKeypressArea: Boolean by ThemeManager.prefs.expandKeypressArea
 

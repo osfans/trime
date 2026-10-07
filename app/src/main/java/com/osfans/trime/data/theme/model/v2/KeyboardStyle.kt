@@ -39,6 +39,8 @@ data class KeyboardStyle(
     val pressOffsetY: Float = 0f,
     val height: Int = 0,
     val heightLandscape: Int = 0,
+    /** 键盘高度占屏幕宽度的百分比；> 0 时优先于固定 [height]，实现全机型等比缩放。 */
+    val keyboardHeightRatio: Int = 0,
     val roundCorner: Float = 0f,
     val shadowRadius: Float = 0f,
     val verticalGap: Int = 0,

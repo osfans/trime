@@ -206,8 +206,8 @@ object ThemeDiagnostics {
                     "keyHeight", "keyWidth", "textSize", "longTextSize", "symbolTextSize",
                     "labelTextSize", "textOffsetX", "textOffsetY", "symbolOffsetX", "symbolOffsetY",
                     "hintOffsetX", "hintOffsetY", "pressOffsetX", "pressOffsetY", "height",
-                    "heightLandscape", "roundCorner", "shadowRadius", "verticalGap",
-                    "resetAsciiModeOnFocusChange", "backgroundFolder",
+                    "heightLandscape", "keyboardHeightRatio", "roundCorner", "shadowRadius",
+                    "verticalGap", "resetAsciiModeOnFocusChange", "backgroundFolder",
                 ),
             "candidateBar" to
                 setOf(

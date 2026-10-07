@@ -53,6 +53,8 @@ data class GeneralStyle(
     val latinFont: MaybeStringList = MaybeStringList.Empty,
     val keyboardHeight: Int = 0,
     val keyboardHeightLand: Int = 0,
+    /** 键盘高度占屏幕宽度百分比；> 0 时优先于固定 [keyboardHeight]。 */
+    val keyboardHeightRatio: Int = 0,
     val popupBottomMargin: Int = 0,
     val popupWidth: Int = 0,
     val popupHeight: Int = 0,

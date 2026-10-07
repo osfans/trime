@@ -23,6 +23,7 @@
     <string name="normal_mode_color">配色</string>
     <string name="normal_mode_color_summary">选取配色</string>
     <string name="manual_select_disables_follow_system">手动选择将关闭“跟随系统日间/夜间”</string>
+    <string name="keyboard_height_ratio">键盘高度</string>
     <string name="key_text_size">按键字号</string>
     <string name="candidate_text_size">候选字号</string>
     <string name="comment_text_size">注释字号</string>

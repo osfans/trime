@@ -71,6 +71,7 @@ object GeneralStyleAdapter {
             latinFont = fonts.latin,
             keyboardHeight = keyboard.height,
             keyboardHeightLand = keyboard.heightLandscape,
+            keyboardHeightRatio = keyboard.keyboardHeightRatio,
             popupBottomMargin = popup.bottomMargin,
             popupWidth = popup.width,
             popupHeight = popup.height,

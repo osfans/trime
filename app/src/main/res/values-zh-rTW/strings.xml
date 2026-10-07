@@ -24,6 +24,7 @@
     <string name="normal_mode_color">配色</string>
     <string name="normal_mode_color_summary">選取想要的配色</string>
     <string name="manual_select_disables_follow_system">手動選擇將關閉「跟隨系統主題色調」</string>
+    <string name="keyboard_height_ratio">鍵盤高度</string>
     <string name="key_text_size">按鍵字號</string>
     <string name="candidate_text_size">候選字號</string>
     <string name="comment_text_size">註釋字號</string>

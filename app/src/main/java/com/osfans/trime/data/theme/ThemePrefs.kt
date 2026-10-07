@@ -135,6 +135,18 @@ class ThemePrefs(
             "%",
         )
 
+    val keyboardHeightRatio =
+        int(
+            R.string.keyboard_height_ratio,
+            KEYBOARD_HEIGHT_RATIO,
+            0,
+            0,
+            100,
+            "%",
+            defaultLabel = R.string.follow_theme,
+            useMinAsDefault = true,
+        )
+
     val useSoftCursor = switch(R.string.use_soft_cursor, USE_SOFT_CURSOR, true)
 
     val hideInputBar = switch(R.string.hide_input_bar, HIDE_INPUT_BAR, false)
@@ -227,6 +239,7 @@ class ThemePrefs(
 
         const val LANDSCAPE_MODE = "keyboard_landscape_mode"
         const val SPLIT_SPACE_PERCENT = "keyboard_split_space"
+        const val KEYBOARD_HEIGHT_RATIO = "keyboard_height_ratio"
 
         const val USE_SOFT_CURSOR = "use_soft_cursor"
         const val HIDE_INPUT_BAR = "hide_input_bar"

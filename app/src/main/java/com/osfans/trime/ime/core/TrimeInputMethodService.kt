@@ -102,6 +102,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         ThemeManager.prefs.hideKeySymbol,
         ThemeManager.prefs.hideKeyHint,
         ThemeManager.prefs.hideInputBar,
+        ThemeManager.prefs.keyboardHeightRatio,
         prefs.advanced.ignoreSystemGestureInsets,
     )
 

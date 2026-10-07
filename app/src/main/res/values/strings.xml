@@ -24,6 +24,7 @@
     <string name="normal_mode_color">Colors</string>
     <string name="normal_mode_color_summary">Select desired color</string>
     <string name="manual_select_disables_follow_system">Manual selection will disable following system day/night</string>
+    <string name="keyboard_height_ratio">Keyboard height</string>
     <string name="key_text_size">Key text size</string>
     <string name="candidate_text_size">Candidate text size</string>
     <string name="comment_text_size">Comment text size</string>

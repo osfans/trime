@@ -26,6 +26,9 @@ keyboard:
   labelTextSize: 22
   height: 250
   heightLandscape: 200
+  # 键盘高度占屏幕宽度百分比（> 0 时优先于上面的 height），
+  # 让键的宽高比在不同尺寸屏幕上保持一致，消除固定 dp 高度带来的变形拉伸。
+  keyboardHeightRatio: 65
   resetAsciiModeOnFocusChange: false
   roundCorner: 8
   shadowRadius: 0.0
