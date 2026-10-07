@@ -28,7 +28,7 @@
 | `preset_keyboards` | `keyboards` | 字段 snake→camel |
 | `liquid_keyboard` | `symbolKeyboard` | 字段 snake→camel |
 
-完整示例见 `app/src/main/assets/shared/demo.trime.yaml`。
+完整示例见默认主题 `app/src/main/assets/shared/trime.yaml`（已采用 V2 格式）。
 
 ## 三、字段映射要点
 
