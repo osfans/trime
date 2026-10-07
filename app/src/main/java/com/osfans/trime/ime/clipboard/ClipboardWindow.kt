@@ -6,8 +6,10 @@
 package com.osfans.trime.ime.clipboard
 
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.graphics.Typeface
+import android.view.ContextThemeWrapper
 import android.view.View
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
@@ -17,6 +19,7 @@ import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DatabaseBean
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.core.InputTabLayout
@@ -40,6 +43,14 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
     private val scope: ThemeScope by instance()
     private val theme: ThemeV2 get() = scope.theme
 
+    /** 跟随 Trime 主题深浅色的弹层上下文（长按菜单、删除确认框等）。 */
+    private val themedContext: Context
+        get() {
+            val isDark = ColorManager.activeColorScheme == scope.theme.colorSchemas.dark
+            val themeRes = if (isDark) R.style.Theme_Dialog_Dark else R.style.Theme_Dialog_Light
+            return ContextThemeWrapper(context, themeRes)
+        }
+
     private lateinit var clipboardLayout: ClipboardLayout
     private lateinit var clipboardPagesAdapter: ClipboardPagesAdapter
     private var wasAttached = false
@@ -57,7 +68,7 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
     private var collectionBeansSubmitJob: Job? = null
 
     private val clipboardBeansAdapter by lazy {
-        object : ClipboardAdapter(scope) {
+        object : ClipboardAdapter(scope, themedContext) {
             override fun onPaste(bean: DatabaseBean) {
                 val text = bean.text ?: return
                 service.commitText(text)
@@ -103,7 +114,7 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
     }
 
     private val collectionBeansAdapter by lazy {
-        object : ClipboardAdapter(scope) {
+        object : ClipboardAdapter(scope, themedContext) {
             override fun onPaste(bean: DatabaseBean) {
                 val text = bean.text ?: return
                 service.commitText(text)
@@ -195,7 +206,7 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
     }
 
     private fun promptDeleteAll(action: suspend () -> Unit) {
-        val dialog = AlertDialog.Builder(context)
+        val dialog = AlertDialog.Builder(themedContext)
             .setTitle(R.string.delete_all)
             .setMessage(R.string.ask_to_delete_all)
             .setPositiveButton(R.string.ok) { _, _ ->

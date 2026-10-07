@@ -5,6 +5,7 @@
 
 package com.osfans.trime.ime.clipboard
 
+import android.content.Context
 import android.os.Build
 import android.view.ViewGroup
 import android.widget.PopupMenu
@@ -21,6 +22,7 @@ import kotlin.math.min
 
 abstract class ClipboardAdapter(
     private val scope: ThemeScope,
+    private val dialogContext: Context,
 ) : PagingDataAdapter<DatabaseBean, ClipboardAdapter.ViewHolder>(diffCallback) {
     companion object {
         private val diffCallback =
@@ -83,9 +85,9 @@ abstract class ClipboardAdapter(
                 onPaste(bean)
             }
             root.setOnLongClickListener {
-                val popup = PopupMenu(ctx, it)
+                val popup = PopupMenu(dialogContext, it)
                 val menu = popup.menu
-                val iconTint = ctx.styledColor(android.R.attr.colorControlNormal)
+                val iconTint = dialogContext.styledColor(android.R.attr.colorControlNormal)
                 menu.item(R.string.edit, R.drawable.ic_baseline_edit_24, iconTint) {
                     onEdit(bean.id)
                 }
