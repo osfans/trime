@@ -7,7 +7,7 @@ package com.osfans.trime.ime.bar.ui
 import android.content.Context
 import android.view.View
 import com.osfans.trime.R
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeScope
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.before
@@ -24,7 +24,7 @@ class CandidateUi(
     private val scope: ThemeScope,
     private val compatView: View,
 ) : Ui {
-    private val theme: Theme get() = scope.theme
+    private val theme: ThemeV2 get() = scope.theme
 
     val unrollButton =
         ToolButton(ctx, R.drawable.ic_baseline_expand_more_24, scope).apply {

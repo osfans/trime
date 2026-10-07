@@ -59,7 +59,7 @@ internal class ColorTable private constructor(
             schemeColors: Map<String, String>,
             fallbackColors: Map<String, String>,
         ): Pair<String, String>? {
-            var current = key
+            var current = normalizeColorKey(key)
             val visited = HashSet<String>()
             while (visited.add(current)) {
                 val value = schemeColors[current]
@@ -71,13 +71,28 @@ internal class ColorTable private constructor(
                 }
                 val altFallback = ColorKey.from(current)?.let(ColorKey::fallbackOf)
                 if (altFallback != null) {
-                    current = altFallback.key
+                    current = altFallback.camelKey
                 } else {
                     return null
                 }
             }
             return null
         }
+
+        /**
+         * Normalizes a color key to camelCase. Known [ColorKey]s use their
+         * canonical camelCase spelling; a theme-defined key is snake→camel
+         * converted so it matches the camelCase scheme produced by the
+         * legacy adapter (the conversion is idempotent for already-camel keys).
+         */
+        private fun normalizeColorKey(key: String): String =
+            ColorKey.from(key)?.camelKey ?: key.snakeToCamel()
+
+        /** `back_color` → `backColor`; already-camel keys are unchanged. */
+        private fun String.snakeToCamel(): String =
+            split("_").let { parts ->
+                parts.first() + parts.drop(1).joinToString("") { it.replaceFirstChar { c -> c.uppercase() } }
+            }
 
         /**
          * The first non-empty value for [key], walking
@@ -108,7 +123,7 @@ internal class ColorTable private constructor(
             val unresolvedKeys = mutableListOf<ColorKey>()
             val invalidValues = mutableListOf<ColorKey>()
             for (key in ColorKey.entries) {
-                val raw = resolveRaw(key.key, scheme, fallbackColors)
+                val raw = resolveRaw(key.camelKey, scheme, fallbackColors)
                 if (raw == null) {
                     unresolvedKeys += key
                     continue

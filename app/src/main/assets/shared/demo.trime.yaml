@@ -1,0 +1,110 @@
+# SPDX-FileCopyrightText: 2015 - 2026 Rime community
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# V2 主题格式示例：对齐「元书/Hamster」皮肤标准。
+# - 语义化 camelCase 键名，按 keyboard / candidateBar / colorSchemas 等分层；
+# - 与 librime 部署通道完全解耦，由 Trime 独立解析；
+# - 旧格式（snake_case）主题经适配层自动转换，无需改动即可继续使用。
+
+version: "1.0"
+name: 示例主题
+author: Trime 社区
+description: V2 格式示范主题
+
+# 1. 键盘几何与按键样式
+keyboard:
+  height: 250
+  heightLandscape: 200
+  keyHeight: 44
+  keyWidth: 10
+  textSize: 22
+  longTextSize: 14
+  symbolTextSize: 10
+  roundCorner: 8
+  shadowRadius: 0
+  horizontalGap: 1
+  verticalGap: 1
+  padding: 0
+  resetAsciiModeOnFocusChange: false
+
+# 2. 候选栏
+candidateBar:
+  viewHeight: 28
+  textSize: 22
+  padding: 5
+  cornerRadius: 4
+  commentHeight: 12
+  commentPosition: right   # right | top | overlay
+  commentTextSize: 10
+
+# 3. 按键弹窗
+popup:
+  height: 0
+  textSize: 0
+
+# 4. 字体
+fonts:
+  key: symbol.ttf
+  candidate: han.ttf
+  comment: comment.ttf
+  latin: latin.ttf
+
+# 5. Enter 键文案
+enterKey:
+  mode: 0
+  labels:
+    go: 前往
+    done: 完成
+    search: 搜索
+    send: 发送
+    default: Enter
+
+# 6. 配色方案（严格只有日间 light 与夜间 dark 两个，不允许多余配色）
+colorSchemas:
+  light:
+    backColor: 0xe4e7e9
+    borderColor: 0xc1c7ca
+    keyTextColor: 0x37474f
+    keyBackColor: 0xeceff1
+    textColor: 0x5a676e
+    commentTextColor: 0x7b868c
+  dark:
+    backColor: 0x222222
+    borderColor: 0x333333
+    keyTextColor: 0xcccccc
+    keyBackColor: 0x2b2b2b
+    textColor: 0xdddddd
+    commentTextColor: 0x999999
+
+# 7. 按键动作
+keys:
+  BackSpace: {label: 退格, repeatable: true, send: BackSpace}
+  Return: {label: 回车, send: Return}
+  Mode_switch: {toggle: ascii_mode, send: SWITCH_CHARSET, states: [中文, 西文]}
+
+# 8. 键盘布局
+keyboards:
+  default:
+    name: 预设键盘
+    asciiMode: 0
+    keys:
+      - {click: q, longClick: "!"}
+      - {click: w, longClick: "@"}
+      - {click: e, longClick: "#"}
+      - {click: r}
+      - {click: space, width: 30}
+      - {click: BackSpace, width: 15}
+      - {click: Return, width: 15}
+
+# 9. 符号面板
+symbolKeyboard:
+  keyHeight: 40
+  singleWidth: 60
+  fixedKeyBar:
+    position: bottom
+    keys: [space1, BackSpace]
+  keyboards: [emoji]
+  emoji:
+    type: SINGLE
+    name: emoji
+    keys: "🙂😂🤣"

@@ -7,6 +7,7 @@
 package com.osfans.trime.data.theme
 
 import android.graphics.drawable.Drawable
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.util.ColorUtils
 import timber.log.Timber
 
@@ -22,7 +23,7 @@ import timber.log.Timber
  * bind or draw; values read once at construction go stale on scheme changes.
  */
 class ThemeScope internal constructor(
-    val theme: Theme,
+    val theme: ThemeV2,
     private val parseColor: (String) -> Int? = { value ->
         runCatching { ColorUtils.parseColor(value) }.getOrNull()
     },

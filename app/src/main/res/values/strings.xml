@@ -23,6 +23,14 @@
     <string name="selected_theme_summary">Select desired theme</string>
     <string name="normal_mode_color">Colors</string>
     <string name="normal_mode_color_summary">Select desired color</string>
+    <string name="manual_select_disables_follow_system">Manual selection will disable following system day/night</string>
+    <string name="key_text_size">Key text size</string>
+    <string name="candidate_text_size">Candidate text size</string>
+    <string name="comment_text_size">Comment text size</string>
+    <string name="key_font">Key font</string>
+    <string name="candidate_font">Candidate font</string>
+    <string name="comment_font">Comment font</string>
+    <string name="follow_theme">Follow theme</string>
     <string name="reset">Reset</string>
     <string name="reset_hint">Overwrite the same files in shared directory with default built-in assets</string>
     <string name="sound_on_keypress">Sound on key press</string>
@@ -242,6 +250,8 @@
     <string name="git_repo">Git repository</string>
     <string name="light">Light</string>
     <string name="dark">Dark</string>
+    <string name="day">Day</string>
+    <string name="night">Night</string>
     <string name="never">Never</string>
     <string name="landscape_only">Landscape only</string>
     <string name="wide_or_landscape">Wide or landscape</string>

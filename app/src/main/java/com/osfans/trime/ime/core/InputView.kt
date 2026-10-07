@@ -22,7 +22,7 @@ import com.osfans.trime.core.CompositionProto
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.bar.InputBarDelegate
 import com.osfans.trime.ime.broadcast.EnterKeyDisplayDelegate
@@ -105,7 +105,7 @@ class InputView(
         bindInstance<InputView> { this@InputView }
         bindInstance<ContextThemeWrapper> { themedContext }
         bindInstance<ThemeScope> { scope }
-        bindInstance<Theme> { scope.theme }
+        bindInstance<ThemeV2> { scope.theme }
         bindInstance<TrimeInputMethodService> { service }
         bindInstance<RimeSession> { rime }
         bindSingleton { InputBroadcaster() }

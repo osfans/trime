@@ -7,7 +7,7 @@ package com.osfans.trime.ime.clipboard
 
 import android.content.Context
 import com.osfans.trime.R
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.bar.ui.ToolButton
 import com.osfans.trime.ime.core.InputTabLayout
@@ -22,7 +22,7 @@ import splitties.views.dsl.core.add
 import splitties.views.dsl.core.wrapContent
 
 class ClipboardTitleUi(override val ctx: Context, private val scope: ThemeScope) : Ui {
-    private val theme: Theme get() = scope.theme
+    private val theme: ThemeV2 get() = scope.theme
 
     val tabLayout = InputTabLayout(ctx)
 

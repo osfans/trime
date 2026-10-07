@@ -9,7 +9,7 @@ import android.graphics.Color
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter4.BaseQuickAdapter
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.data.theme.model.LiquidKeyboard
 import com.osfans.trime.ime.keyboard.GestureFrame
@@ -31,7 +31,7 @@ class LiquidTabsUi(
     override val ctx: Context,
     private val scope: ThemeScope,
 ) : Ui {
-    private val theme: Theme get() = scope.theme
+    private val theme: ThemeV2 get() = scope.theme
 
     inner class TabUi : Ui {
         override val ctx = this@LiquidTabsUi.ctx

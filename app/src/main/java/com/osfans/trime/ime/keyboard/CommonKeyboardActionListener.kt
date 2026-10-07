@@ -18,9 +18,9 @@ import com.osfans.trime.core.RimeKeyEvent
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.theme.ColorManager
-import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.data.theme.ColorManager
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.model.LiquidKeyboard
 import com.osfans.trime.ime.clipboard.ClipboardWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
@@ -50,7 +50,7 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
 
     private val context: ContextThemeWrapper by instance()
     private val service: TrimeInputMethodService by instance()
-    private val theme: Theme by instance()
+    private val theme: ThemeV2 by instance()
     private val rime: RimeSession by instance()
     private val windowManager: BoardWindowManager by instance()
     private val keyboardWindow: KeyboardWindow by instance()
@@ -225,7 +225,7 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
             }
 
             private fun handleColorScheme(arg: String) {
-                if (arg in ThemeManager.activeTheme.presetColorSchemes) {
+                if (arg == "light" || arg == "dark") {
                     ColorManager.setColorScheme(arg)
                 }
             }
@@ -301,12 +301,12 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
             }
 
             private fun switchHideKeySymbol() {
-                val preference = prefs.keyboard.hideKeySymbol
+                val preference = ThemeManager.prefs.hideKeySymbol
                 preference.setValue(!preference.getValue())
             }
 
             private fun switchHideKeyHint() {
-                val preference = prefs.keyboard.hideKeyHint
+                val preference = ThemeManager.prefs.hideKeyHint
                 preference.setValue(!preference.getValue())
             }
 

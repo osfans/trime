@@ -17,7 +17,7 @@ import com.google.android.flexbox.FlexboxLayout
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.osfans.trime.R
 import com.osfans.trime.data.db.CollectionHelper
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.KeyboardWindow
@@ -34,7 +34,7 @@ import splitties.systemservices.clipboardManager
 class SegmentsWindow(di: DI, private val source: String) : BoardWindow.BarBoardWindow(di) {
     private val service: TrimeInputMethodService by instance()
     private val scope: ThemeScope by instance()
-    private val theme: Theme get() = scope.theme
+    private val theme: ThemeV2 get() = scope.theme
     private val windowManager: BoardWindowManager by instance()
 
     override val title: String by lazy {

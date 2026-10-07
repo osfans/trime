@@ -13,6 +13,7 @@ import android.widget.FrameLayout
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.theme.ThemeManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -327,8 +328,8 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
         private val repeatInterval by AppPrefs.defaultInstance().keyboard.repeatInterval
         private val doubleTapTimeout by AppPrefs.defaultInstance().keyboard.doubleTapTimeout
         private val slideStepSize by AppPrefs.defaultInstance().keyboard.slideStepSize
-        private val vibrateOnKeyPress by AppPrefs.defaultInstance().keyboard.vibrateOnKeyPress
-        private val vibrateOnKeyRelease by AppPrefs.defaultInstance().keyboard.vibrateOnKeyRelease
-        private val vibrateOnKeyRepeat by AppPrefs.defaultInstance().keyboard.vibrateOnKeyRepeat
+        private val vibrateOnKeyPress by ThemeManager.prefs.vibrateOnKeyPress
+        private val vibrateOnKeyRelease by ThemeManager.prefs.vibrateOnKeyRelease
+        private val vibrateOnKeyRepeat by ThemeManager.prefs.vibrateOnKeyRepeat
     }
 }

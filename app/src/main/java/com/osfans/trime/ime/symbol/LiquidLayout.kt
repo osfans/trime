@@ -9,7 +9,7 @@ import android.content.Context
 import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.setPadding
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.data.theme.model.LiquidKeyboard
 import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
@@ -44,7 +44,7 @@ class LiquidLayout(
     private val scope: ThemeScope,
     commonKeyboardActionListener: CommonKeyboardActionListener,
 ) : ConstraintLayout(context) {
-    private val theme: Theme get() = scope.theme
+    private val theme: ThemeV2 get() = scope.theme
 
     // TODO: 继承一个键盘视图嵌入到这里，而不是自定义一个视图
     // The fixed-key items, kept so their colors can be refreshed on scheme switches.

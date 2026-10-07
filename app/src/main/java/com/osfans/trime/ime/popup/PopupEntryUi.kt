@@ -13,7 +13,7 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.view.isVisible
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.utils.sizeDp
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.core.AutoScaleTextView
 import com.osfans.trime.ime.keyboard.isIconFont
@@ -35,7 +35,7 @@ class PopupEntryUi(
     keyHeight: Int,
     radius: Float,
 ) : Ui {
-    private val theme: Theme get() = scope.theme
+    private val theme: ThemeV2 get() = scope.theme
 
     var lastShowTime = -1L
 

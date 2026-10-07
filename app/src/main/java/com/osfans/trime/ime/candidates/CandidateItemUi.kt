@@ -12,7 +12,7 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.osfans.trime.core.CandidateProto
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.data.theme.model.GeneralStyle
 import com.osfans.trime.ime.core.AutoScaleTextView
@@ -46,7 +46,7 @@ class CandidateItemUi(
     override val ctx: Context,
     private val scope: ThemeScope,
 ) : Ui {
-    private val theme: Theme
+    private val theme: ThemeV2
         get() = scope.theme
 
     private val textSize = theme.style.candidateTextSize

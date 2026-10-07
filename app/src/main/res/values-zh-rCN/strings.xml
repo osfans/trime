@@ -22,6 +22,14 @@
     <string name="selected_theme_summary">选取主题</string>
     <string name="normal_mode_color">配色</string>
     <string name="normal_mode_color_summary">选取配色</string>
+    <string name="manual_select_disables_follow_system">手动选择将关闭“跟随系统日间/夜间”</string>
+    <string name="key_text_size">按键字号</string>
+    <string name="candidate_text_size">候选字号</string>
+    <string name="comment_text_size">注释字号</string>
+    <string name="key_font">按键字体</string>
+    <string name="candidate_font">候选字体</string>
+    <string name="comment_font">注释字体</string>
+    <string name="follow_theme">跟随主题</string>
     <string name="sound_on_keypress">按键声音</string>
     <string name="sound_volume">按键音量</string>
     <string name="vibrate_on_key_press">按键时振动</string>
@@ -241,6 +249,8 @@
     <string name="git_repo">Git 仓库</string>
     <string name="light">亮色</string>
     <string name="dark">暗色</string>
+    <string name="day">日间</string>
+    <string name="night">夜间</string>
     <string name="never">从不</string>
     <string name="landscape_only">仅限横屏</string>
     <string name="wide_or_landscape">宽屏或横屏</string>

@@ -6,6 +6,7 @@
 package com.osfans.trime.data.theme
 
 import com.charleskorn.kaml.YamlMap
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.util.mapping
 import java.io.File
 
@@ -35,4 +36,7 @@ object ThemeTestSupport {
 
     /** Decodes a built-in theme source file (app/src/main/assets/shared/). */
     fun decodeBuiltinTheme(fileName: String): Theme = decodeThemeFile("src/main/assets/shared/$fileName")
+
+    /** Decodes a built-in theme and adapts it to the unified V2 model. */
+    fun decodeBuiltinThemeV2(fileName: String): ThemeV2 = LegacyThemeAdapter.toV2(decodeBuiltinTheme(fileName))
 }

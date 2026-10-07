@@ -16,7 +16,7 @@ import android.graphics.drawable.GradientDrawable
 import android.view.KeyEvent
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.utils.sizeDp
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.popup.PopupAction
 import com.osfans.trime.ime.popup.PopupDelegate
@@ -27,7 +27,7 @@ import timber.log.Timber
 @SuppressLint("ClickableViewAccessibility", "ViewConstructor")
 class KeyView(
     context: Context,
-    private val theme: Theme,
+    private val theme: ThemeV2,
     private val key: Key,
     private val keyboard: Keyboard,
     private val keyboardView: KeyboardView,

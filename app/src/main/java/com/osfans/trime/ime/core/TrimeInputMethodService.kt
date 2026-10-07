@@ -98,10 +98,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private var cursorUpdateIndex = 0
 
     private val recreateInputViewPrefs: Array<PreferenceDelegate<*>> = arrayOf(
-        prefs.keyboard.expandKeypressArea,
-        prefs.keyboard.hideKeySymbol,
-        prefs.keyboard.hideKeyHint,
-        prefs.keyboard.hideInputBar,
+        ThemeManager.prefs.expandKeypressArea,
+        ThemeManager.prefs.hideKeySymbol,
+        ThemeManager.prefs.hideKeyHint,
+        ThemeManager.prefs.hideInputBar,
         prefs.advanced.ignoreSystemGestureInsets,
     )
 
@@ -161,7 +161,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     private suspend fun updateRimeOption(api: RimeApi) {
         try {
-            api.setRuntimeOption("soft_cursor", prefs.keyboard.useSoftCursor.getValue()) // 軟光標
+            api.setRuntimeOption("soft_cursor", ThemeManager.prefs.useSoftCursor.getValue()) // 軟光標
         } catch (e: Exception) {
             Timber.e(e)
         }
@@ -1005,6 +1005,15 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     fun showDialog(dialog: Dialog) {
         showingDialog?.dismiss()
+        // 背景跟随主题：用主题的键盘背景色 + 候选边框，保持与输入法界面一致的风格。
+        ColorManager.currentScope()?.let { scope ->
+            scope.decorDrawable(
+                "keyboard_background",
+                "candidate_border_color",
+                borderPx = 0,
+                cornerRadius = scope.theme.window.cornerRadius,
+            )?.let { dialog.window?.setBackgroundDrawable(it) }
+        }
         dialog.window?.also {
             it.attributes.apply {
                 token = decorView.windowToken

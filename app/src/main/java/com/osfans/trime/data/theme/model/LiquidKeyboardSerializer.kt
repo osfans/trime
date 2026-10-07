@@ -9,10 +9,11 @@ import com.charleskorn.kaml.YamlList
 import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode
 import com.charleskorn.kaml.YamlScalar
-import com.osfans.trime.data.theme.ThemeYaml
+import com.osfans.trime.data.theme.ThemeYamlV2
 import com.osfans.trime.util.pairs
 import com.osfans.trime.util.splitWithSurrogates
 import com.osfans.trime.util.string
+import com.osfans.trime.util.yamlMapOf
 import com.osfans.trime.util.yamlNode
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -37,8 +38,8 @@ import timber.log.Timber
  */
 @OptIn(InternalSerializationApi::class)
 internal object LiquidKeyboardSerializer : KSerializer<LiquidKeyboard> {
-    /** The fixed keys of the section; every other key of the mapping is a keyboard id. */
-    private val fixedKeys = setOf("single_width", "key_height", "margin_x", "fixed_key_bar", "keyboards")
+    /** The fixed keys of the section in camelCase; every other key is a keyboard id. */
+    private val fixedKeys = setOf("singleWidth", "keyHeight", "marginX", "fixedKeyBar", "keyboards")
 
     private val headerSerializer = Header.serializer()
     private val bodySerializer = Body.serializer()
@@ -49,14 +50,14 @@ internal object LiquidKeyboardSerializer : KSerializer<LiquidKeyboard> {
     override fun deserialize(decoder: Decoder): LiquidKeyboard {
         val root = decoder.yamlNode() as? YamlMap ?: return LiquidKeyboard()
         val header = runCatching {
-            ThemeYaml.parser.decodeFromYamlNode(headerSerializer, root.only(fixedKeys))
+            ThemeYamlV2.parser.decodeFromYamlNode(headerSerializer, normalizeFixedKeys(root).only(fixedKeys))
         }.onFailure {
             Timber.w(it, "Failed to decode LiquidKeyboard itself")
         }.getOrElse { Header() }
         val keyboards = header.keyboards.mapNotNull decode@{ id ->
             val node = root.pairs[id] as? YamlMap ?: return@decode null
             runCatching {
-                val body = ThemeYaml.parser.decodeFromYamlNode(bodySerializer, node)
+                val body = ThemeYamlV2.parser.decodeFromYamlNode(bodySerializer, node)
                 LiquidKeyboard.Keyboard(
                     id = id,
                     type = body.type,
@@ -157,3 +158,18 @@ private fun YamlMap.only(keys: Set<String>) = YamlMap(
     pairs.filterKeys { it in keys }.mapKeys { YamlScalar(it.key, path) },
     path,
 )
+
+/** Legacy snake_case spellings of the fixed keys, accepted for compatibility. */
+private val legacyKeyRenames =
+    mapOf(
+        "single_width" to "singleWidth",
+        "key_height" to "keyHeight",
+        "margin_x" to "marginX",
+        "fixed_key_bar" to "fixedKeyBar",
+    )
+
+/** Normalizes the fixed keys' legacy snake_case spellings to camelCase. */
+private fun normalizeFixedKeys(map: YamlMap): YamlMap {
+    val renamed = map.pairs.mapKeys { (key, _) -> legacyKeyRenames[key] ?: key }
+    return yamlMapOf(renamed)
+}

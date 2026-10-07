@@ -8,7 +8,8 @@ package com.osfans.trime.ime.keyboard
 import android.content.Context
 import android.view.KeyEvent
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.model.TextKeyboard
 import com.osfans.trime.data.theme.model.orAbsent
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
@@ -21,7 +22,7 @@ import kotlin.math.pow
 @Suppress("ktlint:standard:property-naming")
 class Keyboard(
     private val context: Context,
-    private val theme: Theme,
+    private val theme: ThemeV2,
     private val allowedWidth: Int,
     selfConfig: TextKeyboard? = null,
 ) {
@@ -85,7 +86,7 @@ class Keyboard(
     var lastAsciiMode: Boolean = asciiMode
 
     val landscapeKeyboard: String? = selfConfig?.landscapeKeyboard
-    private val preferredSplitPercent by AppPrefs.defaultInstance().keyboard.splitSpacePercent
+    private val preferredSplitPercent by ThemeManager.prefs.splitSpacePercent
     private val landscapePercent =
         resolvePositive(selfConfig?.landscapeSplitPercent, preferredSplitPercent)
 
@@ -112,7 +113,7 @@ class Keyboard(
             ),
         ) { context.dp(it) }
 
-    private val expandKeypressArea: Boolean by AppPrefs.defaultInstance().keyboard.expandKeypressArea
+    private val expandKeypressArea: Boolean by ThemeManager.prefs.expandKeypressArea
 
     init {
 

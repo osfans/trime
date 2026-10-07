@@ -6,18 +6,17 @@
 package com.osfans.trime.ime.keyboard
 
 import android.content.Context
-import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.data.theme.ThemePrefs
 import com.osfans.trime.util.isLandscape
 
 object KeyboardPrefs {
-    private val prefs = AppPrefs.defaultInstance()
-
     private const val WIDE_SCREEN_WIDTH_DP = 600
 
-    fun Context.isLandscapeMode(): Boolean = when (prefs.keyboard.landscapeMode.getValue()) {
-        AppPrefs.Keyboard.LandscapeMode.WIDE -> resources.configuration.isLandscape() || isWideScreen()
-        AppPrefs.Keyboard.LandscapeMode.LANDSCAPE -> resources.configuration.isLandscape()
-        AppPrefs.Keyboard.LandscapeMode.ALWAYS -> true
+    fun Context.isLandscapeMode(): Boolean = when (ThemeManager.prefs.landscapeMode.getValue()) {
+        ThemePrefs.LandscapeMode.WIDE -> resources.configuration.isLandscape() || isWideScreen()
+        ThemePrefs.LandscapeMode.LANDSCAPE -> resources.configuration.isLandscape()
+        ThemePrefs.LandscapeMode.ALWAYS -> true
         else -> false
     }
 

@@ -6,6 +6,8 @@
 package com.osfans.trime.ime.switches
 
 import android.app.Dialog
+import android.content.Context
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.PopupMenu
 import android.widget.Toast
@@ -17,7 +19,8 @@ import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ColorManager
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.bar.ui.ToolButton
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
@@ -43,7 +46,14 @@ class SwitchOptionWindow(di: DI) :
     private val service: TrimeInputMethodService by instance()
     private val rime: RimeSession by instance()
     private val scope: ThemeScope by instance()
-    private val theme: Theme get() = scope.theme
+    private val theme: ThemeV2 get() = scope.theme
+
+    /** 跟随 Trime 主题深浅色的对话框上下文，用于弹出列表的标题/文字颜色协调。 */
+    private val dialogContext: Context by lazy {
+        val isDark = ColorManager.activeColorScheme == scope.theme.colorSchemas.dark
+        val themeRes = if (isDark) R.style.Theme_Dialog_Dark else R.style.Theme_Dialog_Light
+        ContextThemeWrapper(context, themeRes)
+    }
 
     private val staticEntries by lazy {
         arrayOf(
@@ -106,7 +116,7 @@ class SwitchOptionWindow(di: DI) :
                 when (entry) {
                     is SwitchOptionEntry.Static -> when (entry.type) {
                         SwitchOptionEntry.Static.Type.SchemaList -> showDialog { r ->
-                            EnabledSchemaPickerDialog.build(r, service.lifecycleScope, context) {
+                            EnabledSchemaPickerDialog.build(r, service.lifecycleScope, dialogContext) {
                                 setNegativeButton(R.string.enable_schemata) { _, _ ->
                                     AppUtils.launchMainToSchemaList(context)
                                 }
@@ -123,7 +133,7 @@ class SwitchOptionWindow(di: DI) :
                         SwitchOptionEntry.Static.Type.Keyboard -> AppUtils.launchMainToKeyboard(context)
 
                         SwitchOptionEntry.Static.Type.ThemeList -> showDialog { r ->
-                            ThemePickerDialog.build(service.lifecycleScope, context) {
+                            ThemePickerDialog.build(service.lifecycleScope, dialogContext) {
                                 r.commitComposition()
                             }
                         }
@@ -137,7 +147,7 @@ class SwitchOptionWindow(di: DI) :
                                 it.applyOption(entry.switch.name, !oldValue)
                             }
                         } else {
-                            val popup = PopupMenu(context, view)
+                            val popup = PopupMenu(dialogContext, view)
                             val menu = popup.menu
                             entry.switch.states.forEachIndexed { i, state ->
                                 menu.add(0, 0, 0, state).apply {

@@ -68,15 +68,22 @@ enum class ColorKey {
     TEXT_COLOR,
     ;
 
-    /** The color key as it appears in theme YAML files. */
+    /** The color key as it appears in legacy (snake_case) theme YAML files. */
     val key: String = name.lowercase()
 
+    /** The color key as it appears in V2 (camelCase) theme YAML files. */
+    val camelKey: String by lazy {
+        key.split("_").let { parts ->
+            parts.first() + parts.drop(1).joinToString("") { it.replaceFirstChar { c -> c.uppercase() } }
+        }
+    }
+
     companion object {
-        private val byKey = entries.associateBy { it.key }
+        private val byKey = entries.flatMap { listOf(it.key to it, it.camelKey to it) }.toMap()
 
         /**
-         * The typed [ColorKey] for a YAML color key, or null for keys that
-         * only a theme defines.
+         * The typed [ColorKey] for a YAML color key in either spelling, or null
+         * for keys that only a theme defines.
          */
         fun from(key: String): ColorKey? = byKey[key]
 

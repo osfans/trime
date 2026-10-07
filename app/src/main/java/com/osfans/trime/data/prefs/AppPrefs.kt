@@ -119,27 +119,8 @@ class AppPrefs(
         shared: SharedPreferences,
     ) : PreferenceDelegateOwner(shared, R.string.virtual_keyboard) {
         companion object {
-            const val LANDSCAPE_MODE = "keyboard_landscape_mode"
-            const val SPLIT_SPACE_PERCENT = "keyboard_split_space"
-
-            const val USE_SOFT_CURSOR = "use_soft_cursor"
-            const val HIDE_INPUT_BAR = "hide_input_bar"
-            const val HIDE_KEY_SYMBOL = "hide_key_symbol"
-            const val HIDE_KEY_HINT = "hide_key_hint"
-
-            const val SOUND_ON_KEYPRESS = "sound_on_keypress"
-            const val KEY_SOUND_VOLUME = "sound_volume"
-            const val USE_CUSTOM_SOUND_EFFECT = "custom_sound_effect_enabled"
-            const val CUSTOM_SOUND_EFFECT = "custom_sound_effect_name"
-            const val VIBRATE_ON_KEY_PRESS = "vibrate_on_key_press"
-            const val VIBRATE_ON_KEY_RELEASE = "vibrate_on_key_release"
-            const val VIBRATE_ON_KEY_REPEAT = "vibrate_on_key_repeat"
-            const val VIBRATION_DURATION = "vibration_duration"
-            const val VIBRATION_AMPLITUDE = "vibration_amplitude"
             const val SPEAK_ON_KEYPRESS = "speak_on_keypress"
             const val SPEAK_ON_COMMIT = "speak_on_commit"
-            const val POPUP_ON_KEY_PRESS = "show_key_popup"
-            const val EXPAND_KEYPRESS_AREA = "expand_keypress_area"
             const val SWIPE_TRAVEL = "key_swipe_travel"
             const val SWIPE_VELOCITY = "key_swipe_velocity"
             const val LONG_PRESS_TIMEOUT = "key_long_press_timeout"
@@ -161,87 +142,8 @@ class AppPrefs(
             const val HORIZONTAL_CANDIDATE_MODE = "horizontal_candidate_mode"
         }
 
-        enum class LandscapeMode(override val stringRes: Int) : PreferenceDelegateEnum {
-            NEVER(R.string.never),
-            LANDSCAPE(R.string.landscape_only),
-            WIDE(R.string.wide_or_landscape),
-            ALWAYS(R.string.always),
-        }
-
-        val landscapeMode = enum(R.string.enable_landscape_mode, LANDSCAPE_MODE, LandscapeMode.NEVER)
-        val splitSpacePercent = int(
-            R.string.split_space_percent,
-            SPLIT_SPACE_PERCENT,
-            100,
-            0,
-            200,
-            "%",
-        )
-
-        val useSoftCursor = switch(R.string.use_soft_cursor, USE_SOFT_CURSOR, true)
-
-        val hideInputBar = switch(R.string.hide_input_bar, HIDE_INPUT_BAR, false)
-        val hideKeySymbol = switch(R.string.hide_key_symbol, HIDE_KEY_SYMBOL, false)
-        val hideKeyHint = switch(R.string.hide_key_hint, HIDE_KEY_HINT, false)
-
-        val soundOnKeyPress = switch(R.string.sound_on_keypress, SOUND_ON_KEYPRESS, false)
-        val soundVolume = int(
-            R.string.sound_volume,
-            KEY_SOUND_VOLUME,
-            10,
-            0,
-            100,
-            "%",
-            defaultLabel = R.string.system_default,
-        ) { soundOnKeyPress.getValue() }
-
-        val useCustomSoundEffect = switch(
-            R.string.custom_sound_effect_enabled,
-            USE_CUSTOM_SOUND_EFFECT,
-            false,
-        ) { soundOnKeyPress.getValue() }
-        val customSoundEffect = string(
-            R.string.custom_sound_effect_name,
-            CUSTOM_SOUND_EFFECT,
-            "",
-        ) { soundOnKeyPress.getValue() && useCustomSoundEffect.getValue() }
-
-        val vibrateOnKeyPress = switch(R.string.vibrate_on_key_press, VIBRATE_ON_KEY_PRESS, false)
-        val vibrateOnKeyRelease = switch(
-            R.string.vibrate_on_key_release,
-            VIBRATE_ON_KEY_RELEASE,
-            false,
-        ) { vibrateOnKeyPress.getValue() }
-
-        val vibrateOnKeyRepeat = switch(
-            R.string.vibrate_on_key_repeat,
-            VIBRATE_ON_KEY_REPEAT,
-            false,
-        ) { vibrateOnKeyPress.getValue() }
-
-        val vibrationDuration = int(
-            R.string.vibration_duration,
-            VIBRATION_DURATION,
-            0,
-            0,
-            100,
-            "ms",
-            defaultLabel = R.string.system_default,
-        ) { vibrateOnKeyPress.getValue() }
-
-        val vibrationAmplitude = int(
-            R.string.vibration_amplitude,
-            VIBRATION_AMPLITUDE,
-            0,
-            0,
-            255,
-            defaultLabel = R.string.system_default,
-        ) { vibrateOnKeyPress.getValue() }
-
         val speakOnKeyPress = switch(R.string.speak_on_keypress, SPEAK_ON_KEYPRESS, false)
         val speakOnCommit = switch(R.string.speak_on_commit, SPEAK_ON_COMMIT, false)
-        val popupOnKeyPress = switch(R.string.popup_on_key_press, POPUP_ON_KEY_PRESS, false)
-        val expandKeypressArea = switch(R.string.expand_keypress_area_to_edge, EXPAND_KEYPRESS_AREA, false)
         val swipeTravel = int(
             R.string.key_swipe_travel,
             SWIPE_TRAVEL,

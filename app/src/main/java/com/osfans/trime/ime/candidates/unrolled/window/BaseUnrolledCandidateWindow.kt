@@ -16,7 +16,7 @@ import androidx.paging.PagingConfig
 import androidx.recyclerview.widget.RecyclerView
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.bar.InputBarDelegate
 import com.osfans.trime.ime.bar.UnrollButtonStateMachine
@@ -50,7 +50,7 @@ abstract class BaseUnrolledCandidateWindow(di: DI) :
     private val windowManager: BoardWindowManager by instance()
     private val compactCandidate: CompactCandidateDelegate by instance()
 
-    protected val theme: Theme
+    protected val theme: ThemeV2
         get() = scope.theme
 
     private lateinit var lifecycleCoroutineScope: LifecycleCoroutineScope

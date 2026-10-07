@@ -20,7 +20,7 @@ import com.osfans.trime.R
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.data.theme.ThemePrefs
 import com.osfans.trime.data.theme.ThemeScope
@@ -37,7 +37,7 @@ abstract class BaseInputView(
     val scope: ThemeScope,
 ) : ConstraintLayout(service) {
     /** The theme config; geometry is theme-scoped, colors go through [scope.colors]. */
-    val theme: Theme
+    val theme: ThemeV2
         get() = scope.theme
 
     protected abstract fun handleRimeMessage(it: RimeMessage<*>)

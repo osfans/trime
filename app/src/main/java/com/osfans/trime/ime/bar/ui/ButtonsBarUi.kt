@@ -12,7 +12,7 @@ import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayout
 import com.google.android.flexbox.JustifyContent
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.data.theme.model.ToolBar
 import splitties.dimensions.dp
@@ -24,7 +24,7 @@ class ButtonsBarUi(
     private val scope: ThemeScope,
     private val onButtonClick: ((String) -> Unit)? = null,
 ) : Ui {
-    private val theme: Theme get() = scope.theme
+    private val theme: ThemeV2 get() = scope.theme
 
     override val root = view(::FlexboxLayout) {
         alignItems = AlignItems.CENTER

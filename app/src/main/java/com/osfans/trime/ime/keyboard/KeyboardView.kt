@@ -11,7 +11,8 @@ import android.graphics.Canvas
 import android.widget.FrameLayout
 import androidx.core.view.children
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.ime.broadcast.EnterKeyDisplayDelegate
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.popup.PopupDelegate
@@ -20,7 +21,7 @@ import com.osfans.trime.ime.popup.PopupDelegate
 @SuppressLint("ViewConstructor")
 class KeyboardView(
     context: Context,
-    private val theme: Theme,
+    private val theme: ThemeV2,
     private val keyboard: Keyboard,
     val popup: PopupDelegate,
     val service: TrimeInputMethodService,
@@ -35,10 +36,10 @@ class KeyboardView(
     internal val keyTextSize = theme.style.keyTextSize
     internal val keyLongTextSize = theme.style.keyLongTextSize.takeIf { it > 0 } ?: keyTextSize
     internal val symbolTextSize = theme.style.symbolTextSize.takeIf { it > 0 } ?: keyTextSize
-    internal val popupOnKeyPress by AppPrefs.defaultInstance().keyboard.popupOnKeyPress
+    internal val popupOnKeyPress by ThemeManager.prefs.popupOnKeyPress
     internal val hookShiftArrow: Boolean by AppPrefs.defaultInstance().keyboard.hookShiftArrow
-    internal val hideKeySymbol: Boolean by AppPrefs.defaultInstance().keyboard.hideKeySymbol
-    internal val hideKeyHint: Boolean by AppPrefs.defaultInstance().keyboard.hideKeyHint
+    internal val hideKeySymbol: Boolean by ThemeManager.prefs.hideKeySymbol
+    internal val hideKeyHint: Boolean by ThemeManager.prefs.hideKeyHint
 
     init {
         setWillNotDraw(false)

@@ -8,8 +8,8 @@ package com.osfans.trime.data.theme
 
 import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode
-import com.osfans.trime.core.Rime
 import com.osfans.trime.data.base.DataManager
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.util.mapping
 import com.osfans.trime.util.pairs
 import com.osfans.trime.util.yamlMapOf
@@ -18,11 +18,15 @@ import timber.log.Timber
 import java.io.File
 
 /**
- * Loads a theme from its source YAML, expanding the supported librime DSL
- * subset directly. Themes using constructs outside that subset fall back to
- * the librime-deployed artifact. Failures are reported as [ThemeLoadError]
- * instead of a bare log line, so callers can fall back and surface
- * diagnostics (YAML syntax errors carry line/column info).
+ * Loads a theme straight from its source YAML, fully decoupled from the
+ * librime deployment channel.
+ *
+ * A theme is parsed, its `__include` / `__patch` directives are expanded by
+ * [ThemeDslExpander], and the result is decoded as either the V2 format
+ * (camelCase, Hamster-aligned) or the legacy format (snake_case), which is then
+ * adapted to [ThemeV2]. Constructs outside the supported DSL subset, and
+ * malformed files, are reported as structured [ThemeLoadError]s instead of a
+ * bare log line, so callers can fall back and surface diagnostics.
  */
 object ThemeLoader {
     const val CONFIG_VERSION_KEY = "config_version"
@@ -39,7 +43,7 @@ object ThemeLoader {
         class FileNotFound(
             themeId: String,
             val path: String,
-        ) : ThemeLoadError(themeId, "Deployed theme file not found: $path")
+        ) : ThemeLoadError(themeId, "Theme file not found: $path")
 
         class FileUnreadable(
             themeId: String,
@@ -60,10 +64,7 @@ object ThemeLoader {
             cause: Throwable? = null,
         ) : ThemeLoadError(themeId, "Invalid theme structure: $detail", cause)
 
-        /**
-         * The theme declares no color scheme, so there is nothing the runtime
-         * could render it with.
-         */
+        /** The theme declares no color scheme, so there is nothing to render it with. */
         class NoColorScheme(
             themeId: String,
         ) : ThemeLoadError(themeId, "No color scheme is defined")
@@ -72,10 +73,10 @@ object ThemeLoader {
     sealed interface ThemeLoadResult {
         data class Success(
             val themeId: String,
-            val theme: Theme,
+            val theme: ThemeV2,
             /**
              * What static checks found in the theme, or null when the checks
-             * could not run at all.
+             * could not run (or have not been implemented for that format).
              */
             val findings: List<ThemeDiagnostics.Finding>? = null,
         ) : ThemeLoadResult
@@ -87,19 +88,16 @@ object ThemeLoader {
     }
 
     /**
-     * Loads [themeId], preferring its source files and falling back to the
-     * librime-deployed artifact when the source cannot be read faithfully (see
-     * [loadFromSource]). Never throws: returns [ThemeLoadResult.Success] or
+     * Loads [themeId]. Never throws: returns [ThemeLoadResult.Success] or
      * [ThemeLoadResult.Failure] with a structured [ThemeLoadError].
      */
-    fun loadTheme(themeId: String): ThemeLoadResult = loadFromSource(themeId) ?: loadDeployedTheme(themeId)
+    fun loadTheme(themeId: String): ThemeLoadResult = loadFromSource(themeId)
 
     /**
      * Reads [themeId] and its dependencies from source files, expands the
-     * supported DSL subset and decodes the result. Returns null whenever the
-     * source cannot be read faithfully — missing, unreadable, using DSL outside
-     * the subset, or failing to decode — so the caller falls back to the
-     * deployed artifact and librime decides what the file means.
+     * supported DSL subset and decodes the result. Returns a structured
+     * failure instead of falling back to a librime deployment, which no
+     * longer exists in the decoupled pipeline.
      *
      * @param file source file of [themeId] when it is already known.
      * @param sources resource lookup; the data dirs by default, a fixture loader
@@ -109,72 +107,97 @@ object ThemeLoader {
         themeId: String,
         file: File? = null,
         sources: SourceLoader = SourceLoader(),
-    ): ThemeLoadResult? {
-        val node = sources.load(themeId, file) ?: return null
-        return try {
-            decodeAndReport(themeId, expandSource(themeId, node) { id -> sources.load(id, null) })
-        } catch (e: ThemeDslExpander.UnsupportedDsl) {
-            fallBack(themeId, e, "uses DSL outside the supported subset (%s)")
-        } catch (e: ThemeDslExpander.UnresolvedReference) {
-            fallBack(themeId, e, "has unresolved references (%s)")
-        } catch (e: Exception) {
-            fallBack(themeId, e, "cannot be decoded from its source (%s)")
+    ): ThemeLoadResult {
+        val node = sources.load(themeId, file)
+        if (node == null) {
+            val sourceFile = file ?: sources.findFile(themeId)
+            return if (sourceFile == null) {
+                ThemeLoadResult.Failure(themeId, ThemeLoadError.FileNotFound(themeId, "$themeId.yaml"))
+            } else {
+                ThemeLoadResult.Failure(
+                    themeId,
+                    ThemeLoadError.YamlParseError(themeId, IllegalStateException("cannot parse ${sourceFile.name}")),
+                )
+            }
         }
+        return decodeFromSource(themeId, node, sources)
     }
 
-    /** Reports why the source was not used and asks for the deployed artifact. */
-    private fun fallBack(
+    /** Expands [node] and decodes it, reporting failures structurally. */
+    private fun decodeFromSource(
         themeId: String,
-        cause: Exception,
-        reason: String,
-    ): ThemeLoadResult? {
-        Timber.w(cause, "Theme '%s' $reason, falling back to the deployed artifact", themeId, cause.message)
-        return null
-    }
+        node: YamlNode,
+        sources: SourceLoader,
+    ): ThemeLoadResult =
+        try {
+            val expanded = ThemeDslExpander.expand(themeId, node) { id -> sources.load(id, null) }
+            val mapping = expanded.mapping
+                ?: return ThemeLoadResult.Failure(themeId, ThemeLoadError.InvalidStructure(themeId, "YAML root is not a mapping"))
+            decodeAndReport(themeId, mapping)
+        } catch (e: ThemeDslExpander.UnsupportedDsl) {
+            ThemeLoadResult.Failure(themeId, ThemeLoadError.InvalidStructure(themeId, "unsupported librime DSL: ${e.message}", e))
+        } catch (e: ThemeDslExpander.UnresolvedReference) {
+            ThemeLoadResult.Failure(themeId, ThemeLoadError.InvalidStructure(themeId, "unresolved reference: ${e.message}", e))
+        } catch (e: ThemeLoadError) {
+            ThemeLoadResult.Failure(themeId, e)
+        } catch (e: Exception) {
+            ThemeLoadResult.Failure(themeId, ThemeLoadError.InvalidStructure(themeId, "cannot be decoded: ${e.message}", e))
+        }
 
     /**
-     * Decodes [mapping] and reports what the runtime ignores or cannot resolve
-     * in it, so a theme is checked when it is read instead of on first use.
-     * Diagnostics never affect the result of a load.
-     *
-     * A theme that declares no color scheme is refused: it decodes, but there is
-     * nothing for the runtime to pick, so loading it would only fail later.
+     * Decodes a theme file by format. Legacy themes are decoded with the
+     * snake_case parser and adapted to [ThemeV2]; V2 themes decode directly.
+     * A theme that declares no color scheme is refused.
      */
     internal fun decodeAndReport(
         themeId: String,
         mapping: YamlMap,
-    ): ThemeLoadResult {
-        val theme = ThemeYaml.parser.decodeFromYamlNode<Theme>(mapping)
-        if (theme.presetColorSchemes.isEmpty()) {
-            return ThemeLoadResult.Failure(themeId, ThemeLoadError.NoColorScheme(themeId))
+    ): ThemeLoadResult =
+        when (ThemeFormatDetector.detectFormat(mapping)) {
+            ThemeFormat.V2 -> {
+                val themeV2 = ThemeYamlV2.parser.decodeFromYamlNode<ThemeV2>(mapping)
+                if (themeV2.colorSchemas.isEmpty()) {
+                    return ThemeLoadResult.Failure(themeId, ThemeLoadError.NoColorScheme(themeId))
+                }
+                // V2 diagnostics land with the V2 linter (a later phase); the
+                // runtime still refuses a theme without color schemes.
+                ThemeLoadResult.Success(themeId, themeV2, null)
+            }
+
+            ThemeFormat.LEGACY -> {
+                val legacy = ThemeYaml.parser.decodeFromYamlNode<Theme>(mapping)
+                val themeV2 = LegacyThemeAdapter.toV2(legacy)
+                if (themeV2.colorSchemas.isEmpty()) {
+                    return ThemeLoadResult.Failure(themeId, ThemeLoadError.NoColorScheme(themeId))
+                }
+                val findings =
+                    runCatching { ThemeDiagnostics.lint(legacy, mapping) }
+                        .onFailure { Timber.w(it, "Theme '%s': diagnostics failed", themeId) }
+                        .getOrNull()
+                findings?.let { ThemeDiagnostics.log(themeId, it) }
+                ThemeLoadResult.Success(themeId, themeV2, findings)
+            }
         }
-        val findings =
-            runCatching { ThemeDiagnostics.lint(theme, mapping) }
-                .onFailure { Timber.w(it, "Theme '%s': diagnostics failed", themeId) }
-                .getOrNull()
-        findings?.let { ThemeDiagnostics.log(themeId, it) }
-        return ThemeLoadResult.Success(themeId, theme, findings)
-    }
 
     /**
-     * Expands [node] with [loadResource] and decodes the result. Kept separate
-     * from the file lookup so tests can feed fixture resources.
+     * Expands [node] with [loadResource] and decodes the result to [ThemeV2].
+     * Kept separate from the file lookup so tests can feed fixture resources.
      */
     internal fun decodeSource(
         themeId: String,
         node: YamlNode,
         loadResource: (String) -> YamlNode?,
-    ): Theme = ThemeYaml.parser.decodeFromYamlNode(expandSource(themeId, node, loadResource))
-
-    /** Applies the supported DSL subset to [node] and returns its root mapping. */
-    private fun expandSource(
-        themeId: String,
-        node: YamlNode,
-        loadResource: (String) -> YamlNode?,
-    ): YamlMap {
+    ): ThemeV2 {
         val expanded = ThemeDslExpander.expand(themeId, node, loadResource)
-        return expanded.mapping
+        val mapping = expanded.mapping
             ?: throw ThemeLoadError.InvalidStructure(themeId, "YAML root is not a mapping")
+        return decodeToV2(mapping)
+    }
+
+    /** Decodes a raw (already expanded) mapping to [ThemeV2], honoring its format. */
+    internal fun decodeToV2(mapping: YamlMap): ThemeV2 = when (ThemeFormatDetector.detectFormat(mapping)) {
+        ThemeFormat.V2 -> ThemeYamlV2.parser.decodeFromYamlNode<ThemeV2>(mapping)
+        ThemeFormat.LEGACY -> LegacyThemeAdapter.toV2(ThemeYaml.parser.decodeFromYamlNode<Theme>(mapping))
     }
 
     /**
@@ -211,6 +234,9 @@ object ThemeLoader {
     ) {
         private val cache = HashMap<String, YamlNode?>()
 
+        /** The source file of [resourceId], or null when it does not exist. */
+        fun findFile(resourceId: String): File? = findSource(resourceId)
+
         /**
          * @param file source file of [resourceId] when it is already known.
          *   Included resources are always looked up by id. An explicit file
@@ -236,8 +262,7 @@ object ThemeLoader {
     /**
      * Source file of [resourceId] under [roots], in order. A resource id is free
      * text in an include directive, so a file that resolves outside the root it
-     * was found in is refused; librime still resolves such an id on its own, so
-     * the caller falls back to the deployed artifact.
+     * was found in is refused.
      */
     internal fun findSourceFile(
         resourceId: String,
@@ -257,9 +282,8 @@ object ThemeLoader {
     /**
      * Injects the patch of `<id>.custom.yaml` as librime's auto-patch plugin
      * does: the optional reference `__patch: <id>.custom:/patch?`, resolved in
-     * that resource. Reading it as a resource keeps the patch's own directives
-     * (an `__include`, for instance) relative to the file they are written in.
-     * An explicit root `__patch` wins; `.custom` files are never patched.
+     * that resource. An explicit root `__patch` wins; `.custom` files are never
+     * patched.
      */
     internal fun applyCustomPatch(
         resourceId: String,
@@ -270,51 +294,5 @@ object ThemeLoader {
         if (root.pairs[PATCH] != null) return node
         val patchId = resourceId.removeSuffix(".schema") + ".custom"
         return yamlMapOf(root.pairs + (PATCH to yamlScalarOf("$patchId:/patch?")))
-    }
-
-    /** Loads the theme from its librime-deployed artifact. */
-    private fun loadDeployedTheme(themeId: String): ThemeLoadResult {
-        // Returns false when the artifact is already up to date (mtime cache), which is fine.
-        if (!Rime.deployRimeConfigFile(themeId, CONFIG_VERSION_KEY)) {
-            Timber.w("Failed to deploy theme config file '$themeId.yaml'")
-        }
-
-        val path = DataManager.resolveDeployedResourcePath(themeId)
-        val file = File(path)
-        if (!file.exists()) {
-            return ThemeLoadResult.Failure(themeId, ThemeLoadError.FileNotFound(themeId, path))
-        }
-        val content =
-            try {
-                file.readText()
-            } catch (e: Exception) {
-                return ThemeLoadResult.Failure(
-                    themeId,
-                    ThemeLoadError.FileUnreadable(themeId, path, e),
-                )
-            }
-
-        val node =
-            try {
-                ThemeYaml.parser.parseToYamlNode(content)
-            } catch (e: Exception) {
-                return ThemeLoadResult.Failure(
-                    themeId,
-                    ThemeLoadError.YamlParseError(themeId, e),
-                )
-            }
-        val mapping = node.mapping ?: return ThemeLoadResult.Failure(
-            themeId,
-            ThemeLoadError.InvalidStructure(themeId, "YAML root is not a mapping"),
-        )
-
-        return try {
-            decodeAndReport(themeId, mapping)
-        } catch (e: Exception) {
-            ThemeLoadResult.Failure(
-                themeId,
-                ThemeLoadError.InvalidStructure(themeId, "Decode failed", e),
-            )
-        }
     }
 }

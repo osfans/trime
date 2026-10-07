@@ -11,7 +11,7 @@ import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
 import com.osfans.trime.R
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.data.theme.model.ToolBar
 import splitties.views.dsl.constraintlayout.after
@@ -33,7 +33,7 @@ class AlwaysUi(
     private val scope: ThemeScope,
     private val onButtonClick: ((String) -> Unit)? = null,
 ) : Ui {
-    private val theme: Theme get() = scope.theme
+    private val theme: ThemeV2 get() = scope.theme
 
     enum class State {
         Toolbar,

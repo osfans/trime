@@ -15,4 +15,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     </style>
 
     <style name="Theme.DialogTheme" parent="@android:style/Theme.DeviceDefault.Light.Dialog" />
+
+    <!-- 跟随 Trime 主题（日间/夜间）的对话框主题：文字颜色随深浅色协调，背景色由代码按主题覆盖。 -->
+    <style name="Theme.Dialog.Light" parent="Theme.AppCompat.Light.Dialog.Alert" />
+    <style name="Theme.Dialog.Dark" parent="Theme.AppCompat.Dialog.Alert" />
 </resources>

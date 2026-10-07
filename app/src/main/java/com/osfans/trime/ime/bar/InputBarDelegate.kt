@@ -26,7 +26,8 @@ import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.bar.ui.AlwaysUi
 import com.osfans.trime.ime.bar.ui.CandidateUi
@@ -65,7 +66,7 @@ class InputBarDelegate(override val di: DI) :
     private val context: ContextThemeWrapper by instance()
     private val service: TrimeInputMethodService by instance()
     private val scope: ThemeScope by instance()
-    private val theme: Theme get() = scope.theme
+    private val theme: ThemeV2 get() = scope.theme
     private val windowManager: BoardWindowManager by instance()
     private val commonKeyboardActionListener: CommonKeyboardActionListener by instance()
     private val candidate: CompactCandidateDelegate by instance()
@@ -75,7 +76,7 @@ class InputBarDelegate(override val di: DI) :
 
     private val prefs = AppPrefs.defaultInstance()
 
-    private val hideQuickBar by prefs.keyboard.hideInputBar
+    private val hideQuickBar by ThemeManager.prefs.hideInputBar
 
     private val clipboardSuggestion by prefs.clipboard.clipboardSuggestion
 
@@ -239,16 +240,25 @@ class InputBarDelegate(override val di: DI) :
             tabUi.removeExternal()
         }
         view.displayedChild = index
+        applyBarVisibility(state)
+    }
+
+    /**
+     * Applies the "hide input bar" preference to the current state. Only the
+     * toolbar ([QuickBarStateMachine.State.Always]) is hidden; the candidate
+     * bar and tab bar stay visible.
+     */
+    private fun applyBarVisibility(state: QuickBarStateMachine.State) {
+        view.visibility =
+            if (hideQuickBar && state == QuickBarStateMachine.State.Always) {
+                View.GONE
+            } else {
+                View.VISIBLE
+            }
     }
 
     val view by lazy {
         ViewAnimator(context).apply {
-            visibility =
-                if (hideQuickBar) {
-                    View.GONE
-                } else {
-                    View.VISIBLE
-                }
             background =
                 scope.decorDrawable(
                     "candidate_background",
@@ -259,6 +269,9 @@ class InputBarDelegate(override val di: DI) :
             add(alwaysUi.root, lParams(matchParent, matchParent))
             add(candidateUi.root, lParams(matchParent, matchParent))
             add(tabUi.root, lParams(matchParent, matchParent))
+
+            // 初始状态为 Always（工具栏）：隐藏工具栏偏好开启时整条 bar 收起。
+            visibility = if (hideQuickBar) View.GONE else View.VISIBLE
 
             evalAlwaysUiState()
             ClipboardHelper.addOnUpdateListener(onClipboardUpdateListener)

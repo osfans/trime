@@ -16,7 +16,7 @@ import com.osfans.trime.R
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.daemon.RimeSession
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.model.TextKeyboard
 import com.osfans.trime.ime.broadcast.EnterKeyDisplayDelegate
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
@@ -45,7 +45,7 @@ class KeyboardWindow(di: DI) :
     ResidentWindow,
     InputBroadcastReceiver {
     private val service: TrimeInputMethodService by instance()
-    private val theme: Theme by instance()
+    private val theme: ThemeV2 by instance()
     private val rime: RimeSession by instance()
     private val commonKeyboardActionListener: CommonKeyboardActionListener by instance()
     private val popup: PopupDelegate by instance()

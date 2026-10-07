@@ -5,7 +5,6 @@
 
 package com.osfans.trime.data.theme
 
-import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.util.get
 import com.osfans.trime.util.string
 import timber.log.Timber
@@ -18,9 +17,7 @@ object ThemeFilesManager {
             .sortedByDescending { it.lastModified() }
             .map { file ->
                 val configId = file.nameWithoutExtension
-                val name = readSourceName(configId, file)
-                    ?: readDeployedName(configId)
-                    ?: configId.removeSuffix(".trime")
+                val name = readSourceName(configId, file) ?: configId.removeSuffix(".trime")
                 ThemeItem(configId, name)
             }.toMutableList()
     }
@@ -34,15 +31,4 @@ object ThemeFilesManager {
             Timber.w("Failed to decode theme file ${file.absolutePath}: ${e.message}")
             null
         }
-
-    /** Reads the theme name from the deployed artifact, when it exists. */
-    private fun readDeployedName(configId: String): String? {
-        val file = File(DataManager.resolveDeployedResourcePath(configId))
-        if (!file.isFile) return null
-        return runCatching { ThemeYaml.parser.parseToYamlNode(file.readText())["name"]?.string }
-            .getOrElse { e ->
-                Timber.w("Failed to read deployed theme ${file.absolutePath}: ${e.message}")
-                null
-            }
-    }
 }

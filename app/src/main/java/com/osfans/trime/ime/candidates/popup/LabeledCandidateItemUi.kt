@@ -14,7 +14,7 @@ import androidx.annotation.ColorInt
 import androidx.core.text.buildSpannedString
 import androidx.core.text.inSpans
 import com.osfans.trime.core.CandidateProto
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.util.sp
 import splitties.dimensions.dp
@@ -25,7 +25,7 @@ class LabeledCandidateItemUi(
     override val ctx: Context,
     private val scope: ThemeScope,
 ) : Ui {
-    private val theme: Theme
+    private val theme: ThemeV2
         get() = scope.theme
 
     private val labelSize = theme.window.foreground.labelFontSize

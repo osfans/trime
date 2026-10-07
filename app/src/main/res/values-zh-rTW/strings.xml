@@ -23,6 +23,14 @@
     <string name="selected_theme_summary">選取想要的主題</string>
     <string name="normal_mode_color">配色</string>
     <string name="normal_mode_color_summary">選取想要的配色</string>
+    <string name="manual_select_disables_follow_system">手動選擇將關閉「跟隨系統主題色調」</string>
+    <string name="key_text_size">按鍵字號</string>
+    <string name="candidate_text_size">候選字號</string>
+    <string name="comment_text_size">註釋字號</string>
+    <string name="key_font">按鍵字體</string>
+    <string name="candidate_font">候選字體</string>
+    <string name="comment_font">註釋字體</string>
+    <string name="follow_theme">跟隨主題</string>
     <string name="reset">回廠</string>
     <string name="reset_hint">使用預設的內建設置覆蓋共享資料夾下相同檔案</string>
     <string name="sound_on_keypress">按鍵聲音</string>
@@ -242,6 +250,8 @@
     <string name="git_repo">Git 儲存庫</string>
     <string name="light">亮色</string>
     <string name="dark">暗色</string>
+    <string name="day">日間</string>
+    <string name="night">夜間</string>
     <string name="never">從不</string>
     <string name="landscape_only">僅限橫屏</string>
     <string name="wide_or_landscape">寬屏或橫屏</string>

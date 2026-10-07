@@ -9,7 +9,7 @@ import android.content.Context
 import android.text.TextUtils
 import android.view.View
 import com.osfans.trime.R
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.keyboard.GestureFrame
 import splitties.dimensions.dp
@@ -33,7 +33,7 @@ class ClipboardBeanUi(
     override val ctx: Context,
     private val scope: ThemeScope,
 ) : Ui {
-    private val theme: Theme get() = scope.theme
+    private val theme: ThemeV2 get() = scope.theme
 
     val textView =
         textView {

@@ -17,7 +17,7 @@ import com.osfans.trime.core.Candidates
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.bar.InputBarDelegate
 import com.osfans.trime.ime.bar.UnrollButtonStateMachine
@@ -43,7 +43,7 @@ class CompactCandidateDelegate(override val di: DI) :
     private val inputView: InputView by instance()
     private val bar: InputBarDelegate by instance()
 
-    private val theme: Theme
+    private val theme: ThemeV2
         get() = scope.theme
 
     private val fillStyle by AppPrefs.defaultInstance().keyboard.horizontalCandidateMode

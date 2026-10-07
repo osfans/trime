@@ -6,6 +6,7 @@ package com.osfans.trime.data.theme
 
 import android.util.Log
 import com.charleskorn.kaml.YamlNode
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.util.mapping
 import com.osfans.trime.util.pairs
 import com.osfans.trime.util.string
@@ -27,7 +28,7 @@ class ThemeLoaderTest :
             return { id -> map[id]?.let(::node) }
         }
 
-        fun theme(yaml: String): Theme = ThemeLoader.decodeSource("theme", node(yaml)) { null }
+        fun theme(yaml: String): ThemeV2 = ThemeLoader.decodeSource("theme", node(yaml)) { null }
 
         val source = node(
             """
@@ -122,13 +123,17 @@ class ThemeLoaderTest :
 
             val noResources = ThemeLoader.SourceLoader { null }
 
-            Then("anything it cannot read faithfully falls back to the deployed artifact") {
+            Then("anything it cannot read faithfully is reported as a structured failure") {
+                fun failure(id: String, yaml: String): ThemeLoader.ThemeLoadError =
+                    (ThemeLoader.loadFromSource(id, sourceFile(yaml), noResources) as? ThemeLoader.ThemeLoadResult.Failure)
+                        ?.error
+                        ?: error("expected a failure for '$id'")
                 // DSL outside the supported subset.
-                ThemeLoader.loadFromSource("dsl", sourceFile("a: {keys/+: [1]}\n"), noResources) shouldBe null
+                failure("dsl", "a: {keys/+: [1]}\n").shouldBeInstanceOf<ThemeLoader.ThemeLoadError.InvalidStructure>()
                 // A YAML root that is not a mapping.
-                ThemeLoader.loadFromSource("scalar", sourceFile("just a scalar\n"), noResources) shouldBe null
+                failure("scalar", "just a scalar\n").shouldBeInstanceOf<ThemeLoader.ThemeLoadError.InvalidStructure>()
                 // A file that is not valid YAML at all.
-                ThemeLoader.loadFromSource("broken", sourceFile("a: [\n"), noResources) shouldBe null
+                failure("broken", "a: [\n").shouldBeInstanceOf<ThemeLoader.ThemeLoadError.YamlParseError>()
             }
 
             Then("a readable source is decoded without librime") {

@@ -17,7 +17,14 @@ import com.osfans.trime.ime.keyboard.KeyAction
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
-/** 主题和样式配置  */
+/**
+ * 主题和样式配置（legacy 格式）。
+ *
+ * 这是旧版主题的解析模型，仅用于解码 snake_case 的旧格式主题并交由
+ * [com.osfans.trime.data.theme.LegacyThemeAdapter] 转换为 [com.osfans.trime.data.theme.model.v2.ThemeV2]。
+ * 运行时统一消费 [ThemeV2]；本类将在迁移完成后迁入 legacy 包。
+ */
+@Deprecated("Legacy theme model; decode legacy themes and adapt them to ThemeV2")
 @Serializable
 data class Theme(
     val name: String,
@@ -31,8 +38,6 @@ data class Theme(
     val fallbackColors: Map<String, String> = emptyMap(),
     val toolBar: ToolBar = ToolBar(),
 ) {
-    val fonts by lazy { ThemeFonts(this) }
-
     @Transient
     private val actionCache = lazy {
         mutableMapOf<KeyActionToken, KeyAction>()

@@ -8,14 +8,19 @@ package com.osfans.trime.data.theme
 import android.content.res.Configuration
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.prefs.PreferenceDelegate
+import com.osfans.trime.data.theme.model.MaybeStringList
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.util.WeakHashSet
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 object ThemeManager {
     fun interface OnThemeChangeListener {
-        fun onThemeChange(theme: Theme)
+        fun onThemeChange(theme: ThemeV2)
     }
 
     fun getAllThemes(): List<ThemeItem> {
@@ -24,7 +29,7 @@ object ThemeManager {
         return sharedThemes + userThemes
     }
 
-    private lateinit var _activeTheme: Theme
+    private lateinit var _activeTheme: ThemeV2
 
     private var _activeFindings: List<ThemeDiagnostics.Finding>? = null
 
@@ -45,7 +50,7 @@ object ThemeManager {
         }
     }
 
-    var activeTheme: Theme
+    var activeTheme: ThemeV2
         get() {
             ensureActiveTheme()
             return _activeTheme
@@ -72,15 +77,31 @@ object ThemeManager {
 
     val prefs = AppPrefs.defaultInstance().registerProvider(::ThemePrefs)
 
+    private val mainScope = MainScope()
+
+    /** 字号/字体偏好变化时重新加载主题，使覆盖即时生效。 */
+    private val textAppearanceChangeListener = PreferenceDelegate.OnChangeListener<Any> { _, _ ->
+        mainScope.launch { reapplyTheme() }
+    }
+
+    init {
+        prefs.keyTextSize.registerOnChangeListener(textAppearanceChangeListener)
+        prefs.candidateTextSize.registerOnChangeListener(textAppearanceChangeListener)
+        prefs.commentTextSize.registerOnChangeListener(textAppearanceChangeListener)
+        prefs.keyFont.registerOnChangeListener(textAppearanceChangeListener)
+        prefs.candidateFont.registerOnChangeListener(textAppearanceChangeListener)
+        prefs.commentFont.registerOnChangeListener(textAppearanceChangeListener)
+    }
+
     private data class ResolvedTheme(
         val configId: String,
-        val theme: Theme,
+        val theme: ThemeV2,
         val findings: List<ThemeDiagnostics.Finding>?,
     )
 
     private fun getThemeById(id: String): ResolvedTheme {
         when (val result = ThemeLoader.loadTheme(id)) {
-            is ThemeLoader.ThemeLoadResult.Success -> return ResolvedTheme(id, result.theme, result.findings)
+            is ThemeLoader.ThemeLoadResult.Success -> return ResolvedTheme(id, applyUserOverrides(result.theme), result.findings)
             is ThemeLoader.ThemeLoadResult.Failure -> Timber.w(result.error)
         }
 
@@ -88,7 +109,7 @@ object ThemeManager {
             when (val result = ThemeLoader.loadTheme("trime")) {
                 is ThemeLoader.ThemeLoadResult.Success -> {
                     Timber.w("Theme '$id' is unavailable, fallback to default theme 'trime'")
-                    return ResolvedTheme("trime", result.theme, result.findings)
+                    return ResolvedTheme("trime", applyUserOverrides(result.theme), result.findings)
                 }
 
                 is ThemeLoader.ThemeLoadResult.Failure -> Timber.w(result.error)
@@ -100,7 +121,7 @@ object ThemeManager {
             when (val result = ThemeLoader.loadTheme(fallbackId)) {
                 is ThemeLoader.ThemeLoadResult.Success -> {
                     Timber.w("Theme '$id' is unavailable, fallback to available theme '$fallbackId'")
-                    return ResolvedTheme(fallbackId, result.theme, result.findings)
+                    return ResolvedTheme(fallbackId, applyUserOverrides(result.theme), result.findings)
                 }
 
                 is ThemeLoader.ThemeLoadResult.Failure -> lastFailure = result.error
@@ -111,7 +132,7 @@ object ThemeManager {
         error("No valid theme available")
     }
 
-    private fun evaluateActiveTheme(): Theme {
+    private fun evaluateActiveTheme(): ThemeV2 {
         val selectedThemeId = prefs.selectedTheme.getValue()
         val resolvedTheme = getThemeById(selectedThemeId)
         val newTheme = resolvedTheme.theme
@@ -153,5 +174,38 @@ object ThemeManager {
             prefs.selectedTheme.setValue(resolvedTheme.configId)
             resolvedTheme.configId
         }
+    }
+
+    /** 用字号/字体偏好覆盖主题值：0 / 空白 = 跟随主题。 */
+    private fun applyUserOverrides(theme: ThemeV2): ThemeV2 {
+        val keyText = prefs.keyTextSize.getValue()
+        val candidateText = prefs.candidateTextSize.getValue()
+        val commentText = prefs.commentTextSize.getValue()
+        return theme.copy(
+            keyboard = theme.keyboard.copy(
+                textSize = keyText.takeIf { it > 0 }?.toFloat() ?: theme.keyboard.textSize,
+            ),
+            candidateBar = theme.candidateBar.copy(
+                textSize = candidateText.takeIf { it > 0 }?.toFloat() ?: theme.candidateBar.textSize,
+                commentTextSize = commentText.takeIf { it > 0 }?.toFloat() ?: theme.candidateBar.commentTextSize,
+            ),
+            fontFaces = theme.fontFaces.copy(
+                key = prefs.keyFont.getValue().toMaybeStringListOr(theme.fontFaces.key),
+                candidate = prefs.candidateFont.getValue().toMaybeStringListOr(theme.fontFaces.candidate),
+                comment = prefs.commentFont.getValue().toMaybeStringListOr(theme.fontFaces.comment),
+            ),
+        )
+    }
+
+    /** 空白字体偏好 = 跟随主题。 */
+    private fun String.toMaybeStringListOr(fallback: MaybeStringList): MaybeStringList =
+        if (isBlank()) fallback else MaybeStringList.Scalar(this)
+
+    /** 重新加载当前主题并应用（字号/字体偏好变化时）。 */
+    private suspend fun reapplyTheme() {
+        if (!::_activeTheme.isInitialized) return
+        val selectedThemeId = prefs.selectedTheme.getValue()
+        val resolvedTheme = withContext(Dispatchers.IO) { getThemeById(selectedThemeId) }
+        withContext(Dispatchers.Main.immediate) { applyTheme(resolvedTheme) }
     }
 }

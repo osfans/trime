@@ -10,7 +10,7 @@ import android.content.res.ColorStateList
 import android.graphics.drawable.StateListDrawable
 import android.view.ViewOutlineProvider
 import com.google.android.flexbox.FlexboxLayoutManager
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.keyboard.GestureFrame
 import splitties.dimensions.dp
@@ -23,7 +23,7 @@ import splitties.views.gravityCenter
 import splitties.views.setPaddingDp
 
 class SegmentUi(override val ctx: Context, private val scope: ThemeScope) : Ui {
-    private val theme: Theme get() = scope.theme
+    private val theme: ThemeV2 get() = scope.theme
 
     private val spacing = ctx.dp(4)
 

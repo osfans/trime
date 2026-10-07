@@ -9,7 +9,7 @@ import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import kotlinx.coroutines.Job
@@ -27,7 +27,7 @@ import java.util.LinkedList
 class PopupDelegate(override val di: DI) : DIAware {
     private val context: ContextThemeWrapper by instance()
     private val scope: ThemeScope by instance()
-    private val theme: Theme get() = scope.theme
+    private val theme: ThemeV2 get() = scope.theme
     private val service: TrimeInputMethodService by instance()
 
     private val showingEntryUi = HashMap<Int, PopupEntryUi>()

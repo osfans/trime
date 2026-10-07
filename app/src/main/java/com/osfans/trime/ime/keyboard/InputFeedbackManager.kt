@@ -18,6 +18,7 @@ import android.view.KeyEvent
 import android.view.View
 import androidx.core.util.containsValue
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.data.soundeffect.SoundEffectManager
 import splitties.systemservices.audioManager
 import splitties.systemservices.vibrator
@@ -93,9 +94,9 @@ object InputFeedbackManager {
         (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) &&
             vibrator.hasAmplitudeControl()
 
-    private val vibrateOnKeyPress by keyboardPrefs.vibrateOnKeyPress
-    private val vibrationDuration by keyboardPrefs.vibrationDuration
-    private val vibrationAmplitude by keyboardPrefs.vibrationAmplitude
+    private val vibrateOnKeyPress by ThemeManager.prefs.vibrateOnKeyPress
+    private val vibrationDuration by ThemeManager.prefs.vibrationDuration
+    private val vibrationAmplitude by ThemeManager.prefs.vibrationAmplitude
 
     /**
      * Makes a key press vibration if the user has this feature enabled in the preferences.
@@ -153,9 +154,9 @@ object InputFeedbackManager {
         }
     }
 
-    private val soundOnKeyPress by keyboardPrefs.soundOnKeyPress
-    private val soundEffectEnabled by keyboardPrefs.useCustomSoundEffect
-    private val soundVolume by keyboardPrefs.soundVolume
+    private val soundOnKeyPress by ThemeManager.prefs.soundOnKeyPress
+    private val soundEffectEnabled by ThemeManager.prefs.useCustomSoundEffect
+    private val soundVolume by ThemeManager.prefs.soundVolume
 
     /**
      * Makes a key press sound if the user has this feature enabled in the preferences.

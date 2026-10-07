@@ -19,6 +19,7 @@ import androidx.collection.LruCache
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.math.MathUtils
 import com.osfans.trime.data.base.DataManager
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.NinePatchBitmapFactory
 import com.osfans.trime.util.WeakHashSet
@@ -55,7 +56,7 @@ object ColorManager {
         get() = generation
 
     fun interface OnColorChangeListener {
-        fun onColorChange(theme: Theme)
+        fun onColorChange(theme: ThemeV2)
     }
 
     private val onChangeListeners = WeakHashSet<OnColorChangeListener>()
@@ -99,7 +100,7 @@ object ColorManager {
      * Attaches a theme, replacing the current scope. Theme switches notify
      * through ThemeManager, so no color listener fires here.
      */
-    fun attachTheme(theme: Theme) {
+    fun attachTheme(theme: ThemeV2) {
         bitmapCache?.evictAll()
         scope = ThemeScope(theme)
         activateScheme(notify = false)
@@ -117,8 +118,8 @@ object ColorManager {
 
     private fun requireScope(): ThemeScope = requireNotNull(scope) { "ColorManager is not initialized" }
 
-    private fun resolveActiveScheme(theme: Theme): ColorScheme = ColorSchemeResolver.resolve(
-        schemes = theme.presetColorSchemes,
+    private fun resolveActiveScheme(theme: ThemeV2): ColorScheme = ColorSchemeResolver.resolve(
+        schemas = theme.colorSchemas,
         selectedSchemeId = prefs.normalModeColor.getValue(),
         followSystemDayNight = prefs.followSystemDayNight.getValue(),
         isNightMode = isNightMode,

@@ -11,10 +11,11 @@ import android.graphics.fonts.FontFamily
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.osfans.trime.data.base.DataManager
+import com.osfans.trime.data.theme.model.v2.ThemeV2
 import timber.log.Timber
 import java.io.File
 
-class ThemeFonts(private val theme: Theme) {
+class ThemeFonts(private val theme: ThemeV2) {
     private val style = theme.style
 
     private data class FileState(
