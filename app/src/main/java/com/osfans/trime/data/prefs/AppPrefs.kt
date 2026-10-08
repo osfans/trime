@@ -7,7 +7,11 @@ package com.osfans.trime.data.prefs
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
 import androidx.annotation.Keep
+import androidx.annotation.RequiresApi
+import androidx.core.content.edit
+import androidx.preference.PreferenceManager
 import com.osfans.trime.R
 import com.osfans.trime.data.sync.DataStorageMode
 import com.osfans.trime.ime.candidates.compact.CompactCandidateMode
@@ -360,5 +364,22 @@ class AppPrefs(
             IGNORE_SYSTEM_GESTURE_INSETS,
             false,
         )
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun syncToDeviceEncryptedStorage() {
+        val ctx = appContext.createDeviceProtectedStorageContext()
+        val sp = PreferenceManager.getDefaultSharedPreferences(ctx)
+        sp.edit {
+            listOf(
+                keyboard,
+                candidates,
+                clipboard,
+            ).forEach { category ->
+                category.preferenceDelegates.forEach {
+                    it.value.putValueTo(this@edit)
+                }
+            }
+        }
     }
 }

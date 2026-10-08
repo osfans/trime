@@ -4,6 +4,7 @@
  */
 package com.osfans.trime.data.prefs
 
+import android.os.Build
 import android.os.Bundle
 import androidx.annotation.CallSuper
 import androidx.annotation.Keep
@@ -60,6 +61,13 @@ abstract class PreferenceDelegateFragment(
                 }
             }
         }
+    }
+
+    override fun onStop() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            AppPrefs.defaultInstance().syncToDeviceEncryptedStorage()
+        }
+        super.onStop()
     }
 
     override fun onDestroy() {

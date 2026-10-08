@@ -260,7 +260,10 @@ object ThemeLoader {
     }
 
     /** Source file of [resourceId]: the user data dir first, then the shared one. */
-    private fun findSourceFile(resourceId: String): File? = findSourceFile(resourceId, listOf(DataManager.userDataDir, DataManager.sharedDataDir))
+    private fun findSourceFile(resourceId: String): File? = findSourceFile(
+        resourceId,
+        listOf(DataManager.userDataDir, DataManager.sharedDataDir),
+    )
 
     /**
      * Source file of [resourceId] under [roots], in order. A resource id is free

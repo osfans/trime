@@ -4,7 +4,7 @@
 
 package com.osfans.trime.data
 
-import com.osfans.trime.util.appContext
+import com.osfans.trime.TrimeApplication
 
 class SymbolHistory(
     val capacity: Int,
@@ -13,7 +13,9 @@ class SymbolHistory(
         const val FILE_NAME = "symbol_history"
     }
 
-    private val file = appContext.filesDir.resolve(FILE_NAME).apply { createNewFile() }
+    private val file =
+        TrimeApplication.getInstance().directBootAwareContext.filesDir.resolve(FILE_NAME)
+            .apply { createNewFile() }
 
     fun load() {
         val all = file.readLines()
