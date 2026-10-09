@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-FileCopyrightText: 2026 Rime community
+     SPDX-License-Identifier: GPL-3.0-or-later -->
+<resources>
+    <string name="app_name_debug">Trime (Debug)</string>
+</resources>

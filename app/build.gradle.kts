@@ -29,6 +29,7 @@ android {
         versionName = "3.3.13"
 
         multiDexEnabled = true
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "BUILDER", "\"${project.builder}\"")
         buildConfigField("long", "BUILD_TIMESTAMP", project.buildTimestamp)
         buildConfigField("String", "BUILD_COMMIT_HASH", "\"${project.buildCommitHash}\"")
@@ -172,6 +173,7 @@ dependencies {
     testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.kotest.assertions.core)
     androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.runner)
 }
 
 configurations {

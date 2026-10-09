@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include <dlfcn.h>
+#include <rime/setup.h>
 #include <rime_api.h>
 
 #include <memory>
@@ -36,7 +38,7 @@ class Rime {
     return instance;
   }
 
-  void startup(bool fullCheck,
+  void startup(bool fullCheck, const std::vector<std::string>& pluginModules,
                const RimeNotificationHandler& notificationHandler) {
     if (!rime) return;
     const char* userDir = getenv("RIME_USER_DATA_DIR");
@@ -51,6 +53,12 @@ class Rime {
     trime_traits.distribution_name = "Trime";
     trime_traits.distribution_code_name = "trime";
     trime_traits.distribution_version = versionName;
+
+    std::vector<const char*> modules;
+    for (auto m = rime::kDefaultModules; *m; ++m) modules.push_back(*m);
+    for (const auto& m : pluginModules) modules.push_back(m.c_str());
+    modules.push_back(nullptr);
+    trime_traits.modules = modules.data();
 
     rime->setup(&trime_traits);
     rime->initialize(&trime_traits);
@@ -236,9 +244,29 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* jvm, void* reserved) {
   return JNI_VERSION_1_6;
 }
 
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_osfans_trime_core_Rime_loadRimePlugin(JNIEnv* env, jclass,
+                                               jstring path, jstring module) {
+  const std::string name = CString(env, module);
+  auto api = rime_get_api();
+  if (api->find_module(name.c_str())) {
+    return env->NewStringUTF("Rime module name already registered");
+  }
+  // Keep the library loaded while Rime holds its function pointers.
+  if (!dlopen(CString(env, path), RTLD_NOW | RTLD_GLOBAL)) {
+    const char* error = dlerror();
+    return env->NewStringUTF(error ? error : "dlopen failed");
+  }
+  if (!api->find_module(name.c_str())) {
+    return env->NewStringUTF(
+        "Library did not register the filename-derived Rime module");
+  }
+  return env->NewStringUTF("");
+}
+
 extern "C" JNIEXPORT void JNICALL Java_com_osfans_trime_core_Rime_startupRime(
     JNIEnv* env, jclass clazz, jstring shared_dir, jstring user_dir,
-    jstring version_name, jboolean full_check) {
+    jstring version_name, jboolean full_check, jobjectArray plugin_modules) {
   // for rime shared data dir
   setenv("RIME_SHARED_DATA_DIR", CString(env, shared_dir), 1);
   // for rime user data dir
@@ -264,7 +292,14 @@ extern "C" JNIEXPORT void JNICALL Java_com_osfans_trime_core_Rime_startupRime(
                               type, *vararg);
   };
 
-  Rime::Instance().startup(full_check, notificationHandler);
+  std::vector<std::string> modules;
+  for (jsize i = 0; i < env->GetArrayLength(plugin_modules); ++i) {
+    auto name =
+        static_cast<jstring>(env->GetObjectArrayElement(plugin_modules, i));
+    modules.emplace_back(CString(env, name));
+    env->DeleteLocalRef(name);
+  }
+  Rime::Instance().startup(full_check, modules, notificationHandler);
 }
 
 extern "C" JNIEXPORT void JNICALL

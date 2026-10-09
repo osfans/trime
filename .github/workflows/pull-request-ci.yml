@@ -96,3 +96,45 @@ jobs:
           path: app/build/outputs/apk/debug/
           # keep 30 days
           retention-days: 30
+
+  native-plugin-test:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    steps:
+      - name: Fetch source code
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: "temurin"
+          java-version: 25
+          cache: 'gradle'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Test native plugins
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          script: ANDROID_SERIAL=emulator-5554 ./script/test-native-plugins.sh
+
+      - name: Upload test logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: native-plugin-test-logs
+          path: app/build/reports/native-plugins/

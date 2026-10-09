@@ -21,6 +21,8 @@ option(WITH_GFLAGS "Use gflags" OFF)
 option(WITH_GTEST "Use googletest" OFF)
 option(WITH_UNWIND "Enable libunwind support" OFF)
 add_subdirectory(librime/deps/glog)
+set_target_properties(glog_internal PROPERTIES CXX_VISIBILITY_PRESET default
+  VISIBILITY_INLINES_HIDDEN OFF)
 target_compile_options(
   glog_internal PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.")
 

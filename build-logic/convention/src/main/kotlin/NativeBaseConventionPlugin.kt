@@ -17,7 +17,7 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
                 @Suppress("UnstableApiUsage")
                 externalNativeBuild {
                     cmake {
-                        arguments("-DANDROID_STL=c++_static")
+                        arguments("-DANDROID_STL=c++_shared")
                     }
                 }
             }
