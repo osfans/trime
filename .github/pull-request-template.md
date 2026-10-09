@@ -19,7 +19,7 @@ Describe features of this pull request
 - [ ] [CONTRIBUTING](CONTRIBUTING.md)
 
 #### Code style
-- [ ] `make sytle-lint`
+- [ ] `make style-lint`
 - [ ] [Conventional Commits](https://www.conventionalcommits.org/)
 
 #### Build pass
