@@ -404,6 +404,11 @@ class Keyboard(
         return if (on) setModifier(keycode, keepOn) else setModifier(keycode, keyDown)
     }
 
+    fun resetShift() {
+        mShiftKey?.setOn(false)
+        setModifier(KeyEvent.META_SHIFT_ON, false)
+    }
+
     fun refreshModifier(): Boolean {
         // 这里改为了一次性重置全部修饰键状态并返回TRUE刷新UI，可能有bug
         var result = false
