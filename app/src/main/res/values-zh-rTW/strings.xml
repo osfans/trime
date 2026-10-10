@@ -102,6 +102,8 @@
     <string name="hook_shift_num">點擊0-9時，忽略Shift的鎖定狀態</string>
     <string name="hook_shift_symbol">點擊符號鍵時，忽略Shift的鎖定狀態</string>
     <string name="hook_shift_arrow">點選方向鍵時，保持Shift的鎖定狀態</string>
+    <string name="hook_shift_lock">雙擊 Shift 鎖定大寫</string>
+    <string name="hook_shift_lock_summary">再次單擊 Shift 可解除大寫鎖定</string>
     <string name="export">匯出</string>
     <string name="scroll_to_bottom">跳到最後</string>
     <string name="app_crash_message">抱歉，但我們為您帶來了一些紀錄檔以供調查。</string>

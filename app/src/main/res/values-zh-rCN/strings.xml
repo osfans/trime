@@ -98,6 +98,8 @@
     <string name="hook_shift_num">点击0-9时，忽略Shift的锁定状态</string>
     <string name="hook_shift_symbol">点击符号键时，忽略Shift的锁定状态</string>
     <string name="hook_shift_arrow">点击方向键时，保持Shift的锁定状态</string>
+    <string name="hook_shift_lock">双击 Shift 锁定大写</string>
+    <string name="hook_shift_lock_summary">再次单击 Shift 可解除大写锁定</string>
     <string name="developer">开发者</string>
     <string name="export">导出</string>
     <string name="scroll_to_bottom">跳到最后</string>

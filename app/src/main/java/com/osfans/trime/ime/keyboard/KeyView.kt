@@ -76,7 +76,8 @@ class KeyView(
         isSlideCursor = key.click?.isSlideCursor ?: false
         isSlideDelete = key.click?.isSlideDelete ?: false
         hasLongPress = key.hasAction(KeyBehavior.LONG_CLICK)
-        hasDouble = key.hasAction(KeyBehavior.DOUBLE_CLICK)
+        // Shift键始终参与双击检测，以便支持双击锁定大写（可通过设置项 hookShiftLock 关闭）
+        hasDouble = key.hasAction(KeyBehavior.DOUBLE_CLICK) || key.isShift
         hasLazyDouble = key.hasAction(KeyBehavior.LAZY_DOUBLE_CLICK)
         hasPopup = key.popup.isNotEmpty()
 
@@ -197,7 +198,7 @@ class KeyView(
 
         if (action.isModifierKey) {
             keyboard.clickModifierKey(
-                action.isShiftLock xor (behavior == KeyBehavior.LONG_CLICK),
+                modifierKeyLockState(action, behavior),
                 action.modifierKeyOnMask,
             )
             keyboardView.invalidateAllKeys()
@@ -221,6 +222,27 @@ class KeyView(
                 keyboardView.invalidateAllKeys()
             }
         }
+    }
+
+    /**
+     * 计算修饰键本次触发后的锁定状态
+     *
+     * - 长按：取[KeyAction.isShiftLock]的反值（沿用原有的 isShiftLock xor longClick 规则）
+     * - 双击Shift：设置项 hookShiftLock 开启时，锁定大写（CapsLock）；再次单击Shift解除锁定
+     * - 其它（单击、滑动等）：与[KeyAction.isShiftLock]一致
+     */
+    private fun modifierKeyLockState(
+        action: KeyAction,
+        behavior: KeyBehavior,
+    ): Boolean = when (behavior) {
+        KeyBehavior.LONG_CLICK -> !action.isShiftLock
+
+        KeyBehavior.DOUBLE_CLICK ->
+            // 双击Shift恒等于锁定大写。不能按当前锁定状态取反：默认主题的
+            // shift_lock: ascii_long 在中文态下单击即锁定，取反会让双击变成解锁。
+            (keyboardView.hookShiftLock && key.isShift) || action.isShiftLock
+
+        else -> action.isShiftLock
     }
 
     private fun showPopupKeyboard() {

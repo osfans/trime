@@ -159,6 +159,7 @@ class AppPrefs(
             const val HOOK_SHIFT_NUM = "hook_shift_num"
             const val HOOK_SHIFT_SYMBOL = "hook_shift_symbol"
             const val HOOK_SHIFT_ARROW = "hook_shift_arrow"
+            const val HOOK_SHIFT_LOCK = "hook_shift_lock"
 
             const val MAX_SPAN_COUNT = "max_span_count"
             const val MAX_SPAN_COUNT_LANDSCAPE = "max_span_count_landscape"
@@ -342,6 +343,12 @@ class AppPrefs(
         val hookShiftNum = switch(R.string.hook_shift_num, HOOK_SHIFT_NUM, false)
         val hookShiftSymbol = switch(R.string.hook_shift_symbol, HOOK_SHIFT_SYMBOL, false)
         val hookShiftArrow = switch(R.string.hook_shift_arrow, HOOK_SHIFT_ARROW, true)
+        val hookShiftLock = switch(
+            R.string.hook_shift_lock,
+            HOOK_SHIFT_LOCK,
+            true,
+            R.string.hook_shift_lock_summary,
+        )
     }
 
     class Candidates(
