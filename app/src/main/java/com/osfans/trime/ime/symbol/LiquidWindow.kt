@@ -123,10 +123,10 @@ class LiquidWindow(di: DI) :
         rime.launchOnReady {
             val (isAsciiMode, isAsciiPunch) = it.statusCached.run { isAsciiMode to isAsciiPunct }
             if (isAsciiMode) it.setRuntimeOption("ascii_mode", false)
-            if (isAsciiPunch) it.setRuntimeOption("ascii_punch", false)
+            if (isAsciiPunch) it.setRuntimeOption("ascii_punct", false)
             it.clearComposition()
             it.simulateKeySequence(symbol)
-            if (isAsciiPunch) it.setRuntimeOption("ascii_punch", true)
+            if (isAsciiPunch) it.setRuntimeOption("ascii_punct", true)
             ContextCompat.getMainExecutor(service).execute {
                 windowManager.attachWindow(KeyboardWindow)
             }
