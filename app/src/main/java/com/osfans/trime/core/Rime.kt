@@ -316,6 +316,7 @@ class Rime :
             userDataDir,
             BuildConfig.BUILD_VERSION_NAME,
             fullCheck,
+            NativePlugins.modules(),
         )
     }
 
@@ -506,11 +507,15 @@ class Rime :
 
         // init
         @JvmStatic
+        external fun loadRimePlugin(path: String, module: String): String
+
+        @JvmStatic
         external fun startupRime(
             sharedDir: String,
             userDir: String,
             versionName: String,
             fullCheck: Boolean,
+            pluginModules: Array<String>,
         )
 
         @JvmStatic
@@ -621,12 +626,12 @@ class Rime :
             messageFlow_.tryEmit(message)
         }
 
-        private fun registerRimeMessageHandler(handler: (RimeMessage<*>) -> Unit) {
+        internal fun registerRimeMessageHandler(handler: (RimeMessage<*>) -> Unit) {
             if (rimeMessageHandlers.contains(handler)) return
             rimeMessageHandlers.add(handler)
         }
 
-        private fun unregisterRimeMessageHandler(handler: (RimeMessage<*>) -> Unit) {
+        internal fun unregisterRimeMessageHandler(handler: (RimeMessage<*>) -> Unit) {
             rimeMessageHandlers.remove(handler)
         }
     }
