@@ -279,6 +279,7 @@ class Rime :
 
     private fun startRime(fullCheck: Boolean) {
         DataManager.sync()
+        UserDataManager.ensureDefaultCustomConfig()
         val sharedDataDir = DataManager.sharedDataDir.absolutePath
         val userDataDir = DataManager.userDataDir.absolutePath
         Timber.d(
