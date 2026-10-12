@@ -6,8 +6,8 @@
 package com.osfans.trime.core
 
 import com.osfans.trime.BuildConfig
+import com.osfans.trime.core.data.DataManager
 import com.osfans.trime.core.data.UserDataManager
-import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.opencc.OpenCCDictManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.ime.core.InlinePreeditMode
@@ -281,7 +281,7 @@ class Rime :
         DataManager.sync()
         UserDataManager.ensureDefaultCustomConfig()
         val sharedDataDir = DataManager.sharedDataDir.absolutePath
-        val userDataDir = DataManager.userDataDir.absolutePath
+        val userDataDir = UserDataManager.userDataDir.absolutePath
         Timber.d(
             """
             Starting rime with:

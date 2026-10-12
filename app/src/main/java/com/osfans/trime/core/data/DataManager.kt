@@ -1,8 +1,9 @@
-// SPDX-FileCopyrightText: 2015 - 2026 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2026 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-package com.osfans.trime.data.base
+package com.osfans.trime.core.data
 
 import android.content.res.AssetManager
 import android.os.Build

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package com.osfans.trime.data.base
+package com.osfans.trime.core.data
 
 sealed interface DataDiff {
     val path: String
