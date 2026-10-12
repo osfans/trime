@@ -10,7 +10,7 @@ import android.graphics.fonts.Font
 import android.graphics.fonts.FontFamily
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.osfans.trime.data.base.DataManager
+import com.osfans.trime.core.data.DataManager
 import timber.log.Timber
 import java.io.File
 

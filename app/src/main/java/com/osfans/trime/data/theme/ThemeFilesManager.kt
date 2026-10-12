@@ -5,7 +5,7 @@
 
 package com.osfans.trime.data.theme
 
-import com.osfans.trime.data.base.DataManager
+import com.osfans.trime.core.data.DataManager
 import com.osfans.trime.util.get
 import com.osfans.trime.util.string
 import timber.log.Timber

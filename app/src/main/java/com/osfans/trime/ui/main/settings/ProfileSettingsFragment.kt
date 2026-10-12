@@ -15,9 +15,9 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.SwitchPreferenceCompat
 import com.osfans.trime.R
+import com.osfans.trime.core.data.DataManager
 import com.osfans.trime.core.data.DataStorageMode
 import com.osfans.trime.core.data.UserDataManager
-import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.prefs.PreferenceDelegate
 import com.osfans.trime.ui.common.PaddingPreferenceFragment
