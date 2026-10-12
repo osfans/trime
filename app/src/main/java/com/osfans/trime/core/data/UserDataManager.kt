@@ -37,6 +37,15 @@ object UserDataManager {
 
     private const val MTIME_TOLERANCE = 2000L
 
+    private const val DEFAULT_CUSTOM_FILE_NAME = "default.custom.yaml"
+
+    private const val SCHEMA_LIST_CUSTOM_PATCH = """
+      patch:
+        schema_list:
+          - schema: luna_pinyin
+          - schema: luna_pinyin_simp
+    """
+
     private val lock = Mutex()
 
     private val json by lazy { Json }
@@ -111,6 +120,17 @@ object UserDataManager {
     fun isStorageChoiceDone(): Boolean = when (dataStorageMode) {
         DataStorageMode.APP_STORAGE -> true
         DataStorageMode.EXTERNAL_SYNC -> externalRimeTreeUri.isNotEmpty()
+    }
+
+    /**
+     * Bootstraps a usable schema list into the user data dir on first run, so a
+     * freshly installed app has something to deploy.
+     */
+    fun ensureDefaultCustomConfig() {
+        val custom = File(userDataDir, DEFAULT_CUSTOM_FILE_NAME)
+        if (!custom.exists() && custom.createNewFile()) {
+            custom.writeText(SCHEMA_LIST_CUSTOM_PATCH.trimIndent())
+        }
     }
 
     /**
