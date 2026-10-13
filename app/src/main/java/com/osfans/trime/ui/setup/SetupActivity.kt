@@ -23,7 +23,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.osfans.trime.R
-import com.osfans.trime.data.sync.RimeDataSync
+import com.osfans.trime.core.data.UserDataManager
 import com.osfans.trime.databinding.ActivitySetupBinding
 import com.osfans.trime.ui.main.MainActivity
 import com.osfans.trime.ui.setup.SetupPage.Companion.firstUndonePage
@@ -51,10 +51,8 @@ class SetupActivity : FragmentActivity() {
         lifecycleScope.launch {
             val picked = storageAccess.pickDirectory() ?: return@launch
             runCatching {
-                withContext(Dispatchers.IO) {
-                    RimeDataSync.persistTreeUri(picked.uri)
-                    RimeDataSync.importToLocal().getOrThrow()
-                }
+                UserDataManager.persistTreeUri(picked.uri)
+                check(UserDataManager.sync())
                 refreshCurrentFragment()
                 updateButtons()
                 toast(R.string.setup__data_path_imported)
