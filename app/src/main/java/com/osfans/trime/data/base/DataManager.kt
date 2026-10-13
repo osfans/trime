@@ -17,14 +17,6 @@ import kotlin.concurrent.withLock
 
 object DataManager {
     const val DEFAULT_CUSTOM_FILE_NAME = "default.custom.yaml"
-    const val USER_CONFIG_FILE_NAME = "user.yaml"
-    const val INSTALLATION_FILE_NAME = "installation.yaml"
-
-    val POST_SCHEMA_DEPLOY_EXPORT_FILES =
-        listOf(
-            DEFAULT_CUSTOM_FILE_NAME,
-            USER_CONFIG_FILE_NAME,
-        )
 
     private const val DATA_CHECKSUMS_NAME = "checksums.json"
 

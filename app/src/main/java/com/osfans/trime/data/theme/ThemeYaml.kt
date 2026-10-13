@@ -27,7 +27,7 @@ import com.charleskorn.kaml.Yaml as KamlYaml
  *
  * YAML outside themes has its own scope: sound effect descriptors use their own
  * key spelling (see `SoundEffectManager`), and `installation.yaml` is written by
- * librime (see `SyncPathPolicy`).
+ * librime itself.
  */
 object ThemeYaml {
     /**

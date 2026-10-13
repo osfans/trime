@@ -1,9 +1,10 @@
 /*
  * SPDX-FileCopyrightText: 2015 - 2026 Rime community
+ *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-package com.osfans.trime.data.sync
+package com.osfans.trime.core.data
 
 import com.osfans.trime.R
 import com.osfans.trime.data.prefs.PreferenceDelegateEnum

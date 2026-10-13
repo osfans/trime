@@ -15,11 +15,11 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.SwitchPreferenceCompat
 import com.osfans.trime.R
+import com.osfans.trime.core.data.DataStorageMode
+import com.osfans.trime.core.data.UserDataManager
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.prefs.PreferenceDelegate
-import com.osfans.trime.data.sync.DataStorageMode
-import com.osfans.trime.data.sync.RimeDataSync
 import com.osfans.trime.ui.common.PaddingPreferenceFragment
 import com.osfans.trime.ui.common.withLoadingDialog
 import com.osfans.trime.ui.main.MainViewModel
@@ -125,9 +125,8 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                 withLoadingDialog(ctx) {
                     runCatching {
                         withContext(Dispatchers.IO) {
-                            RimeDataSync.persistTreeUri(picked.uri)
-                            RimeDataSync.importToLocal().getOrThrow()
-                            viewModel.rime.runOnReady { deploy(skipImport = true) }
+                            UserDataManager.persistTreeUri(picked.uri)
+                            viewModel.rime.runOnReady { deploy() }
                         }
                     }.onSuccess {
                         updateDataPathSummary()
@@ -180,10 +179,6 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
     }
 
     private fun fallbackToAppStorage() {
-        RimeDataSync.onStorageModeChanged(
-            DataStorageMode.EXTERNAL_SYNC,
-            DataStorageMode.APP_STORAGE,
-        )
         prefs.dataStorageMode.setValue(DataStorageMode.APP_STORAGE)
         updateStorageModeUi()
         updateDataPathSummary()
@@ -217,12 +212,11 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                             val oldMode = prefs.dataStorageMode.getValue()
                             val mode =
                                 DataStorageMode.valueOf(newValue as String)
-                            RimeDataSync.onStorageModeChanged(oldMode, mode)
                             prefs.dataStorageMode.setValue(mode)
                             if (
                                 oldMode == DataStorageMode.APP_STORAGE &&
                                 mode == DataStorageMode.EXTERNAL_SYNC &&
-                                !RimeDataSync.hasExternalAccess()
+                                !UserDataManager.hasExternalAccess()
                             ) {
                                 promptExternalSyncFolderSelection()
                             } else if (
@@ -263,7 +257,7 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                                     when {
                                         !success -> R.string.sync_user_data_failure
 
-                                        RimeDataSync.usesExternalSync() ->
+                                        UserDataManager.useExternalSync() ->
                                             R.string.sync_user_data_success_external
 
                                         else -> R.string.sync_user_data_success
@@ -375,11 +369,7 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
         super.onResume()
         updateStorageModeUi()
         val ctx = requireContext()
-        if (
-            RimeDataSync.usesExternalSync() &&
-            prefs.externalRimeTreeUri.getValue().isNotEmpty() &&
-            !RimeDataSync.hasExternalAccess()
-        ) {
+        if (UserDataManager.useExternalSync() && !UserDataManager.hasExternalAccess()) {
             ctx.toast(R.string.data_path_permission_revoked)
         }
     }
