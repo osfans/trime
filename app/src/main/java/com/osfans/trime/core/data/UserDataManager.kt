@@ -37,6 +37,8 @@ object UserDataManager {
 
     private const val MTIME_TOLERANCE = 2000L
 
+    private const val HASH_BUFFER_SIZE = 32 * 1024
+
     private const val DEFAULT_CUSTOM_FILE_NAME = "default.custom.yaml"
 
     private const val SCHEMA_LIST_CUSTOM_PATCH = """
@@ -71,7 +73,7 @@ object UserDataManager {
 
     private suspend fun hashStream(input: InputStream): String = withContext(Dispatchers.IO) {
         val digest = MessageDigest.getInstance("SHA-256")
-        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        val buffer = ByteArray(HASH_BUFFER_SIZE)
         while (true) {
             val read = input.read(buffer)
             if (read < 0) break
@@ -81,11 +83,13 @@ object UserDataManager {
     }
 
     private suspend fun localHash(file: File): String? = runCatching {
-        file.inputStream().buffered().use { hashStream(it) }
+        file.inputStream().buffered(HASH_BUFFER_SIZE).use {
+            hashStream(it)
+        }
     }.getOrNull()
 
     private suspend fun remoteHash(file: StorageDocument): String? = runCatching {
-        StorageAccess.readFile(file.uri) { hashStream(it.buffered()) }
+        StorageAccess.readFile(file.uri) { hashStream(it.buffered(HASH_BUFFER_SIZE)) }
     }.getOrNull()
 
     // If Android version supports direct boot, we put the hierarchy in device encrypted storage
@@ -297,19 +301,19 @@ object UserDataManager {
                     abs(remoteMtime - baseRemoteMtime) > MTIME_TOLERANCE ||
                     remoteSize != inManifest.length
 
-                if (localChanged || remoteChanged) {
-                    if (localSize == remoteSize) {
-                        val localDigest = localHash(local)
-                        val remoteDigest = remoteHash(remote)
-                        if (localDigest != null && localDigest == remoteDigest) {
-                            Timber.d("Content match for $path, skipping transfer")
-                            localChanged = false
-                            remoteChanged = false
-                            finalHash = localDigest
-                        } else {
-                            finalHash = localDigest
-                        }
+                // Digest both sides once and reuse the results below, so a transfer never
+                // re-reads the file it just wrote.
+                var localDigest: String? = null
+                var remoteDigest: String? = null
+                if ((localChanged || remoteChanged) && localSize == remoteSize) {
+                    localDigest = localHash(local)
+                    remoteDigest = remoteHash(remote)
+                    if (localDigest != null && localDigest == remoteDigest) {
+                        Timber.d("Content match for $path, skipping transfer")
+                        localChanged = false
+                        remoteChanged = false
                     }
+                    finalHash = localDigest
                 }
 
                 var finalLocalMtime = localMtime
@@ -323,14 +327,16 @@ object UserDataManager {
                 when (takeLocal) {
                     true -> {
                         val pasted = paste(local, path)
-                        finalHash = localHash(local) ?: finalHash
+                        // The local content was not modified by the transfer; reuse its digest.
+                        finalHash = localDigest ?: localHash(local) ?: finalHash
                         finalLocalMtime = local.lastModified()
                         finalRemoteMtime = pasted.lastModified
                     }
 
                     false -> {
                         copy(remote, local)
-                        finalHash = localHash(local) ?: finalHash
+                        // The copy reproduced the remote bytes; reuse the remote digest.
+                        finalHash = remoteDigest ?: localHash(local) ?: finalHash
                         finalLocalMtime = local.lastModified()
                         finalRemoteMtime = remote.lastModified
                     }
