@@ -475,6 +475,9 @@ internal object PublicWindowPilotProbe {
             check(runBlocking { withTimeout(30_000) { !SetupActivity.shouldShowUp() } }) {
                 "Pilot requires an already completed disposable route profile before opening any Window"
             }
+            PublicImeWindowPreflight.synchronize(
+                instrumentation, workDeadline, deadline, JSONObject().also { report.put("ime_preflight_window", it) }, ::sessions,
+            )
             val prefs = AppPrefs.defaultInstance()
             val preferenceStore = prefs.advanced.uiMode.sharedPreferences
             val touchedKeys = listOf(prefs.advanced.uiMode.key, prefs.clipboard.clipboardListening.key, ThemeManager.prefs.selectedTheme.key)

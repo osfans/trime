@@ -868,6 +868,28 @@ internal object PublicHostWindowProbe {
             await("Actual Profile route did not open") { main { route(activity) == NavigationRoute.Profile.path && activity.hasWindowFocus() } }
             val fragment = currentPreferences(activity)
             check(fragment is ProfileSettingsFragment)
+            // This is the actual replacement process after READY and before either profile action.
+            val checksumRoot = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                context.createDeviceProtectedStorageContext().dataDir
+            } else {
+                File(context.applicationInfo.dataDir)
+            }
+            val protectedRoots = listOf(
+                "shared" to DataManager.sharedDataDir,
+                "rime" to DataManager.userDataDir,
+                "userdict-backups" to File(context.filesDir, "userdict-backups"),
+                "cache" to context.cacheDir,
+                "sync-index" to File(context.filesDir, "rime_sync_index.json"),
+                "asset-checksums" to File(checksumRoot, "checksums.json"),
+                "direct-boot-checksums" to File(checksumRoot, "checksums.direct-boot.json"),
+            )
+            check(protectedRoots.take(2).all { it.second.isDirectory })
+            check(RimeDaemon.engineState.value == RimeLifecycle.State.READY)
+            marker("profile_full_data_before_begin")
+            val completeBefore = PublicProfileDataSnapshot.capture(protectedRoots, File(directory, "profile-data-before"), ::checkTime)
+            report.put("profile_full_data_before", completeBefore)
+            check(RimeDaemon.engineState.value == RimeLifecycle.State.READY)
+            marker("profile_full_data_before_end")
             val before = configurationBytes("profile-config-before")
             report.put("profile_configuration_before", before)
             profilePromptCancel(activity, fragment)
@@ -875,6 +897,17 @@ internal object PublicHostWindowProbe {
             val after = configurationBytes("profile-config-after")
             report.put("profile_configuration_after", after)
             check(before.getJSONArray("rows").toString() == after.getJSONArray("rows").toString()) { "Prompt/reset cancellation changed original configuration bytes" }
+            check(RimeDaemon.engineState.value == RimeLifecycle.State.READY)
+            marker("profile_full_data_after_begin")
+            val completeAfter = PublicProfileDataSnapshot.capture(protectedRoots, File(directory, "profile-data-after"), ::checkTime)
+            report.put("profile_full_data_after", completeAfter)
+            check(RimeDaemon.engineState.value == RimeLifecycle.State.READY)
+            check(File(directory, "profile-data-before/inventory.json").readBytes().contentEquals(File(directory, "profile-data-after/inventory.json").readBytes())) {
+                "Prompt/reset cancellation changed protected profile data; original before/after bytes retained"
+            }
+            report.put("profile_full_data_unchanged", true)
+                .put("profile_full_data_scope", "Entire shared and rime trees including hidden/compiled/userdb/WAL/log files; entire app cache; userdict-backups, sync index and both DataManager checksum files including absence. No per-file exclusions; native copies require independent host verification.")
+            marker("profile_full_data_after_end")
             check(checks.length() == 2)
         }
 
@@ -1008,6 +1041,9 @@ internal object PublicHostWindowProbe {
             check(mode in setOf("hosts_main", "hosts_advanced", "hosts_log", "dialogs_userdict_cancel", "dialogs_profile_cancel", "dialogs_license_cancel", "dialogs_owner_boundary", "dialogs_userdict_import_error"))
             check(File(context.getExternalFilesDir(null), "runtime-audit-dedicated").let { it.isFile && it.length() == 0L })
             check(!directory.exists() && directory.mkdirs())
+            PublicImeWindowPreflight.synchronize(
+                instrumentation, workDeadline, totalDeadline, JSONObject().also { report.put("ime_preflight_window", it) }, ::sessions,
+            )
             await("The selected IME did not bind before host windows") {
                 main {
                     val observed = sessions()

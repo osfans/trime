@@ -169,6 +169,10 @@ internal class PublicPreferenceProbeContext(val instrumentation: Instrumentation
         check(File(checkNotNull(context.getExternalFilesDir(null)), "runtime-audit-dedicated").let { it.isFile && it.length() == 0L })
         check(runBlocking { withTimeout(30_000) { !SetupActivity.shouldShowUp() } }) { "A completed disposable route profile is required" }
         if (Build.VERSION.SDK_INT >= 33) check(context.packageManager.checkPermission("android.permission.POST_NOTIFICATIONS", context.packageName) == PackageManager.PERMISSION_GRANTED)
+        check(!directory.exists() && directory.mkdirs())
+        PublicImeWindowPreflight.synchronize(
+            instrumentation, workDeadline, totalDeadline, JSONObject().also { report.put("ime_preflight_window", it) }, ::sessionNames,
+        )
         baselineIme = ime()
         check(baselineIme?.second?.startsWith("${context.packageName}/") == true)
         baselineMode = AppPrefs.defaultInstance().advanced.uiMode.let { it.sharedPreferences.contains(it.key) to it.sharedPreferences.all[it.key] }
@@ -195,7 +199,6 @@ internal class PublicPreferenceProbeContext(val instrumentation: Instrumentation
             },
         ) { "Exactly one already-bound selected IME owner and no unknown owners required" }
         await("The already-bound IME did not become READY before preference windows") { RimeDaemon.engineState.value == RimeLifecycle.State.READY }
-        check(!directory.exists() && directory.mkdirs())
         main {
             (context.applicationContext as Application).registerActivityLifecycleCallbacks(callbacks)
             registered = true
