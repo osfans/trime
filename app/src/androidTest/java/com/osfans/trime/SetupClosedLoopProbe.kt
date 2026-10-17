@@ -3,6 +3,7 @@ package com.osfans.trime
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Application
 import android.app.Instrumentation
 import android.content.Context
 import android.content.ContextWrapper
@@ -46,6 +47,7 @@ import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.core.InputView
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.KeyboardWindow
+import com.osfans.trime.ui.main.MainActivity
 import com.osfans.trime.ui.main.NavigationRoute
 import com.osfans.trime.ui.setup.SetupActivity
 import com.osfans.trime.ui.setup.SetupAdvancedSettingsActivity
@@ -759,6 +761,7 @@ object SetupClosedLoopProbe {
         var passed = false
         var checks = 0
         val activities = mutableListOf<SetupActivity>()
+        val completionActivities = mutableListOf<MainActivity>()
         val context = instrumentation.targetContext
         val checkpoints = context.getSharedPreferences("trime_setup", Context.MODE_PRIVATE)
         val checkpointBackup = checkpoints.all
@@ -1008,12 +1011,44 @@ object SetupClosedLoopProbe {
                     }
                     result.putBoolean("setup_trial_focus_recreation_restored", restoreTrialFocus)
                     passed("recreation keeps completion checkpoints without restoring trial text")
-                    main {
-                        val done = recreated.findViewById<Button>(R.id.next_button)
-                        check(done.isShown && done.isEnabled && done.performClick())
+                    val completionTaskId = main { recreated.taskId }
+                    val createdDestinations = mutableListOf<MainActivity>()
+                    val application = context.applicationContext as Application
+                    val completionCallbacks = object : Application.ActivityLifecycleCallbacks {
+                        override fun onActivityCreated(activity: Activity, state: Bundle?) {
+                            // Existing activities and activities in another application are not captured.
+                            if (activity is MainActivity) createdDestinations += activity
+                        }
+
+                        override fun onActivityStarted(activity: Activity) = Unit
+                        override fun onActivityResumed(activity: Activity) = Unit
+                        override fun onActivityPaused(activity: Activity) = Unit
+                        override fun onActivityStopped(activity: Activity) = Unit
+                        override fun onActivitySaveInstanceState(activity: Activity, state: Bundle) = Unit
+                        override fun onActivityDestroyed(activity: Activity) = Unit
                     }
-                    await("The completed wizard was not destroyed after its Done button") {
-                        main { recreated.isDestroyed }
+                    main { application.registerActivityLifecycleCallbacks(completionCallbacks) }
+                    try {
+                        main {
+                            val done = recreated.findViewById<Button>(R.id.next_button)
+                            check(done.isShown && done.isEnabled && done.performClick())
+                        }
+                        await("The completed wizard was not destroyed after its Done button") {
+                            main { recreated.isDestroyed }
+                        }
+                    } finally {
+                        main {
+                            application.unregisterActivityLifecycleCallbacks(completionCallbacks)
+                            val destination = createdDestinations.singleOrNull()
+                            val owned = completionTaskId >= 0 && destination?.taskId == completionTaskId
+                            if (owned) completionActivities += checkNotNull(destination)
+                            result.putInt("setup_completion_expected_task", completionTaskId)
+                            result.putIntArray("setup_completion_created_tasks", createdDestinations.map { it.taskId }.toIntArray())
+                            result.putBoolean("setup_completion_destination_owned", owned)
+                        }
+                    }
+                    check(result.getBoolean("setup_completion_destination_owned")) {
+                        "Done did not create exactly one MainActivity in the probe's setup task; unowned destinations are not closed"
                     }
                     check(!SetupPage.hasUndonePage())
                     check(runBlocking { session.runOnReady { inspectInputSetup() } } == applied)
@@ -1059,9 +1094,14 @@ object SetupClosedLoopProbe {
         } catch (error: Throwable) {
             result.putString("stream", "FAIL: ${error.stackTraceToString()}\n")
         } finally {
-            main { activities.asReversed().forEach { if (!it.isDestroyed && !it.isFinishing) it.finish() } }
+            main {
+                activities.asReversed().forEach { if (!it.isDestroyed && !it.isFinishing) it.finish() }
+                completionActivities.asReversed().forEach { if (!it.isDestroyed && !it.isFinishing) it.finish() }
+            }
             runCatching {
-                await("Setup probe Activity cleanup did not finish") { main { activities.all { it.isDestroyed } } }
+                await("Setup probe Activity cleanup did not finish") {
+                    main { activities.all { it.isDestroyed } && completionActivities.all { it.isDestroyed } }
+                }
                 runBlocking {
                     observer?.cancelAndJoin()
                     session.runOnReady {

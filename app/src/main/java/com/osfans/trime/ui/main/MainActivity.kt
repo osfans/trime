@@ -17,7 +17,6 @@ import android.widget.FrameLayout
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatViewInflater
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.app.NavUtils
 import androidx.core.content.ContextCompat
@@ -43,6 +42,7 @@ import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.soundeffect.SoundEffectManager
 import com.osfans.trime.databinding.ActivityMainBinding
 import com.osfans.trime.ui.common.PublicWindowPilotActivity
+import com.osfans.trime.ui.common.PublicWindowViewInflater
 import com.osfans.trime.ui.common.dialog.LegacyPublicPreferenceDialogFactory
 import com.osfans.trime.ui.common.dialog.PublicAlertDialogs
 import com.osfans.trime.ui.setup.SetupActivity
@@ -59,7 +59,7 @@ open class MainActivity : PublicWindowPilotActivity() {
 
     private val viewModel: MainViewModel by viewModels()
 
-    private val compatViewInflater by lazy(LazyThreadSafetyMode.NONE) { AppCompatViewInflater() }
+    private val compatViewInflater by lazy(LazyThreadSafetyMode.NONE) { PublicWindowViewInflater() }
 
     private lateinit var navController: NavController
     private var testInputPanel: TestInputPanel? = null
