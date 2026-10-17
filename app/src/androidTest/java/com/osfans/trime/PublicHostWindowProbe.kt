@@ -607,35 +607,114 @@ internal object PublicHostWindowProbe {
 
         // These paths own no Dialog instance. Observe only the real accessibility
         // window and actual screen pixels; never claim a platform Dialog/View class.
+        private fun accessibleState(root: AccessibilityNodeInfo, text: String): JSONObject? {
+            if (root.packageName?.toString() != context.packageName) return null
+            val found = root.findAccessibilityNodeInfosByText(text)
+            return try {
+                val nodes = found.filter { it.text?.toString() == text && it.isVisibleToUser && it.isEnabled }
+                check(nodes.size <= 1) { "Ambiguous actual dialog text: $text" }
+                nodes.singleOrNull()?.let { node ->
+                    val bounds = Rect()
+                    node.getBoundsInScreen(bounds)
+                    JSONObject().put("text", text).put("accessibility_class_name", node.className?.toString())
+                        .put("window_id", node.windowId).put("bounds", bounds.flattenToString())
+                        .put("checkable", node.isCheckable).put("checked", node.isCheckedForTest())
+                        .put("instance_class_observed", false)
+                }
+            } finally {
+                found.forEach(::recycle)
+            }
+        }
+
         private fun accessibleState(text: String): JSONObject? {
             checkTime()
             val root = instrumentation.uiAutomation.rootInActiveWindow ?: return null
             return try {
-                if (root.packageName?.toString() != context.packageName) return null
-                val found = root.findAccessibilityNodeInfosByText(text)
-                try {
-                    val nodes = found.filter { it.text?.toString() == text && it.isVisibleToUser && it.isEnabled }
-                    check(nodes.size <= 1) { "Ambiguous actual dialog text: $text" }
-                    nodes.singleOrNull()?.let { node ->
-                        val bounds = Rect()
-                        node.getBoundsInScreen(bounds)
-                        JSONObject().put("text", text).put("accessibility_class_name", node.className?.toString())
-                            .put("window_id", node.windowId).put("bounds", bounds.flattenToString())
-                            .put("checkable", node.isCheckable).put("checked", node.isCheckedForTest())
-                            .put("instance_class_observed", false)
-                    }
-                } finally {
-                    found.forEach(::recycle)
-                }
+                accessibleState(root, text)
             } finally {
                 recycle(root)
             }
         }
 
-        private fun dialogScreen(label: String, texts: List<String>): JSONObject {
-            texts.forEach(::awaitVisibleText)
+        private fun activeTextStates(
+            texts: List<String>,
+            expectedWindowId: Int? = null,
+            rejectedWindowIds: Set<Int> = emptySet(),
+        ): Pair<Int, List<JSONObject>>? {
+            checkTime()
+            val root = instrumentation.uiAutomation.rootInActiveWindow ?: return null
+            return try {
+                val windowId = root.windowId
+                if (root.packageName?.toString() != context.packageName ||
+                    (expectedWindowId != null && windowId != expectedWindowId) || windowId in rejectedWindowIds
+                ) {
+                    return null
+                }
+                val states = mutableListOf<JSONObject>()
+                for (text in texts) {
+                    val state = accessibleState(root, text) ?: return null
+                    if (state.getInt("window_id") != windowId) return null
+                    states += state
+                }
+                windowId to states
+            } finally {
+                recycle(root)
+            }
+        }
+
+        private fun clickVisibleTextInWindow(text: String, companionTexts: List<String>, expectedWindowId: Int): Int {
+            val required = (listOf(text) + companionTexts).distinct()
+            await("Visible action '$text' did not remain in its evidenced dialog window") {
+                activeTextStates(required, expectedWindowId = expectedWindowId) != null
+            }
+            val root = checkNotNull(instrumentation.uiAutomation.rootInActiveWindow)
+            val actionWindowId = try {
+                check(root.packageName?.toString() == context.packageName && root.windowId == expectedWindowId)
+                companionTexts.forEach { companion ->
+                    check(checkNotNull(accessibleState(root, companion)).getInt("window_id") == expectedWindowId)
+                }
+                val matches = root.findAccessibilityNodeInfosByText(text)
+                try {
+                    var node = matches.single {
+                        it.text?.toString() == text && it.isVisibleToUser && it.isEnabled && it.windowId == expectedWindowId
+                    }
+                    val parents = mutableListOf<AccessibilityNodeInfo>()
+                    try {
+                        repeat(4) {
+                            if (!node.isClickable) {
+                                node = checkNotNull(node.parent)
+                                parents += node
+                                check(node.windowId == expectedWindowId)
+                            }
+                        }
+                        check(node.isClickable && node.isVisibleToUser && node.isEnabled)
+                        check(node.performAction(AccessibilityNodeInfo.ACTION_CLICK)) { "Actual visible dialog action was rejected" }
+                    } finally {
+                        parents.forEach(::recycle)
+                    }
+                } finally {
+                    matches.forEach(::recycle)
+                }
+                root.windowId
+            } finally {
+                recycle(root)
+            }
+            checkTime()
+            return actionWindowId
+        }
+
+        private fun dialogScreen(
+            label: String,
+            texts: List<String>,
+            rejectedWindowIds: Set<Int> = emptySet(),
+        ): JSONObject {
+            var evidence: Pair<Int, List<JSONObject>>? = null
+            await("Actual dialog texts were not unique in one new active window: ${texts.joinToString()}") {
+                activeTextStates(texts, rejectedWindowIds = rejectedWindowIds).also { evidence = it } != null
+            }
+            val (windowId, states) = checkNotNull(evidence)
             val observed = JSONObject().put("label", label).put("dialog_instance_class_observed", false)
-                .put("visible_text", JSONArray(texts.map { checkNotNull(accessibleState(it)) }))
+                .put("window_id", windowId).put("visible_text", JSONArray(states))
             val bitmap = checkNotNull(instrumentation.uiAutomation.takeScreenshot())
             try {
                 val file = File(directory, "$label.png")
@@ -734,14 +813,24 @@ internal object PublicHostWindowProbe {
             val externalChoice = checkNotNull(accessibleState(externalLabel))
             check(localChoice.getBoolean("checkable") && localChoice.getBoolean("checked"))
             check(externalChoice.getBoolean("checkable") && !externalChoice.getBoolean("checked"))
+            val storageListWindowId = localChoice.getInt("window_id")
+            check(externalChoice.getInt("window_id") == storageListWindowId)
             report.put("storage_list_initial_checked", localChoice).put("storage_list_initial_unchecked", externalChoice)
-            clickVisibleText(externalLabel)
+                .put("storage_list_action_window_id", clickVisibleTextInWindow(externalLabel, listOf(localLabel), storageListWindowId))
             marker("profile_external_prompt_await")
-            awaitVisibleText(text)
             val cancel = activity.getString(android.R.string.cancel)
-            report.put("profile_prompt_window", dialogScreen("profile-external-prompt", listOf(text, cancel)))
+            val promptWindow = dialogScreen(
+                "profile-external-prompt",
+                listOf(text, cancel),
+                rejectedWindowIds = setOf(storageListWindowId),
+            ).put("previous_window_id", storageListWindowId)
+            report.put("profile_prompt_window", promptWindow)
             marker("profile_external_prompt_ready")
-            clickVisibleText(cancel)
+            promptWindow.put(
+                "cancel_action_window_id",
+                clickVisibleTextInWindow(cancel, listOf(text), promptWindow.getInt("window_id")),
+            )
+            report.put("profile_prompt_window", promptWindow)
             await("Real external-folder Cancel did not restore unchanged Profile") {
                 main { active(activity) && activity.hasWindowFocus() && route(activity) == NavigationRoute.Profile.path } &&
                     !profileFlag(fragment, "pendingExternalSyncSetup") && !profileFlag(fragment, "storageBusy") &&
@@ -846,11 +935,18 @@ internal object PublicHostWindowProbe {
             val name = checkNotNull(selected)
             val before = selectedAssetSnapshot(name, "reset-selected-before")
             report.put("reset_selected_before", before)
-            report.put("reset_window_before", dialogScreen("reset-selected-before", listOf(name, activity.getString(android.R.string.cancel))))
-            clickVisibleText(name)
+            val cancel = activity.getString(android.R.string.cancel)
+            val resetWindowBefore = dialogScreen("reset-selected-before", listOf(name, cancel))
+            val resetWindowId = resetWindowBefore.getInt("window_id")
+            report.put("reset_window_before", resetWindowBefore)
+            resetWindowBefore.put("selection_action_window_id", clickVisibleTextInWindow(name, listOf(cancel), resetWindowId))
+            report.put("reset_window_before", resetWindowBefore)
             await("Actual reset checkbox did not change from unchecked to checked") { accessibleState(name)?.getBoolean("checked") == true }
-            report.put("reset_window_checked", dialogScreen("reset-selected-checked", listOf(name, activity.getString(android.R.string.cancel))))
-            clickVisibleText(activity.getString(android.R.string.cancel))
+            val resetWindowChecked = dialogScreen("reset-selected-checked", listOf(name, cancel))
+            check(resetWindowChecked.getInt("window_id") == resetWindowId)
+            report.put("reset_window_checked", resetWindowChecked)
+            resetWindowChecked.put("cancel_action_window_id", clickVisibleTextInWindow(cancel, listOf(name), resetWindowId))
+            report.put("reset_window_checked", resetWindowChecked)
             await("Reset Cancel did not restore the actual Profile window") { main { active(activity) && activity.hasWindowFocus() && route(activity) == NavigationRoute.Profile.path } }
             val after = selectedAssetSnapshot(name, "reset-selected-after")
             check(before.getBoolean("exists") == after.getBoolean("exists") && before.getJSONArray("entries").toString() == after.getJSONArray("entries").toString())
@@ -1155,9 +1251,22 @@ internal object PublicHostWindowProbe {
             }
             if (externalIntentMonitors.isNotEmpty()) {
                 clean {
-                    externalIntentMonitors.forEach(instrumentation::removeMonitor)
+                    val finalHits = externalIntentMonitors.map { it.hits }
+                    report.put("external_intent_monitor_final_hits", JSONArray(finalHits))
+                    check(externalIntentMonitors.size == 3 && finalHits.all { it == 0 }) {
+                        "A delayed browser or picker request occurred before monitor removal"
+                    }
+                }
+                clean {
+                    val removed = externalIntentMonitors.toList()
+                    removed.forEach(instrumentation::removeMonitor)
                     externalIntentMonitors.clear()
                     report.put("external_intent_monitors_removed", true)
+                    val afterRemoval = removed.map { it.hits }
+                    report.put("external_intent_monitor_hits_after_removal", JSONArray(afterRemoval))
+                    check(afterRemoval.size == 3 && afterRemoval.all { it == 0 }) {
+                        "A delayed browser or picker request occurred during monitor removal"
+                    }
                 }
             }
             clean { marker("cleanup_end") }

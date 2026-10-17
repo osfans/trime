@@ -159,7 +159,7 @@ internal class PublicPreferenceProbeContext(val instrumentation: Instrumentation
         }
     }
     private fun fragmentShape(): List<String> = checkNotNull(activity).supportFragmentManager.fragments
-        .filter { it.tag != fixtureTag && it.tag != DIALOG_TAG }
+        .filter { (fixtureTag == null || it.tag != fixtureTag) && it.tag != DIALOG_TAG }
         .map { "${it.javaClass.name}|${it.id}|${it.tag}" }.sorted()
 
     fun prepare(disposable: Boolean, expectedCode: String) {
