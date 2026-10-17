@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<resources>
+    <string name="a11y_candidate_select">Select candidate</string>
+    <string name="a11y_candidate_actions">Candidate actions</string>
+    <string name="a11y_previous_candidates">Previous candidate page</string>
+    <string name="a11y_next_candidates">Next candidate page</string>
+    <string name="a11y_t9_choose_syllable">Choose pinyin</string>
+    <string name="a11y_t9_focus_segment">Edit this syllable</string>
+    <string name="a11y_preedit">Uncommitted text</string>
+    <string name="a11y_preedit_cursor_previous">Move cursor back one character</string>
+    <string name="a11y_preedit_cursor_next">Move cursor forward one character</string>
+    <string name="a11y_expand_candidates">Expand candidates</string>
+    <string name="a11y_collapse_candidates">Collapse candidates</string>
+    <string name="a11y_keyboard_options">Keyboard options</string>
+    <string name="a11y_hide_keyboard">Hide keyboard</string>
+    <string name="a11y_back_to_keyboard">Back to keyboard</string>
+    <string name="a11y_dismiss_clipboard_suggestion">Dismiss clipboard suggestion</string>
+    <string name="t13_key_action">Keyboard action</string>
+    <string name="t13_key_shift">Shift</string>
+    <string name="t13_key_control">Control</string>
+    <string name="t13_key_alt">Alt</string>
+    <string name="t13_key_meta">Meta</string>
+    <string name="t13_key_symbols">Symbols</string>
+    <string name="t13_key_switch_keyboard">Switch keyboard</string>
+    <string name="t13_key_switch_language">Switch input language</string>
+    <string name="t13_key_escape">Escape</string>
+    <string name="t13_key_tab">Tab</string>
+    <string name="t13_key_left">Move left</string>
+    <string name="t13_key_right">Move right</string>
+    <string name="t13_key_up">Move up</string>
+    <string name="t13_key_down">Move down</string>
+    <string name="t13_key_home">Move to start</string>
+    <string name="t13_key_end">Move to end</string>
+    <string name="t13_key_page_up">Page up</string>
+    <string name="t13_key_page_down">Page down</string>
+    <string name="t13_key_shift_on">Uppercase</string>
+    <string name="t13_key_shift_off">Lowercase</string>
+    <string name="t13_key_caps_locked">Caps lock</string>
+    <string name="t13_key_long_press">Long press</string>
+    <string name="t13_key_swipe_up">Swipe up</string>
+    <string name="t13_key_swipe_down">Swipe down</string>
+    <string name="t13_key_swipe_left">Swipe left</string>
+    <string name="t13_key_swipe_right">Swipe right</string>
+    <string name="t13_key_lock_shift">Lock uppercase</string>
+</resources>

@@ -67,7 +67,7 @@ class DialogSeekBarPreference : DialogPreference {
                     getString(R.styleable.DialogSeekBarPreferenceAttrs_systemDefaultValueText)
                 unit = getString(R.styleable.DialogSeekBarPreferenceAttrs_unit) ?: ""
                 useMinAsDefault = getBoolean(R.styleable.DialogSeekBarPreferenceAttrs_useMinAsDefault, false)
-                if (getBoolean(R.styleable.DialogSeekBarPreferenceAttrs_useSimpleSummaryProvider, false)) {
+                if (getBoolean(R.styleable.DialogSeekBarPreferenceAttrs_trimeSimpleSummaryProvider, false)) {
                     summaryProvider = SimpleSummaryProvider
                 }
             } finally {

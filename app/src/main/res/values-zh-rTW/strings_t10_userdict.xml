@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="userdict_phrases">常用短語</string>
+    <string name="userdict_edit_phrases">編輯常用短語</string>
+    <string name="userdict_add_phrase">新增短語</string>
+    <string name="userdict_phrase">短語</string>
+    <string name="userdict_phrase_code">編碼：全拼用字母，九鍵用數字</string>
+    <string name="userdict_phrase_help">每行填寫短語、編碼和可選的整數權重，以定位字元分隔。可用「新增短語」插入一行。全拼與九鍵共用此檔案，字母編碼和數字編碼是獨立記錄。匯入會先備份再取代整個清單。</string>
+    <string name="userdict_phrase_invalid">請填寫短語和編碼，不含定位字元或換行。短語不能以 # 開頭。</string>
+    <string name="userdict_phrases_saved">常用短語已儲存</string>
+    <string name="userdict_phrases_exported">常用短語已匯出</string>
+    <string name="userdict_recover_backup">還原上一次備份</string>
+    <string name="userdict_recovery_confirmation">以最近的還原備份取代此詞庫？目前詞庫也會先備份。還原會精確恢復記錄；匯入 Rime 快照則會合併記錄。</string>
+    <string name="userdict_recovery_complete">已從備份還原詞庫</string>
+    <string name="userdict_merge_snapshot">合併 Rime 使用者詞庫快照</string>
+</resources>

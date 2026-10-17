@@ -20,6 +20,7 @@ sealed class SwitchOptionEntry(
             UpdateConfig,
             Keyboard,
             ThemeList,
+            Privacy,
         }
     }
 
@@ -36,13 +37,13 @@ sealed class SwitchOptionEntry(
             return if (it.name.isNotEmpty()) {
                 if (labels.size != 2) return null
                 val (disabledText, enabledText) = labels
-                val value = rime.run { getRuntimeOption(it.name) }
+                val value = rime.run { getRuntimeOptionCached(it.name) }
                 val label = if (value) "$enabledText → $disabledText" else "$disabledText → $enabledText"
                 Custom(it, label, 0)
             } else {
                 val options = it.options
                 if (options.size != labels.size) return null
-                val index = options.indexOfFirst { rime.run { getRuntimeOption(it) } }
+                val index = options.indexOfFirst { rime.run { getRuntimeOptionCached(it) } }
                 val label = labels[if (index >= 0) index else 0]
                 Custom(it, label, 0)
             }

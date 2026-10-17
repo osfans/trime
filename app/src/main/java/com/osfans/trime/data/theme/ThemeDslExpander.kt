@@ -13,7 +13,6 @@ import com.osfans.trime.util.get
 import com.osfans.trime.util.isNull
 import com.osfans.trime.util.pairs
 import com.osfans.trime.util.string
-import com.osfans.trime.util.untagged
 import com.osfans.trime.util.yamlListOf
 import com.osfans.trime.util.yamlMapOf
 import java.util.IdentityHashMap
@@ -32,7 +31,8 @@ import java.util.IdentityHashMap
  * - `__patch: /path` and `__patch: { key: value }`.
  *
  * Anything beyond this subset (include lists, `/+` and `/=` path operators,
- * nested patch paths, `__merge`, ...) raises [UnsupportedDsl] so callers can
+ * nested patch paths, list references, references through an ancestor with
+ * directives, `__merge`, ...) raises [UnsupportedDsl] so callers can
  * fall back to the librime deployment path instead of guessing semantics.
  *
  * Fidelity notes, all mirroring librime's config compiler:
@@ -78,19 +78,30 @@ object ThemeDslExpander {
             node: YamlNode,
             resourceId: String,
             root: YamlNode,
-        ): YamlNode = when (val self = node.untagged) {
-            // A tag wrapper never reaches this point: `untagged` strips it. The
-            // branch is here to keep the sealed hierarchy exhaustive.
-            is YamlScalar, is YamlTaggedNode -> self
+        ): YamlNode = when (node) {
+            // Kaml may resolve the scalar inside a tag before exposing the
+            // wrapper (for example, `!!str null`). Do not erase the tag and
+            // guess at librime's type semantics.
+            is YamlTaggedNode -> throw UnsupportedDsl("tagged YAML nodes require librime")
+
+            is YamlScalar -> {
+                // Kaml discards quoting information. A plain `Null`/`NULL` is
+                // null to yaml-cpp, while a quoted one is a string, so only the
+                // native parser can decide without changing user data.
+                if (node.content == "Null" || node.content == "NULL") {
+                    throw UnsupportedDsl("ambiguous capitalized null scalar requires librime")
+                }
+                node
+            }
 
             is YamlList ->
-                expanded.getOrPut(self) {
-                    yamlListOf(*self.items.map { expandNode(it, resourceId, root) }.toTypedArray())
+                expanded.getOrPut(node) {
+                    yamlListOf(*node.items.map { expandNode(it, resourceId, root) }.toTypedArray())
                 }
 
-            is YamlMap -> expanded.getOrPut(self) { expandMapping(self, resourceId, root) }
+            is YamlMap -> expanded.getOrPut(node) { expandMapping(node, resourceId, root) }
 
-            else -> self
+            else -> node
         }
 
         private fun expandMapping(
@@ -128,13 +139,20 @@ object ThemeDslExpander {
             resourceId: String,
             root: YamlNode,
         ): YamlNode {
-            val patchMap = when (val self = patch.untagged) {
-                is YamlMap -> self
+            val patchMap = when (patch) {
+                is YamlTaggedNode -> throw UnsupportedDsl("tagged '$PATCH' values require librime")
+
+                is YamlMap -> {
+                    if (patch.pairs[INCLUDE] != null || patch.pairs[PATCH] != null) {
+                        throw UnsupportedDsl("directives inside a literal '$PATCH' require librime")
+                    }
+                    patch
+                }
 
                 is YamlScalar -> {
                     // A reference, usually `__patch: <id>.custom:/patch?`; absent means
                     // "no such patch", which librime tolerates for optional references.
-                    val target = reference(self, resourceId, root) ?: return base
+                    val target = reference(patch, resourceId, root) ?: return base
                     target as? YamlMap
                         ?: throw UnsupportedDsl("'$PATCH' target is not a mapping")
                 }
@@ -185,6 +203,9 @@ object ThemeDslExpander {
             resourceId: String,
             root: YamlNode,
         ): YamlNode? {
+            if (value is YamlTaggedNode) {
+                throw UnsupportedDsl("tagged '$INCLUDE'/'$PATCH' references require librime")
+            }
             val raw = value.string
                 ?: throw UnsupportedDsl("'$INCLUDE'/'$PATCH' expects a path")
             val optional = raw.endsWith("?")
@@ -224,7 +245,24 @@ object ThemeDslExpander {
             var current: YamlNode = root
             for (segment in path.split('/')) {
                 if (segment.isEmpty()) continue
-                current = current[segment] ?: return null
+                // librime indexes lists with @0 / @last, whereas the generic accessor
+                // accepts plain integers. Neither spelling can use that accessor
+                // faithfully here, even when the reference is optional.
+                if (current is YamlTaggedNode) {
+                    throw UnsupportedDsl("references through tagged YAML nodes require librime: '$path'")
+                }
+                val self = current
+                if (self is YamlList) {
+                    throw UnsupportedDsl("references through sequences require librime: '$path'")
+                }
+                // Native GetResolvedItem resolves blocking dependencies before
+                // entering a child. Looking in this unexpanded map could return
+                // an old value or mistake an inherited optional child for absent.
+                // An auto-injected root custom patch also requires this fallback.
+                if (self is YamlMap && (self.pairs[INCLUDE] != null || self.pairs[PATCH] != null)) {
+                    throw UnsupportedDsl("references through an ancestor with directives require librime: '$path'")
+                }
+                current = self[segment] ?: return null
             }
             return current
         }
@@ -235,6 +273,7 @@ object ThemeDslExpander {
      * semantics outside the supported subset.
      */
     private fun checkPlainKey(key: String) {
+        if (key.isEmpty()) throw UnsupportedDsl("empty mapping key")
         if (key.startsWith("__") && key != INCLUDE && key != PATCH) {
             throw UnsupportedDsl("unsupported directive '$key'")
         }

@@ -37,3 +37,5 @@ interface RimeSession {
 
     val lifecycleScope: CoroutineScope
 }
+
+internal class RimeSessionClosedException(name: String) : IllegalStateException("Session $name is not established")

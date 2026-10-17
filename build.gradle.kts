@@ -16,6 +16,7 @@ plugins {
 spotless {
     kotlin {
         target("**/*.kt", "**/*.kts")
+        targetExclude("**/build/**", "**/.gradle/**", "**/.cxx/**", "app/src/main/assets/**", "app/src/main/jni/**")
         ktlint("1.8.0")
     }
 }

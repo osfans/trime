@@ -6,14 +6,13 @@
 
 package com.osfans.trime.data.theme
 
-import io.kotest.assertions.throwables.shouldThrow
+import android.graphics.Color
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 
 /**
- * ThemeColors view semantics: typed properties mirror `ColorManager.getColor`
- * — resolvable keys return the pre-compiled value, image-valued or
- * unresolvable keys throw IllegalArgumentException.
+ * ThemeColors view semantics: typed properties return pre-compiled values and
+ * degrade invalid color positions without crashing third-party themes.
  */
 class ThemeColorsTest :
     BehaviorSpec({
@@ -51,16 +50,16 @@ class ThemeColorsTest :
         }
         Given("an empty scheme") {
             val view = colors()
-            Then("unresolvable keys throw like ColorManager.getColor") {
-                shouldThrow<IllegalArgumentException> { view.candidateTextColor }
-                shouldThrow<IllegalArgumentException> { view.keyBackColor }
-                shouldThrow<IllegalArgumentException> { view.candidateBorderColor }
+            Then("unresolvable keys are transparent") {
+                view.candidateTextColor shouldBe Color.TRANSPARENT
+                view.keyBackColor shouldBe Color.TRANSPARENT
+                view.candidateBorderColor shouldBe Color.TRANSPARENT
             }
         }
         Given("an image-valued key") {
             val view = colors("key_back_color" to "bg.png")
-            Then("reading it as a color throws like ColorManager.getColor") {
-                shouldThrow<IllegalArgumentException> { view.keyBackColor }
+            Then("reading it in a color position is transparent") {
+                view.keyBackColor shouldBe Color.TRANSPARENT
             }
         }
         Given("the built-in tongwenfeng theme") {

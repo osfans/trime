@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<resources>
+    <item name="keyboard_viewport" type="id" />
+    <item name="preedit_root" type="id" />
+    <item name="t13_key_action_swipe_up" type="id" />
+    <item name="t13_key_action_swipe_down" type="id" />
+    <item name="t13_key_action_swipe_left" type="id" />
+    <item name="t13_key_action_swipe_right" type="id" />
+    <item name="t13_key_action_lock_shift" type="id" />
+</resources>

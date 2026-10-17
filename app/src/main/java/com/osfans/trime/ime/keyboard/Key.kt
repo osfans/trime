@@ -24,8 +24,6 @@ class Key(
     private val theme: Theme,
     private val keyDef: TextKeyboard.TextKey? = null,
 ) {
-    private val rime get() = RimeDaemon.getFirstSessionOrNull()!!
-
     var index: Int = -1
 
     val keyActions: Map<KeyBehavior, KeyAction> = buildMap {
@@ -100,14 +98,14 @@ class Key(
         src: TextKeyboard.TextKey.() -> String,
         fallback: String,
     ): Int = keyDef?.let {
-        runCatching { ColorManager.getColor(src(it)) }.getOrNull()
+        ColorManager.getColorOrNull(src(it))
     } ?: ColorManager.getColor(fallback)
 
     // get color from common color schemes or just fallback to default color
     private fun getColor(
         key: String,
         @ColorInt default: Int,
-    ): Int = runCatching { ColorManager.getColor(key) }.getOrDefault(default)
+    ): Int = ColorManager.getColorOrNull(key) ?: default
 
     private fun getDrawable(
         src: TextKeyboard.TextKey.() -> String,
@@ -270,16 +268,9 @@ class Key(
 
     fun getAction(behavior: KeyBehavior): KeyAction? = keyActions[behavior]?.takeIf { behavior != KeyBehavior.CLICK } ?: checkKeyAction(sendBindings) ?: click
 
-    private fun checkKeyAction(): KeyAction? {
-        val rime = rime
-        val asciiMode = rime.run { statusCached }.isAsciiMode
-        val paging = rime.run { paging }
-        val hasMenu = rime.run { hasMenu }
-        val composing = rime.run { statusCached }.isComposing
-        return keyActions[KeyBehavior.ASCII].takeIf { asciiMode }
-            ?: keyActions[KeyBehavior.PAGING]?.takeIf { paging }
-            ?: keyActions[KeyBehavior.HAS_MENU]?.takeIf { hasMenu }
-            ?: keyActions[KeyBehavior.COMPOSING]?.takeIf { composing }
+    private fun checkKeyAction(): KeyAction? = RimeDaemon.readCached {
+        val status = statusCached
+        resolveKeyStateBinding(keyActions, status.isAsciiMode, status.isComposing, hasMenu, paging, candidateSnapshotCached.isPrediction)
     }
 
     private fun checkKeyAction(sendBindings: Boolean): KeyAction? = checkKeyAction().takeIf { sendBindings }
@@ -289,13 +280,13 @@ class Key(
 
     fun getCode(behavior: KeyBehavior): Int = getAction(behavior)!!.code
 
-    fun getLabel(): String = when {
-        label.isNotEmpty() &&
-            keyAction == click &&
-            !keyActions.containsKey(KeyBehavior.ASCII) &&
-            !rime.run { statusCached }.let { it.isAsciiMode || it.isAsciiPunct } -> label
-
-        else -> keyAction!!.getLabel(parent) // 中文狀態顯示標籤
+    fun getLabel(): String {
+        val action = keyAction
+        val ascii = RimeDaemon.readCached { statusCached.let { it.isAsciiMode || it.isAsciiPunct } } ?: true
+        return when {
+            label.isNotEmpty() && action == click && !keyActions.containsKey(KeyBehavior.ASCII) && !ascii -> label
+            else -> action?.getLabel(parent).orEmpty() // 中文狀態顯示標籤
+        }
     }
 
     fun getPreviewText(behavior: KeyBehavior): String = when (behavior) {
@@ -348,6 +339,23 @@ class Key(
         else -> if (isPressed) hlKeySymbolColor else keySymbolColor
     }
 }
+
+/** Next-word suggestions must not turn a normal digit or Enter key into a menu-selection key. */
+internal fun <T> resolveKeyStateBinding(
+    actions: Map<KeyBehavior, T>,
+    asciiMode: Boolean,
+    composing: Boolean,
+    hasMenu: Boolean,
+    paging: Boolean,
+    isPrediction: Boolean,
+): T? = actions[KeyBehavior.ASCII].takeIf { asciiMode }
+    ?: if (isPrediction) {
+        null
+    } else {
+        actions[KeyBehavior.PAGING]?.takeIf { paging }
+            ?: actions[KeyBehavior.HAS_MENU]?.takeIf { hasMenu }
+            ?: actions[KeyBehavior.COMPOSING]?.takeIf { composing }
+    }
 
 private const val ICON_PREFIX = "ic@"
 

@@ -12,6 +12,7 @@ import android.view.KeyEvent
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
+import com.osfans.trime.core.CandidateSnapshot
 import com.osfans.trime.core.KeyModifiers
 import com.osfans.trime.core.RimeApi
 import com.osfans.trime.core.RimeKeyEvent
@@ -23,8 +24,10 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.data.theme.model.LiquidKeyboard
 import com.osfans.trime.ime.clipboard.ClipboardWindow
+import com.osfans.trime.ime.core.PrivacyModeState
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
+import com.osfans.trime.ime.performance.InputRequest
 import com.osfans.trime.ime.switches.SwitchOptionWindow
 import com.osfans.trime.ime.symbol.LiquidWindow
 import com.osfans.trime.ime.window.BoardWindowManager
@@ -38,6 +41,7 @@ import com.osfans.trime.util.buildIntentFromArgument
 import com.osfans.trime.util.customFormatDateTime
 import com.osfans.trime.util.isAsciiPrintable
 import com.osfans.trime.util.toast
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -59,25 +63,31 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
     private val prefs = AppPrefs.defaultInstance()
 
     private fun showDialog(dialog: suspend (RimeApi) -> Dialog) {
-        rime.launchOnReady { api ->
-            service.lifecycleScope.launch {
-                service.showDialog(dialog(api))
-            }
+        val editorToken = service.editorToken
+        service.postRimeJob {
+            val view = dialog(this)
+            if (service.isCurrentEditor(editorToken)) service.showDialog(view)
         }
     }
 
     private fun showThemePicker() {
-        showDialog { api ->
+        val editorToken = service.editorToken
+        showDialog {
             ThemePickerDialog.build(service.lifecycleScope, context) {
-                api.commitComposition()
+                service.postRimeJob {
+                    if (service.isCurrentEditor(editorToken)) commitComposition()
+                }.join()
             }
         }
     }
 
     private fun showColorPicker() {
-        showDialog { api ->
+        val editorToken = service.editorToken
+        showDialog {
             ColorPickerDialog.build(service.lifecycleScope, context) {
-                api.commitComposition()
+                service.postRimeJob {
+                    if (service.isCurrentEditor(editorToken)) commitComposition()
+                }.join()
             }
         }
     }
@@ -119,7 +129,7 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
             }
 
             override fun onAction(action: KeyAction) {
-                val text = action.getText(KeyboardWindow.currentKeyboard)
+                val text = action.getText(keyboardWindow.currentKeyboard)
                 val shouldHandle = when {
                     action.commit.isNotEmpty() -> {
                         service.commitText(action.commit)
@@ -151,19 +161,12 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
 
             private fun handleSwitchCharset(action: KeyAction) {
                 val option = action.toggle.ifEmpty { return }
-
-                rime.launchOnReady { api ->
-                    service.lifecycleScope.launch {
-                        val isEnabled = api.getRuntimeOption(option)
-                        val isComposing = api.statusCached.isComposing
-                        api.setRuntimeOption(option, !isEnabled)
-                        if (option == "ascii_mode" && isComposing) {
-                            api.getRawInput().takeIf { it.isNotEmpty() }?.let {
-                                service.commitText(it)
-                                api.clearComposition()
-                            }
-                        }
-                    }
+                if (option == "ascii_mode") {
+                    keyboardWindow.switchLanguage()
+                    return
+                }
+                service.postRimeJob {
+                    setRuntimeOption(option, !getRuntimeOption(option))
                 }
             }
 
@@ -179,21 +182,40 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
                 val arg = expandActiveText(action.option)
 
                 when (action.command) {
+                    "t9_digit" -> arg.singleOrNull()?.takeIf { it in '0'..'9' }?.let { digit ->
+                        service.postRimeJob { commitT9Digit(digit) }
+                    }
+
                     "liquid_keyboard" -> handleLiquidKeyboard(arg)
+
                     "menu_keyboard" -> windowManager.attachWindow(SwitchOptionWindow(di))
+
                     "clipboard_window" -> handleClipboardWindow(arg)
+
                     "set_color_scheme" -> handleColorScheme(arg)
+
                     "set_theme" -> handleTheme(arg)
+
                     "broadcast" -> service.sendBroadcast(Intent(arg))
+
                     "clipboard" -> handleClipboard()
+
                     "commit" -> service.commitText(arg)
+
                     "date" -> service.commitText(customFormatDateTime(arg))
+
                     "run" -> handleRunCommand(arg)
+
                     "apply" -> handleApplyCommand(arg)
+
                     "share_text" -> service.shareText()
+
                     "select_candidate" -> handleSelectCandidate(arg)
+
                     "switch_hide_key_symbol" -> switchHideKeySymbol()
+
                     "switch_hide_key_hint" -> switchHideKeyHint()
+
                     else -> handleIntentAction(action.command, arg)
                 }
             }
@@ -201,7 +223,7 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
             private fun handleLiquidKeyboard(arg: String) {
                 // for compatibility
                 if (arg == "剪贴" || arg == "clipboard") {
-                    windowManager.attachWindow(ClipboardWindow(di))
+                    if (!PrivacyModeState.active) windowManager.attachWindow(ClipboardWindow(di))
                     return
                 }
                 val liquidTagList = theme.liquidKeyboard.getTagList()
@@ -220,6 +242,7 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
             }
 
             private fun handleClipboardWindow(arg: String) {
+                if (PrivacyModeState.active) return
                 val tabIndex = arg.toIntOrNull()?.coerceIn(0, 1) ?: 0
                 windowManager.attachWindow(ClipboardWindow(di, tabIndex))
             }
@@ -234,7 +257,7 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
                 if (arg.isEmpty()) {
                     // 参数为空时，刷新当前主题
                     val themeId = ThemeManager.prefs.selectedTheme.getValue()
-                    service.lifecycleScope.launch { ThemeManager.selectTheme(themeId) }
+                    service.lifecycleScope.launch { ThemeManager.selectTheme(themeId, forceReload = true) }
                 } else {
                     // 通过主题名称查找对应的配置ID并切换主题
                     ThemeManager.getAllThemes()
@@ -293,11 +316,7 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
 
             private fun handleSelectCandidate(arg: String) {
                 val index = arg.toIntOrNull() ?: return
-                rime.launchOnReady { api ->
-                    service.lifecycleScope.launch {
-                        api.selectCandidate(index, false)
-                    }
-                }
+                service.postRimeJob { selectCandidate(index, false) }
             }
 
             private fun switchHideKeySymbol() {
@@ -348,16 +367,16 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
                     else -> false
                 }
 
-                if (action.modifier == 0 && KeyboardWindow.currentKeyboard.isOnlyShiftOn && shouldHookShiftKey) {
+                if (action.modifier == 0 && keyboardWindow.currentKeyboard.isOnlyShiftOn && shouldHookShiftKey) {
                     onKey(action.code, 0)
                     return
                 }
 
                 val modifier = when {
-                    action.modifier == 0 -> KeyboardWindow.currentKeyboard.modifier
+                    action.modifier == 0 -> keyboardWindow.currentKeyboard.modifier
 
                     (action.modifier and KeyEvent.META_CTRL_ON) != 0 && isNavigationKey(action.code) ->
-                        action.modifier or KeyboardWindow.currentKeyboard.modifier
+                        action.modifier or keyboardWindow.currentKeyboard.modifier
 
                     else -> action.modifier
                 }
@@ -369,10 +388,24 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
                 keyCode == KeyEvent.KEYCODE_MOVE_HOME ||
                 keyCode == KeyEvent.KEYCODE_MOVE_END
 
-            override fun onKey(
+            override fun onRepeat(action: KeyAction) = if (
+                (action.code == KeyEvent.KEYCODE_DEL || action.code == KeyEvent.KEYCODE_FORWARD_DEL) &&
+                action.commit.isEmpty() && action.getText(keyboardWindow.currentKeyboard).isEmpty()
+            ) {
+                enqueueKey(action.code, action.modifier or keyboardWindow.currentKeyboard.modifier)
+            } else {
+                onAction(action)
+                null
+            }
+
+            override fun onKey(keyEventCode: Int, metaState: Int) {
+                enqueueKey(keyEventCode, metaState)
+            }
+
+            private fun enqueueKey(
                 keyEventCode: Int,
                 metaState: Int,
-            ) {
+            ): kotlinx.coroutines.Job {
                 // An uppercase letter key (e.g. from `{x: A}`) is passed to
                 // rime as the uppercase keysym with Shift, matching what a
                 // physical keyboard reports via the unicode char, so that
@@ -394,7 +427,14 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
                     metaState
                 }
                 val modifiers = KeyModifiers.fromMetaState(m).modifiers
-                service.postRimeJob {
+                return service.postRimeJob {
+                    if (t9Cached.enabled && m == KeyEvent.META_CTRL_ON &&
+                        (keyEventCode == KeyEvent.KEYCODE_Z || keyEventCode == KeyEvent.KEYCODE_Y)
+                    ) {
+                        processKey(value, modifiers)
+                        return@postRimeJob
+                    }
+                    if (m and KeyEvent.META_CTRL_ON != 0) clearPredictionContext()
                     if (service.hookKeyboard(keyEventCode, m)) {
                         Timber.d("handleKey: hook")
                         return@postRimeJob
@@ -414,49 +454,84 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
                 }
             }
 
+            private fun isLanguageMacroAction(action: KeyAction): Boolean = action.commit.isEmpty() && action.text.isEmpty() && (
+                (action.code == KeyEvent.KEYCODE_SWITCH_CHARSET && action.toggle == "ascii_mode") ||
+                    (action.code == KeyEvent.KEYCODE_EISU && action.select in setOf(".ascii", ".native", ".return"))
+                )
+
+            private fun isDefaultMacroKey(action: KeyAction): Boolean = action.code !in setOf(
+                KeyEvent.KEYCODE_SWITCH_CHARSET,
+                KeyEvent.KEYCODE_EISU,
+                KeyEvent.KEYCODE_LANGUAGE_SWITCH,
+                KeyEvent.KEYCODE_FUNCTION,
+                KeyEvent.KEYCODE_SETTINGS,
+                KeyEvent.KEYCODE_PROG_RED,
+                KeyEvent.KEYCODE_MENU,
+                KeyEvent.KEYCODE_VOICE_ASSIST,
+            )
+
+            private suspend fun RimeApi.commitMacroText(text: String) {
+                clearPredictionContext()
+                val request = currentCoroutineContext()[InputRequest]
+                val snapshot = request?.let { CandidateSnapshot(it.editor, 0, it.id) } ?: CandidateSnapshot.EMPTY
+                service.commitTextWithoutPredictionReset(text, snapshot)
+            }
+
             override fun onText(input: String) {
                 if (input.isEmpty()) return
-                Timber.d("onText: $input")
+                Timber.d("onText")
+                val editorToken = service.editorToken
+                if (!service.isCurrentEditor(editorToken)) return
                 val status = rime.run { statusCached }
+                val schemaId = status.schemaId
+                val expanded = try {
+                    expandLanguageMacro(
+                        input,
+                        isLanguageAction = { isLanguageMacroAction(theme.resolveAction(it)) },
+                        textOfAction = { token -> theme.resolveAction(token).takeIf { it.commit.isEmpty() }?.text },
+                    )
+                } catch (failure: IllegalStateException) {
+                    Timber.w(failure, "Rejected cyclic or excessive language macro")
+                    return // No partial mode/text command was accepted.
+                }
                 if (!input[0].isAsciiPrintable() && status.isComposing) {
                     service.postRimeJob { commitComposition() }
                 }
-
-                val escaped = input.replace("{}", "{braceleft}{braceright}")
-                var i = 0
-                while (i < escaped.length) {
-                    val value = when (val match = TEXT_INPUT_PATTERN.matchEntire(escaped.substring(i))) {
-                        match if (match != null) -> match.groupValues[1]
-                        else -> escaped[i].toString()
+                for (value in expanded ?: keyboardMacroParts(input)) {
+                    if (!service.isCurrentEditor(editorToken) || (expanded != null && rime.run { statusCached.schemaId } != schemaId)) return
+                    val braced = value.startsWith('{') && value.endsWith('}')
+                    val action = if (braced) theme.resolveAction(value.removeSurrounding("{", "}")) else null
+                    if (expanded != null && action != null && action.commit.isEmpty() && (
+                            isLanguageMacroAction(action) || action.code == KeyEvent.KEYCODE_EISU ||
+                                action.getText(keyboardWindow.currentKeyboard).isNotEmpty() || isDefaultMacroKey(action)
+                            )
+                    ) {
+                        // Accept at the original macro position. Each mode/default-key callback
+                        // already enqueues its native operation exactly once; wrapping it in a
+                        // second job would append it after this macro's later text/key input.
+                        onAction(action)
+                        continue
                     }
-
                     service.postRimeJob {
-                        if (value.run { startsWith('{') && endsWith('}') }) {
-                            val token = value.removeSurrounding("{", "}")
-                            onAction(theme.resolveAction(token))
+                        if (!service.isCurrentEditor(editorToken) || (expanded != null && statusCached.schemaId != schemaId)) return@postRimeJob
+                        if (action != null) {
+                            if (expanded != null && action.commit.isNotEmpty()) {
+                                commitMacroText(action.commit)
+                            } else {
+                                onAction(action)
+                            }
                         } else if (!value[0].isAsciiPrintable()) {
-                            service.commitText(value)
+                            commitMacroText(value)
                         } else {
                             simulateKeySequence(value)
                         }
                     }
-
-                    i += value.length
                 }
             }
         }
     }
 
     companion object {
-        /**
-         * Regex for combined key events.
-         * group(1) captures either:
-         *   - a plain prefix (optionally preceded by {Escape}) from the left branch,
-         *   - or a standalone {xxx} block from the right branch.
-         * The trailing .* consumes the rest of the input without affecting group(1).
-         */
-        private val TEXT_INPUT_PATTERN = """^((?:\{Escape\})?[^{}]+|\{[^{}]+\}).*$""".toRegex()
-
         private val PLACEHOLDER_PATTERN = Regex(".*(%([1-4]\\$)?s).*")
     }
 }

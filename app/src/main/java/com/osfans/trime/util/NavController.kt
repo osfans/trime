@@ -8,10 +8,11 @@ package com.osfans.trime.util
 import androidx.navigation.NavController
 import androidx.navigation.navOptions
 import androidx.navigation.ui.R
+import com.osfans.trime.ui.main.NavigationRoute
 
-fun <T : Any> NavController.navigateWithAnim(route: T) {
+fun NavController.navigateWithAnim(route: NavigationRoute) {
     navigate(
-        route,
+        route.path,
         navOptions {
             anim {
                 enter = R.animator.nav_default_enter_anim

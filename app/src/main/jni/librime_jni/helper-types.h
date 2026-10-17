@@ -70,7 +70,10 @@ class MenuProto {
 };
 
 static inline int distance(const char* start, const char* end) {
-  return static_cast<int>(utf8::unchecked::distance(start, end));
+  // Android selection and Kotlin String indices count UTF-16 code units.
+  int units = 0;
+  while (start < end) units += utf8::unchecked::next(start) > 0xffff ? 2 : 1;
+  return units;
 }
 
 class ContextProto {

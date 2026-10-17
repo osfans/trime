@@ -7,6 +7,8 @@ package com.osfans.trime.ui.main
 
 import android.content.ClipData
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.enableEdgeToEdge
@@ -19,6 +21,9 @@ import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.TrimeApplication
+import com.osfans.trime.core.RimeLifecycle
+import com.osfans.trime.daemon.RimeDaemon
+import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.databinding.ActivityLogBinding
 import com.osfans.trime.ui.main.log.LogView
 import com.osfans.trime.util.DeviceInfo
@@ -26,7 +31,10 @@ import com.osfans.trime.util.Logcat
 import com.osfans.trime.util.iso8601UTCDateTime
 import com.osfans.trime.util.toast
 import io.github.whiredplanck.storageaccess.StorageAccess
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import splitties.systemservices.clipboardManager
 
 /**
@@ -37,8 +45,38 @@ import splitties.systemservices.clipboardManager
  */
 class LogActivity : AppCompatActivity() {
     private lateinit var logView: LogView
-
     private val storageAccess = StorageAccess(this)
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        if (intent.hasExtra(FROM_DEPLOY)) {
+            menu.add(Menu.NONE, R.id.action_retry_deploy, Menu.NONE, R.string.ime_retry).apply {
+                setIcon(R.drawable.ic_baseline_refresh_reversed_24)
+                setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+                setOnMenuItemClickListener {
+                    isEnabled = false
+                    lifecycleScope.launch {
+                        val name = "LogActivity.retry"
+                        val session = RimeDaemon.createSession(name)
+                        try {
+                            if (RimeDaemon.engineState.value == RimeLifecycle.State.FAILED) {
+                                RimeDaemon.retryFailedStartup()
+                            } else {
+                                session.runOnReady { deploy() }
+                            }
+                        } catch (failure: Exception) {
+                            if (failure is CancellationException && failure !is com.osfans.trime.core.RimeUnavailableException) throw failure
+                            toast(R.string.deploy_failure)
+                        } finally {
+                            RimeDaemon.destroySession(name)
+                            isEnabled = true
+                        }
+                    }
+                    true
+                }
+            }
+        }
+        return super.onCreateOptionsMenu(menu)
+    }
 
     companion object {
         const val FROM_CRASH = "from_crash"
@@ -106,18 +144,27 @@ class LogActivity : AppCompatActivity() {
                             filename = "$packageName-${iso8601UTCDateTime()}.txt",
                             mimeType = "text/plain",
                         ) ?: return@launch
-                        StorageAccess.writeFile(log.uri) { outs ->
-                            outs.bufferedWriter().use {
-                                it.write(DeviceInfo.get(this@LogActivity))
-                                it.write(logView.currentLog)
+                        // Snapshot UI-backed state before the provider write leaves Main.
+                        val deviceInfo = DeviceInfo.get(this@LogActivity)
+                        val logSnapshot = logView.currentLog
+                        withContext(Dispatchers.IO) {
+                            StorageAccess.writeFile(log.uri) { outs ->
+                                outs.bufferedWriter().use {
+                                    it.write(deviceInfo)
+                                    it.write(logSnapshot)
+                                }
                             }
                         }
+                    }.onFailure {
+                        if (it is CancellationException) throw it
                     }.let { toast(it) }
                 }
             }
             copyButton.setOnClickListener {
-                val data = ClipData.newPlainText("log", logView.currentLog)
-                clipboardManager.setPrimaryClip(data)
+                ClipboardHelper.setSensitivePrimaryClip(
+                    clipboardManager,
+                    ClipData.newPlainText("log", logView.currentLog),
+                )
                 if (clipboardManager.hasPrimaryClip()) {
                     toast(R.string.copy_done)
                 }

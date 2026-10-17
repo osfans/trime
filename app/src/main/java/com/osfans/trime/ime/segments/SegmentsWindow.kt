@@ -158,7 +158,7 @@ class SegmentsWindow(di: DI, private val source: String) : BoardWindow.BarBoardW
     override fun refreshColors() {
         if (!viewCreated) return
         ui.refreshColors()
-        (ui.recyclerView.adapter as? SegmentsAdapter)?.notifyDataSetChanged()
+        (ui.recyclerView.adapter as? SegmentsAdapter)?.let { it.notifyItemRangeChanged(0, it.itemCount) }
     }
 
     override fun onAttached() {

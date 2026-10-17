@@ -1,0 +1,10 @@
+{
+    "uniqueId": "com.github.WhiredPlanck:StorageAccess",
+    "artifactVersion": "1.2.1",
+    "description": "Lightweight helper for Android's Storage Access Framework (SAF)",
+    "name": "WhiredPlanck/StorageAccess",
+    "website": "https://github.com/WhiredPlanck/StorageAccess",
+    "licenses": [
+        "Apache-2.0"
+    ]
+}

@@ -115,6 +115,11 @@ object ColorManager {
         activateScheme(notify = true)
     }
 
+    /** Activates an in-memory scheme without changing the persisted selection. */
+    internal fun setColorSchemeForTesting(scheme: ColorScheme) {
+        activateScheme(scheme, notify = true)
+    }
+
     private fun requireScope(): ThemeScope = requireNotNull(scope) { "ColorManager is not initialized" }
 
     private fun resolveActiveScheme(theme: Theme): ColorScheme = ColorSchemeResolver.resolve(
@@ -148,22 +153,17 @@ object ColorManager {
      * look up keys only a theme can define through an injected scope.
      */
     @ColorInt
+    internal fun resolveColorOrNull(
+        scope: ThemeScope,
+        key: String,
+    ): Int? = scope.colorOrNull(key)
+
+    /** Resolves a color, using transparent only after callers had a chance to apply a fallback. */
+    @ColorInt
     internal fun resolveColor(
         scope: ThemeScope,
         key: String,
-    ): Int {
-        val tableEntry = ColorKey.from(key)?.let { scope.colorTable?.get(it) }
-        if (tableEntry is ColorTable.Value.Color) return tableEntry.argb
-        // Keys defined only by a theme resolve through the same chain rules.
-        val scheme = requireNotNull(scope.activeColorScheme)
-        val raw = ColorTable.resolveRaw(key, scheme, scope.theme.fallbackColors)
-        return try {
-            if (raw == null) throw IllegalArgumentException("$key not found")
-            ColorUtils.parseColor(raw)
-        } catch (_: IllegalArgumentException) {
-            ColorUtils.parseColor(key)
-        }
-    }
+    ): Int = resolveColorOrNull(scope, key) ?: Color.TRANSPARENT
 
     /** Resolves a drawable key (color or image asset) against the given scope. */
     internal fun resolveDrawable(
@@ -232,6 +232,10 @@ object ColorManager {
     @ColorInt
     fun getColor(key: String): Int = resolveColor(requireScope(), key)
 
+    /** Nullable lookup for callers that have their own fallback color. */
+    @ColorInt
+    internal fun getColorOrNull(key: String): Int? = resolveColorOrNull(requireScope(), key)
+
     fun getDrawable(key: String): Drawable? = resolveDrawable(requireScope(), key)
 
     internal fun resolveDecorDrawable(
@@ -247,10 +251,8 @@ object ColorManager {
                 it.cornerRadius = cornerRadius
                 it.alpha = MathUtils.clamp(alpha, 0, 255)
                 if (!borderColorKey.isNullOrEmpty()) {
-                    try {
-                        val borderColor = resolveColor(scope, borderColorKey)
+                    resolveColorOrNull(scope, borderColorKey)?.let { borderColor ->
                         it.setStroke(borderPx, borderColor)
-                    } catch (_: Exception) {
                     }
                 }
             }

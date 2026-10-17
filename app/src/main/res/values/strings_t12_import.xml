@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="configuration_import_validated">Validated configurations: %1$d; updated files: %2$d.</string>
+    <string name="configuration_import_rejected">Configuration validation or activation failed. The previous configuration was restored.</string>
+    <string name="configuration_import_recovery_needed">Configuration recovery is incomplete. Recovery files remain at: %1$s</string>
+    <string name="configuration_import_recovery_failed">Configuration activation failed. The previous files remain available; restart or deploy again to restore input.</string>
+</resources>

@@ -5,6 +5,7 @@
 
 package com.osfans.trime.ime.bar.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
@@ -13,16 +14,21 @@ import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.StateListDrawable
 import android.graphics.drawable.shapes.OvalShape
+import android.view.accessibility.AccessibilityNodeInfo
+import android.widget.Button
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import androidx.core.view.isVisible
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.utils.sizeDp
+import com.osfans.trime.R
+import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.data.theme.model.ToolBar
 import com.osfans.trime.ime.core.AutoScaleTextView
 import com.osfans.trime.ime.keyboard.GestureFrame
-import com.osfans.trime.ime.keyboard.KeyboardWindow
+import com.osfans.trime.ime.keyboard.Keyboard
+import com.osfans.trime.util.setCheckedState
 import splitties.dimensions.dp
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.imageView
@@ -33,11 +39,14 @@ import splitties.views.imageDrawable
 import splitties.views.imageResource
 import splitties.views.padding
 
+// Created programmatically with an input-window theme, never inflated from XML.
+@SuppressLint("ViewConstructor")
 class ToolButton(context: Context, private val scope: ThemeScope) : GestureFrame(context) {
 
     private val image = imageView {
         isClickable = false
         isFocusable = false
+        importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
         adjustViewBounds = true
         scaleType = ImageView.ScaleType.CENTER_INSIDE
     }
@@ -45,6 +54,7 @@ class ToolButton(context: Context, private val scope: ThemeScope) : GestureFrame
     private val label = view(::AutoScaleTextView) {
         isClickable = false
         isFocusable = false
+        importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
         isSingleLine = true
         includeFontPadding = false
         gravity = gravityCenter
@@ -64,7 +74,15 @@ class ToolButton(context: Context, private val scope: ThemeScope) : GestureFrame
     private var singleStyle = ""
 
     private var actionLabel = ""
+    private var actionLabelProvider: (() -> String)? = null
     private var config: ToolBar.Button? = null
+
+    /** Navigation buttons may reuse theme visuals while performing a different action. */
+    var accessibilityLabel: CharSequence? = null
+        set(value) {
+            field = value
+            updateAccessibilityLabel()
+        }
 
     private var fontSize = 0f
     private var colorStateList: ColorStateList? = null
@@ -83,6 +101,7 @@ class ToolButton(context: Context, private val scope: ThemeScope) : GestureFrame
         context: Context,
         config: ToolBar.Button,
         scope: ThemeScope,
+        keyboard: Keyboard,
     ) : this(context, scope) {
         this.config = config
         val keyAction = scope.theme.resolveAction(config.action)
@@ -90,13 +109,16 @@ class ToolButton(context: Context, private val scope: ThemeScope) : GestureFrame
 
         val fg = config.foreground
         val toggle = keyAction.toggle
-        if (toggle.isNotEmpty() && config.foreground.optionStyles.size == 2) {
-            option = toggle
+        option = toggle.takeIf { it.isNotEmpty() }
+        if (option != null && fg.optionStyles.size == 2) {
             optionStyles = fg.optionStyles
         } else {
             singleStyle = fg.style
         }
-        actionLabel = keyAction.getLabel(KeyboardWindow.currentKeyboard)
+        actionLabel = keyAction.getLabel(keyboard)
+        actionLabelProvider = {
+            if (RimeDaemon.getFirstSessionOrNull() != null) keyAction.getLabel(keyboard) else actionLabel
+        }
 
         val padding = dp(fg.padding)
         image.padding = padding
@@ -173,6 +195,23 @@ class ToolButton(context: Context, private val scope: ThemeScope) : GestureFrame
         image.isVisible = true
     }
 
+    override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {
+        super.onInitializeAccessibilityNodeInfo(info)
+        info.className = Button::class.java.name
+        info.isCheckable = option != null && accessibilityLabel == null
+        val checked = info.isCheckable && optionEnabled
+        info.setCheckedState(checked)
+        info.isSelected = checked
+    }
+
+    private fun updateAccessibilityLabel() {
+        contentDescription = accessibilityLabel
+            ?: actionLabel.takeIf { it.isNotBlank() }
+            ?: label.text.takeIf { label.isVisible && it.isNotBlank() }
+            ?: context.getString(R.string.a11y_keyboard_options)
+        isSelected = accessibilityLabel == null && option != null && optionEnabled
+    }
+
     fun updateStyle(option: String, enabled: Boolean) {
         if (option == this.option) {
             optionEnabled = enabled
@@ -202,6 +241,7 @@ class ToolButton(context: Context, private val scope: ThemeScope) : GestureFrame
     }
 
     private fun updateContent() {
+        actionLabel = actionLabelProvider?.invoke() ?: actionLabel
         val style = if (option != null && optionStyles.size == 2) {
             optionStyles[if (optionEnabled) 1 else 0]
         } else {
@@ -232,6 +272,7 @@ class ToolButton(context: Context, private val scope: ThemeScope) : GestureFrame
             image.isVisible = false
             label.isVisible = true
         }
+        updateAccessibilityLabel()
     }
 
     companion object {

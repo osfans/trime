@@ -5,16 +5,18 @@
 
 package com.osfans.trime.ui.main.settings
 
-import android.net.Uri
 import android.os.Bundle
 import android.provider.DocumentsContract
 import androidx.appcompat.app.AlertDialog
+import androidx.core.net.toUri
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.SwitchPreferenceCompat
 import com.osfans.trime.R
+import com.osfans.trime.core.RimeMaintenanceMutex
+import com.osfans.trime.core.data.ConfigurationImportException
 import com.osfans.trime.core.data.DataManager
 import com.osfans.trime.core.data.DataStorageMode
 import com.osfans.trime.core.data.UserDataManager
@@ -30,9 +32,11 @@ import com.osfans.trime.util.buildDocumentsProviderIntent
 import com.osfans.trime.util.customFormatTimeInDefault
 import com.osfans.trime.util.toast
 import io.github.whiredplanck.storageaccess.StorageAccess
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 class ProfileSettingsFragment : PaddingPreferenceFragment() {
     private val viewModel: MainViewModel by activityViewModels()
@@ -45,6 +49,26 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
 
     /** Set while the picker runs as part of switching the storage mode to external sync. */
     private var pendingExternalSyncSetup = false
+    private var storageBusy = false
+
+    private fun runStorageChange(block: suspend () -> Unit) {
+        if (storageBusy) return
+        storageBusy = true
+        updateStorageModeUi()
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                block()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Timber.w(e, "Unable to change storage settings")
+                context?.toast(R.string.setup__data_path_import_failed)
+            } finally {
+                storageBusy = false
+                updateStorageModeUi()
+            }
+        }
+    }
 
     private val onBackgroundSyncEnable = PreferenceDelegate.OnChangeListener<Boolean> { _, v ->
         editSyncIntervalPreference.isEnabled = v
@@ -83,32 +107,51 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
 
     private fun provideDataPathSummary(): String? {
         if (externalRimeDir.isEmpty()) return null
-        val dirUri = Uri.parse(externalRimeDir)
-        val docId = DocumentsContract.getTreeDocumentId(dirUri)
-        return if (docId.contains(':')) {
-            val (volume, rel) = docId.split(':', limit = 2)
-            when (volume) {
-                "raw" -> rel
-                "primary" -> "/$rel"
-                else -> "/storage/$volume/$rel"
+        return runCatching {
+            val dirUri = externalRimeDir.toUri()
+            val docId = DocumentsContract.getTreeDocumentId(dirUri)
+            if (docId.contains(':')) {
+                val (volume, rel) = docId.split(':', limit = 2)
+                when (volume) {
+                    "raw" -> rel
+                    "primary" -> "/$rel"
+                    else -> "/storage/$volume/$rel"
+                }
+            } else {
+                docId
             }
-        } else {
-            docId
-        }.removePrefix("/storage/emulated/0")
+        }.getOrNull()?.removePrefix("/storage/emulated/0") ?: externalRimeDir
     }
 
     private fun updateDataPathSummary() {
-        dataPathPreference.summary = provideDataPathSummary()
+        if (::dataPathPreference.isInitialized) {
+            dataPathPreference.summary = provideDataPathSummary()
+        }
     }
 
     private fun updateStorageModeUi() {
-        dataStorageModePreference.value = dataStorageMode.name
-        dataPathPreference.isEnabled = dataStorageMode == DataStorageMode.EXTERNAL_SYNC
+        if (::dataStorageModePreference.isInitialized) {
+            dataStorageModePreference.value = dataStorageMode.name
+            dataStorageModePreference.isEnabled = !storageBusy
+        }
+        if (::dataPathPreference.isInitialized) {
+            dataPathPreference.isEnabled =
+                dataStorageMode == DataStorageMode.EXTERNAL_SYNC && !storageBusy
+        }
     }
 
     private fun pickDataPath() {
+        if (storageBusy) return
         lifecycleScope.launch {
-            val picked = storageAccess.pickDirectory()
+            val picked = try {
+                storageAccess.pickDirectory()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Timber.w(e, "Unable to pick data folder")
+                context?.toast(R.string.setup__data_path_import_failed)
+                return@launch
+            }
             if (picked == null) {
                 // Cancelling the picker never nags: the current folder stays as it is, and a
                 // storage mode switch the user did not finish setting up is undone silently.
@@ -119,27 +162,28 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                 return@launch
             }
             val ctx = requireContext()
-            val externalSyncSetup = pendingExternalSyncSetup
             pendingExternalSyncSetup = false
-            lifecycleScope.launch {
+            runStorageChange {
                 withLoadingDialog(ctx) {
-                    runCatching {
-                        withContext(Dispatchers.IO) {
-                            UserDataManager.persistTreeUri(picked.uri)
-                            viewModel.rime.runOnReady { deploy() }
+                    try {
+                        val stats = withContext(Dispatchers.IO) {
+                            UserDataManager.importConfigurationWithSession(viewModel.rime, picked.uri.toString())
                         }
-                    }.onSuccess {
                         updateDataPathSummary()
-                        ctx.toast(R.string.setup__data_path_imported)
-                    }.onFailure {
-                        if (externalSyncSetup) {
-                            fallbackToAppStorage()
-                        } else {
-                            // Keep the picked folder: it stays the user's choice, and a folder
-                            // that keeps failing makes the deploy path fall back on its own.
-                            updateDataPathSummary()
-                            ctx.toast(R.string.setup__data_path_import_failed)
+                        ctx.toast(ctx.getString(R.string.configuration_import_validated, stats.validatedConfigs, stats.copied + stats.deleted))
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Timber.w(e, "Unable to validate or activate selected data folder")
+                        updateDataPathSummary()
+                        val failure = e as? ConfigurationImportException
+                        val message = when {
+                            failure?.previousConfigurationRestored == true -> getString(R.string.configuration_import_rejected)
+                            failure?.recoveryDirectory != null -> getString(R.string.configuration_import_recovery_needed, failure.recoveryDirectory)
+                            failure != null -> getString(R.string.configuration_import_recovery_failed)
+                            else -> getString(R.string.setup__data_path_import_failed)
                         }
+                        AlertDialog.Builder(ctx).setMessage(message).setPositiveButton(android.R.string.ok, null).show()
                     }
                 }
             }
@@ -172,21 +216,11 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
             }.show()
     }
 
-    /** Falls back to app-specific storage when the user gives up on choosing a folder. */
+    /** Cancelling the picker keeps the previously selected storage mode and directory. */
     private fun cancelExternalSyncSetup() {
-        prefs.dataStorageMode.setValue(DataStorageMode.APP_STORAGE)
-        updateStorageModeUi()
-    }
-
-    private fun fallbackToAppStorage() {
-        prefs.dataStorageMode.setValue(DataStorageMode.APP_STORAGE)
+        pendingExternalSyncSetup = false
         updateStorageModeUi()
         updateDataPathSummary()
-        AlertDialog
-            .Builder(requireContext())
-            .setMessage(R.string.external_sync_fallback_app_storage)
-            .setPositiveButton(android.R.string.ok, null)
-            .show()
     }
 
     override fun onCreatePreferences(
@@ -209,25 +243,21 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                         value = dataStorageMode.name
                         summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
                         setOnPreferenceChangeListener { _, newValue ->
-                            val oldMode = prefs.dataStorageMode.getValue()
                             val mode =
                                 DataStorageMode.valueOf(newValue as String)
-                            prefs.dataStorageMode.setValue(mode)
-                            if (
-                                oldMode == DataStorageMode.APP_STORAGE &&
-                                mode == DataStorageMode.EXTERNAL_SYNC &&
-                                !UserDataManager.hasExternalAccess()
-                            ) {
-                                promptExternalSyncFolderSelection()
-                            } else if (
-                                oldMode == DataStorageMode.EXTERNAL_SYNC &&
-                                mode == DataStorageMode.APP_STORAGE
-                            ) {
-                                // The picked folder and its grant are kept, so switching back to
-                                // external sync does not ask the user to pick it again.
+                            runStorageChange {
+                                val needsPicker = withContext(Dispatchers.IO) {
+                                    RimeMaintenanceMutex.withLock {
+                                        val needsPicker = mode == DataStorageMode.EXTERNAL_SYNC &&
+                                            !UserDataManager.hasExternalAccess()
+                                        if (!needsPicker) prefs.dataStorageMode.setValue(mode)
+                                        needsPicker
+                                    }
+                                }
                                 updateDataPathSummary()
+                                if (needsPicker) promptExternalSyncFolderSelection()
                             }
-                            true
+                            false
                         }
                     },
                 )
@@ -257,7 +287,7 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                                     when {
                                         !success -> R.string.sync_user_data_failure
 
-                                        UserDataManager.useExternalSync() ->
+                                        UserDataManager.usesExternalSync() ->
                                             R.string.sync_user_data_success_external
 
                                         else -> R.string.sync_user_data_success
@@ -369,7 +399,11 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
         super.onResume()
         updateStorageModeUi()
         val ctx = requireContext()
-        if (UserDataManager.useExternalSync() && !UserDataManager.hasExternalAccess()) {
+        if (
+            UserDataManager.usesExternalSync() &&
+            prefs.externalRimeTreeUri.getValue().isNotBlank() &&
+            !UserDataManager.hasExternalAccess()
+        ) {
             ctx.toast(R.string.data_path_permission_revoked)
         }
     }

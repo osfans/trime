@@ -1,0 +1,18 @@
+{
+  "format": "Rime::Predict/1.0",
+  "license": "CC0-1.0",
+  "provenance": "Original hand-authored offline examples; no user or collected corpus data",
+  "source": "script/quality/t11/prediction.tsv",
+  "source_sha256": "7c6fe603e90fc0dead7ff6ca9c39619c3fdba140affe3466202c7f58fc4ecbcd",
+  "database": "trime_predict.db",
+  "sha256": "2bc7ee4fe184c433b82a0650625e0fc4ecbc1c64352ea9aa36342d2c7a612add",
+  "size": 6364,
+  "max_model_bytes": 65536,
+  "default_max_candidates": 5,
+  "default_max_iterations": 1,
+  "initial_prediction": false,
+  "query_count": 34,
+  "next_word_count": 76,
+  "key_units": 256,
+  "string_table_bytes": 4544
+}

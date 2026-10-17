@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.core.TrimeInputMethodService
+import com.osfans.trime.ime.keyboard.KeyboardWindow
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -29,6 +30,7 @@ class PopupDelegate(override val di: DI) : DIAware {
     private val scope: ThemeScope by instance()
     private val theme: Theme get() = scope.theme
     private val service: TrimeInputMethodService by instance()
+    private val keyboardWindow: KeyboardWindow by instance()
 
     private val showingEntryUi = HashMap<Int, PopupEntryUi>()
     private val dismissJobs = HashMap<Int, Job>()
@@ -133,6 +135,7 @@ class PopupDelegate(override val di: DI) : DIAware {
             popupHeight + popupBottomMargin,
             keys,
             labels,
+            keyboardWindow.currentKeyboard,
         )
         showPopupContainer(viewId, keyboardUi)
     }

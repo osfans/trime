@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.x2m7.trime.editorfixture">
+    <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="35" />
+    <application android:theme="@android:style/Theme.Material.Light.NoActionBar" android:label="Trime Editor Test" android:allowBackup="false" android:supportsRtl="true">
+        <activity android:name=".EditorActivity" android:exported="true" android:resizeableActivity="true" android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

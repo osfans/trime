@@ -96,7 +96,7 @@ class AboutFragment : PaddingPreferenceFragment() {
                     R.string.open_source_licenses,
                     R.string.licenses_of_third_party_libraries,
                 ) {
-                    findNavController().navigate(NavigationRoute.License)
+                    findNavController().navigate(NavigationRoute.License.path)
                 }
             }
             addCategory("") {

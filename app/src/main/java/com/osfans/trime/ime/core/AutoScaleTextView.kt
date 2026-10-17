@@ -46,8 +46,6 @@ constructor(
 
     var scaleMode = Mode.None
 
-    private lateinit var text: CharSequence
-
     private var needsMeasureText = true
     private val fontMetrics = Paint.FontMetrics()
     private val textBounds = Rect()
@@ -62,22 +60,25 @@ constructor(
         charSequence: CharSequence?,
         bufferType: BufferType,
     ) {
-        // setText can be called in super constructor
-        if (!::text.isInitialized || charSequence == null || !text.contentEquals(charSequence)) {
+        // TextView also calls this from its constructor. Keep its text, layout and
+        // accessibility state in sync without touching our not-yet-created paint caches.
+        val value = charSequence ?: ""
+        val changed = !super.getText().contentEquals(value)
+        super.setText(value, bufferType)
+        if (changed) {
             needsMeasureText = true
             needsCalculateTransform = true
-            text = charSequence ?: ""
             requestLayout()
             invalidate()
         }
     }
 
-    override fun getText(): CharSequence = text
-
     override fun onMeasure(
         widthMeasureSpec: Int,
         heightMeasureSpec: Int,
     ) {
+        // TextView needs its Layout even though our own paint decides the final size.
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val widthMode = MeasureSpec.getMode(widthMeasureSpec)
         val widthSize = MeasureSpec.getSize(widthMeasureSpec)
         val heightMode = MeasureSpec.getMode(heightMeasureSpec)
@@ -149,6 +150,7 @@ constructor(
         right: Int,
         bottom: Int,
     ) {
+        super.onLayout(changed, left, top, right, bottom)
         if (needsCalculateTransform) {
             calculateTransform(right - left, bottom - top)
             needsCalculateTransform = false

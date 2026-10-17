@@ -6,8 +6,10 @@ package com.osfans.trime.ime.dialog
 
 import android.app.AlertDialog
 import android.content.Context
+import android.view.KeyEvent
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
+import com.osfans.trime.core.KeyValue
 import com.osfans.trime.core.RimeApi
 import kotlinx.coroutines.launch
 import splitties.systemservices.inputMethodManager
@@ -28,7 +30,7 @@ object EnabledSchemaPickerDialog {
             .Builder(context)
             .apply {
                 setTitle(R.string.select_current_schema)
-                if (rime.isEmpty()) {
+                if (selecteds.isEmpty()) {
                     setMessage(R.string.no_schema_to_select)
                 } else {
                     setSingleChoiceItems(
@@ -36,6 +38,10 @@ object EnabledSchemaPickerDialog {
                         selectedIndex,
                     ) { dialog, which ->
                         scope.launch {
+                            // F4 keeps a temporary engine active until the switcher is dismissed.
+                            if (rime.isEmpty()) {
+                                rime.processKey(KeyValue.fromKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ESCAPE)).value)
+                            }
                             rime.selectSchema(selectedIds[which])
                             dialog.dismiss()
                         }

@@ -12,6 +12,7 @@ import androidx.core.view.isVisible
 import com.osfans.trime.R
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
+import com.osfans.trime.ime.keyboard.Keyboard
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.after
 import splitties.views.dsl.constraintlayout.centerHorizontally
@@ -30,6 +31,7 @@ import splitties.views.gravityVerticalCenter
 class TabUi(
     override val ctx: Context,
     private val scope: ThemeScope,
+    private val keyboard: () -> Keyboard,
 ) : Ui {
     private val theme: Theme get() = scope.theme
 
@@ -43,10 +45,11 @@ class TabUi(
             ),
         )
         backButton = if (backButtonConfig != null) {
-            ToolButton(ctx, backButtonConfig, scope)
+            ToolButton(ctx, backButtonConfig, scope, keyboard())
         } else {
             ToolButton(ctx, R.drawable.ic_baseline_arrow_back_24, scope)
         }
+        backButton.accessibilityLabel = ctx.getString(R.string.a11y_back_to_keyboard)
     }
 
     private val titleText = textView {

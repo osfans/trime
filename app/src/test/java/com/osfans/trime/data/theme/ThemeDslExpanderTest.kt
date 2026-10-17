@@ -113,6 +113,10 @@ class ThemeDslExpanderTest :
                     "a: {key/=: 1}",
                     // a __patch list, and a patch of the wrong type
                     "a: {__patch: [{k: 1}]}",
+                    // Literal patch nodes with their own compiler dependencies.
+                    "base: {k: 1}\na: {__patch: {__include: /base}}",
+                    "a: {__patch: {__patch: {k: 1}}}",
+                    "a: {__patch: {'': {name: replacement, style: {}}}}",
                     "s: scalar\na: {__patch: /s}",
                     // a non-scalar __include
                     "a: {__include: [/x, /y]}",
@@ -134,6 +138,45 @@ class ThemeDslExpanderTest :
                 }
             }
 
+            Then("list references fall back instead of accepting another index syntax or skipping an optional item") {
+                listOf("0", "@0", "@last").forEach { index ->
+                    listOf("", "?").forEach { optional ->
+                        shouldThrow<ThemeDslExpander.UnsupportedDsl> {
+                            expand("items: [{name: first}]\ncopy: {__include: '/items/$index$optional'}\n")
+                        }
+                    }
+                }
+            }
+
+            Then("an optional reference cannot skip a child inherited by a pending ancestor") {
+                shouldThrow<ThemeDslExpander.UnsupportedDsl> {
+                    expand(
+                        "base: {k: {v: 1}}\nderived: {__include: /base}\n" +
+                            "copy: {__include: '/derived/k?'}\n",
+                    )
+                }
+            }
+
+            Then("a cross-resource subtree cannot bypass its root custom patch") {
+                val shared = ThemeLoader.applyCustomPatch(
+                    "shared",
+                    ThemeTestSupport.yaml.parseToYamlNode("style: {value: before}\n"),
+                )
+                val custom = ThemeTestSupport.yaml.parseToYamlNode("patch: {style: {value: after}}\n")
+                shouldThrow<ThemeDslExpander.UnsupportedDsl> {
+                    ThemeDslExpander.expand(
+                        "theme",
+                        ThemeTestSupport.yaml.parseToYamlNode("style: {__include: 'shared:/style?'}\n"),
+                    ) { id ->
+                        when (id) {
+                            "shared" -> shared
+                            "shared.custom" -> custom
+                            else -> null
+                        }
+                    }
+                }
+            }
+
             Then("patching a node without an include overwrites it") {
                 expand("a: {__patch: {k: 1}}\n")["a"]!!.mapping!!.pairs["k"]!!.string shouldBe "1"
             }
@@ -152,16 +195,32 @@ class ThemeDslExpanderTest :
                 a.pairs["a"]!!.string shouldBe ""
             }
 
-            Then("librime's other null spellings leave the included value untouched too") {
-                listOf("~", "null", "Null", "NULL").forEach { spelling ->
+            Then("librime's unambiguous null spellings leave the included value untouched too") {
+                listOf("~", "null").forEach { spelling ->
                     val a = expand(template + "x: {__include: /base, a: $spelling}\n")["x"]!!.mapping!!
                     a.pairs["a"]!!.string shouldBe "1"
+                }
+            }
+
+            Then("capitalized null spellings fall back because Kaml loses their quoting style") {
+                listOf("Null", "NULL", "'Null'", "'NULL'").forEach { spelling ->
+                    shouldThrow<ThemeDslExpander.UnsupportedDsl> {
+                        expand(template + "x: {__include: /base, a: $spelling}\n")
+                    }
                 }
             }
 
             Then("a quoted null spelling is still a string") {
                 val a = expand(template + "x: {__include: /base, a: 'null'}\n")["x"]!!.mapping!!
                 a.pairs["a"]!!.string shouldBe "null"
+            }
+
+            Then("explicit tags fall back instead of losing their scalar type") {
+                listOf("!!str", "!!null", "!local").forEach { tag ->
+                    shouldThrow<ThemeDslExpander.UnsupportedDsl> {
+                        expand(template + "x: {__include: /base, a: $tag null}\n")
+                    }
+                }
             }
         }
 
@@ -233,19 +292,19 @@ class ThemeDslExpanderTest :
             val file = File("src/main/assets/shared/trime.yaml")
             val expanded = ThemeDslExpander.expand("trime", ThemeTestSupport.yaml.parseToYamlNode(file.readText())) { null }
 
-            Then("the 'letter' keyboard inherits the default keyboard") {
+            Then("the 'letter' keyboard shares the default keyboard content") {
                 val keyboards = expanded.pairs!!["preset_keyboards"]!!.mapping!!
                 val default = keyboards.pairs["default"]!!.mapping!!
                 val letter = keyboards.pairs["letter"]!!.mapping!!
                 letter.pairs["ascii_mode"]!!.string shouldBe "1"
-                letter.pairs["keys"] shouldBe default.pairs["keys"]
-                letter.pairs["name"] shouldBe default.pairs["name"]
-                letter.pairs["height"] shouldBe default.pairs["height"]
+                letter.pairs.getValue("keys").equivalentContentTo(default.pairs.getValue("keys")) shouldBe true
+                letter.pairs.getValue("name").equivalentContentTo(default.pairs.getValue("name")) shouldBe true
+                letter.pairs.getValue("height").equivalentContentTo(default.pairs.getValue("height")) shouldBe true
             }
 
-            Then("the pure include 'scj6' equals its target keyboard") {
+            Then("the aliased 'scj6' equals its target keyboard by content") {
                 val keyboards = expanded.pairs!!["preset_keyboards"]!!.mapping!!
-                keyboards.pairs["scj6"] shouldBe keyboards.pairs["cangjie5"]
+                keyboards.pairs.getValue("scj6").equivalentContentTo(keyboards.pairs.getValue("cangjie5")) shouldBe true
             }
 
             Then("the expansion is accepted by the theme decoder") {

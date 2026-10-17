@@ -32,7 +32,7 @@ class NativeCacheHashPlugin : Plugin<Project> {
                     buildString {
                         appendLine(cmakeVersion)
                         appendLine(ndkVersion)
-                        appendLine(buildAbiOverride)
+                        appendLine(buildAbis.joinToString(","))
                         appendLine(runCmd("git submodule status"))
                         fileTree("src/main/jni/cmake").forEach { module ->
                             appendLine(sha256(module))

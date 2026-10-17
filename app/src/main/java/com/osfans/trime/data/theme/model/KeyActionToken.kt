@@ -5,7 +5,6 @@
 
 package com.osfans.trime.data.theme.model
 
-import com.osfans.trime.util.string
 import kotlinx.serialization.Serializable
 
 @Serializable(with = KeyActionTokenSerializer::class)
@@ -24,8 +23,13 @@ sealed interface KeyActionToken {
 
 /**
  * A blank plain token means "no action": librime's empty scalar is how a theme
- * unsets a behavior inherited from a keyboard preset. An absent field already
- * decodes to null, so only the blank string case needs normalizing.
+ * unsets a behavior inherited from a keyboard preset. The legacy decoder also
+ * treated an empty inline mapping as absent, while preserving explicitly empty
+ * values such as `commit: ''`.
  */
 val KeyActionToken?.orAbsent: KeyActionToken?
-    get() = if (this is KeyActionToken.Plain && token.isEmpty()) null else this
+    get() = when (this) {
+        is KeyActionToken.Plain -> takeUnless { token.isEmpty() }
+        is KeyActionToken.Inline -> takeUnless { commit == null && text == null && label == null }
+        null -> null
+    }

@@ -110,7 +110,10 @@ internal class ColorTable private constructor(
             for (key in ColorKey.entries) {
                 val raw = resolveRaw(key.key, scheme, fallbackColors)
                 if (raw == null) {
-                    unresolvedKeys += key
+                    // An omitted candidate border means no stroke. Broken explicit fallbacks still report.
+                    val omittedBorder = key == ColorKey.CANDIDATE_BORDER_COLOR &&
+                        scheme[key.key].isNullOrEmpty() && fallbackColors[key.key].isNullOrEmpty()
+                    if (!omittedBorder) unresolvedKeys += key
                     continue
                 }
                 val parsed = parseColor(raw)

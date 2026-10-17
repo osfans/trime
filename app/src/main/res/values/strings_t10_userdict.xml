@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="userdict_phrases">Common phrases</string>
+    <string name="userdict_edit_phrases">Edit common phrases</string>
+    <string name="userdict_add_phrase">Add phrase</string>
+    <string name="userdict_phrase">Phrase</string>
+    <string name="userdict_phrase_code">Code: letters for full pinyin, digits for nine-key</string>
+    <string name="userdict_phrase_help">One phrase, code and optional integer weight per line, separated by tabs. Use Add phrase to insert a row. Full pinyin and nine-key share this file; a letter code and a numeric code are separate entries. Import replaces this list after creating a recovery backup.</string>
+    <string name="userdict_phrase_invalid">Enter a phrase and code without tabs or line breaks. A phrase cannot start with #.</string>
+    <string name="userdict_phrases_saved">Common phrases saved</string>
+    <string name="userdict_phrases_exported">Common phrases exported</string>
+    <string name="userdict_recover_backup">Recover previous backup</string>
+    <string name="userdict_recovery_confirmation">Replace this dictionary with its most recent recovery backup? The current dictionary will also be backed up. This restores records exactly; importing a Rime snapshot merges records instead.</string>
+    <string name="userdict_recovery_complete">Dictionary recovered from backup</string>
+    <string name="userdict_merge_snapshot">Merge a Rime user dictionary snapshot</string>
+</resources>

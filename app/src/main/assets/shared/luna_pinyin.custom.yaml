@@ -1,0 +1,12 @@
+# Fork defaults; a user's own luna_pinyin.custom.yaml still takes precedence.
+patch:
+  'engine/processors/@before 2': predictor
+  'engine/translators/@before 0': predict_translator
+  'switches/+':
+    # Internal option; Trime's settings provide the single prediction control.
+    - name: prediction
+      reset: 0
+  predictor:
+    db: trime_predict.db
+    max_candidates: 5
+    max_iterations: 1

@@ -8,20 +8,21 @@ import android.util.Log
 import com.charleskorn.kaml.yamlMap
 import com.osfans.trime.data.theme.ThemeDiagnostics.Code
 import com.osfans.trime.data.theme.ThemeDiagnostics.Severity
-import com.osfans.trime.data.theme.model.GeneralStyle
+import com.osfans.trime.data.theme.model.PresetKey
 import com.osfans.trime.ime.keyboard.KeyCode
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import timber.log.Timber
-import java.io.File
 
 class ThemeDiagnosticsTest :
     BehaviorSpec({
         // The Android key-name lookup is a platform call that throws when not
         // mocked; the bare letters used by the fixtures resolve without it.
-        beforeTest { KeyCode.androidKeyNameToCode = { 0 } }
+        val platformLookup = KeyCode.androidKeyNameToCode
+        beforeSpec { KeyCode.androidKeyNameToCode = { 0 } }
+        afterSpec { KeyCode.androidKeyNameToCode = platformLookup }
 
         /** Hex-only color parser; enough to tell colors from typos. */
         fun parseHex(value: String): Int? {
@@ -129,13 +130,13 @@ class ThemeDiagnosticsTest :
                     it.code shouldBe Code.CONFIG_VERSION_UNSUPPORTED
                     it.severity shouldBe Severity.WARNING
                     it.message shouldBe
-                        "'config_version' 99.1 is newer than the supported 3.0; " +
+                        "'config_version' 99.1 is newer than the supported 3.1; " +
                         "settings added by the newer format are ignored"
                 }
             }
 
             Then("a newer minor version warns") {
-                lintCodes("config_version: \"3.1\"\n$base") shouldBe listOf(Code.CONFIG_VERSION_UNSUPPORTED)
+                lintCodes("config_version: \"3.2\"\n$base") shouldBe listOf(Code.CONFIG_VERSION_UNSUPPORTED)
             }
 
             Then("a value that is not a version warns") {
@@ -203,6 +204,46 @@ class ThemeDiagnosticsTest :
                 }
             }
 
+            Then("an image used as a color is invalid while a drawable background image is allowed") {
+                val findings = lint(
+                    """
+                    config_version: "3.0"
+                    name: t
+                    style: {}
+                    preset_color_schemes:
+                      default:
+                        back_color: "#000000"
+                        text_color: text.png
+                        key_back_color: key.png
+                    """.trimIndent(),
+                )
+                findings.single().let {
+                    it.code shouldBe Code.INVALID_COLOR_VALUE
+                    it.path shouldBe "preset_color_schemes/default/text_color"
+                    it.message shouldBe "scheme 'default': 'text_color' cannot be parsed as a color (value 'text.png')"
+                }
+            }
+
+            Then("an explicit color fallback to a background image is invalid") {
+                val findings = lint(
+                    """
+                    config_version: "3.0"
+                    name: t
+                    style: {}
+                    preset_color_schemes:
+                      default: {back_color: "#000000", key_back_color: key.png}
+                    fallback_colors:
+                      text_color: key_back_color
+                    """.trimIndent(),
+                )
+                findings.single().let {
+                    it.code shouldBe Code.INVALID_COLOR_VALUE
+                    it.path shouldBe "preset_color_schemes/default/key_back_color"
+                    it.message shouldBe
+                        "scheme 'default': 'key_back_color' cannot be parsed as a color (value 'key.png')"
+                }
+            }
+
             Then("a fallback_colors entry pointing at nothing is reported") {
                 val findings = lint(
                     """
@@ -218,8 +259,64 @@ class ThemeDiagnosticsTest :
                     it.code shouldBe Code.BROKEN_FALLBACK_TARGET
                     it.severity shouldBe Severity.WARNING
                     it.path shouldBe "fallback_colors/key_back_color"
-                    it.message shouldBe "fallback_colors: 'key_back_color' points at 'no_such_key', which no scheme defines"
+                    it.message shouldBe
+                        "fallback_colors: 'key_back_color' points at 'no_such_key', unresolved for scheme 'default'"
                 }
+            }
+
+            Then("a fallback target missing from only one scheme reports that scheme") {
+                val findings = lint(
+                    """
+                    config_version: "3.0"
+                    name: t
+                    style: {}
+                    preset_color_schemes:
+                      default: {back_color: "#000000", my_base: "#ffffff"}
+                      night: {back_color: "#000000"}
+                    fallback_colors:
+                      key_back_color: my_base
+                    """.trimIndent(),
+                )
+                findings.single().let {
+                    it.code shouldBe Code.BROKEN_FALLBACK_TARGET
+                    it.path shouldBe "fallback_colors/key_back_color"
+                    it.message shouldBe
+                        "fallback_colors: 'key_back_color' points at 'my_base', unresolved for scheme 'night'"
+                }
+            }
+
+            Then("an image-looking fallback target is still resolved as a key name") {
+                val findings = lint(
+                    """
+                    config_version: "3.0"
+                    name: t
+                    style: {}
+                    preset_color_schemes: {default: {back_color: "#000000"}}
+                    fallback_colors:
+                      key_back_color: bg.png
+                    """.trimIndent(),
+                )
+                findings.single().let {
+                    it.code shouldBe Code.BROKEN_FALLBACK_TARGET
+                    it.path shouldBe "fallback_colors/key_back_color"
+                    it.message shouldBe
+                        "fallback_colors: 'key_back_color' points at 'bg.png', unresolved for scheme 'default'"
+                }
+            }
+
+            Then("a broken fallback shadowed by every scheme is not reported") {
+                lintCodes(
+                    """
+                    config_version: "3.0"
+                    name: t
+                    style: {}
+                    preset_color_schemes:
+                      default: {key_back_color: "#000000"}
+                      night: {key_back_color: "#111111"}
+                    fallback_colors:
+                      key_back_color: no_such_key
+                    """.trimIndent(),
+                ) shouldBe emptyList()
             }
 
             Then("a fallback_colors entry reaching a built-in chain is fine") {
@@ -316,7 +413,7 @@ class ThemeDiagnosticsTest :
         }
 
         Given("reporting") {
-            /** Collects the lines [ThemeDiagnostics.report] logs, one per finding. */
+            /** Collects the lines [ThemeDiagnostics.log] logs, one per finding. */
             class CollectingTree(private val lines: MutableList<String>) : Timber.Tree() {
                 override fun log(
                     priority: Int,
@@ -384,6 +481,16 @@ class ThemeDiagnosticsTest :
                 captured { ThemeDiagnostics.log("clean", findings) } shouldBe emptyList()
                 findings shouldBe emptyList()
             }
+
+            Then("preset diagnostics do not duplicate the parser log") {
+                val lines =
+                    captured {
+                        ThemeDiagnostics.presetDiagnostics(
+                            mapOf("broken" to PresetKey(send = "Bogus_Key")),
+                        ) shouldBe listOf("preset 'broken' has an unrecognized send 'Bogus_Key'")
+                    }
+                lines shouldBe emptyList()
+            }
         }
 
         Given("the report of a theme") {
@@ -424,10 +531,6 @@ class ThemeDiagnosticsTest :
             val trimeYamlFindings =
                 listOf(
                     "INFO UNKNOWN_TOP_LEVEL_KEY /android_keys",
-                    "WARNING UNKNOWN_STYLE_KEY style/preview_font",
-                    "WARNING UNKNOWN_STYLE_KEY style/preview_height",
-                    "WARNING UNKNOWN_STYLE_KEY style/preview_offset",
-                    "WARNING UNKNOWN_STYLE_KEY style/preview_text_size",
                 )
             val tongwenfengFindings =
                 listOf(

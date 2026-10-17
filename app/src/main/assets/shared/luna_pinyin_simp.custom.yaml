@@ -1,0 +1,6 @@
+# The simplified variant inherits the full-pinyin engine but replaces switches.
+patch:
+  'switches/+':
+    # No states: do not expose a second prediction toggle in the native switcher.
+    - name: prediction
+      reset: 0

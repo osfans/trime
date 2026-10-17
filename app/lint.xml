@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<lint>
+    <!-- API 21 is required. Only these audited update notices are exempt;
+         new coordinates or versions must be reviewed again. See
+         script/quality/API21.md. Room's compiler must match its runtime. -->
+    <issue id="GradleDependency">
+        <ignore regexp="^A newer version of androidx[.]navigation:navigation-(fragment|ui)-ktx than 2[.]9[.]8 is available: 2[.]10[.]2$" />
+        <ignore regexp="^A newer version of androidx[.]room:room-(compiler|ktx|paging|runtime) than 2[.]7[.]2 is available: 2[.]8[.]5$" />
+        <ignore regexp="^A newer version of androidx[.]activity:activity-ktx than 1[.]11[.]0 is available: 1[.]13[.]0$" />
+        <ignore regexp="^A newer version of androidx[.]appcompat:appcompat than 1[.]7[.]1 is available: 1[.]8[.]0$" />
+        <ignore regexp="^A newer version of androidx[.]core:core-ktx than 1[.]17[.]0 is available: 1[.]19[.]1$" />
+        <ignore regexp="^A newer version of androidx[.]paging:paging-runtime-ktx than 3[.]3[.]6 is available: 3[.]5[.]3$" />
+        <ignore regexp="^A newer version of androidx[.]work:work-runtime-ktx than 2[.]10[.]5 is available: 2[.]12[.]0$" />
+    </issue>
+</lint>

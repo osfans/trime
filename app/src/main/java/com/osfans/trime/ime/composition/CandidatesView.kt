@@ -22,13 +22,12 @@ import com.osfans.trime.core.Candidates
 import com.osfans.trime.core.CompositionProto
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.daemon.RimeSession
-import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.candidates.popup.PagedCandidatesUi
 import com.osfans.trime.ime.core.BaseInputView
-import com.osfans.trime.ime.core.TouchEventReceiverWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
+import com.osfans.trime.ime.performance.InputLatencyLog
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.below
 import splitties.views.dsl.constraintlayout.bottomOfParent
@@ -91,20 +90,25 @@ class CandidatesView(
             ctx,
             scope,
             setupPreeditView = { setPaddingDp(3, 1, 3, 1) },
-            onMoveCursor = { pos -> rime.launchOnReady { it.moveCursorPos(pos) } },
+            onMoveCursor = { pos, text -> service.postRimeJob { moveCursorPos(pos, text) } },
         )
 
     private val candidatesUi =
         PagedCandidatesUi(
             ctx,
             scope,
-            onCandidateClick = { index -> rime.launchOnReady { it.selectCandidate(index, global = false) } },
-            onCandidateAction = { index, text, view -> showCandidateActionMenu(index, text, view, global = false) },
-            onPrevPage = { rime.launchOnReady { it.changeCandidatePage(true) } },
-            onNextPage = { rime.launchOnReady { it.changeCandidatePage(false) } },
+            onCandidateClick = { index, snapshot ->
+                service.postRimeJob { selectCandidate(index, global = false, expectedSnapshot = snapshot) }
+            },
+            onCandidateAction = { index, text, view, snapshot ->
+                showCandidateActionMenu(index, text, view, global = false, snapshot = snapshot)
+            },
+            onPrevPage = { snapshot -> service.postRimeJob { changeCandidatePage(true, snapshot) } },
+            onNextPage = { snapshot -> service.postRimeJob { changeCandidatePage(false, snapshot) } },
+            isCurrentSnapshot = { snapshot ->
+                service.isCurrentEditor(snapshot.editorToken) && snapshot == rime.run { candidateSnapshotCached }
+            },
         )
-
-    private val touchEventReceiverWindow = TouchEventReceiverWindow(this)
 
     private var bottomInsets = 0
 
@@ -116,6 +120,10 @@ class CandidatesView(
             }
 
             is RimeMessage.PagedCandidatesMessage -> {
+                if (it.data.snapshot.isValid && it.data.snapshot != rime.run { candidateSnapshotCached }) {
+                    InputLatencyLog.stale(it.data.snapshot)
+                    return
+                }
                 candidates = it.data
                 updateUi()
             }
@@ -224,8 +232,6 @@ class CandidatesView(
         }
         translationX = tX
         translationY = tY
-        // update touchEventReceiverWindow's position after CandidatesView's
-        touchEventReceiverWindow.showAt(tX.roundToInt(), tY.roundToInt(), w, h)
         shouldUpdatePosition = false
     }
 
@@ -320,17 +326,9 @@ class CandidatesView(
         viewTreeObserver.addOnPreDrawListener(preDrawListener)
     }
 
-    override fun setVisibility(visibility: Int) {
-        if (visibility != VISIBLE) {
-            touchEventReceiverWindow.dismiss()
-        }
-        super.setVisibility(visibility)
-    }
-
     override fun onDetachedFromWindow() {
         viewTreeObserver.removeOnPreDrawListener(preDrawListener)
         viewTreeObserver.removeOnGlobalLayoutListener(layoutListener)
-        touchEventReceiverWindow.dismiss()
         super.onDetachedFromWindow()
     }
 

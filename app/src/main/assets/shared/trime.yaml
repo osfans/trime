@@ -5,7 +5,7 @@
 # Trime default style settings
 # encoding: utf-8
 
-config_version: "3.0"
+config_version: "3.1"
 name: 預設 #方案名稱
 author: osfans #作者資訊
 
@@ -41,9 +41,8 @@ style:
   latin_font: latin.ttf #西文字型
   keyboard_height: 250 #锁定键盘高度，避免切换时键盘高度变化而造成闪烁
   keyboard_height_land: 200 #锁定横屏下键盘高度，避免切换时键盘高度变化而造成闪烁
-  preview_font: latin.ttf #按鍵提示字型
+  preview_font: [] #按鍵提示使用系統字型
   preview_height: 60 #按鍵提示高度
-  preview_offset: -12 #按鍵提示縱向偏移
   preview_text_size: 40 #按鍵提示字號
   reset_ascii_mode_on_focus_change: false #焦点变更弹起输入法软键盘时，重置 ascii_mode
   round_corner: 8 #按鍵圓角半徑
@@ -858,6 +857,20 @@ android_keys:
     commit: 上屏
 
 preset_keys:
+  T9_separator: {label: '|', send: apostrophe}
+  T9_backspace: {label: 'ic@backspace_outline', send: BackSpace, repeatable: true, slide_delete: true}
+  T9_enter: {label: enter_labels, send: Return}
+  T9_space: {label: 'ic@keyboard_space', send: space, slide_cursor: true}
+  T9_digit_0: {label: '0', command: t9_digit, option: '0'}
+  T9_digit_1: {label: '1', command: t9_digit, option: '1'}
+  T9_digit_2: {label: '2', command: t9_digit, option: '2'}
+  T9_digit_3: {label: '3', command: t9_digit, option: '3'}
+  T9_digit_4: {label: '4', command: t9_digit, option: '4'}
+  T9_digit_5: {label: '5', command: t9_digit, option: '5'}
+  T9_digit_6: {label: '6', command: t9_digit, option: '6'}
+  T9_digit_7: {label: '7', command: t9_digit, option: '7'}
+  T9_digit_8: {label: '8', command: t9_digit, option: '8'}
+  T9_digit_9: {label: '9', command: t9_digit, option: '9'}
   # 安卓
   BRIGHTNESS_DOWN: {label: 亮度-, send: BRIGHTNESS_DOWN}
   BRIGHTNESS_UP: {label: 亮度+, send: BRIGHTNESS_UP}
@@ -924,6 +937,9 @@ preset_keys:
   Keyboard_mini: {label: 迷你, send: Eisu_toggle, select: mini}
   Keyboard_letter: {label: 字母, send: Eisu_toggle, select: default}
   Keyboard_default: {label: 返回, send: Eisu_toggle, select: .default}
+  Keyboard_ascii: {label: EN, send: Eisu_toggle, select: .ascii}
+  Keyboard_native: {label: 中文, send: Eisu_toggle, select: .native}
+  Keyboard_return: {label: 返回, send: Eisu_toggle, select: .return}
   Keyboard_switch: {label: 鍵盤, send: Eisu_toggle, select: .next}
   liquid_keyboard_switch: { label: 更多, send: FUNCTION, command: liquid_keyboard, option: "更多" }
   liquid_keyboard_exit: {label: 返回, send: FUNCTION, command: liquid_keyboard, option: "-1"}  #退出liquidkeyboard
@@ -974,13 +990,13 @@ preset_keys:
 
 preset_keyboards:
   default:
-    name: 預設40鍵
-    author: "osfans <waxaca@163.com>"
+    name: &default_keyboard_name 預設40鍵
+    author: &default_keyboard_author "osfans <waxaca@163.com>"
     ascii_mode: 0
-    width: 10
-    height: 44
+    width: &default_keyboard_width 10
+    height: &default_keyboard_height 44
     lock: true #切換程序時記憶鍵盤
-    keys:
+    keys: &default_keyboard_keys
       - {click: '1', long_click: '!'}
       - {click: '2', long_click: '@'}
       - {click: '3', long_click: '#'}
@@ -1023,7 +1039,7 @@ preset_keyboards:
       - {click: '/', long_click: '?'}
       - {click: Shift_L}
       - {click: Keyboard_symbols, long_click: Keyboard_number}
-      - {click: Mode_switch, long_click: Menu}
+      - {click: Mode_switch, ascii: Keyboard_native, long_click: Menu}
       - {click: space, width: 30}
       - {click: "'", long_click: '"'}
       - {click: BackSpace, width: 15}
@@ -1058,7 +1074,11 @@ preset_keyboards:
       - {click: Mode_switch, long_click: Menu}
       - {click: Return, composing: Return1, long_click: CommitComment}
   letter:
-    __include: /preset_keyboards/default
+    name: *default_keyboard_name
+    author: *default_keyboard_author
+    width: *default_keyboard_width
+    height: *default_keyboard_height
+    keys: *default_keyboard_keys
     ascii_mode: 1
     reset_ascii_mode: true  #显示键盘时重置为ascii_mode指定的状态
     lock: false
@@ -1271,6 +1291,37 @@ preset_keyboards:
     - {click: "'", long_click: '"'}
     - {click: BackSpace, swipe_right: Delete, swipe_left: Escape, width: 15}
     - {click: Return, long_click: CommitComment, width: 15}
+  luna_pinyin_t9:
+    name: 拼音九键
+    author: "Rime community"
+    t9_layout: true
+    ascii_mode: 0
+    width: 26
+    height: 55
+    keyboard_height: 240
+    keyboard_height_land: 200
+    horizontal_gap: 4
+    vertical_gap: 4
+    lock: true
+    ascii_keyboard: letter
+    keys:
+      - {click: T9_separator, width: 26, label: '|', hint: '1', long_click: T9_digit_1}
+      - {click: '2', width: 26, label: 'ABC', hint: '2', long_click: T9_digit_2}
+      - {click: '3', width: 26, label: 'DEF', hint: '3', long_click: T9_digit_3}
+      - {click: T9_backspace, width: 22}
+      - {click: '4', width: 26, label: 'GHI', hint: '4', long_click: T9_digit_4}
+      - {click: '5', width: 26, label: 'JKL', hint: '5', long_click: T9_digit_5}
+      - {click: '6', width: 26, label: 'MNO', hint: '6', long_click: T9_digit_6}
+      - {click: T9_enter, width: 22}
+      - {click: '7', width: 26, label: 'PQRS', hint: '7', long_click: T9_digit_7}
+      - {click: '8', width: 26, label: 'TUV', hint: '8', long_click: T9_digit_8}
+      - {click: '9', width: 26, label: 'WXYZ', hint: '9', long_click: T9_digit_9}
+      - {click: Keyboard_symbols, width: 22, label: '符号', long_click: Menu}
+      - {click: Keyboard_number, width: 18, label: '123', hint: EN, long_click: Keyboard_ascii}
+      - {click: ',', width: 16, label: '，'}
+      - {click: T9_space, width: 32}
+      - {click: '.', width: 16, label: '。'}
+      - {click: T9_digit_0, width: 18, label: '0'}
   number:
     name: 預設數字
     author: "osfans <waxaca@163.com>"
@@ -1298,8 +1349,8 @@ preset_keyboards:
     - {click: '.'}
     - {click: ','}
     - {click: '='}
-    - {click: Keyboard_default, long_click: Keyboard_symbols}
-    - {click: space}
+    - {click: Keyboard_return, long_click: Keyboard_symbols}
+    - {click: space1}
     - {click: BackSpace}
     - {click: Return}
   symbols:
@@ -1349,7 +1400,7 @@ preset_keyboards:
     - {click: '，', ascii: ',', long_click: one_hand_switch_1}
     - {click: '？', ascii: '?', long_click: one_hand_switch_3}
     - {click: BackSpace, long_click: Escape}
-    - {click: Keyboard_default, long_click: Menu, width: 15}
+    - {click: Keyboard_return, long_click: Menu, width: 15}
     - {click: Keyboard_number, long_click: Color_switch}
     - {click: Keyboard_mini, long_click: Theme_settings}
     - {click: space, width: 30}
@@ -1412,7 +1463,7 @@ preset_keyboards:
     - {long_click: '。', click: '，'}
     - {click: BackSpace, long_click: Escape, width: 10}
     - {click: Return, composing: Return1, long_click: CommitComment, width: 10}
-  cangjie5:
+  cangjie5: &cangjie5_keyboard
     name: 倉頡五代鍵盤
     author: "皛筱晓小笨鱼"
     ascii_mode: 0
@@ -1514,8 +1565,7 @@ preset_keyboards:
     - {click: space, width: 25}
     - {click: "'", long_click: "?"}
     - {click: Return, composing: Return1, long_click: CommitComment, width: 25.5}
-  scj6:
-    __include: /preset_keyboards/cangjie5
+  scj6: *cangjie5_keyboard
   stroke:
     name: 五筆畫鍵盤
     author: 皛筱晓小笨鱼

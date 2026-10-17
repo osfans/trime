@@ -6,13 +6,18 @@
 package com.osfans.trime.ui.main.settings.schema
 
 import android.view.View
-import androidx.lifecycle.viewModelScope
+import com.osfans.trime.TrimeApplication
+import com.osfans.trime.core.RimeMaintenanceMutex
 import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.core.data.UserDataManager
+import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.ui.common.OnItemChangedListener
 import com.osfans.trime.ui.main.settings.ProgressFragment
 import com.osfans.trime.util.NaiveDustman
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 class SchemaListFragment :
@@ -92,12 +97,29 @@ class SchemaListFragment :
         if (!dustman.dirty) return
         val schemaIds = ui.adapter.items.map { it.id }.toTypedArray()
         resetDustman()
-        Timber.d("Persisting schema list: ${schemaIds.joinToString()}")
-        viewModel.viewModelScope.launch {
-            viewModel.rime.runOnReady {
-                setEnabledSchemata(schemaIds)
-                deploy()
-                UserDataManager.sync()
+        Timber.i("Persisting schema list: ${schemaIds.joinToString()}")
+        TrimeApplication.getInstance().coroutineScope.launch {
+            withContext(Dispatchers.IO) {
+                val sessionName = "schema-list-persist"
+                runCatching {
+                    val session = RimeDaemon.createSession(sessionName)
+                    try {
+                        session.runOnReady {
+                            setEnabledSchemata(schemaIds)
+                            deploy(skipImport = true)
+                        }
+                        RimeMaintenanceMutex.withLock {
+                            if (UserDataManager.usesExternalSync()) {
+                                UserDataManager.exportConfigFilesToExternal().getOrThrow()
+                            }
+                        }
+                    } finally {
+                        RimeDaemon.destroySession(sessionName)
+                    }
+                }.onFailure {
+                    if (it is CancellationException) throw it
+                    Timber.e(it, "Failed to persist schema list")
+                }
             }
         }
     }

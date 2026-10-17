@@ -7,8 +7,12 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Delete
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -18,6 +22,12 @@ import org.gradle.process.ExecOperations
 import java.io.File
 import java.util.regex.Pattern
 import javax.inject.Inject
+
+/** Reject an asset set that would make a bundled conversion config fail at runtime. */
+internal fun requireOpenCCDictionaryAssets(names: Set<String>, directory: File) {
+    val missing = names.filterNot { name -> directory.resolve("$name.txt").let { it.isFile && it.length() > 0L } }
+    check(missing.isEmpty()) { "OpenCC packaged dictionaries are missing or empty: ${missing.joinToString()}" }
+}
 
 class OpenCCDataPlugin : Plugin<Project> {
     companion object {
@@ -37,10 +47,20 @@ class OpenCCDataPlugin : Plugin<Project> {
     }
 
     private fun registerInstallTask(project: Project) {
+        val regionalPhrases = project.tasks.register<GenerateRegionalPhrasesTask>("generateOpenCCRegionalPhrases") {
+            sourceDir.set(project.layout.projectDirectory.dir("src/main/jni/OpenCC"))
+            outputDir.set(project.layout.buildDirectory.dir("opencc-host"))
+            cmakeExecutable.set(
+                project.providers.gradleProperty("openccCmakeExecutable")
+                    .orElse(project.providers.environmentVariable("CMAKE_EXECUTABLE"))
+                    .orElse("cmake"),
+            )
+        }
         val task =
             project.tasks.register<InstallOpenCCDataTask>(INSTALL_TASK) {
                 inputDir.set(project.dataBaseDir)
                 outputDir.set(project.dataInstallDir)
+                regionalPhrasesFile.set(regionalPhrases.flatMap { it.outputDir.file("data/STPhrases_GeneratedFromRegionalPhrases.txt") })
             }
         // make sure OpenCC data have been installed before generating data checksums
         project.tasks.getByName(DataChecksumsPlugin.TASK).dependsOn(task)
@@ -55,6 +75,47 @@ class OpenCCDataPlugin : Plugin<Project> {
             }
     }
 
+    /** Build the matching host converter instead of shipping configs with missing dictionaries. */
+    abstract class GenerateRegionalPhrasesTask : DefaultTask() {
+        @get:Inject
+        abstract val execOperations: ExecOperations
+
+        @get:PathSensitive(PathSensitivity.RELATIVE)
+        @get:InputDirectory
+        abstract val sourceDir: DirectoryProperty
+
+        @get:OutputDirectory
+        abstract val outputDir: DirectoryProperty
+
+        @get:Input
+        abstract val cmakeExecutable: Property<String>
+
+        @TaskAction
+        fun execute() {
+            val output = outputDir.get().asFile
+            // OpenCC's generated-dictionary rules do not depend on their Python scripts.
+            // Gradle tracks those inputs, so a changed input must get a fresh host tree.
+            check(!output.exists() || output.deleteRecursively()) { "Cannot clean stale OpenCC host data: $output" }
+            val cmake = cmakeExecutable.get()
+            execOperations.exec {
+                commandLine(
+                    cmake, "-S", sourceDir.get().asFile.absolutePath, "-B", output.absolutePath,
+                    "-DCMAKE_BUILD_TYPE=Release", "-DBUILD_SHARED_LIBS=OFF", "-DENABLE_GTEST=OFF",
+                    "-DBUILD_DOCUMENTATION=OFF", "-DOPENCC_ENABLE_INSTALL=OFF",
+                    "-DBUILD_OPENCC_JIEBA_PLUGIN=OFF", "-DOPENCC_DICT_FORMAT=text",
+                    // Match the public pointer-iterator API already used by Android's OpenCC.
+                    "-DCMAKE_CXX_FLAGS=-DRAPIDJSON_NOMEMBERITERATORCLASS",
+                )
+            }.assertNormalExitValue()
+            execOperations.exec {
+                commandLine(cmake, "--build", output.absolutePath, "--target", "Dictionaries", "--parallel", "1")
+            }.assertNormalExitValue()
+            check(output.resolve("data/STPhrases_GeneratedFromRegionalPhrases.txt").isFile) {
+                "OpenCC's matching host converter did not generate regional phrases"
+            }
+        }
+    }
+
     abstract class InstallOpenCCDataTask : DefaultTask() {
         @get:Inject
         abstract val execOperations: ExecOperations
@@ -67,6 +128,10 @@ class OpenCCDataPlugin : Plugin<Project> {
 
         @get:OutputDirectory
         abstract val outputDir: DirectoryProperty
+
+        @get:PathSensitive(PathSensitivity.NONE)
+        @get:InputFile
+        abstract val regionalPhrasesFile: RegularFileProperty
 
         private val input by lazy { inputDir.get().asFile }
         private val output by lazy { outputDir.get().asFile }
@@ -84,11 +149,6 @@ class OpenCCDataPlugin : Plugin<Project> {
                 "TSCharactersExt" to GeneratedDict("TSCharacters", "extract_tofu_risk.py"),
             )
 
-            // Dicts referenced by OpenCC configs that cannot be generated at build time
-            // (STPhrases_GeneratedFromRegionalPhrases needs a host opencc CLI).
-            // Configs using them (s2t, s2tw, s2twp, s2hk, s2hkp) stay broken.
-            private val UNAVAILABLE_DICTS = setOf("STPhrases_GeneratedFromRegionalPhrases")
-
             // Regex to find "file": "xxx.ocd2" in config JSON
             private val OCD2_FILE_PATTERN = Pattern.compile("\"file\"\\s*:\\s*\"([^\"]+\\.ocd2)\"")
         }
@@ -98,7 +158,7 @@ class OpenCCDataPlugin : Plugin<Project> {
             // Gradle does no per-file cleanup for a whole-@OutputDirectory task, so
             // dictionaries dropped by an OpenCC bump (e.g. JPVariants*) would
             // otherwise linger in the assets forever.
-            output.deleteRecursively()
+            check(!output.exists() || output.deleteRecursively()) { "Cannot clean stale OpenCC assets: $output" }
 
             val dictionary = input.resolve("dictionary")
             val configs =
@@ -116,13 +176,18 @@ class OpenCCDataPlugin : Plugin<Project> {
             // librime. Deriving the set from the configs keeps it from drifting
             // after an OpenCC bump.
             val unpackaged = mutableListOf<String>()
-            referencedDicts(configs).forEach { name ->
+            val references = referencedDicts(configs)
+            references.forEach { name ->
                 val generated = GENERATED_DICTS[name]
                 val source = dictionary.resolve("$name.txt")
                 when {
                     generated != null -> generate(name, generated, dictionary)
+
                     source.isFile -> source.copyTo(output.resolve("$name.txt"), overwrite = true)
-                    name in UNAVAILABLE_DICTS -> Unit
+
+                    name == "STPhrases_GeneratedFromRegionalPhrases" ->
+                        regionalPhrasesFile.get().asFile.copyTo(output.resolve("$name.txt"), overwrite = true)
+
                     else -> unpackaged += name
                 }
             }
@@ -130,9 +195,9 @@ class OpenCCDataPlugin : Plugin<Project> {
                 "OpenCC configs refer to dictionaries which are not packaged:\n" +
                     unpackaged.joinToString("\n") { "  $it" } +
                     "\nAdd a generator to GENERATED_DICTS, drop the text dictionary into " +
-                    "OpenCC's data/dictionary, or allow-list the name in UNAVAILABLE_DICTS " +
-                    "when it cannot be produced at build time."
+                    "OpenCC's data/dictionary. Every shipped config must be usable."
             }
+            requireOpenCCDictionaryAssets(references, output)
         }
 
         /** Every dictionary referenced as `file` by the given configs. */

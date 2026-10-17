@@ -29,7 +29,26 @@ import timber.log.Timber
  */
 object ThemeDiagnostics {
     /** Theme format version this build understands (theme `config_version`). */
-    const val SUPPORTED_CONFIG_VERSION = "3.0"
+    const val SUPPORTED_CONFIG_VERSION = "3.1"
+
+    /** Keys the runtime consumes only as drawable backgrounds. */
+    private val DRAWABLE_ONLY_KEYS =
+        setOf(
+            ColorKey.CANDIDATE_BACKGROUND,
+            ColorKey.HILITED_KEY_BACK_COLOR,
+            ColorKey.HILITED_OFF_KEY_BACK_COLOR,
+            ColorKey.HILITED_ON_KEY_BACK_COLOR,
+            ColorKey.KEY_BACK_COLOR,
+            ColorKey.KEYBOARD_BACK_COLOR,
+            ColorKey.KEYBOARD_BACKGROUND,
+            ColorKey.LIQUID_KEYBOARD_BACKGROUND,
+            ColorKey.LONG_TEXT_BACK_COLOR,
+            ColorKey.OFF_KEY_BACK_COLOR,
+            ColorKey.ON_KEY_BACK_COLOR,
+            ColorKey.ROOT_BACKGROUND,
+        )
+
+    private val COLOR_CONSUMED_KEYS = ColorKey.entries.toSet() - DRAWABLE_ONLY_KEYS
 
     /** Where a finding comes from; also its stable identity in tests. */
     enum class Code {
@@ -283,11 +302,29 @@ object ThemeDiagnostics {
         // fallback entry rather than the key the runtime asks for. The keys
         // that inherit the value are left out, so it is reported once.
         schemes.forEach { (id, colors) ->
-            ColorTable.resolve(colors, theme.fallbackColors, parseColor)
-                .invalidValues
-                .mapNotNull { key ->
-                    ColorTable.resolveRawSource(key.key, colors, theme.fallbackColors)
-                }
+            val invalidSources =
+                ColorTable.resolve(colors, theme.fallbackColors, parseColor)
+                    .invalidValues
+                    .mapNotNull { key ->
+                        ColorTable.resolveRawSource(key.key, colors, theme.fallbackColors)
+                    }
+                    .toMutableList()
+            COLOR_CONSUMED_KEYS.mapNotNullTo(invalidSources) { key ->
+                val direct = colors[key.key]
+                val source =
+                    when {
+                        !direct.isNullOrEmpty() -> key.key to direct
+
+                        !theme.fallbackColors[key.key].isNullOrEmpty() ->
+                            ColorTable.resolveRawSource(key.key, colors, theme.fallbackColors)
+
+                        // Do not reject an image reached only through a built-in
+                        // drawable fallback, such as popup_back_color -> key_back_color.
+                        else -> null
+                    }
+                source?.takeIf { (_, raw) -> ColorTable.isImageValue(raw) }
+            }
+            invalidSources
                 .distinct()
                 .forEach { (source, raw) ->
                     val definedByScheme = colors[source]?.isNotEmpty() == true
@@ -312,10 +349,7 @@ object ThemeDiagnostics {
         lintFallbackTargets(theme, schemes)
     }
 
-    /**
-     * A `fallback_colors` entry whose target no scheme defines is dead: the key
-     * it feeds stays unresolved even though the theme asked for something.
-     */
+    /** Reports a `fallback_colors` entry when it fails to resolve in any scheme that needs it. */
     private fun MutableList<Finding>.lintFallbackTargets(
         theme: Theme,
         schemes: Map<String, Map<String, String>>,
@@ -323,22 +357,21 @@ object ThemeDiagnostics {
         val fallbacks = theme.fallbackColors
         fallbacks.forEach { (from, target) ->
             if (target.isEmpty()) return@forEach
-            // `target` is fine when walking it reaches a value the way the
-            // runtime does: a key a scheme defines, another entry of the chain,
-            // a built-in chain from there, or an image. Walking also means a
-            // chain that ends nowhere, or in a cycle, is reported at every
-            // entry pointing into it.
-            val resolvable =
-                ColorTable.isImageValue(target) ||
-                    schemes.any { scheme ->
-                        ColorTable.resolveRaw(target, scheme.value, fallbacks) != null
-                    }
-            if (resolvable) return@forEach
+            // Start at `from`, exactly as runtime lookup does. A scheme value at
+            // `from` therefore shadows a broken fallback, while an image-looking
+            // target remains a key name until a scheme actually defines it.
+            val unresolvedSchemes =
+                schemes.filter { (_, colors) ->
+                    ColorTable.resolveRaw(from, colors, fallbacks) == null
+                }
+            if (unresolvedSchemes.isEmpty()) return@forEach
+            val schemeLabel = if (unresolvedSchemes.size == 1) "scheme" else "schemes"
+            val schemeIds = unresolvedSchemes.keys.joinToString { "'$it'" }
             add(
                 Finding(
                     Severity.WARNING,
                     Code.BROKEN_FALLBACK_TARGET,
-                    "fallback_colors: '$from' points at '$target', which no scheme defines",
+                    "fallback_colors: '$from' points at '$target', unresolved for $schemeLabel $schemeIds",
                     "fallback_colors/$from",
                 ),
             )
@@ -350,7 +383,7 @@ object ThemeDiagnostics {
      * theme is checked once at activation time instead of on first use.
      */
     fun presetDiagnostics(presetKeys: Map<String, PresetKey>): List<String> = presetKeys.mapNotNull { (name, preset) ->
-        val (keycode, modifiers) = KeyCode.parse(preset.send)
+        val (keycode, modifiers) = KeyCode.parse(preset.send, reportInvalid = false)
         if (preset.send.isNotEmpty() && keycode == 0 && modifiers == 0) {
             "preset '$name' has an unrecognized send '${preset.send}'"
         } else {

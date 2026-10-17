@@ -8,6 +8,7 @@ package com.osfans.trime.ime.keyboard
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
+import android.view.KeyEvent
 import android.widget.FrameLayout
 import androidx.core.view.children
 import com.osfans.trime.data.prefs.AppPrefs
@@ -61,9 +62,6 @@ class KeyboardView(
         val totalWidth = key.width + key.extraWidthLeft + key.extraWidthRight
         layoutParams = LayoutParams(totalWidth, key.height)
 
-        translationX = (key.x - key.extraWidthLeft).toFloat()
-        translationY = key.y.toFloat()
-
         setPadding(
             keyboard.horizontalGap / 2 + key.extraWidthLeft,
             keyboard.verticalGap / 2,
@@ -85,22 +83,54 @@ class KeyboardView(
         setMeasuredDimension(measuredWidth, fullHeight)
     }
 
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        // Model coordinates are absolute keyboard positions, independent of RTL.
+        // Physical bounds must match the drawn keys: requestRectangleOnScreen
+        // walks parent offsets without applying a child's translation.
+        keys.forEachIndexed { index, key ->
+            getChildAt(index)?.let { child ->
+                if (child.visibility != GONE) {
+                    val keyLeft = paddingLeft + key.x - key.extraWidthLeft
+                    val keyTop = paddingTop + key.y
+                    child.layout(keyLeft, keyTop, keyLeft + child.measuredWidth, keyTop + child.measuredHeight)
+                }
+            }
+        }
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
     }
 
     fun invalidateAllKeys() {
-        children.forEach { it.invalidate() }
+        children.forEach { (it as? KeyView)?.refreshAppearance() ?: it.invalidate() }
+    }
+
+    fun updateEnterLabel() {
+        keys.forEachIndexed { index, key ->
+            if (key.click?.code == KeyEvent.KEYCODE_ENTER) {
+                getChildAt(index)?.apply {
+                    contentDescription = labelEnter
+                    (this as? KeyView)?.refreshAppearance() ?: invalidate()
+                }
+            }
+        }
     }
 
     fun invalidateKeyByIndex(index: Int) {
-        getChildAt(index)?.invalidate()
+        getChildAt(index)?.let { (it as? KeyView)?.refreshAppearance() ?: it.invalidate() }
     }
 
     val isCapsOn: Boolean
         get() = keyboard.mShiftKey?.isOn == true
 
-    fun onDetach() {
+    /** Cancel gestures and erase per-key undo text at every editor or privacy boundary. */
+    fun clearTransientContent() {
+        children.filterIsInstance<GestureFrame>().forEach { it.cancelGesture() }
         popup.dismissAll()
+    }
+
+    fun onDetach() {
+        clearTransientContent()
     }
 }

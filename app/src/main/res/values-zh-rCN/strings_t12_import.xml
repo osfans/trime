@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="configuration_import_validated">已校验配置：%1$d；已更新文件：%2$d。</string>
+    <string name="configuration_import_rejected">配置校验或激活失败，已恢复上一次配置。</string>
+    <string name="configuration_import_recovery_needed">配置恢复未完成，恢复文件保留于：%1$s</string>
+    <string name="configuration_import_recovery_failed">配置激活失败，原配置文件仍可使用；请重启或重新部署以恢复输入。</string>
+</resources>

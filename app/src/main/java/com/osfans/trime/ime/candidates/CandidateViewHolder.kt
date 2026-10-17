@@ -5,6 +5,15 @@
 package com.osfans.trime.ime.candidates
 
 import androidx.recyclerview.widget.RecyclerView
+import com.osfans.trime.core.CandidateProto
+import com.osfans.trime.core.CandidateSnapshot
+
+/** A paged row retains the engine state and global index that produced it. */
+data class CandidateRow(
+    val candidate: CandidateProto,
+    val index: Int,
+    val snapshot: CandidateSnapshot,
+)
 
 class CandidateViewHolder(
     val ui: CandidateItemUi,
@@ -12,4 +21,5 @@ class CandidateViewHolder(
     var idx = -1
     var text = ""
     var comment = ""
+    var snapshot = CandidateSnapshot()
 }

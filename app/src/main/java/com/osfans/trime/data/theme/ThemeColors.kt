@@ -6,15 +6,16 @@
 
 package com.osfans.trime.data.theme
 
+import android.graphics.Color
 import androidx.annotation.ColorInt
 
 /**
  * Typed, read-only view over the resolved colors of the active color scheme.
  *
  * Each property is one [ColorKey]; reading it is an O(1) lookup into the
- * pre-compiled [ColorTable]. Keys whose value is an image or that no chain
- * resolves throw [IllegalArgumentException], exactly like
- * `ColorManager.getColor(key)` with the same key.
+ * pre-compiled [ColorTable]. Invalid, missing, or image values used in a color
+ * position safely become transparent; theme diagnostics report the source
+ * configuration without letting a third-party theme crash the UI.
  *
  * The color access root for UI code: reach it through [ThemeScope.colors] and
  * re-read values on every bind or draw — the instance is replaced whenever
@@ -79,6 +80,6 @@ class ThemeColors internal constructor(
     @ColorInt
     private fun color(key: ColorKey): Int = when (val value = table[key]) {
         is ColorTable.Value.Color -> value.argb
-        else -> throw IllegalArgumentException("'${key.key}' is not a color")
+        else -> Color.TRANSPARENT
     }
 }

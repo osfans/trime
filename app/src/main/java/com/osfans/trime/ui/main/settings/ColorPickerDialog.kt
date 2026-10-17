@@ -13,11 +13,12 @@ import com.osfans.trime.data.theme.ThemeManager
 import kotlinx.coroutines.launch
 
 object ColorPickerDialog {
-    fun build(
+    suspend fun build(
         scope: LifecycleCoroutineScope,
         context: Context,
         afterConfirm: (suspend () -> Unit)? = null,
     ): AlertDialog {
+        ThemeManager.init(context.resources.configuration)
         val presetSchemes = ThemeManager.activeTheme.presetColorSchemes.entries.toList()
         val currentScheme = ColorManager.activeColorScheme
         val currentIndex = presetSchemes.indexOfFirst { it.value == currentScheme }

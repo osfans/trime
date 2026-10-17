@@ -32,7 +32,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/diagnosticsToolbar" />
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/emptyState"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -56,14 +56,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/copyButton"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@android:string/copy" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/shareButton"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"

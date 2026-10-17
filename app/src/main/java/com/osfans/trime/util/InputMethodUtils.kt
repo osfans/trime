@@ -34,7 +34,7 @@ object InputMethodUtils {
     } else {
         val activeImeIds = getSecureSettings(Settings.Secure.ENABLED_INPUT_METHODS) ?: "(none)"
         Timber.i("List of active IMEs: $activeImeIds")
-        activeImeIds.split(":").contains(componentName)
+        activeImeIds.split(":").any { it.substringBefore(';') == componentName }
     }
 
     fun checkIsTrimeSelected(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {

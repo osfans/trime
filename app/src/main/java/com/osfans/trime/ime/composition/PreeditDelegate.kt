@@ -10,12 +10,10 @@ import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewOutlineProvider
 import com.osfans.trime.core.CompositionProto
-import com.osfans.trime.daemon.RimeSession
-import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
-import com.osfans.trime.ime.core.TouchEventReceiverWindow
+import com.osfans.trime.ime.core.TrimeInputMethodService
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -28,7 +26,7 @@ class PreeditDelegate(override val di: DI) :
 
     private val context: ContextThemeWrapper by instance()
     private val scope: ThemeScope by instance()
-    private val rime: RimeSession by instance()
+    private val service: TrimeInputMethodService by instance()
 
     private val theme: Theme
         get() = scope.theme
@@ -59,7 +57,7 @@ class PreeditDelegate(override val di: DI) :
                 setupPreeditBackground(this)
                 horizontalPadding = dp(theme.preedit.horizontalPadding)
             },
-            onMoveCursor = { pos -> rime.launchOnReady { it.moveCursorPos(pos) } },
+            onMoveCursor = { pos, text -> service.postRimeJob { moveCursorPos(pos, text) } },
         ).apply {
             root.alpha = theme.preedit.alpha
             root.visibility = View.INVISIBLE
@@ -71,15 +69,12 @@ class PreeditDelegate(override val di: DI) :
         setupPreeditBackground(ui.preedit)
     }
 
-    private val touchEventReceiverWindow = TouchEventReceiverWindow(ui.root)
+    fun clearEditorBoundaryState() {
+        ui.preedit.clearTransientContent()
+    }
 
     override fun onCompositionUpdate(data: CompositionProto) {
         ui.update(data)
         ui.root.visibility = if (ui.visible) View.VISIBLE else View.INVISIBLE
-        if (data.length > 0) {
-            touchEventReceiverWindow.show()
-        } else {
-            touchEventReceiverWindow.dismiss()
-        }
     }
 }

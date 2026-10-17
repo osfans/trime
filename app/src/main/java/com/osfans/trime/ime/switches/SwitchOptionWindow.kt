@@ -17,16 +17,20 @@ import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.bar.ui.ToolButton
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
+import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ui.main.settings.ThemePickerDialog
 import com.osfans.trime.util.AppUtils
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.instance
 import splitties.dimensions.dp
@@ -42,33 +46,41 @@ class SwitchOptionWindow(di: DI) :
     InputBroadcastReceiver {
     private val service: TrimeInputMethodService by instance()
     private val rime: RimeSession by instance()
+    private val keyboardWindow: KeyboardWindow by instance()
     private val scope: ThemeScope by instance()
     private val theme: Theme get() = scope.theme
 
-    private val staticEntries by lazy {
-        arrayOf(
-            SwitchOptionEntry.Static(
-                context.getString(R.string.theme),
-                R.drawable.ic_baseline_color_lens_24,
-                SwitchOptionEntry.Static.Type.ThemeList,
+    private val manualPrivacyMode = AppPrefs.defaultInstance().general.manualPrivacyMode
+
+    private fun staticEntries() = arrayOf(
+        SwitchOptionEntry.Static(
+            context.getString(R.string.theme),
+            R.drawable.ic_baseline_color_lens_24,
+            SwitchOptionEntry.Static.Type.ThemeList,
+        ),
+        SwitchOptionEntry.Static(
+            context.getString(R.string.schemata),
+            R.drawable.ic_round_view_list_24,
+            SwitchOptionEntry.Static.Type.SchemaList,
+        ),
+        SwitchOptionEntry.Static(
+            context.getString(R.string.update_config),
+            R.drawable.ic_baseline_sync_24,
+            SwitchOptionEntry.Static.Type.UpdateConfig,
+        ),
+        SwitchOptionEntry.Static(
+            context.getString(R.string.virtual_keyboard),
+            R.drawable.ic_baseline_keyboard_24,
+            SwitchOptionEntry.Static.Type.Keyboard,
+        ),
+        SwitchOptionEntry.Static(
+            context.getString(
+                if (manualPrivacyMode.getValue()) R.string.disable_privacy_mode else R.string.enable_privacy_mode,
             ),
-            SwitchOptionEntry.Static(
-                context.getString(R.string.schemata),
-                R.drawable.ic_round_view_list_24,
-                SwitchOptionEntry.Static.Type.SchemaList,
-            ),
-            SwitchOptionEntry.Static(
-                context.getString(R.string.update_config),
-                R.drawable.ic_baseline_sync_24,
-                SwitchOptionEntry.Static.Type.UpdateConfig,
-            ),
-            SwitchOptionEntry.Static(
-                context.getString(R.string.virtual_keyboard),
-                R.drawable.ic_baseline_keyboard_24,
-                SwitchOptionEntry.Static.Type.Keyboard,
-            ),
-        )
-    }
+            R.drawable.ic_baseline_lock_24,
+            SwitchOptionEntry.Static.Type.Privacy,
+        ),
+    )
 
     var popupMenu: PopupMenu? = null
 
@@ -80,18 +92,24 @@ class SwitchOptionWindow(di: DI) :
 
     private suspend fun RimeApi.applyOption(option: String, value: Boolean) {
         setRuntimeOption(option, value)
-        if (option in saveOptions) {
-            RimeConfig.openUserConfig("user").use {
-                it.setBool("var/option/$option", value)
+        persistOption(option, value)
+    }
+
+    private suspend fun persistOption(option: String, value: Boolean) {
+        withContext(Dispatchers.IO) {
+            if (option in saveOptions) {
+                RimeConfig.openUserConfig("user").use {
+                    it.setBool("var/option/$option", value)
+                }
             }
         }
     }
 
     private fun showDialog(builder: suspend (RimeApi) -> Dialog) {
-        rime.launchOnReady { api ->
-            service.lifecycleScope.launch {
-                service.showDialog(builder(api))
-            }
+        val editorToken = service.editorToken
+        service.postRimeJob {
+            val dialog = builder(this)
+            if (service.isCurrentEditor(editorToken)) service.showDialog(dialog)
         }
     }
 
@@ -122,19 +140,32 @@ class SwitchOptionWindow(di: DI) :
 
                         SwitchOptionEntry.Static.Type.Keyboard -> AppUtils.launchMainToKeyboard(context)
 
-                        SwitchOptionEntry.Static.Type.ThemeList -> showDialog { r ->
-                            ThemePickerDialog.build(service.lifecycleScope, context) {
-                                r.commitComposition()
+                        SwitchOptionEntry.Static.Type.Privacy -> {
+                            manualPrivacyMode.setValue(!manualPrivacyMode.getValue())
+                            updateSchemaOptionEntries()
+                        }
+
+                        SwitchOptionEntry.Static.Type.ThemeList -> {
+                            val editorToken = service.editorToken
+                            showDialog {
+                                ThemePickerDialog.build(service.lifecycleScope, context) {
+                                    service.postRimeJob {
+                                        if (service.isCurrentEditor(editorToken)) commitComposition()
+                                    }.join()
+                                }
                             }
                         }
                     }
 
                     is SwitchOptionEntry.Custom -> {
+                        val editorToken = service.editorToken
                         val options = entry.switch.options
-                        if (options.isEmpty()) {
-                            rime.launchOnReady {
-                                val oldValue = it.getRuntimeOption(entry.switch.name)
-                                it.applyOption(entry.switch.name, !oldValue)
+                        if (options.isEmpty() && entry.switch.name == "ascii_mode") {
+                            keyboardWindow.switchLanguage { value -> persistOption("ascii_mode", value) }
+                        } else if (options.isEmpty()) {
+                            service.postRimeJob {
+                                val oldValue = getRuntimeOption(entry.switch.name)
+                                applyOption(entry.switch.name, !oldValue)
                             }
                         } else {
                             val popup = PopupMenu(context, view)
@@ -142,9 +173,11 @@ class SwitchOptionWindow(di: DI) :
                             entry.switch.states.forEachIndexed { i, state ->
                                 menu.add(0, 0, 0, state).apply {
                                     setOnMenuItemClickListener {
-                                        rime.launchOnReady {
-                                            options.forEachIndexed { j, option ->
-                                                it.applyOption(option, i == j)
+                                        service.postRimeJob {
+                                            if (service.isCurrentEditor(editorToken)) {
+                                                options.forEachIndexed { j, option ->
+                                                    applyOption(option, i == j)
+                                                }
                                             }
                                         }
                                         true
@@ -172,7 +205,7 @@ class SwitchOptionWindow(di: DI) :
         val switches = rime.run { schemaCached }.switches
         adapter.submitList(
             listOf(
-                *staticEntries,
+                *staticEntries(),
                 *switches.mapNotNull { SwitchOptionEntry.fromSwitch(rime, it) }.toTypedArray(),
             ),
         )
@@ -225,7 +258,7 @@ class SwitchOptionWindow(di: DI) :
             service.lifecycleScope.launch {
                 adapter.submitList(
                     listOf(
-                        *staticEntries,
+                        *staticEntries(),
                         *data.mapNotNull { SwitchOptionEntry.fromSwitch(rime, it) }.toTypedArray(),
                     ),
                 )

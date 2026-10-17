@@ -10,14 +10,18 @@ package com.osfans.trime.ime.keyboard
  * semantics stay testable without Android dependencies.
  *
  * Convention A: positive-wins for gaps and heights. A value > 0 overrides the
- * style default; 0 or null means "unset" and falls through to the style value
- * (which may itself be 0). [unit] converts the selected raw value exactly once.
+ * style default; non-positive or null means "unset" and falls through to a
+ * positive style value, otherwise 0. [unit] converts a selected value exactly once.
  */
 internal fun resolvePositive(
     config: Int?,
     style: Int,
     unit: (Int) -> Int = { it },
-): Int = if (config != null && config > 0) unit(config) else unit(style)
+): Int = when {
+    config != null && config > 0 -> unit(config)
+    style > 0 -> unit(style)
+    else -> 0
+}
 
 /**
  * Convention B: non-negative-wins for corners and borders. The config uses -1

@@ -1,0 +1,375 @@
+--- a/talkback/build.gradle
++++ b/talkback/build.gradle
+@@ -12,4 +12,7 @@
+ 
+ android {
+     namespace "com.google.android.accessibility.talkback"
++    defaultConfig {
++        buildConfigField "String", "LABEL_PROVIDER_AUTHORITY", "\"${talkbackApplicationId}.providers.LabelProvider\""
++    }
+ }
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/CallStateMonitor.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/CallStateMonitor.java
+@@ -60,7 +60,10 @@
+       new BroadcastReceiver() {
+         @Override
+         public void onReceive(Context context, Intent intent) {
+-          context.unregisterReceiver(permissionRequestReceiver);
++          if (!permissionRequestRegistered || isShutdown) {
++            return;
++          }
++          cancelPermissionRequest();
+           String[] permissions = intent.getStringArrayExtra(PERMISSIONS);
+           int[] grantResults = intent.getIntArrayExtra(GRANT_RESULTS);
+           if (permissions == null || grantResults == null) {
+@@ -83,6 +86,8 @@
+ 
+   private int lastCallState;
+   @VisibleForTesting boolean isStarted;
++  @VisibleForTesting boolean permissionRequestRegistered;
++  private boolean isShutdown;
+ 
+   public CallStateMonitor(TalkBackService context) {
+     service = context;
+@@ -137,7 +142,7 @@
+    * ACTION_PHONE_STATE_CHANGED intent. This happens only if READ_PHONE_STATE permission is granted.
+    */
+   public void startMonitoring() {
+-    if (isStarted || !supportTelephony) {
++    if (isShutdown || isStarted || !supportTelephony) {
+       return;
+     }
+     // Starting from M, permission model has changed, so that TalkBack is not granted with
+@@ -157,11 +162,27 @@
+ 
+   /** Unregisters broadcast receiver and stop monitoring phone call state. */
+   public void stopMonitoring() {
++    cancelPermissionRequest();
+     if (isStarted && supportTelephony) {
+       LogUtils.d(TAG, "Stop monitoring call state.");
+       service.unregisterReceiver(this);
+       isStarted = false;
+     }
++  }
++
++  /** Releases this monitor permanently when its owning service is destroyed. */
++  public void shutdown() {
++    isShutdown = true;
++    stopMonitoring();
++  }
++
++  /** Balances the receiver registration even if the permission activity never responds. */
++  private void cancelPermissionRequest() {
++    if (!permissionRequestRegistered) {
++      return;
++    }
++    service.unregisterReceiver(permissionRequestReceiver);
++    permissionRequestRegistered = false;
+   }
+ 
+   /**
+@@ -172,6 +193,9 @@
+    * @param prefs Shared preferences from which to obtain the value
+    */
+   public void requestPhonePermissionIfNeeded(SharedPreferences prefs) {
++    if (isShutdown || permissionRequestRegistered) {
++      return;
++    }
+     boolean tutorialShown = OnboardingInitiator.hasOnboardingBeenShown(prefs, service);
+     if (FeatureSupport.callStateRequiresPermission()
+         && tutorialShown
+@@ -192,7 +216,13 @@
+     IntentFilter filter = new IntentFilter();
+     filter.addAction(ACTION_DONE);
+     service.registerReceiver(permissionRequestReceiver, filter);
+-    service.startActivity(intent);
++    permissionRequestRegistered = true;
++    try {
++      service.startActivity(intent);
++    } catch (RuntimeException exception) {
++      cancelPermissionRequest();
++      throw exception;
++    }
+   }
+ 
+   /**
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/RingerModeAndScreenMonitor.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/RingerModeAndScreenMonitor.java
+@@ -269,10 +269,8 @@
+     final SpannableStringBuilder ttsText = new SpannableStringBuilder();
+ 
+     if (isIdle()) {
+-      // Need the old version to support version older than JB_MR1
+-      // noinspection deprecation
+-      if (Settings.Secure.getInt(
+-              service.getContentResolver(), Settings.Secure.DEVICE_PROVISIONED, 0)
++      if (Settings.Global.getInt(
++              service.getContentResolver(), Settings.Global.DEVICE_PROVISIONED, 0)
+           != 0) {
+         appendCurrentTimeAnnouncement(ttsText);
+       } else {
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/TalkBackService.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/TalkBackService.java
+@@ -1925,6 +1925,10 @@
+   /** Shuts down the infrastructure in case it has been initialized. */
+   private void shutdownInfrastructure() {
+     setServiceState(ServiceStateListener.SERVICE_STATE_SHUTTING_DOWN);
++    // Pending permission requests also own a receiver, even when call monitoring never started.
++    if (callStateMonitor != null) {
++      callStateMonitor.shutdown();
++    }
+     // we put it first to be sure that screen dimming would be removed even if code bellow
+     // will crash by any reason. Because leaving user with dimmed screen is super bad
+     // We check the instance against null to prevent the premature service destroy (aka destroy
+@@ -2394,7 +2398,7 @@
+     }
+ 
+     boolean isDeviceProvisioned =
+-        Settings.Secure.getInt(getContentResolver(), Settings.Global.DEVICE_PROVISIONED, 1) != 0;
++        Settings.Global.getInt(getContentResolver(), Settings.Global.DEVICE_PROVISIONED, 1) != 0;
+ 
+     if (isDeviceProvisioned && !isFirstTimeUser()) {
+       return false;
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/ipc/IpcClient.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/ipc/IpcClient.java
+@@ -54,6 +54,8 @@
+   private final Messenger clientMessenger;
+   // To send messages to IpcService.
+   private @Nullable Messenger serviceMessenger;
++  // A successful bind owns a connection before onServiceConnected delivers its messenger.
++  private boolean bindingRequested;
+ 
+   public IpcClient(Context context) {
+     this.context = context;
+@@ -73,27 +75,41 @@
+ 
+   /** Establishes a connection with {@link IpcService}. */
+   public void bindService() {
+-    if (serviceMessenger != null) {
++    if (bindingRequested) {
+       return;
+     }
+ 
+-    context.bindService(new Intent(context, IpcService.class), this, Context.BIND_AUTO_CREATE);
++    boolean accepted =
++        context.bindService(new Intent(context, IpcService.class), this, Context.BIND_AUTO_CREATE);
++    bindingRequested = true;
++    if (!accepted) {
++      LogUtils.e(TAG, "Could not bind to IpcService.");
++      unbindService();
++    }
+   }
+ 
+   /** Finishes the connection with {@link IpcService}. */
+   public void unbindService() {
+-    if (serviceMessenger == null) {
++    if (!bindingRequested) {
+       return;
+     }
+ 
++    bindingRequested = false;
++    serviceMessenger = null;
+     context.unbindService(this);
+-    serviceMessenger = null;
+   }
+ 
+   /** Called when the connection with service has been established. */
+   @Override
+   public void onServiceConnected(ComponentName name, IBinder binder) {
+-    serviceMessenger = new Messenger(binder);
++    if (bindingRequested) {
++      serviceMessenger = new Messenger(binder);
++    }
++  }
++
++  /** Whether messages can be dispatched through the current connection. */
++  public boolean isConnected() {
++    return serviceMessenger != null;
+   }
+ 
+   /** Called when the service has crashed or been killed. */
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/labeling/CustomLabelManager.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/labeling/CustomLabelManager.java
+@@ -31,7 +31,6 @@
+ import android.view.accessibility.AccessibilityNodeInfo;
+ import androidx.annotation.VisibleForTesting;
+ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
+-import com.google.android.accessibility.talkback.BuildConfig;
+ import com.google.android.accessibility.utils.AccessibilityEventListener;
+ import com.google.android.accessibility.utils.AccessibilityEventUtils;
+ import com.google.android.accessibility.utils.AccessibilityNodeInfoUtils;
+@@ -76,7 +75,7 @@
+   public static final String EXTRA_STRING_ARRAY_PACKAGES = "EXTRA_STRING_ARRAY_PACKAGES";
+ 
+   @VisibleForTesting
+-  static final String AUTHORITY = BuildConfig.LIBRARY_PACKAGE_NAME + ".providers.LabelProvider";
++  static final String AUTHORITY = LabelProvider.AUTHORITY;
+ 
+   /**
+    * The substring separating a label's package and view ID name in a fully-qualified resource
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/labeling/LabelProvider.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/labeling/LabelProvider.java
+@@ -47,7 +47,7 @@
+ 
+   private static final String TAG = "LabelProvider";
+ 
+-  public static final String AUTHORITY = BuildConfig.LIBRARY_PACKAGE_NAME + ".providers.LabelProvider";
++  public static final String AUTHORITY = BuildConfig.LABEL_PROVIDER_AUTHORITY;
+   static final String LABELS_PATH = "labels";
+   static final Uri LABELS_CONTENT_URI =
+       new Uri.Builder().scheme("content").authority(AUTHORITY).path(LABELS_PATH).build();
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/training/TrainingActivity.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/training/TrainingActivity.java
+@@ -386,7 +386,12 @@
+     if (!isTalkBackEnabled(getApplicationContext()) || ipcClient == null) {
+       return;
+     }
+-    ipcClient.sendMessage(message);
++    // onServiceConnected sends the latest page and requests gestures. Until then, pageController
++    // owns the current page state; dispatching through a pending binding would lose the message.
++    // A pause before connection cancels the binding, so no stale page is replayed after leaving.
++    if (ipcClient.isConnected()) {
++      ipcClient.sendMessage(message);
++    }
+   }
+ 
+   @VisibleForTesting
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/training/TrainingIpcClient.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/training/TrainingIpcClient.java
+@@ -76,7 +76,9 @@
+   @Override
+   public void onServiceConnected(ComponentName name, IBinder binder) {
+     super.onServiceConnected(name, binder);
+-    connectionStateListener.run();
++    if (isConnected()) {
++      connectionStateListener.run();
++    }
+   }
+ 
+   /** The data getting from TalkBack. */
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/utils/SplitCompatUtils.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/utils/SplitCompatUtils.java
+@@ -21,8 +21,9 @@
+ /** An empty utility for the version without using feature splits. */
+ public final class SplitCompatUtils {
+   public static boolean installActivity(Context context) {
+-    // Do nothing.
+-    return false;
++    // This distribution has no feature splits; there is nothing to install.
++    // The empty installation completed successfully.
++    return true;
+   }
+ 
+   private SplitCompatUtils() {}
+--- a/utils/src/main/java/com/google/android/accessibility/utils/output/SpeechControllerImpl.java
++++ b/utils/src/main/java/com/google/android/accessibility/utils/output/SpeechControllerImpl.java
+@@ -214,6 +214,7 @@
+    * speaking state.
+    */
+   private boolean mIsSpeaking;
++  private boolean mIsPaused;
+ 
+   /** Indicates that we want to switch TTS silently, i.e. don't say "Using XYZ engine". */
+   private boolean mSkipNextTTSChangeAnnouncement = false;
+@@ -1005,9 +1006,9 @@
+       mSpeechListener.onUtteranceQueued(item);
+     }
+ 
+-    // If TTS isn't ready, this should be the only item in the queue.
++    // Keep queued feedback until onTtsInitialized() can submit it to the engine.
+     if (!mFailoverTts.isReady()) {
+-      LogUtils.e(TAG, "Attempted to speak before TTS was initialized.");
++      LogUtils.v(TAG, "Queued speech item while waiting for TTS initialization.");
+       return;
+     }
+ 
+@@ -1604,9 +1605,12 @@
+    * @see #handleSpeechCompleted(int status)
+    */
+   private void handleSpeechStarting() {
+-    for (SpeechController.Observer observer : mObservers) {
+-      observer.onSpeechStarting();
+-    }
++    if (mIsSpeaking) {
++      return;
++    }
++    // Publish the transition before callbacks, which may synchronously interrupt or restart speech.
++    mIsSpeaking = true;
++    mIsPaused = false;
+ 
+     boolean useAudioFocus = mUseAudioFocus;
+     List<AudioRecordingConfiguration> recordConfigurations =
+@@ -1624,11 +1628,9 @@
+       }
+     }
+ 
+-    if (mIsSpeaking) {
+-      LogUtils.e(TAG, "Started speech while already speaking!");
+-    }
+-
+-    mIsSpeaking = true;
++    for (SpeechController.Observer observer : mObservers) {
++      observer.onSpeechStarting();
++    }
+   }
+ 
+   /**
+@@ -1639,16 +1641,17 @@
+    * @see #handleSpeechStarting()
+    */
+   private void handleSpeechCompleted(int status) {
+-    for (SpeechController.Observer observer : mObservers) {
+-      if (status == STATUS_PAUSE) {
+-        observer.onSpeechPaused();
+-
+-      } else if (status != STATUS_ERROR_DONT_NOTIFY_OBSERVER) {
+-        observer.onSpeechCompleted();
+-      }
+-    }
+-
+-    if (mUseAudioFocus) {
++    final boolean wasSpeaking = mIsSpeaking;
++    final boolean isPause = status == STATUS_PAUSE;
++    // A pause following an interruption is a distinct transition even though speech is idle.
++    if (!wasSpeaking && (!isPause || mIsPaused)) {
++      return;
++    }
++    mIsSpeaking = false;
++    mIsPaused = isPause;
++
++    // Release the old focus before notifying observers; a callback may start new speech.
++    if (wasSpeaking && mUseAudioFocus) {
+       if (BuildVersionUtils.isAtLeastO()) {
+         mAudioManager.abandonAudioFocusRequest(mAudioFocusRequest);
+       } else {
+@@ -1656,11 +1659,13 @@
+       }
+     }
+ 
+-    if (!mIsSpeaking) {
+-      LogUtils.e(TAG, "Completed speech while already completed!");
+-    }
+-
+-    mIsSpeaking = false;
++    for (SpeechController.Observer observer : mObservers) {
++      if (isPause) {
++        observer.onSpeechPaused();
++      } else if (status != STATUS_ERROR_DONT_NOTIFY_OBSERVER) {
++        observer.onSpeechCompleted();
++      }
++    }
+   }
+ 
+   /**
+@@ -1820,6 +1825,11 @@
+    */
+   private void onFragmentCompleted(
+       String utteranceId, boolean success, boolean advance, boolean notifyObserver) {
++    // interrupt() can finish an item synchronously before its engine callback arrives.
++    // Keep the separate pause transition, which intentionally clears the current item first.
++    if (mCurrentFeedbackItem == null && !mIsSpeaking && !requestPause) {
++      return;
++    }
+     if (currentFragmentIterator != null) {
+       currentFragmentIterator.onFragmentCompleted(utteranceId, success);
+     }

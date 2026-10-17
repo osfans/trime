@@ -46,6 +46,11 @@ class MainFragment : PaddingPreferenceFragment() {
     ) {
         preferenceScreen = preferenceManager.createPreferenceScreen(requireContext()).apply {
             addDestinationPreference(
+                R.string.quick_settings,
+                R.drawable.ic_baseline_tune_24,
+                NavigationRoute.QuickSettings,
+            )
+            addDestinationPreference(
                 R.string.schemata,
                 R.drawable.ic_round_view_list_24,
                 NavigationRoute.SchemaList,

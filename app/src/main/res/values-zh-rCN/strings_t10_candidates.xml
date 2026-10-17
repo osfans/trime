@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="candidate_show_comments">显示候选拼音和注释</string>
+    <string name="candidate_horizontal_scroll">允许候选条横向滑动</string>
+    <string name="candidate_pin">对此输入置顶</string>
+    <string name="candidate_restore_ranking">恢复此输入的默认排序</string>
+    <string name="candidate_read_full_text">阅读候选全文</string>
+    <string name="candidate_pinned">已对此方案和输入置顶。</string>
+    <string name="candidate_ranking_restored">已移除此输入的置顶设置，学习词频保持不变。</string>
+    <string name="candidate_forgotten">已请求移除学习记录。系统词典仍可能出现此词；手动置顶不受影响。</string>
+    <string name="candidate_forget_failed">当前候选无法忘记：可能已刷新、无可编辑学习记录或隐私模式禁止。</string>
+    <string name="candidate_action_failed">操作未成功，请刷新候选并在普通模式下重试。</string>
+</resources>

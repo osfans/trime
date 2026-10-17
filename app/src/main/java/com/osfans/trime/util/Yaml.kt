@@ -46,9 +46,15 @@ val YamlNode.string: String?
 
 /** True when this node is a scalar without a value (`key:`, `~`, `null`, `Null`). */
 val YamlNode.isNull: Boolean
-    get() = when (val node = untagged) {
+    get() = when (this) {
+        // yaml-cpp only treats an implicitly tagged plain scalar as null.
+        // Any explicit tag keeps the scalar non-null, even `!!null null`.
+        is YamlTaggedNode -> false
+
         is YamlNull -> true
-        is YamlScalar -> node.content in extraNullSpellings
+
+        is YamlScalar -> content in extraNullSpellings
+
         else -> false
     }
 

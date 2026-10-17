@@ -1,0 +1,23 @@
+--- a/observer9_session_client_v1.py
++++ b/observer9_session_client_v1.py
+@@ -184,0 +185,8 @@
++    def private_test(self, operator, remote):
++        require(operator in {"-e", "-f"}, "Only file-existence predicates are supported")
++        if self.gui.args.api >= 23:
++            # Execute the real predicate as the application UID without starting
++            # an app-domain shell that probes inherited adbd sockets as a TTY.
++            return self.gui.shell("run-as", OBSERVER, "/system/bin/toybox", "test", operator, remote, check=False)
++        return self.gui.shell("run-as", OBSERVER, "sh", "-c", "test " + operator + " " + shlex.quote(remote), check=False)
++
+@@ -186 +194 @@
+-        output = self.gui.shell("run-as", OBSERVER, "sh", "-c", "test -f " + shlex.quote(remote), check=False)
++        output = self.private_test("-f", remote)
+@@ -266 +274 @@
+-        require(self.gui.shell("run-as", OBSERVER, "sh", "-c", "test -e " + shlex.quote(self.cache), check=False) == "" and
++        require(self.private_test("-e", self.cache) == "" and
+@@ -351 +359 @@
+-        require(self.gui.shell("run-as", OBSERVER, "sh", "-c", "test -e " + shlex.quote(remote), check=False) == "" and
++        require(self.private_test("-e", remote) == "" and
+@@ -356 +364 @@
+-        require(self.gui.shell("run-as", OBSERVER, "sh", "-c", "test -e " + shlex.quote(private_tmp), check=False) == "" and
++        require(self.private_test("-e", private_tmp) == "" and

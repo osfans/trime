@@ -8,18 +8,20 @@ package com.osfans.trime.ime.candidates
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
+import android.graphics.Typeface
+import android.text.TextUtils
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import com.osfans.trime.R
 import com.osfans.trime.core.CandidateProto
+import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.prefs.candidateTextSize
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.data.theme.model.GeneralStyle
-import com.osfans.trime.ime.core.AutoScaleTextView
-import com.osfans.trime.ime.keyboard.GestureFrame
 import com.osfans.trime.util.roundedRippleDrawable
 import splitties.dimensions.dp
-import splitties.views.dsl.constraintlayout.baselineToBaselineOf
 import splitties.views.dsl.constraintlayout.bottomOfParent
 import splitties.views.dsl.constraintlayout.bottomToTopOf
 import splitties.views.dsl.constraintlayout.centerHorizontally
@@ -37,6 +39,7 @@ import splitties.views.dsl.constraintlayout.topToBottomOf
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.textView
 import splitties.views.dsl.core.view
 import splitties.views.dsl.core.wrapContent
 import splitties.views.gravityCenter
@@ -49,7 +52,7 @@ class CandidateItemUi(
     private val theme: Theme
         get() = scope.theme
 
-    private val textSize = theme.style.candidateTextSize
+    private val textSize = candidateTextSize(theme.style.candidateTextSize, AppPrefs.defaultInstance().candidates.textSize.getValue())
     private val commentSize = theme.style.commentTextSize
 
     // Read at use time so a scheme switch re-binds rows with the new colors.
@@ -64,26 +67,29 @@ class CandidateItemUi(
     private val candidateTextVerticalBias = theme.style.candidateTextVerticalBias
 
     private val text =
-        view(::AutoScaleTextView) {
+        textView {
             id = View.generateViewId()
             this.textSize = this@CandidateItemUi.textSize
             typeface = theme.fonts.candidate
             isSingleLine = true
+            ellipsize = TextUtils.TruncateAt.END
+            maxWidth = ctx.resources.displayMetrics.widthPixels
             gravity = gravityCenter
-            scaleMode = AutoScaleTextView.Mode.Proportional
         }
 
     private val comment =
-        view(::AutoScaleTextView) {
+        textView {
             id = View.generateViewId()
             this.textSize = commentSize
             typeface = theme.fonts.comment
             isSingleLine = true
+            ellipsize = TextUtils.TruncateAt.END
+            maxWidth = ctx.resources.displayMetrics.widthPixels
             gravity = gravityCenter
-            scaleMode = AutoScaleTextView.Mode.Proportional
         }
 
     private val content = constraintLayout {
+        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
         horizontalPadding = dp(theme.style.candidatePadding)
         when (commentPosition) {
             GeneralStyle.CommentPosition.RIGHT -> {
@@ -99,9 +105,10 @@ class CandidateItemUi(
                 add(
                     comment,
                     lParams(wrapContent, wrapContent) {
+                        // Keep both labels inside the row as candidate widths change.
+                        centerVertically()
                         startToEndOf(text, ctx.dp(1))
                         endOfParent()
-                        baselineToBaselineOf(text)
                         horizontalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
                     },
                 )
@@ -149,10 +156,10 @@ class CandidateItemUi(
     /**
      * candidate long press feedback is handled by `showCandidateActionMenu`
      */
-    override val root = view(::GestureFrame) {
+    override val root = view(::CandidateGestureFrame) {
         add(
             content,
-            lParams(wrapContent, dp(theme.style.candidateViewHeight)) {
+            lParams(wrapContent, dp(candidateRowHeight(ctx, theme))) {
                 gravity = gravityCenter
             },
         )
@@ -162,6 +169,7 @@ class CandidateItemUi(
     fun update(
         item: CandidateProto,
         highlighted: Boolean,
+        isPrediction: Boolean = false,
     ) {
         val tColor = if (highlighted) hlTextColor else textColor
         val cColor = if (highlighted) hlCommentColor else commentColor
@@ -171,10 +179,13 @@ class CandidateItemUi(
         content.background = roundedRippleDrawable(hlBackColor, cornerRadius, contentColor)
         text.text = item.text
         text.setTextColor(tColor)
+        text.typeface = if (highlighted) Typeface.create(theme.fonts.candidate, Typeface.BOLD) else theme.fonts.candidate
 
-        val commentText = item.comment
+        val commentText = if (isPrediction) ctx.getString(R.string.next_word_prediction_label) else item.comment
         comment.text = commentText
         comment.setTextColor(cColor)
-        comment.isVisible = commentText.isNotEmpty()
+        comment.isVisible = isPrediction || (AppPrefs.defaultInstance().candidates.showComments.getValue() && commentText.isNotEmpty())
+        root.isSelected = highlighted
+        root.contentDescription = if (comment.isVisible) "${item.text}, $commentText" else item.text
     }
 }

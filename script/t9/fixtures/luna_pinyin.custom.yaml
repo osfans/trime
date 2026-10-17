@@ -1,0 +1,7 @@
+patch:
+  schema/dependencies: []
+  translator/dictionary: t9_test
+  translator/prism: t9_full_test
+  translator/contextual_suggestions: false
+  engine/translators: [script_translator]
+  engine/filters: []

@@ -6,6 +6,7 @@ package com.osfans.trime.ime.bar.ui
 
 import android.content.Context
 import android.text.TextUtils
+import android.view.View
 import com.osfans.trime.R
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.keyboard.GestureFrame
@@ -36,6 +37,7 @@ class ClipboardSuggestionUi(
 ) : Ui {
     private val icon =
         imageView {
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
             imageDrawable =
                 drawable(R.drawable.ic_clipboard_24)!!.apply {
                     setTint(scope.colors.candidateTextColor)
@@ -52,7 +54,8 @@ class ClipboardSuggestionUi(
 
     val dismiss =
         imageView {
-            isFocusable = false
+            isFocusable = true
+            contentDescription = ctx.getString(R.string.a11y_dismiss_clipboard_suggestion)
             imageDrawable = drawable(R.drawable.ic_outline_cancel_24)!!.apply {
                 setTint(scope.colors.candidateTextColor)
             }

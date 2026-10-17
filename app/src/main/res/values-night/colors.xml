@@ -8,5 +8,4 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 <resources>
     <color name="colorAccent">#0A7CB2</color>
-    <color name="colorAccentDark">#28566d</color>
 </resources>

@@ -5,7 +5,6 @@
 
 package com.osfans.trime.data.theme.model
 
-import com.osfans.trime.util.enum
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -39,6 +38,7 @@ data class TextKeyboard(
     val keyPressOffsetY: Float = 0f,
     val importPreset: String = "",
     val keys: List<TextKey> = emptyList(),
+    val t9Layout: Boolean = false,
 ) {
     enum class LabelTransform {
         NONE,

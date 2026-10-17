@@ -61,12 +61,12 @@ class InputDeviceManager(
 
     var useCandidatesView = false
 
-    fun setInputView(inputView: InputView) {
+    fun setInputView(inputView: InputView?) {
         this.inputView = inputView
         setupInputViewCallback(this.useVirtualKeyboard)
     }
 
-    fun setCandidatesView(candidatesView: CandidatesView) {
+    fun setCandidatesView(candidatesView: CandidatesView?) {
         this.candidatesView = candidatesView
         setupCandidatesViewCallback(this.useVirtualKeyboard)
     }

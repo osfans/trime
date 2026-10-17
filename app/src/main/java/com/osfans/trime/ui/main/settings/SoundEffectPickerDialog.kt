@@ -9,14 +9,17 @@ import android.content.Context
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
 import com.osfans.trime.data.soundeffect.SoundEffectManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 object SoundEffectPickerDialog {
-    fun build(
+    suspend fun build(
         scope: LifecycleCoroutineScope,
         context: Context,
     ): AlertDialog {
-        val all = SoundEffectManager.getAllSoundEffects().map { it.name }
+        val effects = withContext(Dispatchers.IO) { SoundEffectManager.getAllSoundEffects() }
+        val all = effects.map { it.name }
         val current = SoundEffectManager.activeSoundEffect?.name ?: ""
         val currentIndex = all.indexOfFirst { it == current }
         return AlertDialog
@@ -32,7 +35,7 @@ object SoundEffectPickerDialog {
                     ) { dialog, which ->
                         scope.launch {
                             if (which != currentIndex) {
-                                SoundEffectManager.switchEffect(all[which])
+                                SoundEffectManager.switchEffect(effects[which])
                             }
                             dialog.dismiss()
                         }
