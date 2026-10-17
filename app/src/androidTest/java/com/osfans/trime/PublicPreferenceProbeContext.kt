@@ -171,7 +171,11 @@ internal class PublicPreferenceProbeContext(val instrumentation: Instrumentation
         if (Build.VERSION.SDK_INT >= 33) check(context.packageManager.checkPermission("android.permission.POST_NOTIFICATIONS", context.packageName) == PackageManager.PERMISSION_GRANTED)
         check(!directory.exists() && directory.mkdirs())
         PublicImeWindowPreflight.synchronize(
-            instrumentation, workDeadline, totalDeadline, JSONObject().also { report.put("ime_preflight_window", it) }, ::sessionNames,
+            instrumentation,
+            workDeadline,
+            totalDeadline,
+            JSONObject().also { report.put("ime_preflight_window", it) },
+            ::sessionNames,
         )
         baselineIme = ime()
         check(baselineIme?.second?.startsWith("${context.packageName}/") == true)

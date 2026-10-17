@@ -241,7 +241,7 @@ internal object PublicImeWindowPreflight {
                 // This is also unconditional: a launch task may have registered after its caller timed out.
                 postedMain(cleanup = true) {
                     state.created.forEach(::finishKnown)
-                    check(!state.launchAttemptedOnMain || state.created.isNotEmpty() && state.created.all { it.isDestroyed && it in state.destroyed }) {
+                    check(!state.launchAttemptedOnMain || (state.created.isNotEmpty() && state.created.all { it.isDestroyed && it in state.destroyed })) {
                         "Owned launch has unknown teardown; cleanup callback retained, VM must not be reused"
                     }
                     if (state.registered) {

@@ -37,8 +37,13 @@ internal object PublicProfileDataSnapshot {
         }
 
         fun identity(value: StructStat): List<Long> = listOf(
-            value.st_dev, value.st_ino, value.st_mode.toLong(), value.st_nlink,
-            value.st_size, value.st_mtime, value.st_ctime,
+            value.st_dev,
+            value.st_ino,
+            value.st_mode.toLong(),
+            value.st_nlink,
+            value.st_size,
+            value.st_mtime,
+            value.st_ctime,
         )
 
         fun scan(copy: Boolean, label: String): JSONArray {

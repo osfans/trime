@@ -476,7 +476,11 @@ internal object PublicWindowPilotProbe {
                 "Pilot requires an already completed disposable route profile before opening any Window"
             }
             PublicImeWindowPreflight.synchronize(
-                instrumentation, workDeadline, deadline, JSONObject().also { report.put("ime_preflight_window", it) }, ::sessions,
+                instrumentation,
+                workDeadline,
+                deadline,
+                JSONObject().also { report.put("ime_preflight_window", it) },
+                ::sessions,
             )
             val prefs = AppPrefs.defaultInstance()
             val preferenceStore = prefs.advanced.uiMode.sharedPreferences

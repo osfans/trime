@@ -1042,7 +1042,11 @@ internal object PublicHostWindowProbe {
             check(File(context.getExternalFilesDir(null), "runtime-audit-dedicated").let { it.isFile && it.length() == 0L })
             check(!directory.exists() && directory.mkdirs())
             PublicImeWindowPreflight.synchronize(
-                instrumentation, workDeadline, totalDeadline, JSONObject().also { report.put("ime_preflight_window", it) }, ::sessions,
+                instrumentation,
+                workDeadline,
+                totalDeadline,
+                JSONObject().also { report.put("ime_preflight_window", it) },
+                ::sessions,
             )
             await("The selected IME did not bind before host windows") {
                 main {
