@@ -30,16 +30,27 @@ import java.util.concurrent.TimeUnit
 internal object PublicImeWindowPreflight {
     private class State {
         @Volatile var owner: EditorProbeActivity? = null
+
         @Volatile var resumed = false
+
         @Volatile var registered = false
+
         @Volatile var launchRequested = false
+
         @Volatile var launchMainStarted = false
+
         @Volatile var launchAccepted = false
+
         @Volatile var launchAttemptedOnMain = false
+
         @Volatile var launchAborted = false
+
         @Volatile var cleanupRequested = false
+
         @Volatile var callbackFailure: Throwable? = null
+
         @Volatile var readyOwners: Set<String>? = null
+
         // Only the Main thread accesses this collection, including destruction checks.
         val created = mutableListOf<EditorProbeActivity>()
         val destroyed = mutableSetOf<EditorProbeActivity>()
@@ -93,7 +104,11 @@ internal object PublicImeWindowPreflight {
         fun selected(): String? = Settings.Secure.getString(context.contentResolver, Settings.Secure.DEFAULT_INPUT_METHOD)
         fun callbackError(error: Throwable) {
             val primary = state.callbackFailure
-            if (primary == null) state.callbackFailure = error else if (primary !== error) primary.addSuppressed(error)
+            if (primary == null) {
+                state.callbackFailure = error
+            } else if (primary !== error) {
+                primary.addSuppressed(error)
+            }
         }
         fun finishKnown(activity: EditorProbeActivity) {
             try {
@@ -107,14 +122,27 @@ internal object PublicImeWindowPreflight {
                 if (activity is EditorProbeActivity && activity.intent.getStringExtra(extra) == token) {
                     state.created += activity
                     val first = state.owner
-                    if (first == null) state.owner = activity
-                    else if (first !== activity) callbackError(IllegalStateException("Duplicate owned preflight Activity"))
+                    if (first == null) {
+                        state.owner = activity
+                    } else if (first !== activity) {
+                        callbackError(IllegalStateException("Duplicate owned preflight Activity"))
+                    }
                     event("created")
                     if (state.cleanupRequested || first != null) finishKnown(activity)
                 }
             }
-            override fun onActivityResumed(activity: Activity) { if (activity === state.owner) { state.resumed = true; event("resumed") } }
-            override fun onActivityPaused(activity: Activity) { if (activity === state.owner) { state.resumed = false; event("paused") } }
+            override fun onActivityResumed(activity: Activity) {
+                if (activity === state.owner) {
+                    state.resumed = true
+                    event("resumed")
+                }
+            }
+            override fun onActivityPaused(activity: Activity) {
+                if (activity === state.owner) {
+                    state.resumed = false
+                    event("paused")
+                }
+            }
             override fun onActivityDestroyed(activity: Activity) {
                 if (activity is EditorProbeActivity && activity in state.created) {
                     state.destroyed += activity
@@ -183,8 +211,10 @@ internal object PublicImeWindowPreflight {
                     val engine = RimeDaemon.engineState.value
                     evidence.put("owners_observed", JSONArray(owners.sorted())).put("engine_observed", engine.name)
                         .put("manager_active", manager.isActive(editor)).put("selected_ime_observed", selected() ?: JSONObject.NULL)
-                    (owners.size == 1 && owners.single().startsWith(ownerPrefix) && engine == RimeLifecycle.State.READY &&
-                        manager.isActive(editor) && selected() == expectedIme).also { if (it) state.readyOwners = owners }
+                    (
+                        owners.size == 1 && owners.single().startsWith(ownerPrefix) && engine == RimeLifecycle.State.READY &&
+                            manager.isActive(editor) && selected() == expectedIme
+                        ).also { if (it) state.readyOwners = owners }
                 }
             }
             evidence.put("owners_before_finish", JSONArray(checkNotNull(state.readyOwners).sorted()))
@@ -202,9 +232,15 @@ internal object PublicImeWindowPreflight {
             state.cleanupRequested = true
             operationDeadline = minOf(totalDeadline, workEnded + 10_000L)
             fun clean(block: () -> Unit) {
-                try { block() } catch (error: Throwable) {
+                try {
+                    block()
+                } catch (error: Throwable) {
                     val primary = failure
-                    if (primary == null) failure = error else if (primary !== error) primary.addSuppressed(error)
+                    if (primary == null) {
+                        failure = error
+                    } else if (primary !== error) {
+                        primary.addSuppressed(error)
+                    }
                 }
             }
             var windowsDestroyed = false
@@ -217,8 +253,10 @@ internal object PublicImeWindowPreflight {
                 await("Owned preflight Activity did not reach actual onDestroy", operationDeadline) {
                     main {
                         state.created.forEach(::finishKnown)
-                        (!state.launchAttemptedOnMain ||
-                            (state.created.isNotEmpty() && state.created.all { it.isDestroyed && it in state.destroyed }))
+                        (
+                            !state.launchAttemptedOnMain ||
+                                (state.created.isNotEmpty() && state.created.all { it.isDestroyed && it in state.destroyed })
+                            )
                     }
                 }
                 windowsDestroyed = true
@@ -229,9 +267,9 @@ internal object PublicImeWindowPreflight {
                     await("Preflight teardown changed the complete READY IME owner set", operationDeadline) {
                         main {
                             val owners = sessionOwners()
-                            val state = RimeDaemon.engineState.value
-                            evidence.put("owners_after_finish", JSONArray(owners.sorted())).put("engine_after_finish", state.name)
-                            owners == expected && state == RimeLifecycle.State.READY
+                            val engine = RimeDaemon.engineState.value
+                            evidence.put("owners_after_finish", JSONArray(owners.sorted())).put("engine_after_finish", engine.name)
+                            owners == expected && engine == RimeLifecycle.State.READY
                         }
                     }
                 }
@@ -255,10 +293,15 @@ internal object PublicImeWindowPreflight {
                 // Release strong references only after actual destruction and callback removal.
                 clean {
                     main {
-                        evidence.put("owned_activities", JSONArray(state.created.map { activity ->
-                            JSONObject().put("class", activity.javaClass.name).put("identity", System.identityHashCode(activity))
-                                .put("destroyed", activity.isDestroyed).put("on_destroy_observed", activity in state.destroyed)
-                        }))
+                        evidence.put(
+                            "owned_activities",
+                            JSONArray(
+                                state.created.map { activity ->
+                                    JSONObject().put("class", activity.javaClass.name).put("identity", System.identityHashCode(activity))
+                                        .put("destroyed", activity.isDestroyed).put("on_destroy_observed", activity in state.destroyed)
+                                },
+                            ),
+                        )
                         state.created.clear()
                         state.destroyed.clear()
                         state.owner = null
