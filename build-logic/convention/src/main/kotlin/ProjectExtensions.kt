@@ -39,6 +39,9 @@ val Project.ndkVersion
 val Project.buildAbiOverride
     get() = envOrPropOrNull("BUILD_ABI", "buildABI")
 
+val Project.buildAbis: List<String>
+    get() = resolveBuildAbis(buildAbiOverride, Versions.supportedAbis.toList())
+
 val Project.builder
     get() =
         envOrProp("CI_NAME", "ciName") {
@@ -66,9 +69,11 @@ val Project.buildCommitHash
 
 val Project.buildTimestamp
     get() =
-        envOrProp("BUILD_TIMESTAMP", "buildTimestamp") {
-            System.currentTimeMillis().toString()
-        }
+        normalizeBuildTimestamp(
+            envOrProp("BUILD_TIMESTAMP", "buildTimestamp") {
+                System.currentTimeMillis().toString()
+            },
+        )
 
 val Project.signKeyStoreProps: Properties?
     get() {

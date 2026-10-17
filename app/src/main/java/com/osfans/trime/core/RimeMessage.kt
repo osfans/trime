@@ -8,7 +8,19 @@ package com.osfans.trime.core
 sealed class RimeMessage<T>(
     open val data: T,
 ) {
+    var editorToken: Long = 0
+        internal set
+
+    var snapshot: CandidateSnapshot = CandidateSnapshot.EMPTY
+        internal set
+
     abstract val messageType: MessageType
+
+    val isEditorResponse: Boolean
+        get() = when (messageType) {
+            MessageType.Unknown, MessageType.Schema, MessageType.Option, MessageType.Deploy -> false
+            else -> true
+        }
 
     data class UnknownMessage(
         override val data: Array<Any>,
@@ -55,6 +67,10 @@ sealed class RimeMessage<T>(
     data class DeployMessage(
         override val data: State,
     ) : RimeMessage<DeployMessage.State>(data) {
+        /** A validated import applies its own theme after committing the configuration. */
+        var isConfigurationImport: Boolean = false
+            internal set
+
         override val messageType: MessageType
             get() = MessageType.Deploy
 
@@ -74,8 +90,8 @@ sealed class RimeMessage<T>(
     }
 
     data class InlinePreeditMessage(
-        override val data: String,
-    ) : RimeMessage<String>(data) {
+        override val data: InlinePreeditProto,
+    ) : RimeMessage<InlinePreeditProto>(data) {
         override val messageType = MessageType.InlinePreedit
     }
 
@@ -115,6 +131,10 @@ sealed class RimeMessage<T>(
         )
     }
 
+    data class T9Message(override val data: T9StateProto) : RimeMessage<T9StateProto>(data) {
+        override val messageType = MessageType.T9
+    }
+
     enum class MessageType {
         Unknown,
         Schema,
@@ -127,6 +147,7 @@ sealed class RimeMessage<T>(
         Status,
         Candidate,
         Key,
+        T9,
     }
 
     companion object {
@@ -161,7 +182,7 @@ sealed class RimeMessage<T>(
                 CommitTextMessage(params[0] as CommitProto)
 
             MessageType.InlinePreedit ->
-                InlinePreeditMessage(params[0] as String)
+                InlinePreeditMessage(params[0] as InlinePreeditProto)
 
             MessageType.Composition ->
                 CompositionMessage(params[0] as CompositionProto)
@@ -174,6 +195,8 @@ sealed class RimeMessage<T>(
 
             MessageType.Candidate ->
                 BulkCandidatesMessage(params[0] as Candidates.Bulk)
+
+            MessageType.T9 -> T9Message(params[0] as T9StateProto)
 
             MessageType.Key ->
                 KeyMessage(

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<resources>
+    <!-- Keep existing widget/color resources; only this Activity owns a framework Window. -->
+    <style name="Theme.TrimePublicWindowPilot" parent="Theme.TrimeAppTheme">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+    </style>
+    <string name="public_window_navigate_up">Navigate up</string>
+</resources>

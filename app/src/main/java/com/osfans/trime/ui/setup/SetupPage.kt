@@ -15,6 +15,8 @@ enum class SetupPage {
     Mode,
     Enable,
     Select,
+    Input,
+    Try,
     ;
 
     fun getStepText(context: Context) = context.getText(
@@ -22,6 +24,8 @@ enum class SetupPage {
             Mode -> R.string.setup__step_one
             Enable -> R.string.setup__step_two
             Select -> R.string.setup__step_three
+            Input -> R.string.setup__step_input
+            Try -> R.string.setup__step_try
         },
     )
 
@@ -30,6 +34,8 @@ enum class SetupPage {
             Mode -> R.string.setup__select_data_path_hint
             Enable -> R.string.setup__enable_ime_hint
             Select -> R.string.setup__select_ime_hint
+            Input -> R.string.setup__input_hint
+            Try -> R.string.setup__try_hint
         },
     )
 
@@ -38,6 +44,8 @@ enum class SetupPage {
             Mode -> R.string.setup__select_data_path
             Enable -> R.string.setup__enable_ime
             Select -> R.string.setup__select_ime
+            Input -> R.string.setup__apply_input
+            Try -> R.string.setup__open_trial
         },
     )
 
@@ -46,11 +54,14 @@ enum class SetupPage {
             Mode -> (activity as SetupActivity).pickDataPath()
             Enable -> InputMethodUtils.showImeEnablerActivity(activity)
             Select -> InputMethodUtils.showImePicker()
+            Input -> (activity as SetupActivity).applyInputChoice()
+            Try -> (activity as SetupActivity).openTrial()
         }
     }
 
     fun showActionButton(): Boolean = when (this) {
-        Mode -> UserDataManager.useExternalSync()
+        Mode -> UserDataManager.usesExternalSync()
+        Input, Try -> true
         else -> true
     }
 
@@ -58,6 +69,8 @@ enum class SetupPage {
         Mode -> UserDataManager.isStorageChoiceDone()
         Enable -> InputMethodUtils.checkIsTrimeEnabled()
         Select -> InputMethodUtils.checkIsTrimeSelected()
+        Input -> SetupProgress.inputConfirmed
+        Try -> SetupProgress.trialCompleted || SetupProgress.deferred
     }
 
     companion object {
@@ -65,7 +78,8 @@ enum class SetupPage {
 
         fun Int.isLastPage() = this == entries.size - 1
 
-        fun hasUndonePage() = entries.any { !it.isDone() }
+        // Upgrading users who already enabled and selected Trime do not acquire a new wizard.
+        fun hasUndonePage() = listOf(Mode, Enable, Select).any { !it.isDone() } || SetupProgress.needsInputSteps()
 
         fun firstUndonePage() = entries.firstOrNull { !it.isDone() }
     }

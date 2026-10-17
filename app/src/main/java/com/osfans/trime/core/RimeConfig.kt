@@ -32,7 +32,10 @@ class RimeConfig private constructor(
     fun setBool(key: String, value: Boolean) = setRimeConfigBool(peer, key, value)
 
     override fun close() {
-        closeRimeConfig(peer)
+        if (peer == 0L) return
+        val previous = peer
+        peer = 0L
+        closeRimeConfig(previous)
     }
 
     companion object {

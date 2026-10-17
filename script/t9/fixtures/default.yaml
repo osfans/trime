@@ -1,0 +1,16 @@
+config_version: '1'
+schema_list:
+  - schema: luna_pinyin_t9
+menu:
+  page_size: 9
+key_binder:
+  bindings: []
+recognizer:
+  patterns: {}
+ascii_composer:
+  switch_key:
+    Shift_L: noop
+    Shift_R: noop
+punctuator:
+  full_shape: {}
+  half_shape: {}

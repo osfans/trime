@@ -27,7 +27,7 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
             // $ ./gradlew app:assembleRelease
             // $ cp --recursive app/build/intermediates/stripped_native_libs/universalRelease/out/lib app/prebuilt
             if (target.file("prebuilt").exists()) {
-                sourceSets.getByName("main").jniLibs.srcDirs(setOf("prebuilt"))
+                sourceSets.getByName("main").jniLibs.directories.add("prebuilt")
             } else {
                 externalNativeBuild.apply {
                     cmake {
@@ -41,7 +41,7 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
                 isEnable = true
                 isUniversalApk = false
                 reset()
-                (target.buildAbiOverride?.split(",") ?: Versions.supportedAbis).forEach {
+                target.buildAbis.forEach {
                     include(it)
                 }
             }

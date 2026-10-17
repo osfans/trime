@@ -9,7 +9,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -45,6 +47,9 @@ class UserDictListUi(
     entries: Array<String>,
     initMoreButton: (ImageButton.(String) -> Unit) = {},
 ) : Ui {
+    val phraseButton = Button(ctx).apply {
+        setText(R.string.userdict_phrases)
+    }
     val fab =
         view(::FloatingActionButton) {
             imageDrawable =
@@ -89,7 +94,11 @@ class UserDictListUi(
     override val root = coordinatorLayout {
         backgroundColor = styledColor(android.R.attr.colorBackground)
         add(
-            list,
+            LinearLayout(ctx).apply {
+                orientation = LinearLayout.VERTICAL
+                addView(phraseButton, LinearLayout.LayoutParams(matchParent, ViewGroup.LayoutParams.WRAP_CONTENT))
+                addView(list, LinearLayout.LayoutParams(matchParent, 0, 1f))
+            },
             defaultLParams {
                 height = matchParent
                 width = matchParent

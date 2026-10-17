@@ -53,6 +53,15 @@ class ThemeScope internal constructor(
         }
     }
 
+    /** Resolves a color while preserving the difference between transparent and unavailable. */
+    internal fun colorOrNull(key: String): Int? {
+        val tableEntry = ColorKey.from(key)?.let { colorTable?.get(it) }
+        if (tableEntry is ColorTable.Value.Color) return tableEntry.argb
+        val scheme = requireNotNull(activeColorScheme) { "ThemeScope is not initialized" }
+        val raw = ColorTable.resolveRaw(key, scheme, theme.fallbackColors)
+        return runCatching { parseColor(raw ?: key) }.getOrNull()
+    }
+
     /** Resolves a color key through this scope; theme-only keys resolve via the fallback chain. */
     fun color(key: String): Int = ColorManager.resolveColor(this, key)
 

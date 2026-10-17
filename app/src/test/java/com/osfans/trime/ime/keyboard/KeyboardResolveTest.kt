@@ -6,6 +6,10 @@
 
 package com.osfans.trime.ime.keyboard
 
+import com.osfans.trime.data.theme.ThemeTestSupport
+import com.osfans.trime.data.theme.model.GeneralStyle
+import com.osfans.trime.util.yamlMapOf
+import com.osfans.trime.util.yamlScalarOf
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 
@@ -43,6 +47,49 @@ class KeyboardResolveTest :
             When("negative config values are given") {
                 Then("they never win") {
                     resolvePositive(-1, 10, unit) shouldBe 20
+                }
+            }
+
+            When("the theme also has no positive geometry") {
+                Then("the cascade returns zero without converting an invalid value") {
+                    var conversions = 0
+                    for (config in listOf(null, 0, -1)) {
+                        for (style in listOf(0, -8)) {
+                            resolvePositive(config, style) {
+                                conversions++
+                                it * 2
+                            } shouldBe 0
+                        }
+                    }
+                    conversions shouldBe 0
+                }
+            }
+
+            When("a third-party theme supplies negative gaps and heights") {
+                val style =
+                    ThemeTestSupport.yaml.decodeFromYamlNode<GeneralStyle>(
+                        yamlMapOf(
+                            "horizontal_gap" to yamlScalarOf("-2"),
+                            "vertical_gap" to yamlScalarOf("-3"),
+                            "key_height" to yamlScalarOf("-4"),
+                            "keyboard_height" to yamlScalarOf("-5"),
+                        ),
+                    )
+
+                Then("negative style values cannot become keyboard geometry") {
+                    resolvePositive(null, style.horizontalGap, unit) shouldBe 0
+                    resolvePositive(0, style.verticalGap, unit) shouldBe 0
+                    resolvePositive(0, style.keyHeight) shouldBe 0
+                    resolvePositive(0, style.keyboardHeight, unit) shouldBe 0
+                }
+
+                Then("a positive keyboard override still wins and converts once") {
+                    val converted = mutableListOf<Int>()
+                    resolvePositive(6, style.verticalGap) {
+                        converted += it
+                        it * 2
+                    } shouldBe 12
+                    converted shouldBe listOf(6)
                 }
             }
         }

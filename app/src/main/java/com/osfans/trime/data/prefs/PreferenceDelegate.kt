@@ -91,6 +91,10 @@ open class PreferenceDelegate<T : Any>(
             setValue(defaultValue)
             defaultValue
         }
+
+        override fun putValueTo(editor: SharedPreferences.Editor) {
+            editor.putString(key, serializer.serialize(getValue()))
+        }
     }
 
     fun interface OnChangeListener<in T : Any> {

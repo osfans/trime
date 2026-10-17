@@ -1,76 +1,95 @@
 /*
- * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-FileCopyrightText: 2015 - 2026 Rime community
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 package com.osfans.trime.data.userdict
 
+import com.osfans.trime.core.data.DataManager
 import com.osfans.trime.util.appContext
+import kotlinx.coroutines.CancellationException
 import java.io.File
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 
+/** JNI operations must run inside RimeApi.maintainUserDictionaries, with session handles closed. */
 object UserDictManager {
-    fun restoreUserDict(stream: InputStream, snapshotFile: String): Result<Unit> {
-        val tempFile = File(appContext.cacheDir, snapshotFile)
+    private fun store() = DictionaryFileStore(
+        DataManager.userDataDir,
+        File(appContext.filesDir, "userdict-backups"),
+    )
+
+    private inline fun <T> result(block: () -> T): Result<T> = try {
+        Result.success(block())
+    } catch (failure: CancellationException) {
+        throw failure
+    } catch (failure: Exception) {
+        Result.failure(failure)
+    }
+
+    private inline fun <T> staged(suffix: String, block: (File) -> T): T {
+        val temporary = File.createTempFile("userdict-", suffix, appContext.cacheDir)
         try {
-            tempFile.outputStream().use {
-                stream.copyTo(it)
-            }
-            val success = restoreUserDict(tempFile.absolutePath)
-            return if (success) {
-                Result.success(Unit)
-            } else {
-                Result.failure(Exception("Failed to restore"))
-            }
+            return block(temporary)
         } finally {
-            if (tempFile.exists()) {
-                tempFile.delete()
-            }
+            temporary.delete()
         }
     }
 
-    fun importUserDict(stream: InputStream, dictName: String, textFile: String): Result<Int> {
-        val tempFile = File(appContext.cacheDir, textFile)
-        try {
-            tempFile.outputStream().use {
-                stream.copyTo(it)
-            }
-            val count = importUserDict(dictName, tempFile.absolutePath)
-            return if (count >= 0) {
-                Result.success(count)
-            } else {
-                Result.failure(
-                    Exception("Failed to import from '$textFile' to '$dictName'"),
-                )
-            }
-        } finally {
-            if (tempFile.exists()) {
-                tempFile.delete()
-            }
-        }
+    /** Called at startup before native sessions are created, and before every mutation. */
+    fun recoverPendingMutation(): Boolean = store().recoverPendingMutation()
+
+    fun backupForRecovery(dictName: String): Result<Unit> = result {
+        val name = requireDictionaryName(dictName)
+        store().capture("$name.userdb")
+        if (!backupUserDict(name)) throw IOException("Rime could not create the portable dictionary backup")
     }
 
-    fun exportUserDict(dest: OutputStream, dictName: String, textFile: String): Result<Int> {
-        val tempFile = File(appContext.cacheDir, textFile)
-        try {
-            val count = exportUserDict(dictName, tempFile.absolutePath)
-            if (count >= 0 && tempFile.exists()) {
-                tempFile.inputStream().use {
-                    it.copyTo(dest)
+    fun hasRecoveryBackup(dictName: String): Boolean = store().latest("${requireDictionaryName(dictName)}.userdb") != null
+
+    fun recoverUserDict(dictName: String): Result<Unit> = result {
+        val target = "${requireDictionaryName(dictName)}.userdb"
+        val files = store()
+        files.recoverPendingMutation()
+        val backup = files.latest(target) ?: throw IOException("No dictionary recovery backup is available")
+        files.mutate(target) { files.restore(backup) }
+    }
+
+    fun restoreUserDict(stream: InputStream, snapshotFile: String): Result<Unit> = result {
+        staged(".userdb.txt") { temporary ->
+            DictionaryTextFormats.copyBounded(stream, temporary)
+            val name = DictionaryTextFormats.snapshotDictionaryName(temporary)
+            store().mutate("$name.userdb") {
+                if (!restoreUserDictChecked(name, temporary.absolutePath)) {
+                    throw IOException("Rime could not merge the dictionary snapshot: $snapshotFile")
                 }
-                return Result.success(count)
-            } else {
-                return Result.failure(
-                    Exception("Failed to export '$dictName' to '$textFile'"),
-                )
             }
-        } catch (e: Exception) {
-            return Result.failure(e)
-        } finally {
-            if (tempFile.exists()) {
-                tempFile.delete()
+        }
+    }
+
+    fun importUserDict(stream: InputStream, dictName: String, textFile: String): Result<Int> = result {
+        val name = requireDictionaryName(dictName)
+        staged(".txt") { temporary ->
+            DictionaryTextFormats.copyBounded(stream, temporary)
+            val expected = DictionaryTextFormats.validateTable(temporary)
+            store().mutate("$name.userdb") {
+                val count = importUserDict(name, temporary.absolutePath)
+                if (count != expected) throw IOException("Rime did not import every dictionary entry from $textFile")
+                count
             }
+        }
+    }
+
+    fun exportUserDict(dest: OutputStream, dictName: String, textFile: String): Result<Int> = result {
+        val name = requireDictionaryName(dictName)
+        staged(".txt") { temporary ->
+            val count = exportUserDict(name, temporary.absolutePath)
+            if (count < 0 || !temporary.isFile || DictionaryTextFormats.validateTable(temporary) != count) {
+                throw IOException("Rime could not export the dictionary to $textFile")
+            }
+            temporary.inputStream().use { it.copyTo(dest) }
+            count
         }
     }
 
@@ -82,6 +101,9 @@ object UserDictManager {
 
     @JvmStatic
     external fun restoreUserDict(snapshotFile: String): Boolean
+
+    @JvmStatic
+    private external fun restoreUserDictChecked(dictName: String, snapshotFile: String): Boolean
 
     @JvmStatic
     external fun exportUserDict(dictName: String, textFile: String): Int

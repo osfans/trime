@@ -6,6 +6,21 @@ cmake_minimum_required(VERSION 3.18.0)
 
 project(trime VERSION 3.0.0)
 
+# Keep symbols and assertions while avoiding unoptimized IME/deployment latency.
+# Native single-step debugging can opt out without changing release builds.
+option(TRIME_OPTIMIZE_DEBUG_NATIVE "Optimize debug native engine" ON)
+if(TRIME_OPTIMIZE_DEBUG_NATIVE)
+  add_compile_options("$<$<CONFIG:Debug>:-O2>")
+endif()
+
+# AGP invokes Ninja directly, bypassing cmake --build's parallelism setting.
+if("$ENV{CMAKE_BUILD_PARALLEL_LEVEL}" MATCHES "^[1-9][0-9]*$")
+  set(CMAKE_JOB_POOLS
+      "trime_compile=$ENV{CMAKE_BUILD_PARALLEL_LEVEL};trime_link=1")
+  set(CMAKE_JOB_POOL_COMPILE trime_compile)
+  set(CMAKE_JOB_POOL_LINK trime_link)
+endif()
+
 # for reproducible build
 add_link_options("LINKER:--hash-style=both,--build-id=none")
 
@@ -16,6 +31,7 @@ option(BUILD_SHARED_LIBS "" OFF)
 option(BUILD_TESTING "" OFF)
 
 include(Boost)
+include(ThirdPartyCmake)
 
 option(WITH_GFLAGS "Use gflags" OFF)
 option(WITH_GTEST "Use googletest" OFF)
@@ -28,18 +44,19 @@ option(YAML_CPP_BUILD_TOOLS "" OFF)
 option(YAML_CPP_BUILD_TESTS "" OFF)
 option(YAML_CPP_INSTALL "" OFF)
 add_subdirectory(librime/deps/yaml-cpp)
+set_property(TARGET yaml-cpp PROPERTY CXX_STANDARD 17)
 
 # enable compress for leveldb
 option(SNAPPY_BUILD_TESTS "" OFF)
 option(SNAPPY_BUILD_BENCHMARKS "" OFF)
 option(SNAPPY_INSTALL "" OFF)
-add_subdirectory(snappy)
+trime_add_dependency(snappy snappy 3.1)
 
 set(HAVE_SNAPPY TRUE)
 option(LEVELDB_BUILD_TESTS "" OFF)
 option(LEVELDB_BUILD_BENCHMARKS "" OFF)
 option(LEVELDB_INSTALL "" OFF)
-add_subdirectory(librime/deps/leveldb)
+trime_add_dependency(librime/deps/leveldb librime/deps/leveldb 3.9)
 
 add_subdirectory(librime/deps/marisa-trie)
 target_compile_options(
@@ -47,7 +64,7 @@ target_compile_options(
 
 set(LIBMARISA marisa)
 option(USE_SYSTEM_MARISA "" ON)
-add_subdirectory(OpenCC)
+trime_add_dependency(OpenCC OpenCC 3.12)
 include(OpenccWorkarounds)
 
 set(X11Keysym "${CMAKE_SOURCE_DIR}/librime/include")

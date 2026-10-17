@@ -8,7 +8,9 @@ package com.osfans.trime.ui.common
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import com.osfans.trime.ui.common.dialog.PublicPreferenceDialogFactory
 import com.osfans.trime.util.applyNavBarInsetsBottomPadding
 
 /**
@@ -18,6 +20,12 @@ import com.osfans.trime.util.applyNavBarInsetsBottomPadding
  * Source: https://github.com/fcitx5-android/fcitx5-android/blob/dedfc18/app/src/main/java/org/fcitx/fcitx5/android/ui/common/PaddingPreferenceFragment.kt
  */
 abstract class PaddingPreferenceFragment : PreferenceFragmentCompat() {
+    override fun onDisplayPreferenceDialog(preference: Preference) {
+        if (!PublicPreferenceDialogFactory.showIfSupported(this, preference)) {
+            super.onDisplayPreferenceDialog(preference)
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

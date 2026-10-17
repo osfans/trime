@@ -141,14 +141,14 @@ class SchemaListUi(
 
                         override fun onItemAddedBatch(items: List<SchemaItem>) {
                             updateFAB()
-                            showUndoSnackBar(ctx.getString(R.string.added_n_items, items.size)) {
+                            showUndoSnackBar(ctx.resources.getQuantityString(R.plurals.added_n_items, items.size, items.size)) {
                                 items.forEach { remove(it) }
                             }
                         }
 
                         override fun onItemRemovedBatch(items: List<SchemaItem>) {
                             updateFAB()
-                            showUndoSnackBar(ctx.getString(R.string.removed_n_items, items.size)) {
+                            showUndoSnackBar(ctx.resources.getQuantityString(R.plurals.removed_n_items, items.size, items.size)) {
                                 items.forEach { add(it) }
                             }
                         }

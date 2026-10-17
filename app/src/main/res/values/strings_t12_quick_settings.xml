@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<resources>
+    <string name="quick_settings">Common settings</string>
+    <string name="quick_settings_input">Chinese input</string>
+    <string name="quick_settings_layout">Pinyin layout</string>
+    <string name="quick_settings_t9">Nine-key pinyin</string>
+    <string name="quick_settings_full_pinyin">Full pinyin</string>
+    <string name="quick_settings_variant">Chinese characters</string>
+    <string name="quick_settings_simplified">Simplified Chinese</string>
+    <string name="quick_settings_traditional">Traditional Chinese</string>
+    <string name="quick_settings_appearance">Candidates and keyboard</string>
+    <string name="quick_settings_candidate_size">Candidate text size</string>
+    <string name="quick_settings_keyboard_height">Keyboard height</string>
+    <string name="quick_settings_theme_default">Use theme size</string>
+    <string name="quick_settings_feedback">Touch feedback</string>
+    <string name="quick_settings_fuzzy">Nine-key fuzzy pronunciation</string>
+    <string name="quick_settings_fuzzy_hint">These optional rules apply to nine-key pinyin. Full-pinyin and custom schemes keep their own spelling rules.</string>
+    <string name="quick_settings_dictionary">Dictionary and phrases</string>
+    <string name="quick_settings_loading">Reading the current scheme…</string>
+    <string name="quick_settings_read_failed">Could not read the current scheme. Open Schemes to try again.</string>
+    <string name="quick_settings_keep_custom">Keep the current custom scheme. Select a pinyin layout to use the bundled Chinese options.</string>
+    <string name="quick_settings_applied">Chinese input selection applied</string>
+    <string name="quick_settings_schema_unavailable">This pinyin scheme is not enabled. Enable it in Schemes, then try again. The previous selection is unchanged.</string>
+    <string name="quick_settings_pending_input">Finish or clear the current composition before changing Chinese input.</string>
+    <string name="quick_settings_unsupported">This scheme has custom layout or character options. Use Schemes or the advanced configuration to change it.</string>
+    <string name="quick_settings_apply_failed">Could not apply Chinese input. The previous selection was retained.</string>
+    <string name="quick_settings_restore_failed">Could not apply or restore the previous selection. Open Schemes to select a usable scheme.</string>
+</resources>

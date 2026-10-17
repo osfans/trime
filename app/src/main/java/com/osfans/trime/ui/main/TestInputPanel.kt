@@ -14,6 +14,7 @@ import android.graphics.drawable.StateListDrawable
 import android.os.Build
 import android.text.InputType
 import android.util.AttributeSet
+import android.view.View
 import android.view.Window
 import android.widget.EditText
 import android.widget.ImageButton
@@ -66,6 +67,13 @@ constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
 ) : LinearLayout(context, attrs, defStyleAttr) {
+
+    var onVisibilityChange: ((Boolean) -> Unit)? = null
+
+    override fun onVisibilityChanged(changedView: View, visibility: Int) {
+        super.onVisibilityChanged(changedView, visibility)
+        if (changedView === this) onVisibilityChange?.invoke(visibility == VISIBLE)
+    }
 
     data class InputTypeOption(
         @StringRes val label: Int,

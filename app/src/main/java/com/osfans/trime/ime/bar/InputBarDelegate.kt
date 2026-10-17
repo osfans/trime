@@ -32,8 +32,10 @@ import com.osfans.trime.ime.bar.ui.AlwaysUi
 import com.osfans.trime.ime.bar.ui.CandidateUi
 import com.osfans.trime.ime.bar.ui.TabUi
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
+import com.osfans.trime.ime.candidates.candidateRowHeight
 import com.osfans.trime.ime.candidates.compact.CompactCandidateDelegate
 import com.osfans.trime.ime.candidates.unrolled.window.FlexboxUnrolledCandidateWindow
+import com.osfans.trime.ime.core.PrivacyModeState
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
 import com.osfans.trime.ime.keyboard.KeyBehavior
@@ -70,8 +72,9 @@ class InputBarDelegate(override val di: DI) :
     private val commonKeyboardActionListener: CommonKeyboardActionListener by instance()
     private val candidate: CompactCandidateDelegate by instance()
     private val rime: RimeSession by instance()
+    private val keyboardWindow: KeyboardWindow by instance()
 
-    val themedHeight = theme.style.run { candidateViewHeight + commentHeight }
+    val themedHeight = candidateRowHeight(context, theme) + theme.style.commentHeight
 
     private val prefs = AppPrefs.defaultInstance()
 
@@ -83,17 +86,25 @@ class InputBarDelegate(override val di: DI) :
 
     private var clipboardTimeoutJob: Job? = null
 
+    private var inlineSuggestionJob: Job? = null
+
+    private var editorBoundaryGeneration = 0L
+
     private var isClipboardFresh: Boolean = false
     private var isInlineSuggestionPresent: Boolean = false
 
     @Keep
-    private val onClipboardUpdateListener = ClipboardHelper.OnClipboardUpdateListener {
-        if (!clipboardSuggestion) return@OnClipboardUpdateListener
+    private val onClipboardUpdateListener = ClipboardHelper.OnClipboardUpdateListener { bean ->
+        if (!clipboardSuggestion || PrivacyModeState.active) {
+            service.lifecycleScope.launch { dismissClipboardSuggestion() }
+            return@OnClipboardUpdateListener
+        }
         service.lifecycleScope.launch {
-            if (it.text.isNullOrEmpty()) {
+            val text = bean?.text
+            if (PrivacyModeState.active || text.isNullOrEmpty()) {
                 isClipboardFresh = false
             } else {
-                alwaysUi.clipboardUi.text.text = it.text.take(42)
+                alwaysUi.clipboardUi.text.text = text.take(42)
                 isClipboardFresh = true
                 launchClipboardTimeoutJob()
             }
@@ -131,7 +142,7 @@ class InputBarDelegate(override val di: DI) :
     }
 
     private val alwaysUi: AlwaysUi by lazy {
-        AlwaysUi(context, scope) { action ->
+        AlwaysUi(context, scope, { keyboardWindow.currentKeyboard }) { action ->
             if (action.isNotEmpty()) {
                 commonKeyboardActionListener.listener.onAction(theme.resolveAction(action))
             } else {
@@ -144,11 +155,19 @@ class InputBarDelegate(override val di: DI) :
             }
             clipboardUi.suggestionView.apply {
                 setOnClickListener {
+                    if (PrivacyModeState.active) {
+                        dismissClipboardSuggestion()
+                        return@setOnClickListener
+                    }
                     val content = ClipboardHelper.lastBean?.text
                     content?.let { service.commitText(it) }
                     dismissClipboardSuggestion()
                 }
                 setOnLongClickListener {
+                    if (PrivacyModeState.active) {
+                        dismissClipboardSuggestion()
+                        return@setOnLongClickListener true
+                    }
                     ClipboardHelper.lastBean?.let {
                         AppUtils.launchClipEdit(context, it.id, ClipEditActivity.FROM_CLIPBOARD)
                     }
@@ -165,6 +184,23 @@ class InputBarDelegate(override val di: DI) :
         clipboardTimeoutJob?.cancel()
         clipboardTimeoutJob = null
         isClipboardFresh = false
+        alwaysUi.clipboardUi.text.text = ""
+        evalAlwaysUiState()
+    }
+
+    /** Clear surfaces and text that belong to the preceding editor or privacy state. */
+    fun clearEditorBoundaryState() {
+        editorBoundaryGeneration++
+        clipboardTimeoutJob?.cancel()
+        clipboardTimeoutJob = null
+        inlineSuggestionJob?.cancel()
+        inlineSuggestionJob = null
+        isClipboardFresh = false
+        isInlineSuggestionPresent = false
+        alwaysUi.clipboardUi.text.text = ""
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            alwaysUi.inlineSuggestionsUi.clear()
+        }
         evalAlwaysUiState()
     }
 
@@ -177,7 +213,7 @@ class InputBarDelegate(override val di: DI) :
     }
 
     private val tabUi by lazy {
-        TabUi(context, scope)
+        TabUi(context, scope) { keyboardWindow.currentKeyboard }
     }
 
     private val barStateMachine =
@@ -209,6 +245,7 @@ class InputBarDelegate(override val di: DI) :
             windowManager.attachWindow(FlexboxUnrolledCandidateWindow(di))
         }
         candidateUi.unrollButton.setIcon(R.drawable.ic_baseline_expand_more_24)
+        candidateUi.unrollButton.accessibilityLabel = service.getString(R.string.a11y_expand_candidates)
     }
 
     private fun setUnrollButtonToDetach() {
@@ -216,6 +253,7 @@ class InputBarDelegate(override val di: DI) :
             windowManager.attachWindow(KeyboardWindow)
         }
         candidateUi.unrollButton.setIcon(R.drawable.ic_baseline_expand_less_24)
+        candidateUi.unrollButton.accessibilityLabel = service.getString(R.string.a11y_collapse_candidates)
     }
 
     private fun setUnrollButtonEnabled(enabled: Boolean) {
@@ -243,6 +281,7 @@ class InputBarDelegate(override val di: DI) :
 
     val view by lazy {
         ViewAnimator(context).apply {
+            measureAllChildren = false
             visibility =
                 if (hideQuickBar) {
                     View.GONE
@@ -283,7 +322,10 @@ class InputBarDelegate(override val di: DI) :
     }
 
     override fun onStartInput(info: EditorInfo) {
-        evalAlwaysUiState()
+        clearEditorBoundaryState()
+        if (PrivacyModeState.active) {
+            ClipboardHelper.clearTransientSuggestion()
+        }
     }
 
     override fun onWindowAttached(window: BoardWindow) {
@@ -310,10 +352,19 @@ class InputBarDelegate(override val di: DI) :
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
-    fun handleInlineSuggestions(response: InlineSuggestionsResponse): Boolean {
+    fun handleInlineSuggestions(
+        response: InlineSuggestionsResponse,
+        editorToken: Long,
+    ): Boolean {
+        if (PrivacyModeState.active || !service.isCurrentEditor(editorToken)) return false
+        val boundaryGeneration = editorBoundaryGeneration
         val suggestions = response.inlineSuggestions
         if (suggestions.isEmpty()) {
+            inlineSuggestionJob?.cancel()
+            inlineSuggestionJob = null
+            alwaysUi.inlineSuggestionsUi.clear()
             isInlineSuggestionPresent = false
+            evalAlwaysUiState()
             return true
         }
         var pinned: InlineSuggestion? = null
@@ -330,19 +381,27 @@ class InputBarDelegate(override val di: DI) :
                 scrollable.add(it)
             }
         }
-        service.lifecycleScope.launch {
-            alwaysUi.inlineSuggestionsUi.setPinnedView(
-                pinned?.let { inflateInlineContentView(it) },
-            )
-        }
-        service.lifecycleScope.launch {
-            val views = scrollable.map { s ->
-                service.lifecycleScope.async {
-                    inflateInlineContentView(s)
+        inlineSuggestionJob?.cancel()
+        alwaysUi.inlineSuggestionsUi.clear()
+        inlineSuggestionJob =
+            service.lifecycleScope.launch {
+                val pinnedView = async { pinned?.let { inflateInlineContentView(it) } }
+                val views = scrollable.map { suggestion ->
+                    async {
+                        inflateInlineContentView(suggestion)
+                    }
                 }
-            }.awaitAll()
-            alwaysUi.inlineSuggestionsUi.setScrollableViews(views)
-        }
+                val inflatedPinnedView = pinnedView.await()
+                val inflatedScrollableViews = views.awaitAll()
+                if (boundaryGeneration != editorBoundaryGeneration ||
+                    PrivacyModeState.active ||
+                    !service.isCurrentEditor(editorToken)
+                ) {
+                    return@launch
+                }
+                alwaysUi.inlineSuggestionsUi.setPinnedView(inflatedPinnedView)
+                alwaysUi.inlineSuggestionsUi.setScrollableViews(inflatedScrollableViews)
+            }
         isInlineSuggestionPresent = true
         evalAlwaysUiState()
         return true

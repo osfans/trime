@@ -12,15 +12,23 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
+
     <application
         android:name="com.osfans.trime.TrimeApplication"
         android:allowBackup="true"
+        android:enableOnBackInvokedCallback="true"
+        android:supportsRtl="false"
         android:icon="@mipmap/ic_app_icon"
         android:label="@string/trime_app_name"
         android:roundIcon="@mipmap/ic_app_icon_round"
         android:theme="@style/Theme.TrimeAppTheme"
         android:hasFragileUserData="true"
-        tools:targetApi="29">
+        tools:targetApi="33">
 
         <service
             android:name=".ime.core.TrimeInputMethodService"
@@ -73,16 +81,26 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <!-- Settings activity -->
         <activity
             android:name=".ui.main.MainActivity"
+            android:theme="@style/Theme.TrimePublicWindowPilot"
             android:exported="true"
             android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".ui.setup.SetupActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ui.setup.SetupAdvancedSettingsActivity"
+            android:theme="@style/Theme.TrimePublicWindowPilot"
+            android:exported="false"
+            android:launchMode="standard"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".ui.main.LogActivity"
+            android:theme="@style/Theme.TrimePublicWindowPilot"
             android:directBootAware="true"
             android:exported="false"
             android:launchMode="singleTask"
@@ -91,7 +109,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <activity
             android:name=".ui.main.settings.theme.ThemeDiagnosticsActivity"
             android:exported="false"
-            android:parentActivityName=".ui.main.MainActivity" />
+            android:parentActivityName=".ui.main.MainActivity"
+            android:theme="@style/Theme.TrimePublicWindowPilot" />
 
         <activity
             android:name=".ui.main.ClipEditActivity"

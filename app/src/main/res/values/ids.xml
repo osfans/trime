@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Retain the old list hierarchy ID when restoring an AndroidX preference dialog. -->
+    <item name="select_dialog_listview" type="id" tools:override="true" />
+</resources>

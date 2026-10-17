@@ -6,7 +6,7 @@
 
 package com.osfans.trime.data.theme.model
 
-import com.osfans.trime.util.enum
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -53,12 +53,24 @@ data class GeneralStyle(
     val latinFont: MaybeStringList = MaybeStringList.Empty,
     val keyboardHeight: Int = 0,
     val keyboardHeightLand: Int = 0,
-    val popupBottomMargin: Int = 0,
-    val popupWidth: Int = 0,
-    val popupHeight: Int = 0,
-    val popupKeyHeight: Int = 0,
-    val popupFont: MaybeStringList = MaybeStringList.Empty,
-    val popupTextSize: Float = 0f,
+    @SerialName("popup_bottom_margin")
+    private val configuredPopupBottomMargin: Int? = null,
+    @SerialName("popup_width")
+    private val configuredPopupWidth: Int? = null,
+    @SerialName("popup_height")
+    private val configuredPopupHeight: Int? = null,
+    @SerialName("popup_key_height")
+    private val configuredPopupKeyHeight: Int? = null,
+    @SerialName("popup_font")
+    private val configuredPopupFont: MaybeStringList? = null,
+    @SerialName("popup_text_size")
+    private val configuredPopupTextSize: Float? = null,
+    @SerialName("preview_height")
+    private val previewHeight: Int? = null,
+    @SerialName("preview_font")
+    private val previewFont: MaybeStringList? = null,
+    @SerialName("preview_text_size")
+    private val previewTextSize: Float? = null,
     val resetAsciiModeOnFocusChange: Boolean = false,
     val roundCorner: Float = 0f,
     val shadowRadius: Float = 0f,
@@ -70,6 +82,14 @@ data class GeneralStyle(
     val enterLabelMode: Int = 0,
     val enterLabels: EnterLabel = EnterLabel(),
 ) {
+    /** Popup values keep compatibility with themes written before the popup_* rename. */
+    val popupBottomMargin: Int get() = configuredPopupBottomMargin ?: 68
+    val popupWidth: Int get() = configuredPopupWidth ?: 38
+    val popupHeight: Int get() = configuredPopupHeight ?: previewHeight ?: 48
+    val popupKeyHeight: Int get() = configuredPopupKeyHeight ?: previewHeight ?: 48
+    val popupFont: MaybeStringList get() = configuredPopupFont ?: previewFont ?: MaybeStringList.Empty
+    val popupTextSize: Float get() = configuredPopupTextSize ?: previewTextSize ?: 23f
+
     enum class CommentPosition {
         RIGHT,
         TOP,
@@ -146,6 +166,9 @@ data class GeneralStyle(
                 "popup_key_height",
                 "popup_text_size",
                 "popup_width",
+                "preview_font",
+                "preview_height",
+                "preview_text_size",
                 "reset_ascii_mode_on_focus_change",
                 "round_corner",
                 "shadow_radius",

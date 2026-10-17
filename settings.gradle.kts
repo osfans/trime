@@ -11,12 +11,27 @@ pluginManagement {
     }
 }
 
+plugins {
+    id("com.osfans.trime.gradle-compatibility")
+}
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
-        maven("https://jitpack.io")
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "JitPackStorageAccess"
+                    url = uri("https://jitpack.io")
+                }
+            }
+            filter {
+                includeGroup("com.github.getActivity")
+                includeGroup("com.github.WhiredPlanck")
+            }
+        }
     }
 }
 

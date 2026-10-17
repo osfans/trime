@@ -6,8 +6,10 @@
 
 package com.osfans.trime.data.theme
 
+import com.charleskorn.kaml.YamlNode
 import com.osfans.trime.data.theme.model.GeneralStyle
 import com.osfans.trime.data.theme.model.MaybeStringList
+import com.osfans.trime.util.yamlListOf
 import com.osfans.trime.util.yamlMapOf
 import com.osfans.trime.util.yamlScalarOf
 import io.kotest.assertions.throwables.shouldThrow
@@ -57,6 +59,16 @@ class GeneralStyleTest :
                     style.keyFont shouldBe MaybeStringList.Scalar("symbol.ttf")
                 }
 
+                Then("legacy preview fields produce visible popup dimensions with the bundled system font") {
+                    style.popupWidth shouldBe 38
+                    style.popupHeight shouldBe 60
+                    style.popupKeyHeight shouldBe 60
+                    style.popupTextSize shouldBe 40f
+                    style.popupFont shouldBe MaybeStringList.Sequence(emptyList())
+                    // The obsolete preview_offset is absent; popupBottomMargin keeps its own default.
+                    style.popupBottomMargin shouldBe 68
+                }
+
                 Then("theme header is decoded") {
                     theme.name shouldBe "預設"
                 }
@@ -93,6 +105,11 @@ class GeneralStyleTest :
 
             Then("decode equals the constructor defaults") {
                 style shouldBe GeneralStyle()
+                style.popupBottomMargin shouldBe 68
+                style.popupWidth shouldBe 38
+                style.popupHeight shouldBe 48
+                style.popupKeyHeight shouldBe 48
+                style.popupTextSize shouldBe 23f
             }
             Then("decode fills explicit keys but keeps the defaults for the rest") {
                 val style =
@@ -103,6 +120,78 @@ class GeneralStyleTest :
                     )
                 style.candidateTextSize shouldBe 20f
                 style.keyHeight shouldBe 0
+            }
+        }
+
+        Given("a theme that mixes modern popup fields and legacy preview fields") {
+            fun style(vararg popup: Pair<String, YamlNode>): GeneralStyle = ThemeTestSupport.yaml.decodeFromYamlNode(
+                yamlMapOf(
+                    mapOf(
+                        "preview_height" to yamlScalarOf("60"),
+                        "preview_text_size" to yamlScalarOf("40"),
+                        "preview_font" to yamlScalarOf("legacy.ttf"),
+                    ) + popup.toMap(),
+                ),
+            )
+
+            Then("modern popup dimensions and font lists take precedence") {
+                val decoded = style(
+                    "popup_bottom_margin" to yamlScalarOf("70"),
+                    "popup_width" to yamlScalarOf("42"),
+                    "popup_height" to yamlScalarOf("52"),
+                    "popup_key_height" to yamlScalarOf("46"),
+                    "popup_text_size" to yamlScalarOf("25"),
+                    "popup_font" to yamlListOf(yamlScalarOf("modern.ttf")),
+                )
+                decoded.popupBottomMargin shouldBe 70
+                decoded.popupWidth shouldBe 42
+                decoded.popupHeight shouldBe 52
+                decoded.popupKeyHeight shouldBe 46
+                decoded.popupTextSize shouldBe 25f
+                decoded.popupFont shouldBe MaybeStringList.Sequence(listOf("modern.ttf"))
+            }
+
+            Then("explicit zero dimensions and empty fonts do not reactivate legacy previews") {
+                val decoded = style(
+                    "popup_bottom_margin" to yamlScalarOf("0"),
+                    "popup_width" to yamlScalarOf("0"),
+                    "popup_height" to yamlScalarOf("0"),
+                    "popup_key_height" to yamlScalarOf("0"),
+                    "popup_text_size" to yamlScalarOf("0"),
+                    "popup_font" to yamlListOf(),
+                )
+                decoded.popupBottomMargin shouldBe 0
+                decoded.popupWidth shouldBe 0
+                decoded.popupHeight shouldBe 0
+                decoded.popupKeyHeight shouldBe 0
+                decoded.popupTextSize shouldBe 0f
+                decoded.popupFont shouldBe MaybeStringList.Sequence(emptyList())
+            }
+
+            Then("malformed modern values reject source decoding instead of reviving legacy settings") {
+                shouldThrow<SerializationException> {
+                    style("popup_height" to yamlScalarOf("invalid"))
+                }
+            }
+        }
+
+        Given("a third-party legacy theme with preview fonts") {
+            Then("the popup retains scalar fonts, font order and explicit legacy zero values") {
+                val style = ThemeTestSupport.yaml.decodeFromYamlNode<GeneralStyle>(
+                    yamlMapOf(
+                        "preview_height" to yamlScalarOf("0"),
+                        "preview_text_size" to yamlScalarOf("0"),
+                        "preview_font" to yamlListOf(yamlScalarOf("a.ttf"), yamlScalarOf("b.ttf")),
+                    ),
+                )
+                style.popupHeight shouldBe 0
+                style.popupKeyHeight shouldBe 0
+                style.popupTextSize shouldBe 0f
+                style.popupFont shouldBe MaybeStringList.Sequence(listOf("a.ttf", "b.ttf"))
+                val scalarStyle = ThemeTestSupport.yaml.decodeFromYamlNode<GeneralStyle>(
+                    yamlMapOf("preview_font" to yamlScalarOf("latin.ttf")),
+                )
+                scalarStyle.popupFont shouldBe MaybeStringList.Scalar("latin.ttf")
             }
         }
     })

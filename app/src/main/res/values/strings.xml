@@ -6,6 +6,12 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:en:xliff:document:1.2">
+    <string name="ime_unavailable">Chinese input unavailable. Numbers only.</string>
+    <string name="ime_preparing">Preparing Chinese input. Numbers only.</string>
+    <string name="ime_retry">Retry deployment</string>
+    <string name="ime_switch">Switch input method</string>
+    <string name="ime_enter">Enter</string>
+    <string name="ime_existing_resources">Deployment failed. Using an available dictionary; retry from the deployment log.</string>
     <!-- Input Method Platform Tittle  -->
     <string name="app_name_release">Trime</string>
     <string name="app_name_debug">Trime (Debug)</string>
@@ -50,7 +56,6 @@
     <string name="user_data_dir">User directory</string>
     <string name="periodic_background_sync">Periodic background sync</string>
     <string name="periodic_background_sync_status">Last: %1$s (%2$s)</string>
-    <string name="effects">Effects</string>
     <string name="show_app_icon">Show app icon in launcher</string>
     <string name="browse_app_data_dir">Browse app data folder</string>
     <string name="browse_app_data_dir_failed">No file manager available to browse app data</string>
@@ -89,7 +94,6 @@
     <string name="key_swipe_velocity">The speed of triggering the button swipe gesture (the distance/velocity is sufficient)</string>
     <string name="build_info">Build Info</string>
     <string name="telegram">Telegram</string>
-    <string name="quick_bar">Quick bar</string>
     <string name="copy_done">Copied to clipboard!</string>
     <string name="hook_shift_space">Ignore Shift locked for Space</string>
     <string name="test_input">Test input</string>
@@ -99,7 +103,7 @@
     <string name="type_text">Type text</string>
     <string name="type_number">Type number</string>
     <string name="type_password">Type password</string>
-    <string name="hook_shift_num">Ignore Shift locked for 0-9</string>
+    <string name="hook_shift_num">Ignore Shift locked for 0&#8211;9</string>
     <string name="hook_shift_symbol">Ignore Shift locked for Symbol keys</string>
     <string name="hook_shift_arrow">Keep Shift locked for Arrow keys</string>
     <string name="hook_shift_lock">Double tap Shift to lock caps lock</string>
@@ -130,7 +134,7 @@
     <string name="sync_from_external_desc">Before each deploy/sync, import configs from specified dir to internal storage, then export back after sync. Requires more storage space. Recommended for experienced users.</string>
     <string name="use_app_specific_storage_desc">Use internal private storage; users need a compatible file manager to access. On uninstall, system may ask to keep data — always have backups on hand.</string>
     <string name="external_sync_select_folder_message">External sync requires selecting a data folder. Select where trime configuration files will be stored.</string>
-    <string name="external_sync_fallback_app_storage">Folder selection failed or was cancelled. Storage mode will fall back to app-specific storage.</string>
+    <string name="external_sync_missing_tree_fallback">External data folder is missing or inaccessible. Switched to app-specific storage. Re-select the folder in Settings if needed.</string>
     <string name="maintenance">Maintenance</string>
     <string name="loading">Loading</string>
     <string name="success">success</string>
@@ -139,9 +143,12 @@
     <string name="edit">Edit</string>
     <string name="collect">Collect</string>
     <string name="clip_edit_text_hint">Edit text here</string>
+    <string name="clipboard_load_failed">Unable to open this entry.</string>
+    <string name="clipboard_save_failed">Unable to save this entry. Please try again.</string>
+    <string name="clipboard_entry_removed">This entry has been deleted.</string>
     <string name="ask_to_delete_all">Delete All?</string>
     <string name="ok">OK</string>
-    <string name="cancel">CANCEL</string>
+    <string name="cancel">Cancel</string>
     <string name="licenses_of_third_party_libraries">Licenses of third-party libraries</string>
     <string name="clipboard">Clipboard</string>
     <string name="collection">Collection</string>
@@ -156,14 +163,17 @@
     <string name="setup__step_three">Setup 3</string>
     <string name="setup__select_data_path_hint">Choose how <b>Trime</b> stores Rime data</string>
     <string name="setup__select_data_path">Select external data directory…</string>
-    <string name="setup__data_path_imported">Data folder imported successfully</string>
     <string name="setup__data_path_import_failed">Failed to import data folder</string>
     <string name="select_another_directory_to_sync">Change another directory to import?</string>
     <string name="select_another_directory">Change</string>
-    <string name="data_path_not_selected">No data folder selected</string>
     <string name="sync_user_data_success">User data synced successfully</string>
     <string name="sync_user_data_success_external">User data synced to external folder</string>
     <string name="sync_user_data_failure">Failed to sync user data</string>
+    <string name="sync_partial_copy_failure">Some files failed to copy</string>
+    <plurals name="sync_partial_copy_failure_detail">
+        <item quantity="one">%1$d file failed during %2$s. Remaining files were copied and deployment can continue.</item>
+        <item quantity="other">%1$d files failed during %2$s. Remaining files were copied and deployment can continue.</item>
+    </plurals>
     <string name="data_path_permission_revoked">Data folder access was revoked. Please select the folder again.</string>
     <string name="grant_permission">Grant permission</string>
     <string name="notification_permission_title">No Notification Permission</string>
@@ -173,7 +183,6 @@
     <string name="select_current_schema">Select current schema</string>
     <string name="enable_schemata">Enable schemata</string>
     <string name="no_schema_to_select">Currently there is no schema to select. Please go to enable schemata from the available list.</string>
-    <string name="no_schema_to_enable">No schema to enable. Make sure you have prelude and schema files in the user directory.</string>
     <string name="schemata">Schemata</string>
     <string name="navbar_background">Navigation bar background</string>
     <string name="no_theme_to_select">Currently there is no theme to select.</string>
@@ -189,7 +198,6 @@
     <string name="general">General</string>
     <string name="composing_text">Composing text</string>
     <string name="commit_text_preview">Commit text preview</string>
-    <string name="raw_input">Raw input</string>
     <string name="inline_preedit_mode">Inline preedit mode</string>
     <string name="depends_on_input_device">Depends on input device</string>
     <string name="always_show">Always show</string>
@@ -210,9 +218,18 @@
     <string name="undo">Undo</string>
     <string name="added_x">Added %1$s</string>
     <string name="removed_x">Removed %1$s</string>
-    <string name="added_n_items">Added %1$d item(s)</string>
-    <string name="removed_n_items">Removed %1$d item(s)</string>
+    <plurals name="added_n_items">
+        <item quantity="one">Added %1$d item</item>
+        <item quantity="other">Added %1$d items</item>
+    </plurals>
+    <plurals name="removed_n_items">
+        <item quantity="one">Removed %1$d item</item>
+        <item quantity="other">Removed %1$d items</item>
+    </plurals>
     <string name="candidates_layout">Candidate list layout</string>
+    <string name="next_word_prediction">Next word suggestions</string>
+    <string name="next_word_prediction_summary">Show offline suggestions after committing Chinese text. Tap a candidate to insert it. Disabled in privacy mode or when the prediction dictionary is unavailable.</string>
+    <string name="next_word_prediction_label">Suggestion</string>
     <string name="automatic">Automatic</string>
     <string name="horizontal">Horizontal</string>
     <string name="vertical">Vertical</string>
@@ -229,12 +246,17 @@
     <string name="user_dictionary">User dictionary</string>
     <string name="import_">Import</string>
     <string name="import_error">Import error</string>
-    <string name="import_n_entries">Imported %1$d entry(-ies)</string>
-    <string name="exported_n_entries">Exported %1$d entry(-ies)</string>
+    <plurals name="import_n_entries">
+        <item quantity="one">Imported %1$d entry</item>
+        <item quantity="other">Imported %1$d entries</item>
+    </plurals>
+    <plurals name="exported_n_entries">
+        <item quantity="one">Exported %1$d entry</item>
+        <item quantity="other">Exported %1$d entries</item>
+    </plurals>
     <string name="backed_up_x_to_sync_dir">Backed up %1$s to sync dir</string>
     <string name="restored_from_x">Restored from %1$s</string>
     <string name="backup">Backup</string>
-    <string name="restore">Restore</string>
     <string name="clipboard_listening">Clipboard listening</string>
     <string name="clipboard_return_after_paste">Return after pasting</string>
     <string name="source_code">Source code</string>
@@ -248,9 +270,39 @@
     <string name="preferred_voice_input">Preferred voice input</string>
     <string name="no_voice_input_installed">No voice input installed</string>
     <string name="inline_suggestions">Show inline autofill suggestions</string>
+    <string name="manual_privacy_mode">Privacy mode</string>
+    <string name="enable_privacy_mode">Enable privacy mode</string>
+    <string name="disable_privacy_mode">Disable privacy mode</string>
     <string name="update_config">Update config</string>
     <string name="share">Share</string>
     <string name="word_segment">Word segment</string>
     <string name="star_success">Star success</string>
     <string name="ignore_system_gesture_insets">Ignore system gesture insets</string>
+    <string name="t9_unlock">Unlock syllable</string>
+    <string name="t9_cancel">Cancel composition</string>
+    <string name="t9_current_segment">Current: %1$s</string>
+    <string name="t9_locked_syllable">Locked syllable: %1$s</string>
+    <string name="t9_input_segment">Input segment: %1$s</string>
+    <string name="t9_completion">%1$s (complete)</string>
+    <string name="t9_key_height">T9 key height (minimum 48 dp)</string>
+    <string name="t9_one_hand">T9 one-handed layout</string>
+    <string name="t9_one_hand_off">Full width</string>
+    <string name="t9_one_hand_left">Left hand</string>
+    <string name="t9_one_hand_right">Right hand</string>
+    <string name="t9_space">Space</string>
+    <string name="t9_separator">Syllable separator</string>
+    <string name="t9_fuzzy_nl">T9 fuzzy sound: n/l</string>
+    <string name="t9_fuzzy_z_zh">T9 fuzzy sound: z/zh</string>
+    <string name="t9_fuzzy_c_ch">T9 fuzzy sound: c/ch</string>
+    <string name="t9_fuzzy_s_sh">T9 fuzzy sound: s/sh</string>
+    <string name="t9_fuzzy_en_eng">T9 fuzzy sound: en/eng</string>
+    <string name="t9_fuzzy_in_ing">T9 fuzzy sound: in/ing</string>
+    <string name="t9_typo_adjacent">T9 repair: adjacent digit</string>
+    <string name="t9_typo_missing">T9 repair: missing digit</string>
+    <string name="t9_typo_repeat">T9 repair: repeated digit</string>
+    <string name="t9_source_fuzzy">Fuzzy %1$s</string>
+    <string name="t9_source_adjacent">Adjacent</string>
+    <string name="t9_source_missing">Missing</string>
+    <string name="t9_source_repeat">Repeated</string>
+    <string name="t9_suggestion_source">%1$s (%2$s)</string>
 </resources>

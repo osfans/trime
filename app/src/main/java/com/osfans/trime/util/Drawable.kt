@@ -6,7 +6,6 @@ package com.osfans.trime.util
 
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
@@ -15,10 +14,11 @@ import android.graphics.drawable.shapes.OvalShape
 import android.os.Build
 import androidx.annotation.ColorInt
 import androidx.annotation.RequiresApi
+import androidx.core.graphics.drawable.toDrawable
 
 fun rippleDrawable(
     @ColorInt color: Int,
-) = RippleDrawable(ColorStateList.valueOf(color), null, ColorDrawable(Color.WHITE))
+) = RippleDrawable(ColorStateList.valueOf(color), null, Color.WHITE.toDrawable())
 
 fun roundedRippleDrawable(
     @ColorInt color: Int,
@@ -49,7 +49,7 @@ fun borderlessRippleDrawable(
 fun pressHighlightDrawable(
     @ColorInt color: Int,
 ) = StateListDrawable().apply {
-    addState(intArrayOf(android.R.attr.state_pressed), ColorDrawable(color))
+    addState(intArrayOf(android.R.attr.state_pressed), color.toDrawable())
 }
 
 fun circlePressHighlightDrawable(

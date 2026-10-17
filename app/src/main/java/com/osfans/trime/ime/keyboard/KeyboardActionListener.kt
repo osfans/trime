@@ -5,6 +5,8 @@
 
 package com.osfans.trime.ime.keyboard
 
+import kotlinx.coroutines.Job
+
 interface KeyboardActionListener {
     /**
      * Called when the user presses a key. This is sent before the [.onKey] is called. For
@@ -16,6 +18,12 @@ interface KeyboardActionListener {
     fun onPress(keyEventCode: Int)
 
     fun onAction(action: KeyAction)
+
+    /** A repeat owns its queued work so releasing the key can cancel it. */
+    fun onRepeat(action: KeyAction): Job? {
+        onAction(action)
+        return null
+    }
 
     /**
      * Send a key press to the listener.

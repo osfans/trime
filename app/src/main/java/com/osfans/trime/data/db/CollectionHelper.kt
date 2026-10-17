@@ -8,6 +8,7 @@ package com.osfans.trime.data.db
 import android.content.Context
 import androidx.room.Room
 import androidx.room.withTransaction
+import com.osfans.trime.ime.core.PrivacyModeState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -24,16 +25,22 @@ object CollectionHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dis
 
     private var lastBean: DatabaseBean? = null
 
-    fun init(context: Context) {
+    fun init(
+        context: Context,
+        persistHistory: Boolean = true,
+    ) {
         cltDb =
-            Room
-                .databaseBuilder(context, Database::class.java, "collection.db")
+            (
+                if (persistHistory) {
+                    Room.databaseBuilder(context, Database::class.java, "collection.db")
+                } else {
+                    Room.inMemoryDatabaseBuilder(context, Database::class.java)
+                }
+                )
                 .addMigrations(Database.MIGRATION_3_4)
                 .build()
         cltDao = cltDb.databaseDao()
     }
-
-    suspend fun insert(bean: DatabaseBean) = cltDao.insert(bean)
 
     suspend fun get(id: Int) = cltDao.get(id)
 
@@ -55,37 +62,78 @@ object CollectionHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dis
         }
     }
 
+    /** Missing rows are a normal edit outcome; only a committed single-row update is published. */
     suspend fun updateText(
         id: Int,
         text: String,
-    ) {
-        lastBean?.let {
-            if (id == it.id) lastBean = it.copy(text = text)
+    ): TextUpdateResult {
+        val permit = clipboardPersistenceGate.acquire(isSensitive = false)
+            ?: throw PersistencePermitExpiredException()
+        try {
+            return mutex.withLock {
+                val existing = cltDao.get(id) ?: return@withLock TextUpdateResult.NOT_FOUND
+                val updated = existing.copy(text = text)
+                val outcome = cltDb.withTransaction {
+                    clipboardPersistenceGate.guardTransaction(permit) {
+                        when (val affected = cltDao.updateText(id, text)) {
+                            0 -> TextUpdateResult.NOT_FOUND
+                            1 -> TextUpdateResult.SAVED
+                            else -> error("Unexpected edited row count: $affected")
+                        }
+                    }
+                }
+                if (outcome == TextUpdateResult.SAVED) {
+                    PrivacyModeState.publishIfOrdinary(permit) {
+                        if (lastBean?.id == id) lastBean = updated
+                    }
+                }
+                outcome
+            }
+        } finally {
+            clipboardPersistenceGate.release(permit)
         }
-        cltDao.updateText(id, text)
     }
 
     fun addNewBean(text: String) {
+        val permit = clipboardPersistenceGate.acquire(isSensitive = false) ?: return
         launch {
-            mutex.withLock {
-                val bean = DatabaseBean(text = text)
-                if (bean.text.isNullOrBlank()) return@withLock
-                try {
-                    cltDao.find(text)?.let {
-                        lastBean = it.copy(time = bean.time)
-                        cltDao.updateTime(it.id, bean.time)
+            try {
+                mutex.withLock {
+                    val bean = DatabaseBean(text = text)
+                    if (bean.text.isNullOrBlank()) return@withLock
+                    cltDao.find(text)?.let { existing ->
+                        val refreshed =
+                            cltDb.withTransaction {
+                                clipboardPersistenceGate.guardTransaction(permit) {
+                                    cltDao.updateTime(existing.id, bean.time)
+                                    existing.copy(time = bean.time)
+                                }
+                            }
+                        PrivacyModeState.publishIfOrdinary(permit) {
+                            lastBean = refreshed
+                        }
                         return@withLock
                     }
-                    val insertedBean = cltDb.withTransaction {
-                        val rowId = cltDao.insert(bean)
-                        cltDao.get(rowId) ?: bean
+                    val insertedBean =
+                        cltDb.withTransaction {
+                            clipboardPersistenceGate.guardTransaction(permit) {
+                                val rowId = cltDao.insert(bean)
+                                val id = rowId.toInt()
+                                cltDao.get(rowId) ?: bean.copy(id = id)
+                            }
+                        }
+                    PrivacyModeState.publishIfOrdinary(permit) {
+                        lastBean = insertedBean
                     }
-                    lastBean = insertedBean
-                } catch (e: Exception) {
-                    Timber.w("Failed to update collection database: $e")
-                    lastBean = bean
                 }
+            } catch (_: PersistencePermitExpiredException) {
+                // Room rolled the transaction back; never expose the rejected content.
+            } catch (e: Exception) {
+                Timber.w("Failed to update collection database: $e")
             }
+        }.invokeOnCompletion {
+            // Completion handlers also run when a coroutine is cancelled before its body starts.
+            clipboardPersistenceGate.release(permit)
         }
     }
 }

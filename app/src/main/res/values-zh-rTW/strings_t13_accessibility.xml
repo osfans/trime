@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<resources>
+    <string name="a11y_candidate_select">選擇候選</string>
+    <string name="a11y_candidate_actions">候選操作</string>
+    <string name="a11y_previous_candidates">上一頁候選</string>
+    <string name="a11y_next_candidates">下一頁候選</string>
+    <string name="a11y_t9_choose_syllable">選擇拼音</string>
+    <string name="a11y_t9_focus_segment">編輯這一音節</string>
+    <string name="a11y_preedit">未提交文字</string>
+    <string name="a11y_preedit_cursor_previous">游標向前移一字</string>
+    <string name="a11y_preedit_cursor_next">游標向後移一字</string>
+    <string name="a11y_expand_candidates">展開候選</string>
+    <string name="a11y_collapse_candidates">收起候選</string>
+    <string name="a11y_keyboard_options">鍵盤選項</string>
+    <string name="a11y_hide_keyboard">隱藏鍵盤</string>
+    <string name="a11y_back_to_keyboard">返回鍵盤</string>
+    <string name="a11y_dismiss_clipboard_suggestion">關閉剪貼簿建議</string>
+    <string name="t13_key_action">鍵盤操作</string>
+    <string name="t13_key_shift">切換大小寫</string>
+    <string name="t13_key_control">Control 控制鍵</string>
+    <string name="t13_key_alt">Alt 組合鍵</string>
+    <string name="t13_key_meta">Meta 組合鍵</string>
+    <string name="t13_key_symbols">符號</string>
+    <string name="t13_key_switch_keyboard">切換鍵盤</string>
+    <string name="t13_key_switch_language">切換輸入語言</string>
+    <string name="t13_key_escape">退出</string>
+    <string name="t13_key_tab">定位字元</string>
+    <string name="t13_key_left">向左移動</string>
+    <string name="t13_key_right">向右移動</string>
+    <string name="t13_key_up">向上移動</string>
+    <string name="t13_key_down">向下移動</string>
+    <string name="t13_key_home">移到開頭</string>
+    <string name="t13_key_end">移到結尾</string>
+    <string name="t13_key_page_up">上一頁</string>
+    <string name="t13_key_page_down">下一頁</string>
+    <string name="t13_key_shift_on">大寫</string>
+    <string name="t13_key_shift_off">小寫</string>
+    <string name="t13_key_caps_locked">大寫鎖定</string>
+    <string name="t13_key_long_press">長按</string>
+    <string name="t13_key_swipe_up">向上滑動</string>
+    <string name="t13_key_swipe_down">向下滑動</string>
+    <string name="t13_key_swipe_left">向左滑動</string>
+    <string name="t13_key_swipe_right">向右滑動</string>
+    <string name="t13_key_lock_shift">鎖定大寫</string>
+</resources>

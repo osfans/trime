@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<resources>
+    <item name="action_retry_deploy" type="id" />
+    <item name="action_deploy" type="id" />
+    <item name="action_test_input" type="id" />
+    <item name="action_developer" type="id" />
+    <item name="action_about" type="id" />
+    <item name="action_edit" type="id" />
+    <item name="action_delete" type="id" />
+</resources>

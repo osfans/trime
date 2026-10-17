@@ -11,6 +11,7 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.NinePatchDrawable
 import android.util.DisplayMetrics
+import androidx.core.graphics.get
 import timber.log.Timber
 import java.io.File
 import java.nio.ByteBuffer
@@ -104,7 +105,7 @@ object NinePatchBitmapFactory {
         val rangeListX = arrayListOf<Range>()
         var pos = -1
         for (i in 1 until width - 1) {
-            val color = bitmap.getPixel(i, 0)
+            val color = bitmap[i, 0]
             val alpha = Color.alpha(color)
             val red = Color.red(color)
             val green = Color.green(color)
@@ -130,7 +131,7 @@ object NinePatchBitmapFactory {
         val rangeListY: MutableList<Range> = ArrayList()
         pos = -1
         for (i in 1 until height - 1) {
-            val color = bitmap.getPixel(0, i)
+            val color = bitmap[0, i]
             val alpha = Color.alpha(color)
             val red = Color.red(color)
             val green = Color.green(color)

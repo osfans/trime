@@ -11,6 +11,7 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
+import androidx.annotation.IdRes
 import androidx.annotation.StringRes
 import splitties.resources.drawable
 
@@ -49,9 +50,10 @@ fun Menu.item(
     @DrawableRes icon: Int = 0,
     @ColorInt iconTint: Int = 0,
     showAsAction: Boolean = false,
+    @IdRes id: Int = Menu.NONE,
     onClick: Function0<Any?>? = null,
 ): MenuItem {
-    val item = add(title).setup(icon, iconTint, showAsAction, onClick)
+    val item = add(Menu.NONE, id, Menu.NONE, title).setup(icon, iconTint, showAsAction, onClick)
     return item
 }
 
@@ -60,8 +62,9 @@ fun Menu.item(
     @DrawableRes icon: Int = 0,
     @ColorInt iconTint: Int = 0,
     showAsAction: Boolean = false,
+    @IdRes id: Int = Menu.NONE,
     onClick: Function0<Any?>? = null,
 ): MenuItem {
-    val item = add(title).setup(icon, iconTint, showAsAction, onClick)
+    val item = add(Menu.NONE, id, Menu.NONE, title).setup(icon, iconTint, showAsAction, onClick)
     return item
 }

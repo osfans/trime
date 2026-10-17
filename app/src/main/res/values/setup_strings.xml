@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<resources>
+    <string name="setup__step_input">Choose your Chinese input</string>
+    <string name="setup__step_try">Try the keyboard</string>
+    <string name="setup__input_hint">Choose a layout and character set, then apply them. Your configuration files will be preserved.</string>
+    <string name="setup__try_hint">Type and select Chinese text such as “你好”. This test text is not saved by the setup wizard.</string>
+    <string name="setup__layout_label">Chinese layout</string>
+    <string name="setup__keep_current">Keep my current input scheme</string>
+    <string name="setup__full_pinyin">Full pinyin (recommended)</string>
+    <string name="setup__nine_key">Nine key pinyin</string>
+    <string name="setup__charset_label">Chinese characters</string>
+    <string name="setup__simplified">Simplified Chinese</string>
+    <string name="setup__traditional">Traditional Chinese</string>
+    <string name="setup__apply_input">Apply selected input</string>
+    <string name="setup__open_trial">Open keyboard</string>
+    <string name="setup__trial_hint">Type “你好” here</string>
+    <string name="setup__trial_later">Try typing later</string>
+    <string name="setup__advanced">Advanced settings</string>
+    <string name="setup__input_loading">Preparing the current input scheme…</string>
+    <string name="setup__input_current">Current scheme: %1$s</string>
+    <string name="setup__input_applied">Ready: %1$s</string>
+    <string name="setup__input_failed">The input choice could not be applied. Check the enabled schemes in advanced settings and try again.</string>
+    <string name="setup__trial_done">Chinese text was committed successfully.</string>
+    <string name="setup__trial_deferred">You can try typing from the main settings page later.</string>
+    <string name="setup__input_restore_failed">The input choice could not be applied or restored. Your configuration files are preserved; select a working scheme in advanced settings before retrying.</string>
+    <string name="setup__input_pending">Finish or cancel your current composition before changing the input scheme.</string>
+</resources>

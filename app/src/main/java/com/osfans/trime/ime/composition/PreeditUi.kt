@@ -13,6 +13,7 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.text.buildSpannedString
+import com.osfans.trime.R
 import com.osfans.trime.core.CompositionProto
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
@@ -25,7 +26,7 @@ open class PreeditUi(
     final override val ctx: Context,
     private val scope: ThemeScope,
     private val setupPreeditView: (TextView.() -> Unit)? = null,
-    private val onMoveCursor: ((Int) -> Unit)? = null,
+    private val onMoveCursor: ((Int, String) -> Unit)? = null,
 ) : Ui {
     private val theme: Theme
         get() = scope.theme
@@ -48,6 +49,7 @@ open class PreeditUi(
             override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean = false
 
             init {
+                id = R.id.preedit_root
                 orientation = HORIZONTAL
                 add(preedit, lParams())
             }
@@ -71,8 +73,9 @@ open class PreeditUi(
     private fun updateTextView(
         str: CharSequence,
         visible: Boolean,
+        cursor: Int = 0,
     ) = preedit.run {
-        text = str
+        updateComposition(str, cursor)
         visibility = if (visible) View.VISIBLE else View.GONE
     }
 
@@ -82,6 +85,7 @@ open class PreeditUi(
         val hasPreedit = composition.length > 0
         visible = hasPreedit
         if (!visible) {
+            preedit.clearTransientContent()
             updateTextView("", false)
             return
         }
@@ -94,6 +98,6 @@ open class PreeditUi(
                     append(string, cursorPos, string.length)
                 }
             }
-        updateTextView(stringWithCursor, true)
+        updateTextView(stringWithCursor, true, cursorPos)
     }
 }

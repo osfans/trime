@@ -78,6 +78,10 @@ class InputBroadcaster : InputBroadcastReceiver {
         receivers.forEach { it.onWindowDetached(window) }
     }
 
+    override fun onKeyboardLayoutChanged() {
+        receivers.forEach { it.onKeyboardLayoutChanged() }
+    }
+
     override fun onEnterKeyLabelUpdate(label: String) {
         receivers.forEach { it.onEnterKeyLabelUpdate(label) }
     }

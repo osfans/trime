@@ -1,0 +1,83 @@
+--- a/src/libespeak-ng/setlengths.c
++++ b/src/libespeak-ng/setlengths.c
+@@ -295,6 +295,11 @@
+ 	int new_value = value;
+ 	extern const int param_defaults[N_SPEECH_PARAM];
+ 
++	if (parameter < 0 || parameter >= N_SPEECH_PARAM)
++		return EINVAL;
++	if (parameter == espeakPUNCTUATION && (value < espeakPUNCT_NONE || value > espeakPUNCT_SOME))
++		return EINVAL;
++
+ 	if (relative) {
+ 		if (parameter < 5) {
+ 			int default_value;
+@@ -325,6 +330,9 @@
+ 		if (new_value > 99) new_value = 99;
+ 		embedded_value[EMBED_R] = new_value;
+ 		break;
++	case espeakPUNCTUATION:
++		// readclause consumes the saved punctuation value for each clause.
++		break;
+ 	case espeakLINELENGTH:
+ 		option_linelength = new_value;
+ 		break;
+--- a/android/src/com/reecedunn/espeak/FileUtils.java
++++ b/android/src/com/reecedunn/espeak/FileUtils.java
+@@ -26,7 +26,9 @@
+ 
+ public class FileUtils {
+     public static String read(File file) throws IOException {
+-        return readByteArray(new FileInputStream(file), (int)file.length()).toString();
++        try (InputStream stream = new FileInputStream(file)) {
++            return readByteArray(stream, (int)file.length()).toString();
++        }
+     }
+ 
+     public static String read(InputStream stream) throws IOException {
+@@ -38,7 +40,9 @@
+     }
+ 
+     public static byte[] readBinary(File file) throws IOException {
+-        return readByteArray(new FileInputStream(file), (int)file.length()).toByteArray();
++        try (InputStream stream = new FileInputStream(file)) {
++            return readByteArray(stream, (int)file.length()).toByteArray();
++        }
+     }
+ 
+     public static byte[] readBinary(InputStream stream) throws IOException {
+--- a/android/src/com/reecedunn/espeak/CheckVoiceData.java
++++ b/android/src/com/reecedunn/espeak/CheckVoiceData.java
+@@ -34,6 +34,7 @@
+ import com.reecedunn.espeak.SpeechSynthesis.SynthReadyCallback;
+ 
+ import java.io.File;
++import java.io.InputStream;
+ import java.util.ArrayList;
+ import java.util.List;
+ import java.util.Locale;
+@@ -71,8 +72,8 @@
+     }
+ 
+     public static boolean canUpgradeResources(Context context) {
+-        try {
+-            final String version = FileUtils.read(context.getResources().openRawResource(R.raw.espeakdata_version));
++        try (InputStream versionStream = context.getResources().openRawResource(R.raw.espeakdata_version)) {
++            final String version = FileUtils.read(versionStream);
+             final String installedVersion = FileUtils.read(new File(getDataPath(context), "version"));
+             return !version.equals(installedVersion);
+         } catch (Exception e) {
+--- a/android/src/com/reecedunn/espeak/DownloadVoiceData.java
++++ b/android/src/com/reecedunn/espeak/DownloadVoiceData.java
+@@ -150,7 +150,10 @@
+                     zipStream.closeEntry();
+                 }
+ 
+-                final String version = FileUtils.read(mContext.getResources().openRawResource(R.raw.espeakdata_version));
++                final String version;
++                try (InputStream versionStream = mContext.getResources().openRawResource(R.raw.espeakdata_version)) {
++                    version = FileUtils.read(versionStream);
++                }
+                 final File outputFile = new File(mOutput, "espeak-ng-data/version");
+ 
+                 FileUtils.write(outputFile, version);

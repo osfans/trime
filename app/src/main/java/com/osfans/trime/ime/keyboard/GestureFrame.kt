@@ -9,6 +9,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.SystemClock
 import android.view.MotionEvent
+import android.view.accessibility.AccessibilityEvent
 import android.widget.FrameLayout
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -16,6 +17,7 @@ import com.osfans.trime.data.prefs.AppPrefs
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import splitties.dimensions.dp
 import kotlin.math.abs
 import kotlin.math.floor
 
@@ -34,6 +36,11 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
     private var longPressJob: Job? = null
     private var repeatJob: Job? = null
     private var doubleTapJob: Job? = null
+    private var touchActive = false
+    private val accessibilityActivation = GestureAccessibilityActivation()
+
+    internal val hasPendingTouchGesture: Boolean
+        get() = touchActive || doubleTapJob?.isActive == true
 
     private var lastTapTime = 0L
     private var lastSwipeBehavior: KeyBehavior = KeyBehavior.CLICK
@@ -57,6 +64,7 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
     var onPress: (() -> Unit)? = null
     var onRelease: ((behavior: KeyBehavior, longPress: Boolean) -> Unit)? = null
     var onCancel: (() -> Unit)? = null
+    var onRepeatEnd: (() -> Unit)? = null
     var onMove: ((x: Float, y: Float, longPress: Boolean) -> Unit)? = null
     var onSwipe: ((behavior: KeyBehavior) -> Unit)? = null
 
@@ -85,6 +93,7 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 if (!isEnabled) return false
+                touchActive = true
                 touchId = (touchId + 1) and 0xFFFF
                 val currentTouchId = touchId
                 startX = x
@@ -110,6 +119,7 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
             }
 
             MotionEvent.ACTION_MOVE -> {
+                if (!touchActive) return true
                 if (!isEnabled) return false
                 drawableHotspotChanged(x, y)
 
@@ -120,28 +130,27 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
 
                 if ((isSlideCursor || isSlideDelete) && onSlide != null && !isLongPressed && swipeTravel > 0) {
                     if (!slideActivated) {
-                        if (abs(dx) >= swipeTravel) {
+                        if (abs(dx) >= dp(swipeTravel) && abs(dx) > abs(dy)) {
                             slideActivated = true
                             lastX = startX
                         }
                     }
 
                     if (slideActivated) {
-                        val step = getNStep(lastX, x, slideStepSize.toFloat())
+                        val stepSize = dp(slideStepSize).coerceAtLeast(1).toFloat()
+                        val step = getNStep(lastX, x, stepSize)
                         if (step != 0) {
                             onSlide?.invoke(step, x, y)
-                            lastX = x
+                            lastX += step * stepSize
                         }
                     }
                 }
 
-                if (!isLongPressed) {
+                if (!isLongPressed && !slideActivated) {
                     val behavior = detectSwipe(dx, dy)
-                    if (behavior != lastSwipeBehavior) {
+                    if (behavior != KeyBehavior.CLICK && behavior != lastSwipeBehavior) {
                         lastSwipeBehavior = behavior
-                        if (behavior != KeyBehavior.CLICK) {
-                            onSwipe?.invoke(behavior)
-                        }
+                        onSwipe?.invoke(behavior)
                     }
                 }
 
@@ -149,6 +158,9 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
             }
 
             MotionEvent.ACTION_UP -> {
+                if (!touchActive) return true
+                if (!isEnabled) return false
+                touchActive = false
                 val dx = x - startX
                 val dy = y - startY
 
@@ -163,9 +175,11 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
                 }
 
                 if (isLongPressed) {
-                    dispatchBehavior(KeyBehavior.LONG_CLICK, true)
+                    if (isRepeatable) onCancel?.invoke() else dispatchBehavior(KeyBehavior.LONG_CLICK, true)
                     return true
                 }
+
+                detectSwipe(dx, dy).takeIf { it != KeyBehavior.CLICK }?.let { lastSwipeBehavior = it }
 
                 if (swipeTriggered) {
                     dispatchBehavior(lastSwipeBehavior, false)
@@ -205,14 +219,7 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
             }
 
             MotionEvent.ACTION_CANCEL -> {
-                isPressed = false
-                cancelJobs()
-
-                isLongPressed = false
-                slideActivated = false
-                swipeTriggered = false
-
-                onCancel?.invoke()
+                cancelGesture()
                 return true
             }
         }
@@ -239,14 +246,10 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
 
     private fun startRepeatJob() {
         repeatJob = lifecycleScope.launch {
-            try {
-                while (true) {
-                    if (vibrateOnKeyRepeat) InputFeedbackManager.keyPressVibrate(this@GestureFrame)
-                    dispatchBehavior(KeyBehavior.CLICK, true)
-                    delay(repeatInterval.toLong())
-                }
-            } finally {
-                onCancel?.invoke()
+            while (true) {
+                if (vibrateOnKeyRepeat) InputFeedbackManager.keyPressVibrate(this@GestureFrame)
+                dispatchBehavior(KeyBehavior.CLICK, true)
+                delay(repeatInterval.toLong())
             }
         }
     }
@@ -265,9 +268,9 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
         }
 
         val isSwipe =
-            (swipeTravel > 0 && distance >= swipeTravel) ||
-                (swipeVelocity > 0 && velocity >= swipeVelocity)
-        swipeTriggered = isSwipe
+            (swipeTravel > 0 && distance >= dp(swipeTravel)) ||
+                (swipeVelocity > 0 && velocity >= dp(swipeVelocity))
+        swipeTriggered = swipeTriggered || isSwipe
 
         if (!isSwipe) return KeyBehavior.CLICK
         return if (absDx > absDy) {
@@ -294,10 +297,59 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
         }
     }
 
+    /** Use the same callbacks once, without fabricating touch events or starting repeat timers. */
+    protected fun performAccessibilityBehavior(behavior: KeyBehavior): Boolean {
+        if (onRelease == null || (behavior == KeyBehavior.LONG_CLICK && (hasPopup || !hasLongPress || isRepeatable))) return false
+        if (!accessibilityActivation.begin(isEnabled, touchActive, doubleTapJob?.isActive == true)) return false
+        try {
+            lastTapTime = 0L
+            onPress?.invoke()
+            if (behavior == KeyBehavior.LONG_CLICK) onLongClick?.invoke()
+            dispatchBehavior(behavior, behavior == KeyBehavior.LONG_CLICK)
+            if (behavior != KeyBehavior.CLICK) {
+                sendAccessibilityEvent(
+                    if (behavior == KeyBehavior.LONG_CLICK) AccessibilityEvent.TYPE_VIEW_LONG_CLICKED else AccessibilityEvent.TYPE_VIEW_CLICKED,
+                )
+            }
+            return true
+        } catch (failure: Throwable) {
+            onCancel?.invoke()
+            throw failure
+        } finally {
+            isPressed = false
+            accessibilityActivation.finish()
+        }
+    }
+
     private fun cancelJobs() {
+        onRepeatEnd?.invoke()
         longPressJob?.cancel()
         repeatJob?.cancel()
         doubleTapJob?.cancel()
+    }
+
+    fun cancelGesture() {
+        touchActive = false
+        touchId = (touchId + 1) and 0xFFFF
+        lastTapTime = 0
+        isPressed = false
+        isLongPressed = false
+        slideActivated = false
+        swipeTriggered = false
+        cancelJobs()
+        onCancel?.invoke()
+    }
+
+    override fun onDetachedFromWindow() {
+        cancelGesture()
+        super.onDetachedFromWindow()
+    }
+
+    override fun setEnabled(enabled: Boolean) {
+        if (!enabled) {
+            cancelGesture()
+        }
+        super.setEnabled(enabled)
     }
 
     fun getNStep(start: Float, end: Float, step: Float): Int = (if (start < end) 1 else -1) *

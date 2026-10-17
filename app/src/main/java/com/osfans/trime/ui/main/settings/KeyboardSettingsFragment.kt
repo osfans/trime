@@ -17,9 +17,14 @@ class KeyboardSettingsFragment : PreferenceDelegateFragment(AppPrefs.defaultInst
     override fun onPreferenceUiCreated(screen: PreferenceScreen) {
         screen.findPreference<Preference>("custom_sound_effect_name")?.apply {
             setOnPreferenceClickListener {
-                lifecycleScope.launch {
-                    SoundEffectPickerDialog.build(lifecycleScope, requireContext())
-                        .show()
+                val scope = viewLifecycleOwner.lifecycleScope
+                isEnabled = false
+                scope.launch {
+                    try {
+                        SoundEffectPickerDialog.build(scope, requireContext()).show()
+                    } finally {
+                        isEnabled = true
+                    }
                 }
                 true
             }

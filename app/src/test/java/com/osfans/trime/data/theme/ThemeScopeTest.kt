@@ -6,6 +6,7 @@
 
 package com.osfans.trime.data.theme
 
+import android.graphics.Color
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
@@ -45,7 +46,7 @@ class ThemeScopeTest :
             Then("colors resolves through the scheme") {
                 s.activeColorScheme shouldBe schemeA
                 s.colors.candidateTextColor shouldBe 0x112233
-                shouldThrow<IllegalArgumentException> { s.colors.backColor }
+                s.colors.backColor shouldBe Color.TRANSPARENT
             }
         }
         Given("a scope whose scheme switches from A to B") {
@@ -62,8 +63,33 @@ class ThemeScopeTest :
         Given("a scope with an unresolvable scheme key") {
             val s = scope()
             s.updateScheme(mapOf("candidate_text_color" to "not-a-color"))
-            Then("activation succeeds and the key throws when read") {
-                shouldThrow<IllegalArgumentException> { s.colors.candidateTextColor }
+            Then("activation succeeds and the invalid key is transparent") {
+                s.colors.candidateTextColor shouldBe Color.TRANSPARENT
+            }
+            Then("nullable lookup lets views apply their own fallback") {
+                s.colorOrNull("candidate_text_color") shouldBe null
+                s.colorOrNull("") shouldBe null
+            }
+        }
+        Given("a scope with an explicitly transparent color") {
+            val s = scope()
+            s.updateScheme(mapOf("key_text_color" to "#00000000"))
+            Then("nullable lookup preserves transparent as a real value") {
+                s.colorOrNull("key_text_color") shouldBe Color.TRANSPARENT
+            }
+        }
+        Given("a scope with no optional candidate border") {
+            val s = scope()
+            s.updateScheme(schemeA)
+            Then("nullable lookup distinguishes no stroke from a transparent stroke") {
+                s.colorOrNull("candidate_border_color") shouldBe null
+            }
+        }
+        Given("a scope with an image in a color position") {
+            val s = scope()
+            s.updateScheme(mapOf("key_text_color" to "label.png"))
+            Then("nullable lookup reports the color as unavailable") {
+                s.colorOrNull("key_text_color") shouldBe null
             }
         }
     })

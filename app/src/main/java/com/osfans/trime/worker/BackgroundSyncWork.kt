@@ -6,18 +6,34 @@
 package com.osfans.trime.worker
 
 import android.content.Context
-import androidx.work.Configuration
+import android.os.Build
+import android.os.UserManager
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.osfans.trime.TrimeApplication
+import com.osfans.trime.core.RimeMaintenanceMutex
 import com.osfans.trime.core.data.UserDataManager
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.prefs.AppPrefs
+import kotlinx.coroutines.CancellationException
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
+
+internal fun canInitializeWorkManager(
+    sdkInt: Int,
+    userUnlocked: Boolean,
+    deviceProtectedContext: Boolean,
+    directBootMode: Boolean = false,
+    processReplacementPending: Boolean = false,
+): Boolean = !processReplacementPending &&
+    (
+        sdkInt < Build.VERSION_CODES.N ||
+            (userUnlocked && !deviceProtectedContext && !directBootMode)
+        )
 
 class BackgroundSyncWork(
     context: Context,
@@ -27,6 +43,8 @@ class BackgroundSyncWork(
         try {
             Timber.i("Starting background sync ...")
             return doBackgroundSync()
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Timber.e(e, "Background sync job failed.")
             return Result.retry()
@@ -37,7 +55,15 @@ class BackgroundSyncWork(
         if (!enable) {
             return Result.failure()
         }
-        if (!UserDataManager.isStorageAvailable()) {
+        val available = RimeMaintenanceMutex.withLock {
+            if (UserDataManager.usesExternalSync() &&
+                !UserDataManager.hasExternalAccess()
+            ) {
+                UserDataManager.fallbackToAppStorage()
+            }
+            UserDataManager.isStorageAvailable()
+        }
+        if (!available) {
             Timber.w("Background sync skipped: storage not available")
             return Result.retry()
         }
@@ -73,8 +99,11 @@ class BackgroundSyncWork(
             context: Context,
             policy: ExistingPeriodicWorkPolicy,
         ) {
-            WorkManager.initialize(context, Configuration.Builder().build())
-            val instance = WorkManager.getInstance(context)
+            if (!canUseWorkManager(context)) {
+                Timber.i("BackgroundSyncWork deferred until credential-protected storage is available")
+                return
+            }
+            val instance = getWorkManager(context)
             if (!enable) {
                 instance.cancelUniqueWork(PERIODIC_BACKGROUND_SYNC_KEY)
                 Timber.i("BackgroundSyncWork canceled!")
@@ -101,5 +130,28 @@ class BackgroundSyncWork(
                 workRequest,
             )
         }
+
+        private fun canUseWorkManager(context: Context): Boolean {
+            val application = TrimeApplication.getInstance()
+            val processReplacementPending = application.isDirectBootProcessReplacementPending
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                return canInitializeWorkManager(
+                    Build.VERSION.SDK_INT,
+                    userUnlocked = true,
+                    deviceProtectedContext = false,
+                    processReplacementPending = processReplacementPending,
+                )
+            }
+            val userManager = context.getSystemService(UserManager::class.java)
+            return canInitializeWorkManager(
+                Build.VERSION.SDK_INT,
+                userManager?.isUserUnlocked == true,
+                context.isDeviceProtectedStorage,
+                application.isDirectBootMode,
+                processReplacementPending,
+            )
+        }
+
+        private fun getWorkManager(context: Context): WorkManager = WorkManager.getInstance(context.applicationContext)
     }
 }

@@ -6,9 +6,8 @@
 package com.osfans.trime.ui.main
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
+import androidx.core.net.toUri
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
@@ -16,6 +15,7 @@ import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.entity.License
 import com.osfans.trime.R
 import com.osfans.trime.ui.common.PaddingPreferenceFragment
+import com.osfans.trime.ui.common.dialog.PublicAlertDialogs
 import kotlinx.coroutines.launch
 
 class LicenseFragment : PaddingPreferenceFragment() {
@@ -71,8 +71,8 @@ class LicenseFragment : PaddingPreferenceFragment() {
             else -> {
                 val licenseArray = licenses.toTypedArray()
                 val licenseNames = licenseArray.map { it.spdxId ?: it.name }.toTypedArray()
-                AlertDialog
-                    .Builder(requireContext())
+                PublicAlertDialogs
+                    .builder(requireContext())
                     .setTitle(uniqueId)
                     .setItems(licenseNames) { _, idx ->
                         showLicenseContent(licenseArray[idx])
@@ -85,7 +85,7 @@ class LicenseFragment : PaddingPreferenceFragment() {
 
     private fun showLicenseContent(license: License) {
         if (license.url?.isNotBlank() == true) {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(license.url)))
+            license.url?.let { startActivity(Intent(Intent.ACTION_VIEW, it.toUri())) }
         }
     }
 }

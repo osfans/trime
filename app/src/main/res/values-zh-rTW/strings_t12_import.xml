@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="configuration_import_validated">已驗證設定：%1$d；已更新檔案：%2$d。</string>
+    <string name="configuration_import_rejected">設定驗證或啟用失敗，已還原上一次設定。</string>
+    <string name="configuration_import_recovery_needed">設定還原尚未完成，還原檔案保留於：%1$s</string>
+    <string name="configuration_import_recovery_failed">設定啟用失敗，原設定檔案仍可使用；請重新啟動或重新部署以還原輸入。</string>
+</resources>

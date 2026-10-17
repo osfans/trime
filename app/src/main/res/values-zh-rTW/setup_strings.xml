@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<resources>
+    <string name="setup__step_input">選擇中文輸入方式</string>
+    <string name="setup__step_try">試打中文</string>
+    <string name="setup__input_hint">選擇佈局和簡繁後套用。已有設定檔會保留。</string>
+    <string name="setup__try_hint">輸入並選中「你好」等中文。設定精靈不會儲存試打文字。</string>
+    <string name="setup__layout_label">中文佈局</string>
+    <string name="setup__keep_current">保留目前輸入方案</string>
+    <string name="setup__full_pinyin">全拼（建議）</string>
+    <string name="setup__nine_key">九鍵拼音</string>
+    <string name="setup__charset_label">漢字字形</string>
+    <string name="setup__simplified">簡體中文</string>
+    <string name="setup__traditional">繁體中文</string>
+    <string name="setup__apply_input">套用所選輸入方式</string>
+    <string name="setup__open_trial">開啟鍵盤試打</string>
+    <string name="setup__trial_hint">在這裡輸入「你好」</string>
+    <string name="setup__trial_later">稍後試打</string>
+    <string name="setup__advanced">進階設定</string>
+    <string name="setup__input_loading">正在準備目前輸入方案…</string>
+    <string name="setup__input_current">目前方案：%1$s</string>
+    <string name="setup__input_applied">已就緒：%1$s</string>
+    <string name="setup__input_failed">未能套用所選輸入方式。請在進階設定檢查可用方案後重試。</string>
+    <string name="setup__trial_done">已成功提交中文。</string>
+    <string name="setup__trial_deferred">稍後可從主設定頁開啟試打。</string>
+    <string name="setup__input_restore_failed">未能套用或還原輸入方式。設定檔仍保留，請先在進階設定選回可用方案後重試。</string>
+    <string name="setup__input_pending">請先完成或取消目前尚未提交的輸入，再切換輸入方案。</string>
+</resources>

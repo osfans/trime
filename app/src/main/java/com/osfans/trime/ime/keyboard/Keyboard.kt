@@ -6,8 +6,10 @@
 package com.osfans.trime.ime.keyboard
 
 import android.content.Context
+import android.content.res.Configuration
 import android.view.KeyEvent
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.prefs.keyboardHeightOverride
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.model.TextKeyboard
 import com.osfans.trime.data.theme.model.orAbsent
@@ -24,6 +26,7 @@ class Keyboard(
     private val theme: Theme,
     private val allowedWidth: Int,
     selfConfig: TextKeyboard? = null,
+    heightBudgetPx: Int = 0,
 ) {
 
     /** 按鍵默認水平間距  */
@@ -81,6 +84,7 @@ class Keyboard(
 
     /** Keyboard default ascii mode  */
     val asciiMode = selfConfig?.asciiMode == 1
+    val isT9Layout = selfConfig?.t9Layout == true
     val resetAsciiMode = selfConfig?.resetAsciiMode ?: true
     var lastAsciiMode: Boolean = asciiMode
 
@@ -100,17 +104,42 @@ class Keyboard(
     val isLock = selfConfig?.lock ?: false // 切換程序時記憶鍵盤
     val asciiKeyboard: String? = selfConfig?.asciiKeyboard // 英文鍵盤
 
-    val keyboardHeight: Int =
+    val requestedKeyboardHeight: Int =
         resolvePositive(
             selfConfig?.let {
-                pickLandscape(it.keyboardHeight, it.keyboardHeightLand, context.isLandscapeMode())
+                pickLandscape(
+                    it.keyboardHeight,
+                    it.keyboardHeightLand,
+                    context.isLandscapeMode() || (isT9Layout && context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE),
+                )
             },
             pickLandscape(
                 theme.style.keyboardHeight,
                 theme.style.keyboardHeightLand,
                 context.isLandscapeMode(),
             ),
-        ) { context.dp(it) }
+        ) { context.dp(it) }.let { themedHeight ->
+            val display = context.resources.displayMetrics
+            val override = keyboardHeightOverride(
+                (display.heightPixels / display.density).toInt(),
+                AppPrefs.defaultInstance().keyboard.keyboardHeight.getValue(),
+            )
+            if (override > 0) {
+                context.dp(override)
+            } else if (isT9Layout && themedHeight > 0) {
+                val preferred = AppPrefs.defaultInstance().keyboard.t9KeyHeight.getValue()
+                context.dp(T9LayoutPolicy.height((display.heightPixels / display.density).toInt(), (themedHeight / display.density).toInt(), preferred))
+            } else {
+                themedHeight
+            }
+        }
+
+    // Keep the four real 48dp rows. A smaller viewport scrolls this full model.
+    val keyboardHeight: Int = if (isT9Layout && heightBudgetPx > 0) {
+        T9LayoutPolicy.modelHeight(requestedKeyboardHeight, heightBudgetPx, context.dp(192))
+    } else {
+        requestedKeyboardHeight
+    }
 
     private val expandKeypressArea: Boolean by AppPrefs.defaultInstance().keyboard.expandKeypressArea
 
@@ -123,7 +152,7 @@ class Keyboard(
 
             val maxColumns = if (selfConfig.columns == -1) Int.MAX_VALUE else selfConfig.columns
 
-            val isSplit = context.isLandscapeMode() && landscapePercent > 0
+            val isSplit = !isT9Layout && context.isLandscapeMode() && landscapePercent > 0
             val splitRatio = if (isSplit) landscapePercent / 100f else 0f
 
             val oneWeightWidthPx =
@@ -362,7 +391,7 @@ class Keyboard(
     val isOnlyShiftOn: Boolean
         get() =
             isShifted &&
-                !modifier.hasFlag(KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON or KeyEvent.META_SYM_ON or KeyEvent.META_META_ON)
+                (modifier and (KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON or KeyEvent.META_SYM_ON or KeyEvent.META_META_ON)) == 0
 
     /**
      * 设置Shift键状态（用于自动大写）
@@ -397,11 +426,17 @@ class Keyboard(
                 KeyEvent.META_ALT_ON -> mAltKey
                 KeyEvent.META_CTRL_ON -> mCtrlKey
                 KeyEvent.META_META_ON -> mMetaKey
-                KeyEvent.KEYCODE_SYM -> mSymKey
+                KeyEvent.META_SYM_ON -> mSymKey
                 else -> null
             }
         val keepOn = modifierKey?.setOn(on) ?: on
         return if (on) setModifier(keycode, keepOn) else setModifier(keycode, keyDown)
+    }
+
+    /** Keep the registered Shift locked even when the first tap already locked it. */
+    fun lockShift() {
+        mShiftKey?.let { if (!it.isOn) it.setOn(true) }
+        setModifier(KeyEvent.META_SHIFT_ON, true)
     }
 
     fun resetShift() {
@@ -410,13 +445,13 @@ class Keyboard(
     }
 
     fun refreshModifier(): Boolean {
-        // 这里改为了一次性重置全部修饰键状态并返回TRUE刷新UI，可能有bug
+        // Clear every temporary modifier, even after an earlier clear changed the state.
         var result = false
-        if (mShiftKey != null && !mShiftKey!!.isOn) result = result || setModifier(KeyEvent.META_SHIFT_ON, false)
-        if (mAltKey != null && !mAltKey!!.isOn) result = result || setModifier(KeyEvent.META_ALT_ON, false)
-        if (mCtrlKey != null && !mCtrlKey!!.isOn) result = result || setModifier(KeyEvent.META_CTRL_ON, false)
-        if (mMetaKey != null && !mMetaKey!!.isOn) result = result || setModifier(KeyEvent.META_META_ON, false)
-        if (mSymKey != null && !mSymKey!!.isOn) result = result || setModifier(KeyEvent.KEYCODE_SYM, false)
+        if (mShiftKey != null && !mShiftKey!!.isOn) result = setModifier(KeyEvent.META_SHIFT_ON, false) || result
+        if (mAltKey != null && !mAltKey!!.isOn) result = setModifier(KeyEvent.META_ALT_ON, false) || result
+        if (mCtrlKey != null && !mCtrlKey!!.isOn) result = setModifier(KeyEvent.META_CTRL_ON, false) || result
+        if (mMetaKey != null && !mMetaKey!!.isOn) result = setModifier(KeyEvent.META_META_ON, false) || result
+        if (mSymKey != null && !mSymKey!!.isOn) result = setModifier(KeyEvent.META_SYM_ON, false) || result
         return result
     }
 

@@ -4,6 +4,7 @@
 
 package com.osfans.trime.util
 
+import com.osfans.trime.core.data.UserDataManager
 import timber.log.Timber
 import java.io.File
 
@@ -16,14 +17,11 @@ object ResourceUtils {
         val assets = appContext.assets.list(path)
         if (!assets.isNullOrEmpty()) {
             assets.fold(0L) { acc, asset ->
-                acc + copyFile("$path/$asset", "$dest/$asset").getOrDefault(0L)
+                acc + copyFile("$path/$asset", "$dest/$asset").getOrThrow()
             }
         } else {
             appContext.assets.open(path).use { i ->
-                File(dest)
-                    .also { it.parentFile?.mkdirs() }
-                    .outputStream()
-                    .use { o -> i.copyTo(o) }
+                UserDataManager.writeFromStream(File(dest)) { output -> i.copyTo(output) }
             }
         }
     }.onFailure { Timber.e(it, "Caught a error in copying assets") }

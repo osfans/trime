@@ -18,7 +18,6 @@ object KeyCode {
     fun isStandardKey(code: Int): Boolean = code in 1 until RimeKeyMapping.SYMBOL_CODE_OFFSET
 
     fun nameToKeyCode(name: String): Int {
-        Timber.d("nameToKeyCode: $name")
         if (name.isEmpty()) return KeyEvent.KEYCODE_UNKNOWN
 
         RimeKeyMapping.upperNameToCode(name)?.let { return it }
@@ -55,7 +54,6 @@ object KeyCode {
     ): String = if (isStandardKey(code)) {
         if (virtualKeyCharacterMap.isPrintingKey(code)) {
             val charCode = virtualKeyCharacterMap.get(code, mask)
-            Timber.d("getDisplayLabel: keyCode=$code, mask=$mask, charCode=$charCode")
             if (charCode > 0) {
                 charCode.toChar().toString()
             } else {
@@ -69,13 +67,14 @@ object KeyCode {
         RimeKeyMapping.symbolCodeToLabel(code) ?: codeToKeyName(code) ?: ""
     }
 
-    fun parse(repr: String): Pair<Int, Int> {
+    fun parse(repr: String, reportInvalid: Boolean = true): Pair<Int, Int> {
         if (repr.isEmpty()) return 0 to 0
         var modifiers = 0
         var start = 0
         while (true) {
             val found = repr.indexOf('+', start)
-            if (found == -1) break
+            // The final '+' is a literal key, including chords such as Control++.
+            if (found == -1 || found == repr.lastIndex) break
 
             val token = repr.substring(start, found)
             val modifier =
@@ -89,7 +88,7 @@ object KeyCode {
             if (modifier != null) {
                 modifiers = modifiers or modifier
             } else {
-                Timber.e("Unrecognized modifier '$token'")
+                if (reportInvalid) Timber.e("Unrecognized modifier '$token'")
                 return 0 to 0
             }
             start = found + 1
@@ -106,7 +105,7 @@ object KeyCode {
         }
         val keycode = nameToKeyCode(token)
         if (keycode == 0) {
-            Timber.e("Unrecognized key '$token'")
+            if (reportInvalid) Timber.e("Unrecognized key '$token'")
             return 0 to 0
         }
         return keycode to modifiers

@@ -16,97 +16,92 @@ import com.osfans.trime.ui.main.settings.ClipboardSettingsFragment
 import com.osfans.trime.ui.main.settings.GeneralSettingsFragment
 import com.osfans.trime.ui.main.settings.KeyboardSettingsFragment
 import com.osfans.trime.ui.main.settings.ProfileSettingsFragment
+import com.osfans.trime.ui.main.settings.QuickSettingsFragment
 import com.osfans.trime.ui.main.settings.schema.SchemaListFragment
 import com.osfans.trime.ui.main.settings.theme.ThemeSettingsFragment
 import com.osfans.trime.ui.main.settings.userdict.UserDictionaryFragment
 import kotlinx.parcelize.Parcelize
-import kotlinx.serialization.Serializable
 
 @Parcelize
-sealed class NavigationRoute : Parcelable {
+sealed class NavigationRoute(
+    val path: String,
+) : Parcelable {
 
-    @Serializable
-    data object Main : NavigationRoute()
+    data object Main : NavigationRoute("com.osfans.trime.ui.main.NavigationRoute.Main")
 
-    @Serializable
-    data object SchemaList : NavigationRoute()
+    data object QuickSettings : NavigationRoute("com.osfans.trime.ui.main.NavigationRoute.QuickSettings")
 
-    @Serializable
-    data object UserDict : NavigationRoute()
+    data object SchemaList : NavigationRoute("com.osfans.trime.ui.main.NavigationRoute.SchemaList")
 
-    @Serializable
-    data object Profile : NavigationRoute()
+    data object UserDict : NavigationRoute("com.osfans.trime.ui.main.NavigationRoute.UserDict")
 
-    @Serializable
-    data object General : NavigationRoute()
+    data object Profile : NavigationRoute("com.osfans.trime.ui.main.NavigationRoute.Profile")
 
-    @Serializable
-    data object VirtualKeyboard : NavigationRoute()
+    data object General : NavigationRoute("com.osfans.trime.ui.main.NavigationRoute.General")
 
-    @Serializable
-    data object CandidatesWindow : NavigationRoute()
+    data object VirtualKeyboard : NavigationRoute("com.osfans.trime.ui.main.NavigationRoute.VirtualKeyboard")
 
-    @Serializable
-    data object Theme : NavigationRoute()
+    data object CandidatesWindow : NavigationRoute("com.osfans.trime.ui.main.NavigationRoute.CandidatesWindow")
 
-    @Serializable
-    data object Clipboard : NavigationRoute()
+    data object Theme : NavigationRoute("com.osfans.trime.ui.main.NavigationRoute.Theme")
 
-    @Serializable
-    data object Advanced : NavigationRoute()
+    data object Clipboard : NavigationRoute("com.osfans.trime.ui.main.NavigationRoute.Clipboard")
 
-    @Serializable
-    data object Developer : NavigationRoute()
+    data object Advanced : NavigationRoute("com.osfans.trime.ui.main.NavigationRoute.Advanced")
 
-    @Serializable
-    data object About : NavigationRoute()
+    data object Developer : NavigationRoute("com.osfans.trime.ui.main.NavigationRoute.Developer")
 
-    @Serializable
-    data object License : NavigationRoute()
+    data object About : NavigationRoute("com.osfans.trime.ui.main.NavigationRoute.About")
+
+    data object License : NavigationRoute("com.osfans.trime.ui.main.NavigationRoute.License")
 
     companion object {
-        fun createGraph(controller: NavController) = controller.createGraph(Main) {
+        fun createGraph(controller: NavController) = controller.createGraph(Main.path) {
             val ctx = controller.context
 
-            fragment<MainFragment, Main> {
+            fragment<MainFragment>(Main.path) {
                 label = ctx.getString(R.string.trime_app_name)
             }
 
-            fragment<SchemaListFragment, SchemaList> {
+            fragment<QuickSettingsFragment>(QuickSettings.path) {
+                label = ctx.getString(R.string.quick_settings)
+            }
+
+            fragment<SchemaListFragment>(SchemaList.path) {
                 label = ctx.getString(R.string.schemata)
             }
-            fragment<UserDictionaryFragment, UserDict> {
+            fragment<UserDictionaryFragment>(UserDict.path) {
                 label = ctx.getString(R.string.user_dictionary)
             }
-            fragment<ProfileSettingsFragment, Profile> {
+            fragment<ProfileSettingsFragment>(Profile.path) {
                 label = ctx.getString(R.string.profile)
             }
 
-            fragment<GeneralSettingsFragment, General> {
+            fragment<GeneralSettingsFragment>(General.path) {
                 label = ctx.getString(R.string.general)
             }
-            fragment<KeyboardSettingsFragment, VirtualKeyboard> {
+            fragment<KeyboardSettingsFragment>(VirtualKeyboard.path) {
                 label = ctx.getString(R.string.virtual_keyboard)
             }
-            fragment<CandidatesSettingsFragment, CandidatesWindow> {
+            fragment<CandidatesSettingsFragment>(CandidatesWindow.path) {
                 label = ctx.getString(R.string.candidates_window)
             }
-            fragment<ThemeSettingsFragment, Theme> {
+            fragment<ThemeSettingsFragment>(Theme.path) {
                 label = ctx.getString(R.string.theme)
             }
-            fragment<ClipboardSettingsFragment, Clipboard> {
+            fragment<ClipboardSettingsFragment>(Clipboard.path) {
                 label = ctx.getString(R.string.clipboard)
             }
-            fragment<AdvancedSettingsFragment, Advanced> {
+            fragment<AdvancedSettingsFragment>(Advanced.path) {
                 label = ctx.getString(R.string.advanced)
             }
-            fragment<DeveloperFragment, Developer> {
+            fragment<DeveloperFragment>(Developer.path) {
                 label = ctx.getString(R.string.developer)
             }
-            fragment<AboutFragment, About> {
+            fragment<AboutFragment>(About.path) {
                 label = ctx.getString(R.string.about)
             }
-            fragment<LicenseFragment, License> {
+            fragment<LicenseFragment>(License.path) {
                 label = ctx.getString(R.string.license)
             }
         }

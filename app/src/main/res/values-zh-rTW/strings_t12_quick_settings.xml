@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<resources>
+    <string name="quick_settings">常用設定</string>
+    <string name="quick_settings_input">中文輸入</string>
+    <string name="quick_settings_layout">拼音佈局</string>
+    <string name="quick_settings_t9">九鍵拼音</string>
+    <string name="quick_settings_full_pinyin">全拼</string>
+    <string name="quick_settings_variant">簡繁選擇</string>
+    <string name="quick_settings_simplified">簡體中文</string>
+    <string name="quick_settings_traditional">繁體中文</string>
+    <string name="quick_settings_appearance">候選與鍵盤</string>
+    <string name="quick_settings_candidate_size">候選字號</string>
+    <string name="quick_settings_keyboard_height">鍵盤高度</string>
+    <string name="quick_settings_theme_default">使用主題尺寸</string>
+    <string name="quick_settings_feedback">觸感與聲音</string>
+    <string name="quick_settings_fuzzy">九鍵模糊音</string>
+    <string name="quick_settings_fuzzy_hint">以下規則僅用於九鍵拼音，預設關閉。全拼及自訂方案保留各自的拼寫規則。</string>
+    <string name="quick_settings_dictionary">詞庫與短語</string>
+    <string name="quick_settings_loading">正在讀取目前方案…</string>
+    <string name="quick_settings_read_failed">無法讀取目前方案，請在「輸入方案」中重試。</string>
+    <string name="quick_settings_keep_custom">保留目前自訂方案。選擇拼音佈局後可使用內建簡繁選項。</string>
+    <string name="quick_settings_applied">已套用中文輸入選擇</string>
+    <string name="quick_settings_schema_unavailable">此拼音方案尚未啟用，請在「輸入方案」中啟用後重試。原有選擇未改變。</string>
+    <string name="quick_settings_pending_input">請先提交或清除未完成的輸入，再變更中文輸入設定。</string>
+    <string name="quick_settings_unsupported">此方案使用自訂佈局或簡繁選項，請透過「輸入方案」或進階設定調整。</string>
+    <string name="quick_settings_apply_failed">無法套用中文輸入選擇，已保留原有選擇。</string>
+    <string name="quick_settings_restore_failed">無法套用或還原原有選擇，請在「輸入方案」中選擇可用方案。</string>
+</resources>

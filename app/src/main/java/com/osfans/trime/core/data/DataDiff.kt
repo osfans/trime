@@ -41,28 +41,25 @@ sealed interface DataDiff {
         fun diff(
             old: DataChecksums,
             new: DataChecksums,
-        ): List<DataDiff> {
-            if (old.sha256 == new.sha256) return emptyList()
-            return new.files
-                .mapNotNull { (path, sha256) ->
-                    when {
-                        path !in old.files && sha256.isNotBlank() -> CreateFile(path)
-
-                        old.files[path] != sha256 ->
-                            if (sha256.isNotBlank()) UpdateFile(path) else null
-
-                        else -> null
-                    }
-                }.toMutableList()
-                .apply {
-                    addAll(
-                        old.files
-                            .filterKeys { it !in new.files }
-                            .map { (path, sha256) ->
-                                if (sha256.isNotBlank()) DeleteFile(path) else DeleteDir(path)
-                            },
-                    )
+            isFilePresent: (path: String) -> Boolean,
+        ): List<DataDiff> = new.files
+            .mapNotNull { (path, sha256) ->
+                when {
+                    sha256.isBlank() -> null
+                    path !in old.files -> CreateFile(path)
+                    old.files[path] != sha256 -> UpdateFile(path)
+                    !isFilePresent(path) -> CreateFile(path)
+                    else -> null
                 }
-        }
+            }.toMutableList()
+            .apply {
+                addAll(
+                    old.files
+                        .filterKeys { it !in new.files }
+                        .map { (path, sha256) ->
+                            if (sha256.isNotBlank()) DeleteFile(path) else DeleteDir(path)
+                        },
+                )
+            }
     }
 }

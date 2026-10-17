@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<resources>
+    <!-- The referenced app name supplies the locale-specific release translation. -->
+    <string name="trime_app_name" translatable="false">@string/app_name_release</string>
+</resources>

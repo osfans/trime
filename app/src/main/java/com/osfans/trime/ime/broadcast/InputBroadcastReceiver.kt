@@ -34,5 +34,7 @@ interface InputBroadcastReceiver {
 
     fun onWindowDetached(window: BoardWindow) {}
 
+    fun onKeyboardLayoutChanged() {}
+
     fun onEnterKeyLabelUpdate(label: String) {}
 }

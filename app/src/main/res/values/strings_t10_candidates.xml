@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="candidate_show_comments">Show candidate pronunciation and comments</string>
+    <string name="candidate_horizontal_scroll">Allow horizontal scrolling in the candidate bar</string>
+    <string name="candidate_pin">Pin for this input</string>
+    <string name="candidate_restore_ranking">Restore default order for this input</string>
+    <string name="candidate_read_full_text">Read full candidate</string>
+    <string name="candidate_pinned">Pinned for this schema and input.</string>
+    <string name="candidate_ranking_restored">Pins removed for this input. Learned frequencies are unchanged.</string>
+    <string name="candidate_forgotten">Requested removal of the learned record. The system dictionary may still show this word; explicit pins are unchanged.</string>
+    <string name="candidate_forget_failed">Cannot forget this candidate. It may have changed, have no editable learned record, or be protected by privacy mode.</string>
+    <string name="candidate_action_failed">Could not apply this action. Refresh the candidates and try again in normal mode.</string>
+</resources>

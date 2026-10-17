@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="userdict_phrases">常用短语</string>
+    <string name="userdict_edit_phrases">编辑常用短语</string>
+    <string name="userdict_add_phrase">添加短语</string>
+    <string name="userdict_phrase">短语</string>
+    <string name="userdict_phrase_code">编码：全拼用字母，九键用数字</string>
+    <string name="userdict_phrase_help">每行填写短语、编码和可选的整数权重，用制表符分隔。可用“添加短语”插入一行。全拼与九键共享此文件，字母编码和数字编码是独立记录。导入会先备份再替换整个列表。</string>
+    <string name="userdict_phrase_invalid">请填写短语和编码，不含制表符或换行。短语不能以 # 开头。</string>
+    <string name="userdict_phrases_saved">常用短语已保存</string>
+    <string name="userdict_phrases_exported">常用短语已导出</string>
+    <string name="userdict_recover_backup">恢复上一次备份</string>
+    <string name="userdict_recovery_confirmation">用最近的恢复备份替换此词库？当前词库也会先备份。恢复会精确还原记录；导入 Rime 快照则会合并记录。</string>
+    <string name="userdict_recovery_complete">已从备份恢复词库</string>
+    <string name="userdict_merge_snapshot">合并 Rime 用户词库快照</string>
+</resources>

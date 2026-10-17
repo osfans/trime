@@ -74,7 +74,7 @@ Java_com_osfans_trime_core_RimeConfig_getRimeConfigString(JNIEnv* env,
   const char* value = api->config_get_cstring(
       reinterpret_cast<RimeConfig*>(peer), CString(env, key));
   if (!value) return nullptr;
-  return env->NewStringUTF(value);
+  return makeJavaString(env, value);
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL

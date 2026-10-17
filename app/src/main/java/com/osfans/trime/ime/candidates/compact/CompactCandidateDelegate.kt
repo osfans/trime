@@ -6,24 +6,31 @@
 package com.osfans.trime.ime.candidates.compact
 
 import android.content.res.Configuration
+import android.graphics.Canvas
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RectShape
 import android.view.ContextThemeWrapper
+import androidx.core.view.isNotEmpty
 import androidx.core.view.updateLayoutParams
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.osfans.trime.R
+import com.osfans.trime.core.CandidateSnapshot
 import com.osfans.trime.core.Candidates
 import com.osfans.trime.daemon.RimeSession
-import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.bar.InputBarDelegate
 import com.osfans.trime.ime.bar.UnrollButtonStateMachine
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
+import com.osfans.trime.ime.candidates.CandidateViewHolder
+import com.osfans.trime.ime.candidates.CandidateViewportAnchor
 import com.osfans.trime.ime.candidates.unrolled.decoration.FlexboxVerticalDecoration
 import com.osfans.trime.ime.core.InputView
+import com.osfans.trime.ime.core.TrimeInputMethodService
+import com.osfans.trime.ime.performance.InputLatencyLog
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -31,22 +38,30 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.dimensions.dp
-import splitties.views.dsl.recyclerview.recyclerView
 import kotlin.math.max
 
 class CompactCandidateDelegate(override val di: DI) :
     DIAware,
     InputBroadcastReceiver {
+    data class UnrolledCandidateState(
+        val offset: Int,
+        val total: Int,
+        val highlighted: Int,
+        val snapshot: CandidateSnapshot,
+        val anchor: Int,
+    )
     private val context: ContextThemeWrapper by instance()
-    private val rime: RimeSession by instance()
     private val scope: ThemeScope by instance()
     private val inputView: InputView by instance()
+    private val service: TrimeInputMethodService by instance()
     private val bar: InputBarDelegate by instance()
+    private val rime: RimeSession by instance()
 
     private val theme: Theme
         get() = scope.theme
 
     private val fillStyle by AppPrefs.defaultInstance().keyboard.horizontalCandidateMode
+    private val horizontalScroll by AppPrefs.defaultInstance().candidates.compactCandidateScroll
 
     private val maxSpanCountPref by lazy {
         AppPrefs.defaultInstance().keyboard.run {
@@ -71,35 +86,46 @@ class CompactCandidateDelegate(override val di: DI) :
     private var secondLayoutPassDone = false
 
     private val _unrolledCandidateOffset =
-        MutableSharedFlow<Int>(
+        MutableSharedFlow<UnrolledCandidateState>(
             replay = 1,
             onBufferOverflow = BufferOverflow.DROP_OLDEST,
         )
 
     val unrolledCandidateOffset = _unrolledCandidateOffset.asSharedFlow()
+    val expandedViewportAnchor = CandidateViewportAnchor()
 
     fun refreshUnrolled(childCount: Int) {
-        _unrolledCandidateOffset.tryEmit(childCount)
+        val scrolling = layoutManager is LinearLayoutManager
+        val offset = if (scrolling) 0 else childCount
+        val anchor = if (scrolling) CompactCandidateLayoutManagers.firstVisibleIndex(layoutManager).coerceAtLeast(0) else offset
+        expandedViewportAnchor.update(adapter.snapshot, offset)
+        _unrolledCandidateOffset.tryEmit(UnrolledCandidateState(offset, adapter.total, adapter.highlightedIdx, adapter.snapshot, anchor))
         bar.unrollButtonStateMachine.push(
             UnrollButtonStateMachine.TransitionEvent.UnrolledCandidatesUpdated,
             UnrollButtonStateMachine.BooleanKey.UnrolledCandidatesEmpty to
-                (adapter.total == childCount),
+                (adapter.total == offset),
         )
     }
 
     /** Restyles the compact list after a scheme switch; visible rows re-bind. */
     fun refreshColors() {
         separatorDrawable.paint.color = scope.colors.candidateSeparatorColor
-        adapter.notifyDataSetChanged()
+        adapter.notifyItemRangeChanged(0, adapter.itemCount)
     }
 
-    val adapter by lazy {
+    val adapter: CompactCandidateViewAdapter by lazy {
         CompactCandidateViewAdapter(scope).apply {
-            setOnItemClickListener { _, _, position ->
-                rime.launchOnReady { it.selectCandidate(position, global = true) }
+            setOnItemClickListener { _, view, _ ->
+                val holder = this@CompactCandidateDelegate.view.findContainingViewHolder(view) as? CandidateViewHolder
+                    ?: return@setOnItemClickListener
+                val index = holder.idx
+                val snapshot = holder.snapshot
+                service.postRimeJob { selectCandidate(index, global = true, expectedSnapshot = snapshot) }
             }
-            setOnItemLongClickListener { _, view, position ->
-                inputView.showCandidateActionMenu(position, items[position].text, view, global = true)
+            setOnItemLongClickListener { _, view, _ ->
+                val holder = this@CompactCandidateDelegate.view.findContainingViewHolder(view) as? CandidateViewHolder
+                    ?: return@setOnItemLongClickListener false
+                inputView.showCandidateActionMenu(holder.idx, holder.text, view, global = true, snapshot = holder.snapshot)
                 true
             }
         }
@@ -110,34 +136,30 @@ class CompactCandidateDelegate(override val di: DI) :
         layoutFlexGrow = flexGrow
     }
 
-    val layoutManager by lazy {
-        object : FlexboxLayoutManager(context) {
-            override fun canScrollHorizontally(): Boolean = false
+    private val scrollingLayoutManager by lazy { CompactCandidateLayoutManagers.create(context, true, ::onLayoutCompleted) }
+    private val wrappedLayoutManager by lazy { CompactCandidateLayoutManagers.create(context, false, ::onLayoutCompleted) }
+    private var activeLayoutManager: RecyclerView.LayoutManager? = null
 
-            override fun canScrollVertically(): Boolean = false
+    val layoutManager: RecyclerView.LayoutManager
+        get() = activeLayoutManager ?: desiredLayoutManager().also { activeLayoutManager = it }
 
-            override fun onLayoutCompleted(state: RecyclerView.State?) {
-                super.onLayoutCompleted(state)
-                val cnt = this.childCount
-                if (secondLayoutPassNeeded) {
-                    if (cnt < adapter.itemCount) {
-                        // [^2] RecyclerView can't display all candidates
-                        // update LayoutParams in onLayoutCompleted would trigger another
-                        // onLayoutCompleted, skip the second one to avoid infinite loop
-                        if (secondLayoutPassDone) return
-                        secondLayoutPassDone = true
-                        for (i in 0 until cnt) {
-                            getChildAt(i)!!.updateLayoutParams<LayoutParams> {
-                                flexGrow = 1f
-                            }
-                        }
-                    } else {
-                        secondLayoutPassNeeded = false
-                    }
+    private fun desiredLayoutManager() = if (horizontalScroll) scrollingLayoutManager else wrappedLayoutManager
+
+    private fun onLayoutCompleted(manager: RecyclerView.LayoutManager) {
+        val count = manager.childCount
+        if (manager is FlexboxLayoutManager && secondLayoutPassNeeded) {
+            if (count < adapter.itemCount) {
+                // Updating flexGrow requests another layout; apply it once.
+                if (secondLayoutPassDone) return
+                secondLayoutPassDone = true
+                for (index in 0 until count) {
+                    manager.getChildAt(index)!!.updateLayoutParams<FlexboxLayoutManager.LayoutParams> { flexGrow = 1f }
                 }
-                refreshUnrolled(cnt)
+            } else {
+                secondLayoutPassNeeded = false
             }
         }
+        refreshUnrolled(count)
     }
 
     private val separatorDrawable by lazy {
@@ -150,17 +172,36 @@ class CompactCandidateDelegate(override val di: DI) :
         }
     }
 
-    val view by lazy {
+    val view: RecyclerView by lazy {
         object : RecyclerView(context) {
             override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
                 super.onSizeChanged(w, h, oldw, oldh)
-                if (fillStyle == CompactCandidateMode.AUTO_FILL) {
+                if (!horizontalScroll && fillStyle == CompactCandidateMode.AUTO_FILL) {
                     val maxSpanCount = maxSpanCountPref.getValue()
                     layoutMinWidth = w / maxSpanCount - separatorDrawable.intrinsicWidth
                 }
             }
-        }
-        context.recyclerView(R.id.candidate_view) {
+
+            override fun dispatchDraw(canvas: Canvas) {
+                super.dispatchDraw(canvas)
+                if (!InputLatencyLog.enabled) return
+                val candidateAdapter = this@CompactCandidateDelegate.adapter
+                val snapshot = candidateAdapter.snapshot
+                if (!isShown || !isLaidOut || !service.isCurrentEditor(snapshot.editorToken) ||
+                    snapshot != rime.run { candidateSnapshotCached }
+                ) {
+                    return
+                }
+                for (index in 0 until childCount) {
+                    val holder = getChildViewHolder(getChildAt(index)) as? CandidateViewHolder ?: return
+                    if (holder.snapshot != snapshot) return
+                }
+                if (candidateAdapter.itemCount == 0 || isNotEmpty()) {
+                    InputLatencyLog.candidateDraw(snapshot, hasCandidates = candidateAdapter.itemCount > 0)
+                }
+            }
+        }.apply {
+            id = R.id.candidate_view
             itemAnimator = null
             isFocusable = false
             isFocusableInTouchMode = false
@@ -170,6 +211,11 @@ class CompactCandidateDelegate(override val di: DI) :
             adapter = this@CompactCandidateDelegate.adapter
             layoutManager = this@CompactCandidateDelegate.layoutManager
             addItemDecoration(FlexboxVerticalDecoration(separatorDrawable))
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    if (horizontalScroll && dx != 0) refreshUnrolled(recyclerView.childCount)
+                }
+            })
         }
     }
 
@@ -178,14 +224,34 @@ class CompactCandidateDelegate(override val di: DI) :
 
         val maxSpanCount = maxSpanCountPref.getValue()
 
-        when (fillStyle) {
-            CompactCandidateMode.NEVER_FILL -> {
+        adapter.horizontalScroll = horizontalScroll
+        val nextManager = desiredLayoutManager()
+        if (layoutManager !== nextManager) {
+            view.stopScroll()
+            activeLayoutManager = nextManager
+            view.layoutManager = nextManager
+            adapter.notifyItemRangeChanged(0, adapter.itemCount)
+        }
+        if (data.snapshot != adapter.snapshot) {
+            expandedViewportAnchor.clear()
+            view.stopScroll()
+            layoutManager.scrollToPosition(0)
+        }
+
+        when {
+            horizontalScroll -> {
                 layoutMinWidth = 0
                 layoutFlexGrow = 0f
                 secondLayoutPassNeeded = false
             }
 
-            CompactCandidateMode.AUTO_FILL -> {
+            fillStyle == CompactCandidateMode.NEVER_FILL -> {
+                layoutMinWidth = 0
+                layoutFlexGrow = 0f
+                secondLayoutPassNeeded = false
+            }
+
+            fillStyle == CompactCandidateMode.AUTO_FILL -> {
                 layoutMinWidth = view.width / maxSpanCount - separatorDrawable.intrinsicWidth
                 layoutFlexGrow = if (candidates.size < maxSpanCount) 0f else 1f
                 // [^1] total candidates count < maxSpanCount
@@ -193,7 +259,7 @@ class CompactCandidateDelegate(override val di: DI) :
                 secondLayoutPassDone = false
             }
 
-            CompactCandidateMode.ALWAYS_FILL -> {
+            else -> {
                 layoutMinWidth = 0
                 layoutFlexGrow = 1f
                 secondLayoutPassNeeded = false
@@ -201,7 +267,8 @@ class CompactCandidateDelegate(override val di: DI) :
         }
 
         adapter.updateLayoutParams(layoutMinWidth, layoutFlexGrow)
-        adapter.updateCandidates(candidates, total, highlighted)
+        adapter.layoutFlexShrink = if (horizontalScroll) 0f else 1f
+        adapter.updateCandidates(candidates, total, highlighted, data.snapshot)
 
         // not sure why empty candidates won't trigger `FlexboxLayoutManager#onLayoutCompleted()`
         if (candidates.isEmpty()) {

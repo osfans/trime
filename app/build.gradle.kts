@@ -4,6 +4,8 @@
  */
 @file:Suppress("UnstableApiUsage")
 
+import java.util.regex.Pattern
+
 plugins {
     id("com.osfans.trime.app-convention")
     id("com.osfans.trime.native-app-convention")
@@ -16,9 +18,19 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+// The default is the upstream release identity; never infer the manifest version from git describe.
+val appVersionName = project.envOrPropOrNull("BUILD_VERSION_NAME", "buildVersionName") ?: "3.3.13"
+require(appVersionName.isNotBlank()) { "A nonempty buildVersionName is required" }
+
+val selectedTestBuildType = providers.gradleProperty("trime.testBuildType").orElse("debug").get()
+require(selectedTestBuildType in setOf("debug", "release")) { "trime.testBuildType must be debug or release" }
+
 android {
+    testBuildType = selectedTestBuildType
     namespace = "com.osfans.trime"
-    compileSdk = 37
+    compileSdk {
+        version = release(37) { minorApiLevel = 0 }
+    }
     buildToolsVersion = "36.0.0"
 
     defaultConfig {
@@ -26,29 +38,40 @@ android {
         minSdk = 21
         targetSdk = 37
         versionCode = 20261101
-        versionName = "3.3.13"
+        versionName = appVersionName
+        testInstrumentationRunner = if (selectedTestBuildType == "release") {
+            "com.osfans.trime.UserDictionaryUpgradeInstrumentation"
+        } else {
+            "com.osfans.trime.StartupResponsivenessInstrumentation"
+        }
 
         multiDexEnabled = true
         buildConfigField("String", "BUILDER", "\"${project.builder}\"")
         buildConfigField("long", "BUILD_TIMESTAMP", project.buildTimestamp)
         buildConfigField("String", "BUILD_COMMIT_HASH", "\"${project.buildCommitHash}\"")
         buildConfigField("String", "BUILD_GIT_REPO", "\"${project.buildGitRepo}\"")
-        buildConfigField("String", "BUILD_VERSION_NAME", "\"${project.buildVersionName}\"")
+        buildConfigField("String", "BUILD_VERSION_NAME", "\"$appVersionName\"")
+        // Explicit opt-in for the same release build used by both T08 benchmark cohorts.
+        buildConfigField(
+            "boolean",
+            "PERFORMANCE_TRACING",
+            providers.gradleProperty("trime.performanceTrace").map { it.toBooleanStrict().toString() }.orElse("false").get(),
+        )
     }
 
     base {
         // https://www.norio.be/blog/archivesBaseName-removed-from-gradle9.html
-        archivesName = "${android.defaultConfig.applicationId}-$buildVersionName"
+        archivesName = "${android.defaultConfig.applicationId}-$appVersionName"
     }
 
     buildFeatures {
         buildConfig = true
         viewBinding = true
-        resValues = true
     }
 
     buildTypes {
         release {
+            isDebuggable = false
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -64,13 +87,10 @@ android {
                         keyPassword = project.signKeyPwd
                     }
                 }
-
-            resValue("string", "trime_app_name", "@string/app_name_release")
         }
         debug {
+            isDebuggable = true
             applicationIdSuffix = ".debug"
-
-            resValue("string", "trime_app_name", "@string/app_name_debug")
         }
         all {
             // remove META-INF/version-control-info.textproto
@@ -79,9 +99,24 @@ android {
         }
     }
 
+    sourceSets.getByName("androidTest") {
+        if (selectedTestBuildType == "release") {
+            // The ordinary suite references Debug-only editor fixtures. Release upgrade
+            // acceptance uses the same two native Java classes through a dedicated root.
+            java.directories.clear()
+            kotlin.directories.clear()
+            manifest.srcFile("src/upgradeTest/AndroidManifest.xml")
+        }
+        java.directories.add("src/sharedUpgradeTest/java")
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    lint {
+        warningsAsErrors = true
     }
 
     testOptions {
@@ -102,10 +137,21 @@ android {
                     "/META-INF/*.version",
                     "/META-INF/*.kotlin_module", // cannot be excluded actually
                     "/META-INF/androidx/**",
+                    // SDK Console ownership metadata is not used by these libraries at runtime.
+                    "/META-INF/org/jetbrains/kotlinx/kotlinx-serialization-core-jvm/verification.properties",
+                    "/META-INF/com/mikepenz/aboutlibraries-core/verification.properties",
                     "/DebugProbesKt.bin",
                     "/kotlin-tooling-metadata.json",
                 )
         }
+    }
+}
+
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        // A test APK's applicationId is its OWN id. Bind both runners to the actual
+        // tested app variant instead of assuming the special ${applicationId} value.
+        variant.androidTest?.manifestPlaceholders?.put("trimeTestedApplicationId", variant.applicationId)
     }
 }
 
@@ -115,6 +161,13 @@ aboutLibraries {
         fetchRemoteLicense.set(false)
         fetchRemoteFunding.set(false)
         includePlatform.set(false)
+    }
+    library {
+        // JitPack publishes StorageAccess' Apache-2.0 license as "Other".
+        // Exclude that metadata and restore the audited entry from app/licenses.
+        exclusionPatterns.add(
+            Pattern.compile("com.github.WhiredPlanck:StorageAccess", Pattern.LITERAL),
+        )
     }
     export {
         excludeFields.set(
@@ -153,6 +206,8 @@ dependencies {
     implementation(libs.xxpermissions)
     implementation(libs.kodein.di)
     implementation(libs.kaml)
+    // Use KAML's existing parser events to reject oversized/deep imports before building a node tree.
+    implementation(libs.snakeyaml.engine.kmp)
     implementation(libs.storageaccess)
     implementation(libs.splitties.bitflags)
     implementation(libs.splitties.systemservices)

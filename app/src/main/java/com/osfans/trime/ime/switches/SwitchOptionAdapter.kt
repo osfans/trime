@@ -38,7 +38,7 @@ abstract class SwitchOptionAdapter : BaseQuickAdapter<SwitchOptionEntry, SwitchO
 
     /** Re-colors the visible rows after a scheme switch; rows re-apply colors on bind. */
     fun refreshColors() {
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
 
     abstract val scope: ThemeScope

@@ -16,6 +16,7 @@ import android.provider.DocumentsContract.Root
 import android.provider.DocumentsProvider
 import android.webkit.MimeTypeMap
 import com.osfans.trime.R
+import com.osfans.trime.core.data.SyncRelativePath
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -69,52 +70,135 @@ class RimeDataProvider : DocumentsProvider() {
          */
         internal fun resolveDocumentsRoot(externalFilesDir: File?): Pair<File, String>? {
             val base = externalFilesDir ?: return null
-            val parentPath = base.parent ?: return null
-            return base to "$parentPath${File.separator}"
+            return try {
+                val canonicalBase = base.canonicalFile
+                if (!canonicalBase.isDirectory || !canonicalBase.canRead()) return null
+                val canonicalParent = canonicalBase.parentFile ?: return null
+                canonicalBase to "${canonicalParent.path}${File.separator}"
+            } catch (_: IOException) {
+                null
+            } catch (_: SecurityException) {
+                null
+            }
+        }
+
+        /** Resolve an opaque document id while keeping it below the canonical provider root. */
+        internal fun resolveDocument(
+            root: File,
+            docIdPrefix: String,
+            documentId: String,
+        ): File? {
+            if (documentId.isEmpty() || File(documentId).isAbsolute) return null
+            return try {
+                val canonicalRoot = root.canonicalFile
+                val canonicalPrefix = File(docIdPrefix).canonicalFile
+                if (canonicalRoot.parentFile != canonicalPrefix) return null
+                val requested = File(canonicalPrefix, documentId).absoluteFile
+                requested.canonicalFile.takeIf {
+                    it == requested && SyncRelativePath.isContained(canonicalRoot, it)
+                }
+            } catch (_: IOException) {
+                null
+            } catch (_: SecurityException) {
+                null
+            }
         }
     }
 
-    private var baseDir: File? = null
-    private var docIdPrefix: String? = null
-    private var textFilePaths: Array<String> = emptyArray()
+    private data class RootState(
+        val baseDir: File,
+        val docIdPrefix: String,
+        val textFilePaths: Set<String>,
+    )
 
-    private val File.docId
-        get() = absolutePath.removePrefix(docIdPrefix())
+    private val rootStateLock = Any()
 
-    private fun docIdPrefix(): String {
-        if (!ensureBaseDir()) {
-            throw FileNotFoundException("App files dir is not available")
+    @Volatile
+    private var cachedRootState: RootState? = null
+
+    private fun File.docId(root: RootState): String {
+        val canonical = canonicalFileOrNull() ?: throw FileNotFoundException("Cannot resolve document path")
+        if (!isContained(root.baseDir, canonical)) {
+            throw FileNotFoundException("Document escapes provider root")
         }
-        return docIdPrefix!!
+        return canonical.path.removePrefix(root.docIdPrefix)
     }
 
-    private fun fileFromDocId(docId: String) = File(docIdPrefix(), docId)
+    private fun fileFromDocId(
+        docId: String,
+        root: RootState,
+    ): File = resolveDocument(root.baseDir, root.docIdPrefix, docId)
+        ?: throw FileNotFoundException("Invalid document id")
 
-    private fun ensureBaseDir(): Boolean {
-        if (baseDir != null && docIdPrefix != null) return true
-        val (base, prefix) =
-            resolveDocumentsRoot(context!!.getExternalFilesDir(null)) ?: return false
-        baseDir = base
-        docIdPrefix = prefix
-        textFilePaths = Array(TEXT_FILES.size) { base.resolve(TEXT_FILES[it]).absolutePath }
-        return true
+    private fun resolveRootState(): RootState? = synchronized(rootStateLock) {
+        val resolved = try {
+            resolveDocumentsRoot(context?.getExternalFilesDir(null))
+        } catch (_: SecurityException) {
+            null
+        }
+        if (resolved == null) {
+            cachedRootState = null
+            return@synchronized null
+        }
+        val (base, prefix) = resolved
+        cachedRootState?.takeIf { it.baseDir == base && it.docIdPrefix == prefix }?.let {
+            return@synchronized it
+        }
+        RootState(
+            baseDir = base,
+            docIdPrefix = prefix,
+            textFilePaths = TEXT_FILES.mapNotNullTo(mutableSetOf()) { base.resolve(it).canonicalFileOrNull()?.path },
+        ).also { cachedRootState = it }
+    }
+
+    private fun requireRootState(): RootState = resolveRootState() ?: throw FileNotFoundException("App files dir is not available")
+
+    private fun File.canonicalFileOrNull(): File? = try {
+        canonicalFile
+    } catch (_: IOException) {
+        null
+    } catch (_: SecurityException) {
+        null
+    }
+
+    private fun isContained(
+        root: File,
+        file: File,
+    ): Boolean = try {
+        SyncRelativePath.isContained(root, file)
+    } catch (_: IOException) {
+        false
+    } catch (_: SecurityException) {
+        false
+    }
+
+    private fun isDirectPath(
+        root: File,
+        file: File,
+    ): Boolean = try {
+        SyncRelativePath.isDirectPath(root, file)
+    } catch (_: IOException) {
+        false
+    } catch (_: SecurityException) {
+        false
+    } catch (_: IllegalArgumentException) {
+        false
     }
 
     override fun onCreate(): Boolean = true
 
     override fun queryRoots(projection: Array<String>?): Cursor {
         val cursor = MatrixCursor(projection ?: DEFAULT_ROOT_PROJECTION)
-        if (!ensureBaseDir()) return cursor
-        val root = baseDir!!
+        val root = resolveRootState() ?: return cursor
         cursor.newRow().apply {
-            add(Root.COLUMN_ROOT_ID, root.docId)
+            add(Root.COLUMN_ROOT_ID, root.baseDir.docId(root))
             add(
                 Root.COLUMN_FLAGS,
                 Root.FLAG_SUPPORTS_CREATE or Root.FLAG_LOCAL_ONLY or Root.FLAG_SUPPORTS_SEARCH or Root.FLAG_SUPPORTS_IS_CHILD,
             )
             add(Root.COLUMN_ICON, R.mipmap.ic_app_icon)
             add(Root.COLUMN_TITLE, context!!.getString(R.string.trime_app_name))
-            add(Root.COLUMN_DOCUMENT_ID, root.docId)
+            add(Root.COLUMN_DOCUMENT_ID, root.baseDir.docId(root))
             add(Root.COLUMN_MIME_TYPES, MIME_TYPE_WILDCARD)
         }
         return cursor
@@ -124,7 +208,8 @@ class RimeDataProvider : DocumentsProvider() {
         documentId: String,
         projection: Array<out String>?,
     ) = MatrixCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION).apply {
-        newRowFromFile(fileFromDocId(documentId))
+        val root = requireRootState()
+        newRowFromFile(fileFromDocId(documentId, root), root)
     }
 
     override fun queryChildDocuments(
@@ -132,8 +217,11 @@ class RimeDataProvider : DocumentsProvider() {
         projection: Array<String>?,
         sortOrder: String?,
     ) = MatrixCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION).apply {
-        fileFromDocId(parentDocumentId).listFiles()?.forEach {
-            newRowFromFile(it)
+        val root = requireRootState()
+        val children = fileFromDocId(parentDocumentId, root).listFiles()
+            ?: throw FileNotFoundException("Cannot list $parentDocumentId")
+        children.filter { isDirectPath(root.baseDir, it) }.forEach {
+            newRowFromFile(it, root)
         }
     }
 
@@ -141,10 +229,13 @@ class RimeDataProvider : DocumentsProvider() {
         documentId: String,
         mode: String,
         signal: CancellationSignal?,
-    ): ParcelFileDescriptor = ParcelFileDescriptor.open(
-        fileFromDocId(documentId),
-        ParcelFileDescriptor.parseMode(mode),
-    )
+    ): ParcelFileDescriptor {
+        val root = requireRootState()
+        return ParcelFileDescriptor.open(
+            fileFromDocId(documentId, root),
+            ParcelFileDescriptor.parseMode(mode),
+        )
+    }
 
     @Throws(FileNotFoundException::class)
     override fun openDocumentThumbnail(
@@ -152,7 +243,8 @@ class RimeDataProvider : DocumentsProvider() {
         sizeHint: Point,
         signal: CancellationSignal?,
     ): AssetFileDescriptor {
-        val file = fileFromDocId(documentId)
+        val root = requireRootState()
+        val file = fileFromDocId(documentId, root)
         val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
         return AssetFileDescriptor(pfd, 0, file.length())
     }
@@ -163,7 +255,8 @@ class RimeDataProvider : DocumentsProvider() {
         mimeType: String,
         displayName: String,
     ): String {
-        val newFile = createAbstractFile(parentDocumentId, displayName)
+        val root = requireRootState()
+        val newFile = createAbstractFile(parentDocumentId, displayName, root)
         try {
             val ok =
                 if (mimeType == Document.MIME_TYPE_DIR) {
@@ -177,12 +270,15 @@ class RimeDataProvider : DocumentsProvider() {
         } catch (e: IOException) {
             throw FileNotFoundException("createDocument id=${newFile.path} failed: ${e.message}")
         }
-        return newFile.docId
+        return newFile.docId(root)
     }
 
     @Throws(FileNotFoundException::class)
     override fun deleteDocument(documentId: String) {
-        fileFromDocId(documentId).apply {
+        val root = requireRootState()
+        fileFromDocId(documentId, root).apply {
+            check(this != root.baseDir) { "Cannot delete provider root" }
+            requireContainedTree(this, root)
             val ok =
                 if (isDirectory) {
                     deleteRecursively()
@@ -195,20 +291,31 @@ class RimeDataProvider : DocumentsProvider() {
         }
     }
 
-    override fun getDocumentType(documentId: String): String = fileFromDocId(documentId).mimeType
+    override fun getDocumentType(documentId: String): String {
+        val root = requireRootState()
+        return fileFromDocId(documentId, root).mimeType(root)
+    }
 
     override fun isChildDocument(
         parentDocumentId: String,
         documentId: String,
-    ): Boolean = documentId.startsWith(parentDocumentId)
+    ): Boolean = runCatching {
+        val root = requireRootState()
+        val parent = fileFromDocId(parentDocumentId, root)
+        val child = fileFromDocId(documentId, root)
+        parent != child && isContained(parent, child)
+    }.getOrDefault(false)
 
     @Throws(FileNotFoundException::class)
     override fun copyDocument(
         sourceDocumentId: String,
         targetParentDocumentId: String,
     ): String {
-        val oldFile = fileFromDocId(sourceDocumentId)
-        val newFile = createAbstractFile(targetParentDocumentId, oldFile.name)
+        val root = requireRootState()
+        val oldFile = fileFromDocId(sourceDocumentId, root)
+        requireContainedTree(oldFile, root)
+        val newFile = createAbstractFile(targetParentDocumentId, oldFile.name, root)
+        check(!isContained(oldFile, newFile)) { "Cannot copy into the source tree" }
         oldFile.apply {
             try {
                 val ok =
@@ -218,13 +325,13 @@ class RimeDataProvider : DocumentsProvider() {
                         copyTo(newFile).exists()
                     }
                 if (!ok) {
-                    throw FileNotFoundException("copyDocument id=$sourceDocumentId to ${newFile.docId} failed")
+                    throw FileNotFoundException("copyDocument id=$sourceDocumentId to ${newFile.docId(root)} failed")
                 }
             } catch (e: Exception) {
-                throw FileNotFoundException("copyDocument id=$sourceDocumentId to ${newFile.docId} failed: ${e.message}")
+                throw FileNotFoundException("copyDocument id=$sourceDocumentId to ${newFile.docId(root)} failed: ${e.message}")
             }
         }
-        return newFile.docId
+        return newFile.docId(root)
     }
 
     @Throws(FileNotFoundException::class)
@@ -232,13 +339,16 @@ class RimeDataProvider : DocumentsProvider() {
         documentId: String,
         displayName: String,
     ): String {
-        val oldFile = fileFromDocId(documentId)
+        val root = requireRootState()
+        val oldFile = fileFromDocId(documentId, root)
+        check(oldFile != root.baseDir) { "Cannot rename provider root" }
+        SyncRelativePath.requireSafeName(displayName)
         val newFile = oldFile.resolveSibling(displayName)
         if (newFile.exists()) {
             throw FileNotFoundException("renameDocument id=$documentId to $displayName failed: target exists")
         }
-        oldFile.renameTo(newFile)
-        return newFile.docId
+        if (!oldFile.renameTo(newFile)) throw FileNotFoundException("Cannot rename $documentId")
+        return newFile.docId(root)
     }
 
     @Throws(FileNotFoundException::class)
@@ -247,10 +357,13 @@ class RimeDataProvider : DocumentsProvider() {
         sourceParentDocumentId: String,
         targetParentDocumentId: String,
     ): String {
-        val oldFile = fileFromDocId(sourceDocumentId)
-        val newFile = createAbstractFile(targetParentDocumentId, oldFile.name)
-        oldFile.renameTo(newFile)
-        return newFile.docId
+        val root = requireRootState()
+        val oldFile = fileFromDocId(sourceDocumentId, root)
+        check(oldFile != root.baseDir) { "Cannot move provider root" }
+        check(oldFile.parentFile == fileFromDocId(sourceParentDocumentId, root)) { "Incorrect source parent" }
+        val newFile = createAbstractFile(targetParentDocumentId, oldFile.name, root)
+        if (!oldFile.renameTo(newFile)) throw FileNotFoundException("Cannot move $sourceDocumentId")
+        return newFile.docId(root)
     }
 
     @Throws(FileNotFoundException::class)
@@ -259,28 +372,53 @@ class RimeDataProvider : DocumentsProvider() {
         query: String,
         projection: Array<String>?,
     ) = MatrixCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION).apply {
+        val root = requireRootState()
         val q = query.lowercase()
-        fileFromDocId(rootId)
+        val visited = mutableSetOf<String>()
+        fileFromDocId(rootId, root)
             .walk()
+            .onEnter { file ->
+                file.canonicalFileOrNull()?.takeIf {
+                    isDirectPath(root.baseDir, file) && isContained(root.baseDir, it)
+                }?.path?.let(visited::add) == true
+            }
+            .filter { isDirectPath(root.baseDir, it) }
             .filter { it.name.lowercase().contains(q) }
             .take(SEARCH_RESULTS_LIMIT)
-            .forEach { newRowFromFile(it) }
+            .forEach { newRowFromFile(it, root) }
     }
 
-    private val File.mimeType: String
-        get() =
-            when {
-                isDirectory -> Document.MIME_TYPE_DIR
-                TEXT_EXTENSIONS.contains(extension) -> MIME_TYPE_TEXT
-                textFilePaths.contains(absolutePath) -> MIME_TYPE_TEXT
-                else -> MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: MIME_TYPE_BIN
+    private fun File.mimeType(root: RootState): String = when {
+        isDirectory -> Document.MIME_TYPE_DIR
+        TEXT_EXTENSIONS.contains(extension) -> MIME_TYPE_TEXT
+        root.textFilePaths.contains(absolutePath) -> MIME_TYPE_TEXT
+        else -> MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: MIME_TYPE_BIN
+    }
+
+    private fun requireContainedTree(
+        treeRoot: File,
+        root: RootState,
+    ) {
+        val visited = mutableSetOf<String>()
+        treeRoot.walkTopDown().onEnter {
+            val canonicalPath = it.canonicalFileOrNull()?.path
+            check(isDirectPath(root.baseDir, it) && canonicalPath != null && visited.add(canonicalPath)) {
+                "Unsafe or recursive document tree"
             }
+            true
+        }.forEach {
+            check(isDirectPath(root.baseDir, it)) { "Document escapes provider root" }
+        }
+    }
 
     private fun createAbstractFile(
         parentDocumentId: String,
         displayName: String,
+        root: RootState,
     ): File {
-        val parent = fileFromDocId(parentDocumentId)
+        SyncRelativePath.requireSafeName(displayName)
+        val parent = fileFromDocId(parentDocumentId, root)
+        check(parent.isDirectory) { "Not a directory: $parentDocumentId" }
         var newFile = parent.resolve(displayName)
         var noConflictId = 2
         while (newFile.exists()) {
@@ -291,23 +429,30 @@ class RimeDataProvider : DocumentsProvider() {
     }
 
     @Throws(FileNotFoundException::class)
-    private fun MatrixCursor.newRowFromFile(file: File) {
-        if (!file.exists()) {
-            throw FileNotFoundException("File(path=${file.absolutePath}) not found")
+    private fun MatrixCursor.newRowFromFile(
+        file: File,
+        root: RootState,
+    ) {
+        val safeFile = file.canonicalFileOrNull()?.takeIf {
+            isDirectPath(root.baseDir, file) && isContained(root.baseDir, it)
+        }
+            ?: throw FileNotFoundException("Invalid file path")
+        if (!safeFile.exists()) {
+            throw FileNotFoundException("File(path=${safeFile.absolutePath}) not found")
         }
 
-        val mimeType = file.mimeType
+        val mimeType = safeFile.mimeType(root)
         var flags =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) Document.FLAG_SUPPORTS_COPY else 0
-        if (file.canWrite()) {
+        if (safeFile.canWrite()) {
             flags = flags or
-                if (file.isDirectory) {
+                if (safeFile.isDirectory) {
                     Document.FLAG_DIR_SUPPORTS_CREATE
                 } else {
                     Document.FLAG_SUPPORTS_WRITE
                 }
         }
-        if (file.parentFile?.canWrite() == true) {
+        if (safeFile != root.baseDir && safeFile.parentFile?.canWrite() == true) {
             flags = flags or
                 Document.FLAG_SUPPORTS_DELETE or
                 Document.FLAG_SUPPORTS_RENAME
@@ -320,12 +465,12 @@ class RimeDataProvider : DocumentsProvider() {
         }
 
         newRow().apply {
-            add(Document.COLUMN_DOCUMENT_ID, file.docId)
+            add(Document.COLUMN_DOCUMENT_ID, safeFile.docId(root))
             add(Document.COLUMN_MIME_TYPE, mimeType)
-            add(Document.COLUMN_DISPLAY_NAME, file.name)
-            add(Document.COLUMN_LAST_MODIFIED, file.lastModified())
+            add(Document.COLUMN_DISPLAY_NAME, safeFile.name)
+            add(Document.COLUMN_LAST_MODIFIED, safeFile.lastModified())
             add(Document.COLUMN_FLAGS, flags)
-            add(Document.COLUMN_SIZE, file.length())
+            add(Document.COLUMN_SIZE, safeFile.length())
         }
     }
 }

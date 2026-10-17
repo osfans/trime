@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 -->
 
 <resources>
-    <attr name="useSimpleSummaryProvider" format="boolean" />
+    <attr name="trimeSimpleSummaryProvider" format="boolean" />
     <declare-styleable name="DialogSeekBarPreferenceAttrs">
         <attr name="min" format="integer" />
         <attr name="max" format="integer" />
@@ -16,12 +16,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <attr name="systemDefaultValue" format="integer" />
         <attr name="systemDefaultValueText" format="string" />
         <attr name="unit" format="string" />
-        <attr name="useSimpleSummaryProvider" />
+        <attr name="trimeSimpleSummaryProvider" />
         <attr name="useMinAsDefault" format="boolean" />
-    </declare-styleable>
-
-    <declare-styleable name="FolderPickerPreferenceAttrs">
-        <attr name="useSimpleSummaryProvider" />
     </declare-styleable>
 
     <declare-styleable name="KeyboardViewPreviewState">

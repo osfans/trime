@@ -163,7 +163,7 @@ class ColorTableTest :
                             for (entry in ColorKey.entries) {
                                 val expected = legacyWalk(entry.key, colors, theme.fallbackColors)
                                 ColorTable.resolveRaw(entry.key, colors, theme.fallbackColors) shouldBe expected
-                                if (expected == null) {
+                                if (expected == null && entry != ColorKey.CANDIDATE_BORDER_COLOR) {
                                     table.unresolvedKeys shouldContain entry
                                 } else {
                                     table.unresolvedKeys shouldNotContain entry
@@ -179,10 +179,24 @@ class ColorTableTest :
                 val theme = ThemeTestSupport.decodeBuiltinTheme("trime.yaml")
                 val colors = theme.presetColorSchemes.values.first()
                 val table = ColorTable.resolve(colors, theme.fallbackColors, parseHex)
-                Then("the key is reported unresolved and resolves to None") {
-                    table.unresolvedKeys shouldContain ColorKey.CANDIDATE_BORDER_COLOR
+                Then("the optional omitted border resolves to None without a warning") {
+                    table.unresolvedKeys shouldNotContain ColorKey.CANDIDATE_BORDER_COLOR
                     table[ColorKey.CANDIDATE_BORDER_COLOR] shouldBe ColorTable.Value.None
                 }
+            }
+        }
+        Given("an explicitly configured candidate border") {
+            Then("a valid color is still rendered") {
+                val table = ColorTable.resolve(scheme("candidate_border_color" to "#112233"), emptyMap(), parseHex)
+                table[ColorKey.CANDIDATE_BORDER_COLOR] shouldBe ColorTable.Value.Color(0x112233)
+            }
+            Then("an invalid color still reports an error") {
+                val table = ColorTable.resolve(scheme("candidate_border_color" to "not-a-color"), emptyMap(), parseHex)
+                table.invalidValues shouldContain ColorKey.CANDIDATE_BORDER_COLOR
+            }
+            Then("a broken explicit fallback is still unresolved") {
+                val table = ColorTable.resolve(scheme(), mapOf("candidate_border_color" to "missing"), parseHex)
+                table.unresolvedKeys shouldContain ColorKey.CANDIDATE_BORDER_COLOR
             }
         }
     })

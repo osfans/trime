@@ -229,11 +229,6 @@
           "type": "integer",
           "description": "按鍵提示高度"
         },
-        "preview_offset": {
-          "type": "integer",
-          "default": "-12",
-          "description": "按鍵提示縱向偏移"
-        },
         "preview_text_size": {
           "type": "integer",
           "description": "按鍵提示字號"

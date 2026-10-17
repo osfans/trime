@@ -10,6 +10,7 @@ import com.osfans.trime.data.theme.model.KeyActionToken
 import com.osfans.trime.data.theme.model.PresetKey
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
+import timber.log.Timber
 
 /**
  * Pins the key-action grammar: how a plain token is resolved against the
@@ -17,9 +18,9 @@ import io.kotest.matchers.shouldBe
  */
 class KeyActionTest :
     BehaviorSpec({
-        // The Android key-name lookup is a platform call that throws when not
-        // mocked; the Rime key table is the path under test.
-        beforeTest { KeyCode.androidKeyNameToCode = { 0 } }
+        val platformLookup = KeyCode.androidKeyNameToCode
+        beforeSpec { KeyCode.androidKeyNameToCode = KeyCodeTestSupport::androidKeyNameToCode }
+        afterSpec { KeyCode.androidKeyNameToCode = platformLookup }
 
         val presetKeys = ThemeTestSupport.decodeBuiltinTheme("trime.yaml").presetKeys
 
@@ -60,10 +61,18 @@ class KeyActionTest :
                     action.modifierKeyOnMask shouldBe KeyEvent.META_SHIFT_ON
                 }
             }
-            `when`("the preset has no send but a command") {
-                then("the action degrades to a function key") {
-                    val action = plain("Return")
-                    action.code shouldBe KeyEvent.KEYCODE_ENTER
+            `when`("the T9 literal-digit preset has no send but a command") {
+                then("both themes preserve the function command and exact digit") {
+                    listOf("trime.yaml", "tongwenfeng.trime.yaml").forEach { file ->
+                        val presets = ThemeTestSupport.decodeBuiltinTheme(file).presetKeys
+                        for (digit in 0..9) {
+                            val action = KeyAction(KeyActionToken.Plain("T9_digit_$digit"), presets)
+                            action.code shouldBe KeyEvent.KEYCODE_FUNCTION
+                            action.command shouldBe "t9_digit"
+                            action.option shouldBe digit.toString()
+                            action.text shouldBe ""
+                        }
+                    }
                 }
             }
             `when`("the preset only simulates a key sequence") {
@@ -77,6 +86,15 @@ class KeyActionTest :
         }
 
         given("a plain token with key-code syntax") {
+            `when`("the key is a literal plus with or without Control") {
+                then("the final plus remains the key rather than an empty modifier") {
+                    plain("+").code shouldBe KeyEvent.KEYCODE_PLUS
+                    plain("+").modifier shouldBe 0
+                    plain("Control++").code shouldBe KeyEvent.KEYCODE_PLUS
+                    plain("Control++").modifier shouldBe KeyEvent.META_CTRL_ON
+                    plain("Control++").text shouldBe ""
+                }
+            }
             `when`("it is a modifier expression without braces") {
                 then("the key code and the modifier mask are resolved") {
                     val action = plain("Control+a")
@@ -126,9 +144,39 @@ class KeyActionTest :
             }
             `when`("it is an arbitrary word") {
                 then("it becomes plain text") {
-                    val action = plain("hello")
-                    action.code shouldBe 0
-                    action.text shouldBe "hello"
+                    for (literal in listOf("hello", "你好", "abc+xyz")) {
+                        val action = plain(literal)
+                        action.code shouldBe 0
+                        action.text shouldBe literal
+                    }
+                }
+            }
+        }
+
+        given("the supplied theme presets") {
+            `when`("the same token has different meanings in two themes") {
+                then("each action retains only the explicitly supplied preset") {
+                    val first = KeyAction(KeyActionToken.Plain("custom"), mapOf("custom" to PresetKey(commit = "first")))
+                    val second = KeyAction(KeyActionToken.Plain("custom"), mapOf("custom" to PresetKey(text = "second")))
+                    first.commit shouldBe "first"
+                    first.text shouldBe ""
+                    second.commit shouldBe ""
+                    second.text shouldBe "second"
+                }
+            }
+            `when`("the bundled T9 editing keys are decoded") {
+                then("space, Enter and repeatable deletion retain their actions") {
+                    listOf("trime.yaml", "tongwenfeng.trime.yaml").forEach { file ->
+                        val presets = ThemeTestSupport.decodeBuiltinTheme(file).presetKeys
+                        fun action(name: String) = KeyAction(KeyActionToken.Plain(name), presets)
+                        action("T9_space").code shouldBe KeyEvent.KEYCODE_SPACE
+                        action("T9_space").isSlideCursor shouldBe true
+                        action("space1").code shouldBe KeyEvent.KEYCODE_SPACE
+                        action("T9_enter").code shouldBe KeyEvent.KEYCODE_ENTER
+                        action("T9_backspace").code shouldBe KeyEvent.KEYCODE_DEL
+                        action("T9_backspace").isRepeatable shouldBe true
+                        action("T9_backspace").isSlideDelete shouldBe true
+                    }
                 }
             }
         }
@@ -160,11 +208,23 @@ class KeyActionTest :
                 }
             }
             `when`("the send value does not resolve to a key") {
-                then("the action stays inert (no code, no command)") {
-                    val action =
-                        KeyAction(KeyActionToken.Plain("broken"), mapOf("broken" to PresetKey(send = "Bogus_Key")))
-                    action.code shouldBe 0
-                    action.command shouldBe ""
+                then("the action stays inert and emits one named diagnostic") {
+                    val messages = mutableListOf<String>()
+                    val tree = object : Timber.Tree() {
+                        override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+                            messages += message
+                        }
+                    }
+                    Timber.plant(tree)
+                    try {
+                        val action =
+                            KeyAction(KeyActionToken.Plain("broken"), mapOf("broken" to PresetKey(send = "Bogus_Key")))
+                        action.code shouldBe 0
+                        action.command shouldBe ""
+                        messages shouldBe listOf("preset 'broken' has an unrecognized send 'Bogus_Key'")
+                    } finally {
+                        Timber.uproot(tree)
+                    }
                 }
             }
         }

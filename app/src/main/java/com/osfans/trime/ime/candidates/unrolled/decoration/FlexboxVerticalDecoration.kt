@@ -9,7 +9,6 @@ import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.flexbox.FlexboxLayoutManager
 import splitties.dimensions.dp
 
 class FlexboxVerticalDecoration(
@@ -42,10 +41,10 @@ class FlexboxVerticalDecoration(
         parent: RecyclerView,
         state: RecyclerView.State,
     ) {
-        val layoutManager = parent.layoutManager as FlexboxLayoutManager
+        val layoutManager = parent.layoutManager ?: return
         for (i in 0 until layoutManager.childCount) {
             val view = parent.getChildAt(i)
-            val lp = view.layoutParams as FlexboxLayoutManager.LayoutParams
+            val lp = view.layoutParams as RecyclerView.LayoutParams
             val left: Int
             val right: Int
             when (parent.layoutDirection) {

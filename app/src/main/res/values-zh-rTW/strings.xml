@@ -6,6 +6,15 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="ime_unavailable">中文輸入不可用，暫可輸入數字</string>
+    <string name="ime_preparing">正在準備中文輸入，暫可輸入數字</string>
+    <string name="ime_retry">重試部署</string>
+    <string name="ime_switch">切換輸入法</string>
+    <string name="ime_enter">換行</string>
+    <string name="ime_existing_resources">部署失敗，正在使用可用詞庫；可從部署日誌重試。</string>
+    <string name="clipboard_load_failed">無法開啟這筆記錄。</string>
+    <string name="clipboard_save_failed">儲存失敗，請重試。</string>
+    <string name="clipboard_entry_removed">這筆記錄已被刪除。</string>
     <!-- 輸入法平臺名稱  -->
     <string name="app_name_release">同文輸入法</string>
     <string name="app_name_debug">同文輸入法（除錯模式）</string>
@@ -50,7 +59,6 @@
     <string name="user_data_dir">使用者資料夾</string>
     <string name="periodic_background_sync">後台定時同步</string>
     <string name="periodic_background_sync_status">上次同步時間（狀態）：%1$s（%2$s）</string>
-    <string name="effects">效果</string>
     <string name="only_available_on_some_roms">此選項僅對部分 ROM 有效</string>
     <string name="show_app_icon">在啟動器中顯示圖示</string>
     <string name="browse_app_data_dir">瀏覽應用資料夾</string>
@@ -89,7 +97,6 @@
     <string name="key_swipe_velocity">觸發按鍵滑動手勢的速度（距離/速度滿足其一即可）</string>
     <string name="build_info">建構資訊</string>
     <string name="telegram">Telegram</string>
-    <string name="quick_bar">快捷欄</string>
     <string name="copy_done">已複製</string>
     <string name="hook_shift_space">點擊空格時，忽略Shift的鎖定狀態</string>
     <string name="test_input">測試輸入</string>
@@ -99,7 +106,7 @@
     <string name="type_text">輸入文字</string>
     <string name="type_number">輸入數字</string>
     <string name="type_password">輸入密碼</string>
-    <string name="hook_shift_num">點擊0-9時，忽略Shift的鎖定狀態</string>
+    <string name="hook_shift_num">點擊0&#8211;9時，忽略Shift的鎖定狀態</string>
     <string name="hook_shift_symbol">點擊符號鍵時，忽略Shift的鎖定狀態</string>
     <string name="hook_shift_arrow">點選方向鍵時，保持Shift的鎖定狀態</string>
     <string name="hook_shift_lock">雙擊 Shift 鎖定大寫</string>
@@ -130,7 +137,7 @@
     <string name="sync_from_external_desc">每次部署或同步使用者資料前，從指定目錄匯入資料到內部儲存空間，並在同步使用者資料後匯出到該目錄。需要較多儲存空間。建議有經驗的使用者使用。</string>
     <string name="use_app_specific_storage_desc">直接使用應用程式內部私有儲存空間，使用者需要使用支援的檔案管理器管理資料。解除安裝應用程式時，系統可能會詢問是否保留資料，請隨時做好備份。</string>
     <string name="external_sync_select_folder_message">外部同步需要選擇資料資料夾。請選擇存放 Trime 設定檔的位置。</string>
-    <string name="external_sync_fallback_app_storage">資料夾選擇失敗或已取消。儲存模式將還原為使用應用程式專屬儲存空間。</string>
+    <string name="external_sync_missing_tree_fallback">外部資料資料夾缺失或無法存取，已切換為應用程式專屬儲存空間。如需繼續外部同步，請在設定中重新選擇資料夾。</string>
     <string name="maintenance">維護</string>
     <string name="loading">正在載入</string>
     <string name="success">成功</string>
@@ -156,14 +163,16 @@
     <string name="setup__step_three">第 3 步</string>
     <string name="setup__select_data_path_hint">選擇<b>同文輸入法</b>如何儲存 Rime 資料</string>
     <string name="setup__select_data_path">選擇外部資料夾…</string>
-    <string name="setup__data_path_imported">資料夾匯入成功</string>
     <string name="setup__data_path_import_failed">資料夾匯入失敗</string>
     <string name="select_another_directory_to_sync">要選擇另一個資料夾進行同步嗎？</string>
     <string name="select_another_directory">選擇</string>
-    <string name="data_path_not_selected">未選擇資料夾</string>
     <string name="sync_user_data_success">使用者資料同步成功</string>
     <string name="sync_user_data_success_external">使用者資料已同步到外部資料夾</string>
     <string name="sync_user_data_failure">使用者資料同步失敗</string>
+    <string name="sync_partial_copy_failure">部分檔案複製失敗</string>
+    <plurals name="sync_partial_copy_failure_detail">
+        <item quantity="other">%2$s 時有 %1$d 個檔案複製失敗。其餘檔案已複製，部署將繼續進行。</item>
+    </plurals>
     <string name="data_path_permission_revoked">資料夾存取權限已被撤銷，請重新選擇資料夾。</string>
     <string name="grant_permission">授予權限</string>
     <string name="notification_permission_title">沒有通知權限</string>
@@ -173,7 +182,6 @@
     <string name="select_current_schema">選擇當前方案</string>
     <string name="enable_schemata">啓用方案</string>
     <string name="no_schema_to_select">當前沒有方案可選擇。請前往啟用方案。</string>
-    <string name="no_schema_to_enable">沒有方案可啟用。請確保您已在使用者資料夾中放入了前置檔案和方案檔案。</string>
     <string name="schemata">方案</string>
     <string name="navbar_background">導航欄背景</string>
     <string name="no_theme_to_select">當前沒有主題可選擇。</string>
@@ -189,7 +197,6 @@
     <string name="general">常規</string>
     <string name="composing_text">預編輯碼</string>
     <string name="commit_text_preview">首選詞預覽</string>
-    <string name="raw_input">原始輸入碼</string>
     <string name="inline_preedit_mode">嵌入式預編輯模式</string>
     <string name="depends_on_input_device">視輸入設備而定</string>
     <string name="always_show">始終顯示</string>
@@ -210,9 +217,16 @@
     <string name="undo">撤銷</string>
     <string name="added_x">已新增 %1$s</string>
     <string name="removed_x">已移除 %1$s</string>
-    <string name="added_n_items">已新增 %1$d 個項目</string>
-    <string name="removed_n_items">已移除 %1$d 個項目</string>
+    <plurals name="added_n_items">
+        <item quantity="other">已新增 %1$d 個項目</item>
+    </plurals>
+    <plurals name="removed_n_items">
+        <item quantity="other">已移除 %1$d 個項目</item>
+    </plurals>
     <string name="candidates_layout">候選詞列表佈局</string>
+    <string name="next_word_prediction">下一詞聯想</string>
+    <string name="next_word_prediction_summary">提交漢字後顯示離線聯想，點選候選才提交。隱私模式或聯想詞庫不可用時停用。</string>
+    <string name="next_word_prediction_label">聯想</string>
     <string name="automatic">自動</string>
     <string name="horizontal">橫向</string>
     <string name="vertical">縱向</string>
@@ -227,14 +241,17 @@
     <string name="max_span_count">每行最大候選詞數</string>
     <string name="max_span_count_landscape">每行最大候選詞數(橫屏)</string>
     <string name="user_dictionary">使用者詞典</string>
-    <string name="exported_n_entries">已匯出 %1$d 個詞條</string>
+    <plurals name="exported_n_entries">
+        <item quantity="other">已匯出 %1$d 個詞條</item>
+    </plurals>
     <string name="backed_up_x_to_sync_dir">已備份 %1$s 到同步目錄</string>
     <string name="import_">匯入</string>
     <string name="import_error">匯入錯誤</string>
-    <string name="import_n_entries">已匯入 %1$d 個詞條</string>
+    <plurals name="import_n_entries">
+        <item quantity="other">已匯入 %1$d 個詞條</item>
+    </plurals>
     <string name="restored_from_x">已從 %1$s 還原</string>
     <string name="backup">備份</string>
-    <string name="restore">還原</string>
     <string name="clipboard_listening">監聽剪貼簿</string>
     <string name="clipboard_return_after_paste">貼上後返回</string>
     <string name="source_code">原始碼</string>
@@ -248,9 +265,33 @@
     <string name="preferred_voice_input">首選語音輸入</string>
     <string name="no_voice_input_installed">尚未安裝語音輸入</string>
     <string name="inline_suggestions">顯示內嵌自動填充建議</string>
+    <string name="manual_privacy_mode">隱私模式</string>
+    <string name="enable_privacy_mode">開啟隱私模式</string>
+    <string name="disable_privacy_mode">關閉隱私模式</string>
     <string name="update_config">更新配置</string>
     <string name="share">分享</string>
     <string name="word_segment">分词</string>
     <string name="star_success">收藏成功</string>
     <string name="ignore_system_gesture_insets">忽略系統手勢插邊</string>
+    <string name="t9_key_height">九鍵按鍵高度（最低 48 dp）</string>
+    <string name="t9_one_hand">九鍵單手配置</string>
+    <string name="t9_one_hand_off">全寬</string>
+    <string name="t9_one_hand_left">左手</string>
+    <string name="t9_one_hand_right">右手</string>
+    <string name="t9_space">空格</string>
+    <string name="t9_separator">音節分隔符</string>
+    <string name="t9_fuzzy_nl">九鍵模糊音：n/l</string>
+    <string name="t9_fuzzy_z_zh">九鍵模糊音：z/zh</string>
+    <string name="t9_fuzzy_c_ch">九鍵模糊音：c/ch</string>
+    <string name="t9_fuzzy_s_sh">九鍵模糊音：s/sh</string>
+    <string name="t9_fuzzy_en_eng">九鍵模糊音：en/eng</string>
+    <string name="t9_fuzzy_in_ing">九鍵模糊音：in/ing</string>
+    <string name="t9_typo_adjacent">九鍵誤觸：相鄰數字</string>
+    <string name="t9_typo_missing">九鍵誤觸：漏按數字</string>
+    <string name="t9_typo_repeat">九鍵誤觸：重複數字</string>
+    <string name="t9_source_fuzzy">模糊音 %1$s</string>
+    <string name="t9_source_adjacent">鄰鍵</string>
+    <string name="t9_source_missing">漏按</string>
+    <string name="t9_source_repeat">重複</string>
+    <string name="t9_suggestion_source">%1$s（%2$s）</string>
 </resources>

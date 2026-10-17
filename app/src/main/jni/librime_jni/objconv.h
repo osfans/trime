@@ -34,8 +34,13 @@ inline std::vector<std::string> stringArrayToStringVector(JNIEnv* env,
   std::vector<std::string> result;
   result.reserve(length);
   for (int i = 0; i < length; ++i) {
-    CString cstr(
+    // JNI local reference limits are especially small on Android 5. Keep
+    // one element alive at a time, even when converting several large arrays.
+    JRef<jstring> element(
         env, reinterpret_cast<jstring>(env->GetObjectArrayElement(array, i)));
+    if (env->ExceptionCheck() || !*element)
+      throw std::invalid_argument("Invalid string array element");
+    CString cstr(env, *element);
     result.emplace_back(cstr);
   }
   return std::move(result);

@@ -93,6 +93,17 @@ class TextKeyboardTest :
                 blank.click.orAbsent shouldBe null
                 key.click.orAbsent shouldBe KeyActionToken.Plain("a")
             }
+
+            Then("an empty inline action counts as no action") {
+                val blank = ThemeTestSupport.yaml.decodeFromYamlNode<TextKey>(yamlMapOf("click" to yamlMapOf()))
+                blank.click shouldBe KeyActionToken.Inline()
+                blank.click.orAbsent shouldBe null
+
+                val explicitEmpty = ThemeTestSupport.yaml.decodeFromYamlNode<TextKey>(
+                    yamlMapOf("click" to yamlMapOf("commit" to yamlScalarOf(""))),
+                )
+                explicitEmpty.click.orAbsent shouldBe KeyActionToken.Inline(commit = "")
+            }
         }
 
         Given("a key whose popup is written as a scalar") {
@@ -131,6 +142,22 @@ class TextKeyboardTest :
                 key.hilitedKeyBackColor shouldBe "0xff00ff00"
                 key.hilitedKeyBorderColor shouldBe "0xff0000ff"
                 key.hilitedKeySymbolColor shouldBe "0xff00ffff"
+            }
+        }
+
+        Given("a keyboard carrying the fork's T9 layout marker") {
+            val keyboard = ThemeTestSupport.yaml.decodeFromYamlNode<TextKeyboard>(
+                yamlMapOf("t9_layout" to yamlScalarOf("true")),
+            )
+
+            Then("the marker survives decoding and copies used by layout resolution") {
+                keyboard.t9Layout shouldBe true
+                keyboard.copy(name = "compatible_t9").t9Layout shouldBe true
+            }
+
+            Then("ordinary keyboard defaults remain non-T9") {
+                TextKeyboard.DEFAULTS.t9Layout shouldBe false
+                ThemeTestSupport.yaml.decodeFromYamlNode<TextKeyboard>(yamlMapOf()).t9Layout shouldBe false
             }
         }
     })

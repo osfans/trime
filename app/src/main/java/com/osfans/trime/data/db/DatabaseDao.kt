@@ -23,8 +23,8 @@ interface DatabaseDao {
     @Query("UPDATE ${DatabaseBean.TABLE_NAME} SET text=:newText WHERE id=:id")
     suspend fun updateText(
         id: Int,
-        newText: String,
-    )
+        newText: String?,
+    ): Int
 
     @Query("UPDATE ${DatabaseBean.TABLE_NAME} SET pinned=:pinned WHERE id=:id")
     suspend fun updatePinned(

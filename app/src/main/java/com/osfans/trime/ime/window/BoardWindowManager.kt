@@ -56,6 +56,7 @@ class BoardWindowManager(override val di: DI) : DIAware {
         if (window.key in cachedResidentWindows) {
             if (cachedResidentWindows[window.key]!!.first === window) {
                 Timber.d("Skip adding resident window $window")
+                return
             } else {
                 throw IllegalStateException("${window.key} is already occupied")
             }
@@ -74,6 +75,7 @@ class BoardWindowManager(override val di: DI) : DIAware {
     fun attachWindow(window: BoardWindow) {
         if (window === currentWindow) {
             Timber.d("Skip attaching $window")
+            return
         }
         val newView =
             if (window is ResidentWindow) {
@@ -103,6 +105,8 @@ class BoardWindowManager(override val di: DI) : DIAware {
         }
         if (window is ResidentWindow) {
             window.beforeAttached()
+            // Its cached view may have been off screen during a scheme switch.
+            window.refreshColors()
         }
         view.apply { add(newView, lParams(matchParent, matchParent)) }
         currentView = newView

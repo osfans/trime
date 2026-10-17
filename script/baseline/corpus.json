@@ -1,0 +1,21 @@
+{
+  "format_version": 1,
+  "id": "t00-t9-v1",
+  "schema": "luna_pinyin_t9",
+  "options": {"ascii_mode": false, "simplification": true},
+  "candidate_limit": 30,
+  "learning": [
+    {"input": "64", "text": "你", "repeat": 5},
+    {"input": "64426", "text": "你好", "repeat": 5}
+  ],
+  "cases": [
+    {"id": "ni-mi", "input": "64"},
+    {"id": "ni-hao", "input": "64426"},
+    {"id": "xian-xiao-zhan-zhao", "input": "9426"},
+    {"id": "explicit-syllable-boundary", "input": "94'26"},
+    {"id": "nv", "input": "68"},
+    {"id": "lv", "input": "58"},
+    {"id": "nue", "input": "683"},
+    {"id": "lue", "input": "583"}
+  ]
+}

@@ -25,7 +25,7 @@ class ThemeFonts(private val theme: Theme) {
 
     private data class TypefaceKey(val files: List<FileState>)
 
-    private val fontDir get() = File(DataManager.userDataDir, "fonts")
+    private val fontDir by lazy { File(DataManager.userDataDir, "fonts") }
 
     private val fontFamilyCache =
         object : androidx.collection.LruCache<FileState, FontFamily>(16) {}

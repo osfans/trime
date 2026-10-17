@@ -78,6 +78,9 @@ class YamlTest :
                 isNull("key: \"null\"\n") shouldBe false
                 // An explicit tag is not the implicit one yaml-cpp checks for.
                 isNull("key: !!null x\n") shouldBe false
+                isNull("key: !!str null\n") shouldBe false
+                isNull("key: !!null null\n") shouldBe false
+                isNull("key: !local null\n") shouldBe false
                 // kaml's node model does not keep the quoting style, so a quoted
                 // capitalised spelling is indistinguishable from a plain one and is
                 // still treated as null; yaml-cpp would read it as a string.

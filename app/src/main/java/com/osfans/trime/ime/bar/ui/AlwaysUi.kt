@@ -14,6 +14,7 @@ import com.osfans.trime.R
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.data.theme.model.ToolBar
+import com.osfans.trime.ime.keyboard.Keyboard
 import splitties.views.dsl.constraintlayout.after
 import splitties.views.dsl.constraintlayout.before
 import splitties.views.dsl.constraintlayout.centerVertically
@@ -31,6 +32,7 @@ import timber.log.Timber
 class AlwaysUi(
     override val ctx: Context,
     private val scope: ThemeScope,
+    private val keyboard: () -> Keyboard,
     private val onButtonClick: ((String) -> Unit)? = null,
 ) : Ui {
     private val theme: Theme get() = scope.theme
@@ -48,7 +50,7 @@ class AlwaysUi(
         buttonConfig: ToolBar.Button?,
         @DrawableRes icon: Int = 0,
     ): ToolButton = if (buttonConfig != null) {
-        ToolButton(ctx, buttonConfig, scope).apply {
+        ToolButton(ctx, buttonConfig, scope, keyboard()).apply {
             setOnClickListener { onButtonClick?.invoke(buttonConfig.action) }
             val longPressAction = buttonConfig.longPressAction
             if (longPressAction.isNotEmpty()) {
@@ -64,13 +66,15 @@ class AlwaysUi(
         }
     }
 
-    val buttonsUi = ButtonsBarUi(ctx, scope, onButtonClick)
+    val buttonsUi = ButtonsBarUi(ctx, scope, keyboard, onButtonClick)
 
     val clipboardUi = ClipboardSuggestionUi(ctx, scope)
 
     val inlineSuggestionsUi = InlineSuggestionsUi(ctx)
 
-    val hideKeyboardButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_drop_down_24, scope)
+    val hideKeyboardButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_drop_down_24, scope).apply {
+        accessibilityLabel = ctx.getString(R.string.a11y_hide_keyboard)
+    }
     private val rightMostButton =
         ViewAnimator(ctx).apply {
             add(hideKeyboardButton, lParams(matchParent, matchParent))
@@ -80,10 +84,15 @@ class AlwaysUi(
     private val leftMostButton = toolButton(
         theme.toolBar.primaryButton,
         R.drawable.ic_baseline_more_horiz_24,
-    )
+    ).apply {
+        if (theme.toolBar.primaryButton == null) {
+            accessibilityLabel = ctx.getString(R.string.a11y_keyboard_options)
+        }
+    }
 
     private val animator =
         ViewAnimator(ctx).apply {
+            measureAllChildren = false
             add(buttonsUi.root, lParams(matchParent, matchParent))
             add(clipboardUi.root, lParams(matchParent, matchParent))
             add(inlineSuggestionsUi.root, lParams(matchParent, matchParent))
@@ -92,6 +101,8 @@ class AlwaysUi(
     override val root: ConstraintLayout = constraintLayout {
         val (leftWidth, leftHeight) = buttonsUi.getButtonSize(theme.toolBar.primaryButton)
         val (rightWidth, rightHeight) = buttonsUi.getButtonSize(theme.toolBar.buttons.firstOrNull())
+        // Adaptive third-party sizes still use every branch to determine their allocation.
+        rightMostButton.measureAllChildren = rightWidth <= 0 || rightHeight <= 0
 
         add(
             leftMostButton,

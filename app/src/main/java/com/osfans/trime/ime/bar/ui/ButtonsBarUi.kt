@@ -15,6 +15,7 @@ import com.google.android.flexbox.JustifyContent
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.data.theme.model.ToolBar
+import com.osfans.trime.ime.keyboard.Keyboard
 import splitties.dimensions.dp
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.view
@@ -22,6 +23,7 @@ import splitties.views.dsl.core.view
 class ButtonsBarUi(
     override val ctx: Context,
     private val scope: ThemeScope,
+    private val keyboard: () -> Keyboard,
     private val onButtonClick: ((String) -> Unit)? = null,
 ) : Ui {
     private val theme: Theme get() = scope.theme
@@ -40,7 +42,7 @@ class ButtonsBarUi(
         buttonConfig: ToolBar.Button?,
         @DrawableRes icon: Int = 0,
     ): ToolButton = if (buttonConfig != null) {
-        ToolButton(ctx, buttonConfig, scope).apply {
+        ToolButton(ctx, buttonConfig, scope, keyboard()).apply {
             setOnClickListener { onButtonClick?.invoke(buttonConfig.action) }
             val longPressAction = buttonConfig.longPressAction
             if (longPressAction.isNotEmpty()) {

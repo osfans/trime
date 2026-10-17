@@ -16,6 +16,7 @@ import timber.log.Timber
 import java.io.File
 
 object SoundEffectManager {
+    private val selectionLock = Any()
 
     private val userDir: File
         get() {
@@ -40,7 +41,7 @@ object SoundEffectManager {
         return files
             ?.mapNotNull decode@{ f ->
                 val effect = try {
-                    val result = yaml.decodeFromString<SoundEffect>(f.bufferedReader().readText())
+                    val result = yaml.decodeFromString<SoundEffect>(f.bufferedReader().use { it.readText() })
                     if (result.name.isEmpty()) {
                         result.copy(name = f.name.substringBefore("."))
                     } else {
@@ -66,15 +67,26 @@ object SoundEffectManager {
             Timber.w("Unknown sound effect '$name'")
             return
         }
-        activeSoundEffect = effect
-        soundEffectPref = name
+        switchEffect(effect)
+    }
+
+    fun switchEffect(effect: SoundEffect) {
+        synchronized(selectionLock) {
+            activeSoundEffect = effect
+            soundEffectPref = effect.name
+        }
         InputFeedbackManager.reloadSoundEffects()
     }
 
     fun init() {
-        activeSoundEffect = getEffect(soundEffectPref) ?: return
+        val selected = synchronized(selectionLock) { soundEffectPref }
+        val loaded = if (selected.isEmpty()) null else getEffect(selected)
+        synchronized(selectionLock) {
+            if (selected == soundEffectPref) activeSoundEffect = loaded
+        }
     }
 
+    @Volatile
     var activeSoundEffect: SoundEffect? = null
         private set
 

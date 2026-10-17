@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+---
+name: t9_test
+version: 't05-1'
+sort: by_weight
+use_preset_vocabulary: false
+...
+你	ni	1000
+李	li	900
+米	mi	800
+好	hao	1000
+高	gao	900
+你好	ni hao	10000
+李好	li hao	9000
+早	zao	1000
+找	zhao	900
+擦	ca	1000
+茶	cha	900
+撒	sa	1000
+沙	sha	900
+怎	zen	1000
+增	zeng	900
+林	lin	1000
+零	ling	900
+宁	ning	900
+女	nv	100
+绿	lv	100
+略	lve	100
+虐	nve	100
+绝	jue	100
+先	xian	100
+西	xi	100
+安	an	100
+西安	xi an	200

@@ -5,10 +5,11 @@
 
 package com.osfans.trime.ui.common
 
+import android.app.AlertDialog
 import android.content.Context
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AlertDialog
 import com.osfans.trime.R
+import com.osfans.trime.ui.common.dialog.PublicAlertDialogs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancelAndJoin
@@ -29,12 +30,13 @@ import splitties.views.dsl.core.verticalMargin
 fun Context.ProgressBarDialogIndeterminate(
     @StringRes title: Int,
 ): AlertDialog.Builder {
-    val androidStyles = AndroidStyles(this)
-    return AlertDialog
-        .Builder(this)
+    val builder = PublicAlertDialogs.builder(this)
+    val dialogContext = builder.context
+    val androidStyles = AndroidStyles(dialogContext)
+    return builder
         .setTitle(title)
         .setView(
-            verticalLayout {
+            dialogContext.verticalLayout {
                 add(
                     androidStyles.progressBar.horizontal {
                         isIndeterminate = true
@@ -61,7 +63,9 @@ suspend fun withLoadingDialog(
             launch {
                 delay(threshold)
                 withContext(Dispatchers.Main) {
-                    loadingDialog = context.ProgressBarDialogIndeterminate(title).show()
+                    if (PublicAlertDialogs.canShow(context)) {
+                        loadingDialog = context.ProgressBarDialogIndeterminate(title).show()
+                    }
                 }
             }
         try {

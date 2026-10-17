@@ -30,6 +30,8 @@ data class Theme(
     val presetColorSchemes: PresetColorSchemes = emptyMap(),
     val fallbackColors: Map<String, String> = emptyMap(),
     val toolBar: ToolBar = ToolBar(),
+    @Transient
+    val fallbackKeyboards: Map<String, String> = emptyMap(),
 ) {
     val fonts by lazy { ThemeFonts(this) }
 
