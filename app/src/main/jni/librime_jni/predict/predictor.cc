@@ -6,16 +6,17 @@
 // never replay commit_history, including editor and option transitions.
 #include "predictor.h"
 
-#include "predict_engine.h"
-#include "prediction_key_policy.h"
-#include "prediction_policy.h"
-#include "trime_prediction_guard.h"
-#include "trime_privacy_guard.h"
 #include <rime/candidate.h>
 #include <rime/context.h>
 #include <rime/engine.h>
 #include <rime/key_event.h>
 #include <rime/segmentation.h>
+
+#include "predict_engine.h"
+#include "prediction_key_policy.h"
+#include "prediction_policy.h"
+#include "trime_prediction_guard.h"
+#include "trime_privacy_guard.h"
 
 namespace rime {
 namespace {
@@ -40,7 +41,9 @@ Predictor::Predictor(const Ticket& ticket, an<PredictEngine> predict_engine)
   context_update_connection_ = context->update_notifier().connect(
       [this](Context* ctx) { OnContextUpdate(ctx); });
   option_update_connection_ = context->option_update_notifier().connect(
-      [this](Context* ctx, const string& option) { OnOptionUpdate(ctx, option); });
+      [this](Context* ctx, const string& option) {
+        OnOptionUpdate(ctx, option);
+      });
 }
 
 Predictor::~Predictor() {
@@ -89,7 +92,9 @@ void Predictor::OnCommit(Context* ctx) {
   // simplifier/uniquifier wrap candidates and change type(). The prediction
   // segment retains its identity across those filters and enforces the cap.
   const bool predicted = HasPrediction(ctx);
-  const string type = predicted ? "prediction" : genuine ? genuine->type() : "raw";
+  const string type = predicted ? "prediction"
+                      : genuine ? genuine->type()
+                                : "raw";
   const string text = ctx->GetCommitText();
   if (!trime::prediction::IsPredictableCommit(type, text)) {
     Reset(ctx, false);
@@ -105,8 +110,8 @@ void Predictor::OnOptionUpdate(Context* ctx, const string& option) {
     Reset(ctx, true);
     ctx->commit_history().clear();
     ctx->set_option("prediction", trime::IsPredictionRequested() &&
-                        !trime::IsPrivacyModeEnabled() &&
-                        !ctx->get_option("ascii_mode"));
+                                      !trime::IsPrivacyModeEnabled() &&
+                                      !ctx->get_option("ascii_mode"));
     ctx->commit_history().clear();
     return;
   }
@@ -147,7 +152,8 @@ void Predictor::OnContextUpdate(Context* ctx) {
   }
 }
 
-PredictorComponent::PredictorComponent(an<PredictEngineComponent> engine_factory)
+PredictorComponent::PredictorComponent(
+    an<PredictEngineComponent> engine_factory)
     : engine_factory_(engine_factory) {}
 PredictorComponent::~PredictorComponent() = default;
 Predictor* PredictorComponent::Create(const Ticket& ticket) {

@@ -4,25 +4,28 @@
 // See LICENSE in this directory for the conditions and disclaimer.
 #include "predict_engine.h"
 
-#include "prediction_policy.h"
-#include "trime_prediction_guard.h"
-#include "trime_privacy_guard.h"
 #include <rime/candidate.h>
 #include <rime/context.h>
+#include <rime/dict/db_pool_impl.h>
+#include <rime/schema.h>
 #include <rime/segmentation.h>
 #include <rime/service.h>
 #include <rime/ticket.h>
 #include <rime/translation.h>
-#include <rime/schema.h>
-#include <rime/dict/db_pool_impl.h>
+
+#include "prediction_policy.h"
+#include "trime_prediction_guard.h"
+#include "trime_privacy_guard.h"
 
 namespace rime {
 namespace {
 const ResourceType kPredictDbResourceType = {"predict_db", "", ""};
 }  // namespace
 
-PredictEngine::PredictEngine(an<PredictDb> db, int max_iterations, int max_candidates)
-    : db_(db), max_iterations_(trime::prediction::IterationLimit(max_iterations)),
+PredictEngine::PredictEngine(an<PredictDb> db, int max_iterations,
+                             int max_candidates)
+    : db_(db),
+      max_iterations_(trime::prediction::IterationLimit(max_iterations)),
       max_candidates_(trime::prediction::CandidateLimit(max_candidates)) {}
 PredictEngine::~PredictEngine() = default;
 
@@ -64,21 +67,23 @@ void PredictEngine::CreatePredictSegment(Context* ctx) const {
 
 an<Translation> PredictEngine::Translate(const Segment& segment) const {
   if (!candidates_ || !db_ || !trime::IsPredictionRequested() ||
-      trime::IsPrivacyModeEnabled()) return nullptr;
+      trime::IsPrivacyModeEnabled())
+    return nullptr;
   auto translation = New<FifoTranslation>();
   const auto count = std::min<std::size_t>(candidates_->size, max_candidates_);
   for (std::size_t i = 0; i < count; ++i) {
     const auto text = db_->GetEntryText(candidates_->at[i]);
     if (!text.empty())
-      translation->Append(New<SimpleCandidate>("prediction", segment.end,
-                                               segment.end, text));
+      translation->Append(
+          New<SimpleCandidate>("prediction", segment.end, segment.end, text));
   }
   return translation;
 }
 
 PredictEngineComponent::PredictEngineComponent()
     : db_pool_(the<ResourceResolver>(
-          Service::instance().CreateResourceResolver(kPredictDbResourceType))) {}
+          Service::instance().CreateResourceResolver(kPredictDbResourceType))) {
+}
 PredictEngineComponent::~PredictEngineComponent() = default;
 
 PredictEngine* PredictEngineComponent::Create(const Ticket& ticket) {

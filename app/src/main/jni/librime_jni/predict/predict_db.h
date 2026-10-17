@@ -7,10 +7,10 @@
 #define RIME_PREDICT_DB_H_
 
 #include <darts.h>
-#include <rime/resource.h>
 #include <rime/dict/mapped_file.h>
 #include <rime/dict/string_table.h>
 #include <rime/dict/table.h>
+#include <rime/resource.h>
 
 namespace rime {
 namespace predict {
@@ -24,14 +24,18 @@ struct Metadata {
   uint32_t value_trie_size;
 };
 using Candidates = ::rime::Array<::rime::table::Entry>;
-struct RawEntry { string text; double weight; };
+struct RawEntry {
+  string text;
+  double weight;
+};
 using RawData = map<string, vector<RawEntry>>;
 }  // namespace predict
 
 class PredictDb : public MappedFile {
  public:
   explicit PredictDb(const path& file_path)
-      : MappedFile(file_path), key_trie_(new Darts::DoubleArray),
+      : MappedFile(file_path),
+        key_trie_(new Darts::DoubleArray),
         value_trie_(new StringTable) {}
   bool Load();
   bool Save();

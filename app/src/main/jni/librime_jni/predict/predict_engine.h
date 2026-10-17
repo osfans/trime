@@ -6,9 +6,10 @@
 #ifndef RIME_PREDICT_ENGINE_H_
 #define RIME_PREDICT_ENGINE_H_
 
-#include "predict_db.h"
 #include <rime/component.h>
 #include <rime/dict/db_pool.h>
+
+#include "predict_db.h"
 
 namespace rime {
 
@@ -32,8 +33,10 @@ class PredictEngine : public Class<PredictEngine, const Ticket&> {
   const string& query() const { return query_; }
   int num_candidates() const { return candidates_ ? candidates_->size : 0; }
   string candidate(size_t i) const {
-    return candidates_ && i < candidates_->size && i < static_cast<size_t>(max_candidates_)
-               ? db_->GetEntryText(candidates_->at[i]) : string();
+    return candidates_ && i < candidates_->size &&
+                   i < static_cast<size_t>(max_candidates_)
+               ? db_->GetEntryText(candidates_->at[i])
+               : string();
   }
 
  private:

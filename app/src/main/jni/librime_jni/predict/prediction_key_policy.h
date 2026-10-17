@@ -12,10 +12,22 @@ inline bool ShouldDismissForKey(const rime::KeyEvent& key) {
   if (key.release()) return false;
   if (!key.ctrl() && !key.alt() && !key.super()) {
     switch (code) {
-      case XK_Up: case XK_Down: case XK_Left: case XK_Right:
-      case XK_Prior: case XK_Next: case XK_Home: case XK_End:
-      case XK_KP_Up: case XK_KP_Down: case XK_KP_Left: case XK_KP_Right:
-      case XK_KP_Prior: case XK_KP_Next: case XK_KP_Home: case XK_KP_End:
+      case XK_Up:
+      case XK_Down:
+      case XK_Left:
+      case XK_Right:
+      case XK_Prior:
+      case XK_Next:
+      case XK_Home:
+      case XK_End:
+      case XK_KP_Up:
+      case XK_KP_Down:
+      case XK_KP_Left:
+      case XK_KP_Right:
+      case XK_KP_Prior:
+      case XK_KP_Next:
+      case XK_KP_Home:
+      case XK_KP_End:
         return false;
     }
   }

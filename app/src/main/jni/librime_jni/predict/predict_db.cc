@@ -4,20 +4,23 @@
 // See LICENSE in this directory for the conditions and disclaimer.
 // Trime overlay for the pinned librime-predict database.
 #include "predict_db.h"
+
+#include <darts.h>
+#include <fcntl.h>
+#include <rime/dict/mapped_file.h>
+#include <rime/dict/string_table.h>
+#include <rime/resource.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include <algorithm>
+#include <boost/algorithm/string.hpp>
+#include <cerrno>
+#include <cmath>
+
 #include "model_integrity.h"
 #include "prediction_policy.h"
 #include "trime_predict_model_hash.h"
-#include <cerrno>
-#include <cmath>
-#include <algorithm>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <boost/algorithm/string.hpp>
-#include <darts.h>
-#include <rime/resource.h>
-#include <rime/dict/mapped_file.h>
-#include <rime/dict/string_table.h>
 
 namespace rime {
 
@@ -36,13 +39,14 @@ bool PredictDb::Load() {
     int descriptor;
     ~OpenedModel() { ::close(descriptor); }
   } opened{fd};
-  struct stat info {};
+  struct stat info{};
   if (::fstat(fd, &info) != 0 || !S_ISREG(info.st_mode)) return false;
   const auto length = info.st_size;
-  if (length <= 0 || static_cast<std::uint64_t>(length) !=
-                         trime::prediction::kBundledModelBytes ||
+  if (length <= 0 ||
+      static_cast<std::uint64_t>(length) !=
+          trime::prediction::kBundledModelBytes ||
       static_cast<std::uint64_t>(length) >
-                         trime::prediction::kMaximumModelBytes)
+          trime::prediction::kMaximumModelBytes)
     return false;
   vector<char> image(static_cast<std::size_t>(length));
   std::size_t copied = 0;
@@ -57,7 +61,8 @@ bool PredictDb::Load() {
       trime::prediction::kBundledModelSha256)
     return false;
   if (image.size() < sizeof(predict::Metadata)) return false;
-  const auto* metadata = reinterpret_cast<const predict::Metadata*>(image.data());
+  const auto* metadata =
+      reinterpret_cast<const predict::Metadata*>(image.data());
   if (!std::memchr(metadata->format, 0, predict::Metadata::kFormatMaxLength) ||
       string(metadata->format) != kPredictFormat)
     return false;
@@ -66,15 +71,18 @@ bool PredictDb::Load() {
   const auto key_field = offsetof(predict::Metadata, key_trie);
   const auto value_field = offsetof(predict::Metadata, value_trie);
   std::memcpy(&key_relative, image.data() + key_field, sizeof(key_relative));
-  std::memcpy(&value_relative, image.data() + value_field, sizeof(value_relative));
+  std::memcpy(&value_relative, image.data() + value_field,
+              sizeof(value_relative));
   std::size_t key_offset = 0;
   std::size_t value_offset = 0;
   if (!metadata->key_trie_size || !metadata->value_trie_size ||
       metadata->key_trie_size > image.size() / sizeof(std::uint32_t) ||
-      !trime::prediction::ContainsRelativeRange(image.size(), key_field,
-          key_relative, metadata->key_trie_size * sizeof(std::uint32_t), &key_offset) ||
-      !trime::prediction::ContainsRelativeRange(image.size(), value_field,
-          value_relative, metadata->value_trie_size, &value_offset) ||
+      !trime::prediction::ContainsRelativeRange(
+          image.size(), key_field, key_relative,
+          metadata->key_trie_size * sizeof(std::uint32_t), &key_offset) ||
+      !trime::prediction::ContainsRelativeRange(
+          image.size(), value_field, value_relative, metadata->value_trie_size,
+          &value_offset) ||
       key_offset % alignof(std::uint32_t))
     return false;
   try {
@@ -127,8 +135,7 @@ bool PredictDb::Build(const predict::RawData& data) {
   keys.reserve(data_size);
   int i = 0;
   for (const auto& kv : data) {
-    if (kv.second.empty())
-      continue;
+    if (kv.second.empty()) continue;
     for (const auto& candidate : kv.second) {
       string_table.Add(candidate.text, candidate.weight,
                        &entries[i].text.str_id());
@@ -155,8 +162,7 @@ bool PredictDb::Build(const predict::RawData& data) {
   vector<int> values;
   values.reserve(data_size);
   for (const auto& kv : data) {
-    if (kv.second.empty())
-      continue;
+    if (kv.second.empty()) continue;
     values.push_back(WriteCandidates(kv.second, available_entries));
     available_entries += kv.second.size();
   }
@@ -202,15 +208,20 @@ predict::Candidates* PredictDb::Lookup(const string& query) {
   const int result = key_trie_->exactMatchSearch<int>(query.c_str());
   if (result < 0 || result % alignof(predict::Candidates) ||
       !trime::prediction::ContainsRange(model_image_.size(), result,
-                                       sizeof(std::uint32_t)))
+                                        sizeof(std::uint32_t)))
     return nullptr;
-  auto* candidates = reinterpret_cast<predict::Candidates*>(model_image_.data() + result);
-  if (!candidates->size || candidates->size > trime::prediction::kMaximumModelCandidates ||
-      !trime::prediction::ContainsRange(model_image_.size(), result,
-          offsetof(predict::Candidates, at) + candidates->size * sizeof(table::Entry)))
+  auto* candidates =
+      reinterpret_cast<predict::Candidates*>(model_image_.data() + result);
+  if (!candidates->size ||
+      candidates->size > trime::prediction::kMaximumModelCandidates ||
+      !trime::prediction::ContainsRange(
+          model_image_.size(), result,
+          offsetof(predict::Candidates, at) +
+              candidates->size * sizeof(table::Entry)))
     return nullptr;
   for (const auto& entry : *candidates) {
-    if (entry.text.str_id() >= value_trie_->NumKeys() || !std::isfinite(entry.weight))
+    if (entry.text.str_id() >= value_trie_->NumKeys() ||
+        !std::isfinite(entry.weight))
       return nullptr;
   }
   return candidates;

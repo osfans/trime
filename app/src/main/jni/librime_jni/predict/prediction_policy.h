@@ -27,15 +27,14 @@ inline int IterationLimit(int configured) noexcept {
 }
 
 inline bool IsPredictableCommit(const std::string& type,
-                               const std::string& text) noexcept {
-  if (text.empty() || text.size() > kMaximumQueryBytes ||
-      type == "punct" || type == "raw" || type == "thru")
+                                const std::string& text) noexcept {
+  if (text.empty() || text.size() > kMaximumQueryBytes || type == "punct" ||
+      type == "raw" || type == "thru")
     return false;
   // This compact model contains Han words. ASCII, spaces and punctuation end
   // the next-word context rather than looking like another Chinese commit.
-  return std::none_of(text.begin(), text.end(), [](unsigned char ch) {
-    return ch < 0x80;
-  });
+  return std::none_of(text.begin(), text.end(),
+                      [](unsigned char ch) { return ch < 0x80; });
 }
 
 inline bool ContainsRange(std::size_t total, std::size_t offset,
@@ -44,8 +43,7 @@ inline bool ContainsRange(std::size_t total, std::size_t offset,
 }
 
 inline bool ContainsRelativeRange(std::size_t total, std::size_t field,
-                                  std::int32_t relative,
-                                  std::size_t length,
+                                  std::int32_t relative, std::size_t length,
                                   std::size_t* offset) noexcept {
   const auto destination = static_cast<std::int64_t>(field) + relative;
   if (!relative || destination < 0 ||
