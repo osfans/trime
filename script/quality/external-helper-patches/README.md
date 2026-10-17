@@ -28,7 +28,7 @@
 
 目录手势工具的实际模块已保存为 `../directory_gesture_guard.py`，需要调用方提供有进程身份、截止时间和内存保护的 `Probe`。它保留原图、窗口、完整连续日志及触摸目标，不是独立的导入验收命令。可用 `python3 -m unittest discover -s script/quality -p test_directory_gesture_guard.py` 运行 10 项宿主语义检查；合成日志用于异常边界，不能替代模拟器实测。
 
-完整版本、来源、构建与运行边界见 [运行警告报告](../T13-WARNING-TRIAGE.md)。本地 APK 不作为 Trime Release 附件发布。
+每次独立验收都应记录工具版本、来源、构建身份和运行边界；上述历史结果不能代替当前 APK 的验收。本地辅助 APK 不作为 Trime Release 附件发布。
 
 ## Observer9 主机文件检查
 

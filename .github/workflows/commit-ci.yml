@@ -34,11 +34,17 @@ jobs:
           echo ${GITHUB_REF#refs/*/}
           echo CI_BRANCH=${GITHUB_REF#refs/*/} >> $GITHUB_ENV
 
+      - name: Setup Python for host data generation
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
       - name: Setup Java
         uses: actions/setup-java@v6
         with:
           distribution: "temurin"
-          java-version: 25
+          # The hash-audited Gradle plugin backport requires JDK 17.
+          java-version: 17
           # will restore cache of dependencies and wrappers
           cache: 'gradle'
 
@@ -51,10 +57,43 @@ jobs:
         run: |
           sdkmanager --install "cmake;3.31.6"
 
+      - name: Configure and verify host data tools
+        shell: python
+        run: |
+          import os
+          from pathlib import Path
+          import subprocess
+          import sys
+
+          sdk = Path(os.environ["ANDROID_HOME"])
+          cmake_dir = sdk / "cmake" / "3.31.6" / "bin"
+          cmake = cmake_dir / ("cmake.exe" if sys.platform == "win32" else "cmake")
+          if not cmake.is_file():
+              raise SystemExit(f"Missing SDK CMake: {cmake}")
+          subprocess.run([str(cmake), "--version"], check=True, timeout=30)
+          # The resource installer invokes python3; check that exact command too.
+          subprocess.run(["python3", "-c", "import sys; print(sys.executable); print(sys.version); raise SystemExit(0 if sys.version_info >= (3, 11) else 'Python 3.11+ required')"], check=True, timeout=30)
+          with open(os.environ["GITHUB_PATH"], "a", encoding="utf-8") as stream:
+              stream.write(str(cmake_dir) + "\n")
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as stream:
+              stream.write("CMAKE_EXECUTABLE=" + str(cmake) + "\n")
+
       - name: Check code style
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
           make style-lint
+
+      - name: Install host test dependencies
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --only-binary=:all: --requirement script/quality/requirements-host.txt
+          python3 -m pip check
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends librime-bin
+          command -v rime_deployer
+          dpkg-query --show --showformat='${Package} ${Version}\n' librime-bin
 
       - name: Calculate JNI cache hash
         id: cache-hash
@@ -76,6 +115,53 @@ jobs:
       - name: Build debug Trime
         run: |
           make debug
+
+      - name: Verify host test dependencies and source assets
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        shell: python
+        run: |
+          import hashlib
+          from importlib.metadata import version
+          from pathlib import Path
+          import shutil
+          import sys
+
+          if Path(shutil.which("python3") or "").resolve() != Path(sys.executable).resolve():
+              raise SystemExit("Host tests must use the configured Python interpreter")
+          for distribution, expected in (("Pillow", "12.3.0"), ("PyYAML", "6.0.3")):
+              observed = version(distribution)
+              print(distribution, observed)
+              if observed != expected:
+                  raise SystemExit(f"Unexpected {distribution} version: {observed}")
+          deployer = shutil.which("rime_deployer")
+          if deployer is None:
+              raise SystemExit("rime_deployer is required; do not skip schema deployment tests")
+          print(deployer, hashlib.sha256(Path(deployer).read_bytes()).hexdigest())
+          names = (
+              "default.yaml", "key_bindings.yaml", "symbols.yaml", "punctuation.yaml", "pinyin.yaml",
+              "luna_pinyin.schema.yaml", "luna_pinyin_simp.schema.yaml", "luna_pinyin_t9.schema.yaml",
+              "luna_pinyin.custom.yaml", "luna_pinyin_simp.custom.yaml", "stroke.schema.yaml",
+              "trime_predict.db", "trime_predict.db.json",
+          )
+          for name in names:
+              path = Path("app/src/main/assets/shared") / name
+              if not path.is_file() or path.stat().st_size == 0:
+                  raise SystemExit(f"Missing source asset or uninitialized data submodule: {path}")
+              print(path, path.resolve(), hashlib.sha256(path.read_bytes()).hexdigest())
+
+      - name: Test host tools and CMake adaptations
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for suite in script/quality script/baseline script/quality/t04 script/quality/t05 script/quality/t08 script/quality/t10 script/quality/t11; do
+            python3 -B -m unittest discover -v -s "$suite" -p 'test_*.py'
+          done
+
+      - name: Test application and build logic
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          ./gradlew :app:testDebugUnitTest :build-logic:convention:test :build-logic:compatibility:test
 
       - name: Add JNI cache
         if: ${{ !steps.jni-cache.outputs.cache-hit }}

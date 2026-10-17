@@ -132,7 +132,7 @@ Use `python3 -B script/quality/t05/summarize.py PATH/metrics.json --output NEW.j
 to reproduce the summary; it rejects incomplete pairs, changed exact candidate
 lists, source leakage and unbounded suggestions. `test_t05.py` tests those checks.
 
-Results and limitations belong in [VALIDATION-T05.md](../VALIDATION-T05.md).
+Record results and limitations with the current run identity, APK and resource hashes; an older experiment is not acceptance evidence for a new build.
 
 ## Startup And Index Regression
 
@@ -160,4 +160,4 @@ directory each time; it must not point at a personal user database. Five index
 build timings exclude dictionary loading, Rime menu work and rendering. They must
 not be described as end-to-end keyboard latency.
 
-Follow-up findings and measured results: [T05 risk report](../VALIDATION-T05-RISK.md).
+Report follow-up findings and measured results alongside the exact run artifacts, including failures and coverage limits. Keep engine timings separate from Android UI and physical-device acceptance.
