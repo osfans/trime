@@ -13,6 +13,8 @@ import java.security.MessageDigest
 
 /** Read-only byte observations for a disposable profile; not an atomic or restorable DB backup. */
 internal object PublicProfileDataSnapshot {
+    // Linux UAPI value on all supported Android ABIs; the Java field requires API 27.
+    private const val OPEN_CLOEXEC = 0x80000
     private const val MAX_BYTES = 512L * 1024 * 1024
     private const val MAX_ENTRIES = 10_000
     private const val MAX_DEPTH = 64
@@ -81,7 +83,7 @@ internal object PublicProfileDataSnapshot {
                         total += before.st_size
                         val digest = MessageDigest.getInstance("SHA-256")
                         var size = 0L
-                        val fd = Os.open(file.absolutePath, OsConstants.O_RDONLY or OsConstants.O_CLOEXEC or OsConstants.O_NOFOLLOW, 0)
+                        val fd = Os.open(file.absolutePath, OsConstants.O_RDONLY or OPEN_CLOEXEC or OsConstants.O_NOFOLLOW, 0)
                         try {
                             check(identity(Os.fstat(fd)) == identity(before)) { "Protected file changed before open" }
                             val output = if (copy) FileOutputStream(copyFile) else null
