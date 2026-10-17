@@ -480,6 +480,10 @@ def main():
             path = Path(matches[0]).resolve(strict=True)
             assert path.is_relative_to(binary) and path.suffix == '.a'
             archives[name] = bind(path)
+        opencc_symbols, _ = run([tool_paths['readelf'], '-Ws', '--demangle',
+                                archives['opencc']['path']], 30)
+        private_darts = [line for line in opencc_symbols.splitlines() if 'TrimeOpenccDarts::' in line]
+        assert private_darts and not re.search(r'\bDarts::', opencc_symbols), 'OpenCC exposes conflicting Rime Darts symbols'
         test_binary = binary / 'host-bin/prediction-native-test'
         dynamic_text, _ = run([tool_paths['readelf'], '-d', test_binary], 30)
         symbols_text, _ = run([tool_paths['readelf'], '-Ws', test_binary], 30)
@@ -498,6 +502,7 @@ def main():
                          link_map=bind(link_map), compile_commands=bind(compile_path),
                          actual_build_config=bind(configured), target_info=bind(binary / 'host-targets.txt'),
                          actual_opencc_version_definitions=opencc_definitions,
+                         opencc_private_darts_symbol_count=len(private_darts),
                          rime_headers=rime_headers, rime_header_target_compilations=header_targets,
                          fixture_compile_command=fixture_rows[0], source_only_no_android_claim=True)
         if args.build_model_tool:

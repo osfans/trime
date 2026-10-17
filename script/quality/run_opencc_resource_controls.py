@@ -34,9 +34,10 @@ THIRD=ROOT/'app/src/main/jni/cmake/ThirdPartyCmake.cmake'
 SAFETY=ROOT/'app/src/main/jni/cmake/OpenccResourceSafety.cmake'
 LOOKUP=ROOT/'app/src/main/jni/cmake/OpenccLookupCompat.cmake'
 PLUGIN=ROOT/'app/src/main/jni/cmake/OpenccPluginCompat.cmake'
+DARTS=ROOT/'app/src/main/jni/cmake/OpenccDartsCompat.cmake'
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def write(p,value):p.write_text(json.dumps(value,indent=2)+'\n')
-report={'status':'running','control_passed':False,'purpose':'Native host diagnostic controls of actual bundled OpenCC/Marisa; not Android runtime or final release acceptance','compiler_workers':args.workers,'inputs':{str(p):sha(p) for p in [Path(__file__),DRAFT/'opencc_resource_control.cpp',THIRD,SAFETY,LOOKUP,PLUGIN]},'variants':{},'steps':[]}
+report={'status':'running','control_passed':False,'purpose':'Native host diagnostic controls of actual bundled OpenCC/Marisa; not Android runtime or final release acceptance','compiler_workers':args.workers,'inputs':{str(p):sha(p) for p in [Path(__file__),DRAFT/'opencc_resource_control.cpp',THIRD,SAFETY,LOOKUP,PLUGIN,DARTS]},'variants':{},'steps':[]}
 write(OUT/'report.json',report)
 compiler=shutil.which(args.compiler) or args.compiler;cmake=shutil.which(args.cmake) or args.cmake;ninja=shutil.which('ninja');assert Path(compiler).is_file() and Path(cmake).is_file() and ninja
 tool_inputs={name:{'path':path,'sha256':sha(Path(path).resolve()),'version':subprocess.check_output([path,'--version'],text=True).splitlines()[0]} for name,path in [('compiler',compiler),('cmake',cmake),('ninja',ninja)]}
@@ -67,10 +68,10 @@ try:
   adapt=folder/'adapt.cmake'
   # OpenCC 1.4.2 already uses CMake 3.12 and host FindPython3; validate both
   # without rewriting upstream's current declarations or generation commands.
-  adapt.write_text(f'include("{THIRD}")\ninclude("{SAFETY}")\ninclude("{LOOKUP}")\ninclude("{PLUGIN}")\ntrime_validate_opencc_cmake("{copy}")\ntrime_adapt_opencc_lookup("{copy}/src")\ntrime_adapt_opencc_plugin("{copy}/src")\n'+(f'trime_adapt_opencc_resources("{copy}/src")\n' if variant=='patched' else ''))
+  adapt.write_text(f'include("{THIRD}")\ninclude("{SAFETY}")\ninclude("{LOOKUP}")\ninclude("{PLUGIN}")\ninclude("{DARTS}")\ntrime_validate_opencc_cmake("{copy}")\ntrime_adapt_opencc_darts("{copy}")\ntrime_adapt_opencc_lookup("{copy}/src")\ntrime_adapt_opencc_plugin("{copy}/src")\n'+(f'trime_adapt_opencc_resources("{copy}/src")\n' if variant=='patched' else ''))
   assert run([cmake,'-P',str(adapt)],folder/'adapt.log',timeout=60)==0
   source_after={str(p.relative_to(copy)):sha(p) for p in copy.rglob('*') if p.is_file()};write(folder/'source-after.json',source_after)
-  changed=[p for p in source_after if source_before[p]!=source_after[p]];assert set(changed)==({'src/Dict.hpp','src/TextDict.cpp','src/PrefixMatch.cpp','src/PluginSegmentation.cpp','src/MarisaDict.cpp','src/SerializableDict.hpp'} if variant=='patched' else {'src/Dict.hpp','src/TextDict.cpp','src/PrefixMatch.cpp','src/PluginSegmentation.cpp'})
+  changed=[p for p in source_after if source_before[p]!=source_after[p]];assert set(changed)==({'src/Dict.hpp','src/TextDict.cpp','src/PrefixMatch.cpp','src/PluginSegmentation.cpp','src/DartsDict.cpp','deps/darts-clone-0.32h/include/darts.h','src/MarisaDict.cpp','src/SerializableDict.hpp'} if variant=='patched' else {'src/Dict.hpp','src/TextDict.cpp','src/PrefixMatch.cpp','src/PluginSegmentation.cpp','src/DartsDict.cpp','deps/darts-clone-0.32h/include/darts.h'})
   variant_sources[variant]=source_after
   shutil.copy2(DRAFT/'opencc_resource_control.cpp',folder/'resource_control.cpp')
   (folder/'CMakeLists.txt').write_text(f'''cmake_minimum_required(VERSION 3.10...3.31)
@@ -116,11 +117,11 @@ target_link_libraries(resource_control PRIVATE libopencc)
     assert rc==(23 if expected_handles else 0) and 'LeakSanitizer: detected memory leaks' not in raw and 'ERROR: AddressSanitizer' not in raw
    variant_report['scenarios'][scenario]={'returncode':rc,'observed':data,'expected_negative_control':variant=='original' and (heap_failure or expected_handles!=0),'expected_header_lsan_bytes':608 if heap_failure else 0,'log_sha256':sha(log)}
    write(OUT/'report.json',report)
-  assert all(sha(p)==report['inputs'][str(p)] for p in [Path(__file__),DRAFT/'opencc_resource_control.cpp',THIRD,SAFETY,LOOKUP,PLUGIN]),'Inputs changed during native controls'
+  assert all(sha(p)==report['inputs'][str(p)] for p in [Path(__file__),DRAFT/'opencc_resource_control.cpp',THIRD,SAFETY,LOOKUP,PLUGIN,DARTS]),'Inputs changed during native controls'
  contrast=[path for path in variant_sources['original'] if variant_sources['original'][path]!=variant_sources['patched'][path]]
  assert set(contrast)=={'src/MarisaDict.cpp','src/SerializableDict.hpp'}, 'Only resource RAII may differ between negative and positive variants'
  report['resource_only_variant_delta']=contrast
- report['common_compatibility_sources']={name:variant_sources['original'][name] for name in ['src/Dict.hpp','src/TextDict.cpp','src/PrefixMatch.cpp','src/PluginSegmentation.cpp']}
+ report['common_compatibility_sources']={name:variant_sources['original'][name] for name in ['src/Dict.hpp','src/TextDict.cpp','src/PrefixMatch.cpp','src/PluginSegmentation.cpp','src/DartsDict.cpp','deps/darts-clone-0.32h/include/darts.h']}
  report['status']='completed';report['control_passed']=True
 except BaseException as error:
  primary_failure=True

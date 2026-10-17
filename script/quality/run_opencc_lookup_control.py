@@ -63,6 +63,8 @@ def main():
     parser.add_argument("--compiler", default="c++")
     parser.add_argument("--ninja", default="ninja")
     parser.add_argument("--require-gcc-major", type=int)
+    parser.add_argument("--baseline-darts-fixtures", type=Path,
+                        help="Optional retained old-library fixture directory; compare actual fixed32 and legacy64 bytes")
     args = parser.parse_args()
     out = args.out.resolve()
     out.relative_to((ROOT / "build").resolve())
@@ -74,9 +76,13 @@ def main():
     source = NATIVE / "OpenCC"
     adaptation = NATIVE / "cmake"
     fixture = Path(__file__).with_name("opencc_lookup_control.cpp")
+    darts_fixture = Path(__file__).with_name("opencc_darts_control.cpp")
     tools = {name: Path(shutil.which(value) or value).resolve(strict=True)
-             for name, value in (("cmake", args.cmake), ("compiler", args.compiler), ("ninja", args.ninja))}
-    inputs = {str(path): binding(path) for path in [Path(__file__).resolve(), fixture, *tools.values()]}
+             for name, value in (("cmake", args.cmake), ("compiler", args.compiler), ("ninja", args.ninja), ("nm", "nm"))}
+    baseline_files = [] if args.baseline_darts_fixtures is None else [
+        args.baseline_darts_fixtures.resolve(strict=True) / name
+        for name in ("built-fixed32.ocd", "legacy64.ocd")]
+    inputs = {str(path): binding(path) for path in [Path(__file__).resolve(), fixture, darts_fixture, *tools.values(), *baseline_files]}
     source_before = snapshot(source)
     adaptation_before = snapshot(adaptation)
     report = {"passed": False, "scope": __doc__, "workers": 1, "steps": [],
@@ -199,6 +205,9 @@ def main():
         copied_fixture = out / fixture.name
         shutil.copyfile(fixture, copied_fixture)
         assert binding(copied_fixture)["sha256"] == inputs[str(fixture)]["sha256"]
+        copied_darts = out / darts_fixture.name
+        shutil.copyfile(darts_fixture, copied_darts)
+        assert binding(copied_darts)["sha256"] == inputs[str(darts_fixture)]["sha256"]
         hook = out / "lookup-target.cmake"
         hook.write_text("""function(trime_add_lookup_control)
   if(NOT TARGET libopencc)
@@ -212,6 +221,11 @@ def main():
   target_compile_options(opencc_lookup_control PRIVATE -O3 -Wall -Wextra -Werror)
   target_include_directories(opencc_lookup_control PRIVATE "${opencc_source}" "${opencc_binary}")
   target_link_libraries(opencc_lookup_control PRIVATE libopencc)
+  add_executable(opencc_darts_control """ + quote(copied_darts) + """)
+  set_target_properties(opencc_darts_control PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+  target_compile_options(opencc_darts_control PRIVATE -O3 -Wall -Wextra -Werror)
+  target_include_directories(opencc_darts_control PRIVATE "${opencc_source}" "${opencc_binary}")
+  target_link_libraries(opencc_darts_control PRIVATE libopencc)
 endfunction()
 cmake_language(DEFER CALL trime_add_lookup_control)
 """)
@@ -232,19 +246,20 @@ cmake_language(DEFER CALL trime_add_lookup_control)
                                       "cmake_record": binding(compiler_files[0])}
         if args.require_gcc_major is not None:
             assert compiler_id == ["GNU"] and int(version[0].split(".")[0]) == args.require_gcc_major
-        run([tools["cmake"], "--build", build, "--target", "opencc_lookup_control",
+        run([tools["cmake"], "--build", build, "--target", "opencc_lookup_control", "opencc_darts_control",
              "--parallel", "1", "--verbose"], "build", 1200)
         executable = build / "opencc_lookup_control"
         compile_commands = build / "compile_commands.json"
         rows = json.loads(compile_commands.read_text())
         fixture_rows = [row for row in rows if Path(row["file"]).resolve() == copied_fixture]
         textdict_rows = [row for row in rows if Path(row["file"]).name == "TextDict.cpp"]
-        assert len(fixture_rows) == len(textdict_rows) == 1
+        darts_rows = [row for row in rows if Path(row["file"]).resolve() == copied_darts]
+        assert len(fixture_rows) == len(textdict_rows) == len(darts_rows) == 1
         adapted_source = build / "trime-deps/OpenCC/src/TextDict.cpp"
         assert Path(textdict_rows[0]["file"]).resolve() == adapted_source
         assert "new NoValueDictEntry(std::string(word, len))" not in adapted_source.read_text()
         assert "const std::string_view key(word, len);" in adapted_source.read_text()
-        for row in fixture_rows + textdict_rows:
+        for row in fixture_rows + textdict_rows + darts_rows:
             assert all(flag in row["command"].split() for flag in ("-O3", "-Wall", "-Wextra", "-Werror"))
         output = run([executable], "test", 30)
         lines = [line for line in output.splitlines() if line.startswith("{")]
@@ -254,11 +269,35 @@ cmake_language(DEFER CALL trime_add_lookup_control)
         assert result["dictionaries"] == 4 and result["queries"] > 1000
         assert result["groups"]["all_256_single_bytes"] == 256
         assert result["groups"]["present_empty_key"] == result["groups"]["absent_empty_key"] == 1
+        darts_executable = build / "opencc_darts_control"
+        fixture_dir = out / "darts-fixtures"
+        darts_output = run([darts_executable, fixture_dir], "darts-test", 30)
+        darts_lines = [line for line in darts_output.splitlines() if line.startswith("{")]
+        assert len(darts_lines) == 1
+        darts_result = json.loads(darts_lines[0])
+        assert darts_result["passed"] and darts_result["real_library"]
+        assert darts_result["valid_readers"] == 4 and darts_result["rejected_readers"] == 24
+        assert darts_result["deep_prefix_keys"] == 65
+        wire_files = {path.name: binding(path) for path in sorted(fixture_dir.iterdir())}
+        baseline_equal = None
+        if baseline_files:
+            baseline_equal = all(path.read_bytes() == (fixture_dir / path.name).read_bytes()
+                                 for path in baseline_files)
+            assert baseline_equal, "Private namespace changed actual old-library wire bytes"
+        archive = build / "OpenCC/src/libopencc.a"
+        symbols = run([tools["nm"], "-C", "--defined-only", archive], "darts-symbols", 30)
+        private_symbols = [line for line in symbols.splitlines() if " TrimeOpenccDarts::" in line]
+        original_symbols = [line for line in symbols.splitlines() if re.search(r"\bDarts::", line)]
+        assert private_symbols and not original_symbols, "OpenCC Darts symbols were not isolated"
         report.update(observed=result, executable=binding(executable), fixture_copy=binding(copied_fixture),
                       adapted_textdict=binding(adapted_source), compiler_commands=binding(compile_commands),
                       actual_fixture_compile=fixture_rows[0], actual_textdict_compile=textdict_rows[0],
                       production_wrapper=binding(adaptation / "opencc-host/CMakeLists.txt"),
-                      generated_hook=binding(hook), passed=True)
+                      generated_hook=binding(hook), darts_observed=darts_result,
+                      darts_executable=binding(darts_executable), darts_fixture_copy=binding(copied_darts),
+                      darts_wire_files=wire_files, baseline_darts_wire_equal=baseline_equal,
+                      opencc_archive=binding(archive), private_darts_symbols=private_symbols,
+                      original_darts_symbols=original_symbols, actual_darts_compile=darts_rows[0], passed=True)
     except BaseException:
         primary_error = traceback.format_exc()
         report["error"] = primary_error
