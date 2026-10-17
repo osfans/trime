@@ -14,6 +14,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <system_error>
 #include <vector>
 
 namespace fs = std::filesystem;
@@ -87,8 +88,15 @@ int execute(const std::string& scenario, const fs::path& directory) {
     if (writer) {
       try {
         serializable.SerializeToFile(std::string("/dev/full"));
-      } catch (const std::exception& error) {
-        rejected = std::string(error.what()).find("MARISA_IO_ERROR") != std::string::npos;
+      } catch (const std::system_error& error) {
+        // Bundled Marisa 0.3.1 reports the real stdio error, replacing its old
+        // MARISA_IO_ERROR text. Require /dev/full's exact generic ENOSPC code.
+        const std::string message(error.what());
+        rejected = error.code() == std::make_error_code(std::errc::no_space_on_device) &&
+                   message.find("writer.cc:") != std::string::npos &&
+                   (message.find("std::system_error: std::fwrite:") != std::string::npos ||
+                    message.find("std::system_error: std::fflush:") != std::string::npos);
+        require(rejected, "Unexpected native writer error: " + message);
       }
     } else {
       if (scenario == "config-text" || filenameText) {
