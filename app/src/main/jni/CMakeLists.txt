@@ -47,7 +47,7 @@ target_compile_options(
 
 set(LIBMARISA marisa)
 option(USE_SYSTEM_MARISA "" ON)
-add_subdirectory(OpenCC)
+add_subdirectory(librime/deps/opencc)
 include(OpenccWorkarounds)
 
 set(X11Keysym "${CMAKE_SOURCE_DIR}/librime/include")
