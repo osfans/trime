@@ -1146,9 +1146,11 @@ internal object PublicHostWindowProbe {
                         storageListWindowId,
                         successorTexts = listOf(text, activity.getString(android.R.string.cancel)),
                         ownedListDialog = {
-                            (fragment.parentFragmentManager.findFragmentByTag(
-                                "androidx.preference.PreferenceFragment.DIALOG",
-                            ) as? DialogFragment)?.dialog as? AlertDialog
+                            (
+                                fragment.parentFragmentManager.findFragmentByTag(
+                                    "androidx.preference.PreferenceFragment.DIALOG",
+                                ) as? DialogFragment
+                                )?.dialog as? AlertDialog
                         },
                     ),
                 )
