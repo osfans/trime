@@ -70,6 +70,8 @@ int execute(const std::string& scenario, const fs::path& directory) {
                          dict + "},\"conversion_chain\":[{\"dict\":" + dict + "}]}");
   };
   const bool writer = scenario == "writer";
+  const bool filenameHeader = scenario == "filename-header";
+  const bool filenameText = scenario == "filename-text";
   require(descriptors(component, writer).empty(), "Unexpected fixture descriptor before calibration");
   {
     FileHandle observed(fopen((writer ? fs::path("/dev/full") : binary).c_str(), writer ? "wb" : "rb"), fclose);
@@ -79,7 +81,7 @@ int execute(const std::string& scenario, const fs::path& directory) {
   require(descriptors(component, writer).empty(), "Calibration handle remained open");
   writeConfig(false);
   std::vector<size_t> retained;
-  int failures = 0, retries = 0;
+  int failures = 0, retries = 0, filenameRetries = 0;
   for (int i = 0; i < 32; ++i) {
     bool rejected = false;
     if (writer) {
@@ -89,7 +91,7 @@ int execute(const std::string& scenario, const fs::path& directory) {
         rejected = std::string(error.what()).find("MARISA_IO_ERROR") != std::string::npos;
       }
     } else {
-      if (scenario == "config-text") {
+      if (scenario == "config-text" || filenameText) {
         writeFile(source, "missing tab and value\n");
         writeConfig(true);
       } else {
@@ -104,6 +106,17 @@ int execute(const std::string& scenario, const fs::path& directory) {
           opencc::MarisaDict::NewFromFile(input.get());
         } catch (const opencc::Exception& error) {
           rejected = std::string(error.what()).find("Invalid OpenCC dictionary header") != std::string::npos;
+        }
+      } else if (filenameHeader || filenameText) {
+        try {
+          if (filenameHeader) {
+            opencc::SerializableDict::NewFromFile<opencc::MarisaDict>(binary.string());
+          } else {
+            opencc::SerializableDict::NewFromFile<opencc::TextDict>(source.string());
+          }
+        } catch (const std::runtime_error& error) {
+          const auto expected = filenameText ? "Tabular not found" : "Invalid OpenCC dictionary header";
+          rejected = std::string(error.what()).find(expected) != std::string::npos;
         }
       } else {
         try {
@@ -125,6 +138,18 @@ int execute(const std::string& scenario, const fs::path& directory) {
       opencc::SimpleConverter recovered(config.string());
       require(recovered.Convert("漢語測試") == "汉语测试", "Real conversion retry failed");
     }
+    if (filenameHeader || filenameText) {
+      opencc::DictPtr recovered;
+      if (filenameHeader) {
+        recovered = opencc::SerializableDict::NewFromFile<opencc::MarisaDict>(binary.string());
+      } else {
+        recovered = opencc::SerializableDict::NewFromFile<opencc::TextDict>(source.string());
+      }
+      const auto match = recovered->Match(std::string("漢語"));
+      require(!match.IsNull() && match.Get()->GetDefault() == "汉语",
+              "Real filename-reader retry failed");
+      ++filenameRetries;
+    }
     if (writer) {
       const fs::path retry = directory / "writer-retry.ocd2";
       serializable.SerializeToFile(retry.string());
@@ -135,7 +160,9 @@ int execute(const std::string& scenario, const fs::path& directory) {
   }
   const auto remaining = descriptors(component, writer);
   std::cout << "{\"scenario\":\"" << scenario << "\",\"attempts\":32,\"expected_exceptions\":" << failures
-            << ",\"successful_real_conversion_retries\":" << retries << ",\"descriptor_observer_calibrated\":true,\"retained_descriptors_after_each_failure\":[";
+            << ",\"successful_real_conversion_retries\":" << retries
+            << ",\"successful_filename_reader_retries\":" << filenameRetries
+            << ",\"descriptor_observer_calibrated\":true,\"retained_descriptors_after_each_failure\":[";
   for (size_t i = 0; i < retained.size(); ++i) std::cout << (i ? "," : "") << retained[i];
   std::cout << "],\"retained_fixture_descriptors\":" << remaining.size()
             << ",\"descriptor_resources_clean\":" << (remaining.empty() ? "true" : "false")
@@ -149,7 +176,8 @@ int main(int argc, char** argv) {
     require(argc == 3, "Expected scenario and new owned fixture directory");
     const std::string scenario = argv[1];
     require(scenario == "direct-header" || scenario == "config-header" ||
-            scenario == "config-text" || scenario == "writer", "Unknown scenario");
+            scenario == "config-text" || scenario == "writer" ||
+            scenario == "filename-header" || scenario == "filename-text", "Unknown scenario");
     return execute(scenario, fs::absolute(argv[2]));
   } catch (const opencc::Exception& error) {
     std::cerr << "UNEXPECTED OPENCC FAILURE: " << error.what() << std::endl;

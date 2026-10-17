@@ -4,9 +4,11 @@
 Usage: python3 script/quality/run_opencc_resource_controls.py build/opencc-resources
 
 Builds two isolated copies with one compiler worker by default (at most two). The original
-must expose the known header allocation and file-handle failures; the patched
-copy must reject the same malformed inputs without retaining resources and
-complete every valid retry. Original failing logs are preserved. This does
+must expose the known direct-file header allocation and filename/writer handle
+failures; the patched copy must reject the same malformed inputs without
+retaining resources and complete every valid retry. Both config-provider paths
+must remain clean: pinned OpenCC loads their dictionaries from owned buffers.
+Original failing logs are preserved. This does
 not build an APK or establish Android device acceptance. Requires clang++,
 CMake, Ninja, Python 3, /proc/self/fd and /dev/full on Linux.
 """
@@ -99,19 +101,20 @@ target_link_libraries(resource_control PRIVATE libopencc)
   assert run([cmake,'--build',str(build),'--target','resource_control','--parallel',str(args.workers)],folder/'build.log',timeout=1200)==0
   exe=build/'resource_control';variant_report={'source_changes':changed,'source_map_before_sha256':sha(folder/'source-before.json'),'source_map_after_sha256':sha(folder/'source-after.json'),'executable_sha256':sha(exe),'scenarios':{}};report['variants'][variant]=variant_report
   env=dict(os.environ);env['ASAN_OPTIONS']='detect_leaks=1:halt_on_error=1:exitcode=86';env['LSAN_OPTIONS']='exitcode=87:report_objects=1'
-  for scenario in ['direct-header','config-header','config-text','writer']:
+  for scenario in ['direct-header','config-header','config-text','writer','filename-header','filename-text']:
    log=folder/(scenario+'.log');rc=run([str(exe),scenario,str(folder/('fixture-'+scenario))],log,env,timeout=60);raw=log.read_text()
    data=json.loads(next(line for line in raw.splitlines() if line.startswith('{')))
    assert data['attempts']==data['expected_exceptions']==data['successful_real_conversion_retries']==32 and data['descriptor_observer_calibrated']
-   expected_handles=32 if variant=='original' and scenario!='direct-header' else 0
+   assert data['successful_filename_reader_retries']==(32 if scenario in ['filename-header','filename-text'] else 0)
+   expected_handles=32 if variant=='original' and scenario in ['writer','filename-header','filename-text'] else 0
    assert data['retained_fixture_descriptors']==expected_handles
    assert data['retained_descriptors_after_each_failure']==(list(range(1,33)) if expected_handles else [0]*32)
-   heap_failure=variant=='original' and scenario in ['direct-header','config-header']
+   heap_failure=variant=='original' and scenario in ['direct-header','filename-header']
    if heap_failure:
     assert rc==87 and 'LeakSanitizer: detected memory leaks' in raw and '608 byte(s) leaked in 32 allocation(s)' in raw and 'MarisaDict::NewFromFile' in raw
    else:
     assert rc==(23 if expected_handles else 0) and 'LeakSanitizer: detected memory leaks' not in raw and 'ERROR: AddressSanitizer' not in raw
-   variant_report['scenarios'][scenario]={'returncode':rc,'observed':data,'expected_negative_control':variant=='original','expected_header_lsan_bytes':608 if heap_failure else 0,'log_sha256':sha(log)}
+   variant_report['scenarios'][scenario]={'returncode':rc,'observed':data,'expected_negative_control':variant=='original' and (heap_failure or expected_handles!=0),'expected_header_lsan_bytes':608 if heap_failure else 0,'log_sha256':sha(log)}
    write(OUT/'report.json',report)
   assert all(sha(p)==report['inputs'][str(p)] for p in [Path(__file__),DRAFT/'opencc_resource_control.cpp',THIRD,SAFETY,LOOKUP,PLUGIN]),'Inputs changed during native controls'
  contrast=[path for path in variant_sources['original'] if variant_sources['original'][path]!=variant_sources['patched'][path]]

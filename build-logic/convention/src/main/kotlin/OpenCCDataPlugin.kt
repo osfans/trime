@@ -104,8 +104,12 @@ class OpenCCDataPlugin : Plugin<Project> {
             val cmake = cmakeExecutable.get()
             execOperations.exec {
                 commandLine(
-                    cmake, "-S", adaptationDir.get().asFile.resolve("opencc-host").absolutePath,
-                    "-B", output.absolutePath, "-DCMAKE_BUILD_TYPE=Release",
+                    cmake,
+                    "-S",
+                    adaptationDir.get().asFile.resolve("opencc-host").absolutePath,
+                    "-B",
+                    output.absolutePath,
+                    "-DCMAKE_BUILD_TYPE=Release",
                     "-DTRIME_OPENCC_SOURCE_DIR=${sourceDir.get().asFile.absolutePath}",
                 )
             }.assertNormalExitValue()
