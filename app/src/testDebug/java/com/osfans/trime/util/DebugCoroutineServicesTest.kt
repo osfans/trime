@@ -31,6 +31,7 @@ class DebugExternalHandler :
 class DebugCoroutineServicesTest :
     StringSpec({
         val service = CoroutineExceptionHandler::class.java
+        val serviceLoader = checkNotNull(service.classLoader)
         val original = "META-INF/services/" + service.name
         val relocated = "trime-services/" + service.name
 
@@ -39,7 +40,7 @@ class DebugCoroutineServicesTest :
             try {
                 val urls = resources.mapValues { (name, text) ->
                     directory.resolve(name).apply {
-                        parentFile.mkdirs()
+                        checkNotNull(parentFile).mkdirs()
                         writeText(text)
                     }.toURI().toURL()
                 }
@@ -96,7 +97,7 @@ class DebugCoroutineServicesTest :
 
         "null service retains the platform null rejection" {
             shouldThrow<NullPointerException> {
-                DebugCoroutineServices.load<CoroutineExceptionHandler>(null, service.classLoader)
+                DebugCoroutineServices.load<CoroutineExceptionHandler>(null, serviceLoader)
             }
         }
 
@@ -109,7 +110,7 @@ class DebugCoroutineServicesTest :
 
         "resource IO failures remain observable" {
             val failure = IOException("synthetic lookup failure")
-            val loader = object : ClassLoader(service.classLoader) {
+            val loader = object : ClassLoader(serviceLoader) {
                 override fun getResources(name: String): Enumeration<URL> = throw failure
             }
             shouldThrow<IOException> { DebugCoroutineServices.getResources(loader, original) } shouldBe failure
@@ -122,12 +123,12 @@ class DebugCoroutineServicesTest :
                 "kotlinx/coroutines/internal/FastServiceLoader.class" to "82dc841566a8c98e678f84af41d1744869e2bcdd8804e4094252325fcc12e28e",
             )
             expected.forEach { (name, digest) ->
-                val bytes = checkNotNull(service.classLoader.getResourceAsStream(name)).use { it.readBytes() }
+                val bytes = checkNotNull(serviceLoader.getResourceAsStream(name)).use { it.readBytes() }
                 MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) } shouldBe digest
             }
         }
 
         "JVM tests keep their original dependency SPI resources" {
-            service.classLoader.getResources(original).hasMoreElements() shouldBe true
+            serviceLoader.getResources(original).hasMoreElements() shouldBe true
         }
     })
