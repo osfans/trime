@@ -23,9 +23,10 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.os.BundleCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
@@ -135,12 +136,12 @@ abstract class PublicPreferenceDialogFragment :
         cancelOnStart = false
         val builder = PublicAlertDialogs.builder(requireContext())
             .setTitle(dialogTitle)
-            .setIcon(dialogIcon?.let { BitmapDrawable(resources, it) })
+            .setIcon(dialogIcon?.toDrawable(resources))
             .setPositiveButton(positiveText, this)
             .setNegativeButton(negativeText, this)
         if (dialogLayout != 0) {
             // Main/Advanced's public onCreateView hook remains on the cloned inflater chain.
-            val content = LayoutInflater.from(builder.context).inflate(dialogLayout, null)
+            val content = layoutInflater.cloneInContext(builder.context).inflate(dialogLayout, null)
             bindDialogView(content, savedInstanceState != null)
             builder.setView(content)
         } else {
@@ -210,7 +211,7 @@ abstract class PublicPreferenceDialogFragment :
     private fun snapshotIcon(icon: Drawable?): Bitmap? {
         if (icon == null) return null
         if (icon is BitmapDrawable) return icon.bitmap
-        val bitmap = Bitmap.createBitmap(icon.intrinsicWidth, icon.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(icon.intrinsicWidth, icon.intrinsicHeight)
         val canvas = Canvas(bitmap)
         icon.setBounds(0, 0, canvas.width, canvas.height)
         icon.draw(canvas)

@@ -15,6 +15,7 @@
  */
 package com.osfans.trime.ui.common
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
@@ -26,6 +27,8 @@ import com.osfans.trime.R
 import com.osfans.trime.data.prefs.AppPrefs
 
 /** Public configuration-only subset of AppCompat's base-context strategy; owns no Window. */
+// Copies the caller's active locale; it does not provide runtime locale selection.
+@SuppressLint("AppBundleLocaleChanges")
 internal object PublicWindowPilotConfiguration {
     fun wrap(
         base: Context,

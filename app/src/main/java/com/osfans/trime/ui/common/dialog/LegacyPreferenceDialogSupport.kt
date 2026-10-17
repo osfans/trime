@@ -31,6 +31,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.os.BundleCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -93,7 +95,7 @@ internal class LegacyPreferenceDialogWindow(
         closeDelivered = false
         val builder = PublicAlertDialogs.builder(fragment.requireContext())
             .setTitle(title)
-            .setIcon(icon?.let { BitmapDrawable(fragment.resources, it) })
+            .setIcon(icon?.toDrawable(fragment.resources))
             .setPositiveButton(positiveText, fragment)
             .setNegativeButton(negativeText, fragment)
         if (layout != 0) {
@@ -168,7 +170,7 @@ internal class LegacyPreferenceDialogWindow(
     private fun snapshotIcon(drawable: Drawable?): Bitmap? {
         if (drawable == null) return null
         if (drawable is BitmapDrawable) return drawable.bitmap
-        val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight)
         val canvas = Canvas(bitmap)
         drawable.setBounds(0, 0, canvas.width, canvas.height)
         drawable.draw(canvas)
