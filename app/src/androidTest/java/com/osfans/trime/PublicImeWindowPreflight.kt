@@ -5,6 +5,7 @@ import android.app.Activity
 import android.app.Application
 import android.app.Instrumentation
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -197,23 +198,46 @@ internal object PublicImeWindowPreflight {
             await("Real empty editor did not receive a visible focused window", limit) {
                 main { editor.isAttachedToWindow && editor.isLaidOut && editor.width > 0 && editor.height > 0 && editor.hasWindowFocus() && editor.hasFocus() }
             }
-            main {
+            val initialShowAccepted = main {
+                val accepted = manager.showSoftInput(editor, 0)
                 evidence.put("activity_class", activity.javaClass.name).put("activity_identity", System.identityHashCode(activity))
                     .put("editor_id", editor.id).put("editor_input_type", editor.inputType).put("editor_ime_options", editor.imeOptions)
                     .put("window_focus", activity.hasWindowFocus()).put("editor_focus", editor.hasFocus())
-                    .put("show_soft_input_returned", manager.showSoftInput(editor, 0)).put("show_soft_input_called", true)
+                    .put("show_soft_input_returned", accepted).put("show_soft_input_called", true)
                 event("show_soft_input")
+                accepted
             }
+            val showRequestedAt = SystemClock.uptimeMillis()
+            var bindingRestartRequested = false
             await("Public IMMS request did not establish the unique selected READY IME", limit) {
                 main {
                     state.callbackFailure?.let { throw it }
                     val owners = sessionOwners()
                     val engine = RimeDaemon.engineState.value
+                    val active = manager.isActive(editor)
+                    val selectedIme = selected()
                     evidence.put("owners_observed", JSONArray(owners.sorted())).put("engine_observed", engine.name)
-                        .put("manager_active", manager.isActive(editor)).put("selected_ime_observed", selected() ?: JSONObject.NULL)
+                        .put("manager_active", active).put("selected_ime_observed", selectedIme ?: JSONObject.NULL)
+                    // API21 can retain the IMMS connection after instrumentation replaces its
+                    // process. A request within its 3s reconnect window then waits indefinitely
+                    // unless the same real editor requests input again. Do so once, within the
+                    // original deadline, only while no IME session has started.
+                    if (Build.VERSION.SDK_INT == 21 && !initialShowAccepted && !bindingRestartRequested &&
+                        SystemClock.uptimeMillis() - showRequestedAt >= 4_000L &&
+                        owners.isEmpty() && engine == RimeLifecycle.State.STOPPED && active && selectedIme == expectedIme &&
+                        state.owner === activity && state.resumed && !activity.isFinishing && !activity.isDestroyed && activity.hasWindowFocus() &&
+                        editor.isLaidOut && editor.width > 0 && editor.height > 0 &&
+                        editor.isAttachedToWindow && editor.isShown && editor.hasWindowFocus() && editor.hasFocus() && editor.text.isEmpty()
+                    ) {
+                        bindingRestartRequested = true
+                        evidence.put("binding_restart_after_show_ms", SystemClock.uptimeMillis() - showRequestedAt)
+                        event("restart_input_requested")
+                        manager.restartInput(editor)
+                        event("restart_input_returned")
+                    }
                     (
                         owners.size == 1 && owners.single().startsWith(ownerPrefix) && engine == RimeLifecycle.State.READY &&
-                            manager.isActive(editor) && selected() == expectedIme
+                            active && selectedIme == expectedIme
                         ).also { if (it) state.readyOwners = owners }
                 }
             }
