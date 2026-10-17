@@ -204,6 +204,7 @@ class TrimeApplication : Application() {
     }
 
     private fun startWorkManager() {
+        if (isDirectBootMode) return
         coroutineScope.launch {
             BackgroundSyncWork.start(directBootAwareContext)
         }
