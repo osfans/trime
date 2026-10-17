@@ -35,13 +35,10 @@ jobs:
           cache: 'gradle'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v4
-        with:
-          packages: 'platform-tools'
-
-      - name: Install Android NDK
+        shell: python
         run: |
-          sdkmanager --install "cmake;3.31.6"
+          import runpy
+          runpy.run_path("script/ci/setup_android_cli.py", run_name="__main__")
 
       - name: Configure and verify host data tools
         shell: python
