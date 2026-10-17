@@ -1487,123 +1487,152 @@ object MixedInputProbe {
         } catch (failure: Throwable) {
             result.putString("stream", "FAIL: ${failure.stackTraceToString()}\n")
         } finally {
-            val cleanupErrors = mutableListOf<String>()
-            if (dedicatedValidated) {
-                // One failed restore must not skip the independent preference/activity/client cleanup.
-                try {
-                    runner.manualPreference?.restore()
-                    runner.manualPreferenceCleanup.put("restored_store", runner.manualPreference?.state() ?: JSONObject.NULL)
-                    if (runner.manualPreference?.implemented == true && runner.hasService()) {
-                        runBlocking {
-                            val priorToken = runner.main { runner.service.editorToken }
-                            runner.current = runner.chat
-                            runner.main {
-                                runner.chat.requestFocus()
-                                runner.manager.restartInput(runner.chat)
-                                runner.manager.showSoftInput(runner.chat, 0)
-                            }
-                            runner.until { runner.input() != null && runner.service.currentInputEditorInfo?.fieldId == runner.chat.id && runner.service.editorToken != priorToken }
-                            val reread = runner.settled()
-                            val original = checkNotNull(runner.manualPreference).original()
-                            if (original.optString("raw") in setOf("native", "ascii")) {
-                                check(reread.getBoolean("ascii_mode") == (original.getString("raw") == "ascii")) { "Restored manual preference was not re-read by the new ordinary editor" }
-                            }
-                            runner.manualPreferenceCleanup.put("new_ordinary_editor", reread).put("prior_editor_token", priorToken)
+            finishRun(
+                runner = runner,
+                result = result,
+                initiallyPassed = passed,
+                dedicatedValidated = dedicatedValidated,
+                activity = activity,
+                originalTheme = originalTheme,
+                session = session,
+                originalSchema = originalSchema,
+                originalAscii = originalAscii,
+                restoreInline = { preference.setValue(originalInline) },
+            )
+        }
+    }
+
+    private fun finishRun(
+        runner: Runner,
+        result: Bundle,
+        initiallyPassed: Boolean,
+        dedicatedValidated: Boolean,
+        activity: Activity?,
+        originalTheme: String,
+        session: RimeSession?,
+        originalSchema: String?,
+        originalAscii: Boolean,
+        restoreInline: () -> Unit,
+    ) {
+        var passed = initiallyPassed
+        val instrumentation = runner.instrumentation
+        val baseline = runner.baseline
+        val cleanupErrors = mutableListOf<String>()
+        if (dedicatedValidated) {
+            // One failed restore must not skip the independent preference/activity/client cleanup.
+            try {
+                runner.manualPreference?.restore()
+                runner.manualPreferenceCleanup.put("restored_store", runner.manualPreference?.state() ?: JSONObject.NULL)
+                if (runner.manualPreference?.implemented == true && runner.hasService()) {
+                    runBlocking {
+                        val priorToken = runner.main { runner.service.editorToken }
+                        runner.current = runner.chat
+                        runner.main {
+                            runner.chat.requestFocus()
+                            runner.manager.restartInput(runner.chat)
+                            runner.manager.showSoftInput(runner.chat, 0)
                         }
+                        runner.until { runner.input() != null && runner.service.currentInputEditorInfo?.fieldId == runner.chat.id && runner.service.editorToken != priorToken }
+                        val reread = runner.settled()
+                        val original = checkNotNull(runner.manualPreference).original()
+                        if (original.optString("raw") in setOf("native", "ascii")) {
+                            check(reread.getBoolean("ascii_mode") == (original.getString("raw") == "ascii")) { "Restored manual preference was not re-read by the new ordinary editor" }
+                        }
+                        runner.manualPreferenceCleanup.put("new_ordinary_editor", reread).put("prior_editor_token", priorToken)
                     }
-                    runner.manualPreferenceCleanup.put(
-                        "status",
-                        when {
-                            runner.manualPreference?.implemented != true -> "NOT_APPLICABLE_T09_PREF_NOT_IMPLEMENTED"
-                            runner.manualPreferenceCleanup.has("new_ordinary_editor") -> "restored_and_rebound"
-                            else -> "restored_store_only_editor_unavailable"
-                        },
-                    )
-                } catch (failure: Throwable) {
-                    cleanupErrors.add(failure.stackTraceToString())
                 }
-                val finalEditorToken = if (runner.hasService()) runner.main { runner.service.editorToken } else null
-                try {
-                    activity?.let { runner.main { it.finish() } }
-                } catch (failure: Throwable) {
-                    cleanupErrors.add(failure.stackTraceToString())
-                }
-                runBlocking {
-                    withContext(NonCancellable) {
-                        if (finalEditorToken != null) {
-                            try {
-                                runner.until { !runner.service.isCurrentEditor(finalEditorToken) }
-                                runner.api { } // Drain the serial onFinishInput cleanup before restoring.
-                            } catch (failure: Throwable) {
-                                cleanupErrors.add(failure.stackTraceToString())
-                            }
-                        }
+                runner.manualPreferenceCleanup.put(
+                    "status",
+                    when {
+                        runner.manualPreference?.implemented != true -> "NOT_APPLICABLE_T09_PREF_NOT_IMPLEMENTED"
+                        runner.manualPreferenceCleanup.has("new_ordinary_editor") -> "restored_and_rebound"
+                        else -> "restored_store_only_editor_unavailable"
+                    },
+                )
+            } catch (failure: Throwable) {
+                cleanupErrors.add(failure.stackTraceToString())
+            }
+            val finalEditorToken = if (runner.hasService()) runner.main { runner.service.editorToken } else null
+            try {
+                activity?.let { runner.main { it.finish() } }
+            } catch (failure: Throwable) {
+                cleanupErrors.add(failure.stackTraceToString())
+            }
+            runBlocking {
+                withContext(NonCancellable) {
+                    if (finalEditorToken != null) {
                         try {
-                            withTimeout(30_000) { ThemeManager.selectTheme(originalTheme) }
+                            runner.until { !runner.service.isCurrentEditor(finalEditorToken) }
+                            runner.api { } // Drain the serial onFinishInput cleanup before restoring.
                         } catch (failure: Throwable) {
                             cleanupErrors.add(failure.stackTraceToString())
                         }
-                        try {
-                            withTimeout(30_000) {
-                                originalSchema?.let { schema ->
-                                    session?.runOnReady {
-                                        clearComposition()
-                                        check(selectSchema(schema))
-                                        setRuntimeOption("ascii_mode", originalAscii)
-                                        check(selectedSchemaId() == schema && getRuntimeOption("ascii_mode") == originalAscii) { "Original native schema/mode did not restore" }
-                                    }
+                    }
+                    try {
+                        withTimeout(30_000) { ThemeManager.selectTheme(originalTheme) }
+                    } catch (failure: Throwable) {
+                        cleanupErrors.add(failure.stackTraceToString())
+                    }
+                    try {
+                        withTimeout(30_000) {
+                            originalSchema?.let { schema ->
+                                session?.runOnReady {
+                                    clearComposition()
+                                    check(selectSchema(schema))
+                                    setRuntimeOption("ascii_mode", originalAscii)
+                                    check(selectedSchemaId() == schema && getRuntimeOption("ascii_mode") == originalAscii) { "Original native schema/mode did not restore" }
                                 }
                             }
-                        } catch (failure: Throwable) {
-                            cleanupErrors.add(failure.stackTraceToString())
                         }
-                    }
-                }
-                for (cleanup in listOf<() -> Unit>(
-                    { preference.setValue(originalInline) },
-                    { runner.manualPreference?.verifyRestored() },
-                    { session?.let { runner.main { RimeDaemon.destroySession(javaClass.name) } } },
-                )) {
-                    try {
-                        cleanup()
                     } catch (failure: Throwable) {
                         cleanupErrors.add(failure.stackTraceToString())
                     }
                 }
-                if (cleanupErrors.isNotEmpty()) {
-                    passed = false
-                    result.putString("cleanup_failure", cleanupErrors.joinToString("\n"))
-                }
+            }
+            for (cleanup in listOf<() -> Unit>(
+                restoreInline,
+                { runner.manualPreference?.verifyRestored() },
+                { session?.let { runner.main { RimeDaemon.destroySession(javaClass.name) } } },
+            )) {
                 try {
-                    File(runner.output, "completion.json").writeText(
-                        json(
-                            "passed" to passed, "baseline" to baseline,
-                            "run_id" to runner.runId, "collection_complete" to runner.collectionComplete,
-                            "cleanup_errors" to JSONArray(cleanupErrors), "manual_language_preference_cleanup" to runner.manualPreferenceCleanup, "device_run" to true,
-                            "physical_touch_benchmark" to false, "performance_acceptance" to false,
-                        ).toString(2) + "\n",
-                    )
-                    // Manifest binds this nonce to only this test-owned directory. It excludes
-                    // itself, avoiding a circular digest; partial failure artifacts remain usable.
-                    val attachments = JSONObject()
-                    checkNotNull(runner.output.listFiles()).sortedBy { it.name }.forEach { file ->
-                        check(file.isFile) { "Unexpected nested test artifact" }
-                        attachments.put(file.name, json("sha256" to digest(file.readBytes()), "bytes" to file.length()))
-                    }
-                    File(runner.output, "artifact-manifest.json").writeText(
-                        json(
-                            "format" to 1,
-                            "run_id" to runner.runId,
-                            "attachments" to attachments,
-                        ).toString(2) + "\n",
-                    )
+                    cleanup()
                 } catch (failure: Throwable) {
-                    passed = false
-                    result.putString("report_failure", failure.stackTraceToString())
+                    cleanupErrors.add(failure.stackTraceToString())
                 }
             }
-            result.putBoolean("passed", passed)
-            instrumentation.finish(if (passed) Activity.RESULT_OK else Activity.RESULT_CANCELED, result)
+            if (cleanupErrors.isNotEmpty()) {
+                passed = false
+                result.putString("cleanup_failure", cleanupErrors.joinToString("\n"))
+            }
+            try {
+                File(runner.output, "completion.json").writeText(
+                    json(
+                        "passed" to passed, "baseline" to baseline,
+                        "run_id" to runner.runId, "collection_complete" to runner.collectionComplete,
+                        "cleanup_errors" to JSONArray(cleanupErrors), "manual_language_preference_cleanup" to runner.manualPreferenceCleanup, "device_run" to true,
+                        "physical_touch_benchmark" to false, "performance_acceptance" to false,
+                    ).toString(2) + "\n",
+                )
+                // Manifest binds this nonce to only this test-owned directory. It excludes
+                // itself, avoiding a circular digest; partial failure artifacts remain usable.
+                val attachments = JSONObject()
+                checkNotNull(runner.output.listFiles()).sortedBy { it.name }.forEach { file ->
+                    check(file.isFile) { "Unexpected nested test artifact" }
+                    attachments.put(file.name, json("sha256" to digest(file.readBytes()), "bytes" to file.length()))
+                }
+                File(runner.output, "artifact-manifest.json").writeText(
+                    json(
+                        "format" to 1,
+                        "run_id" to runner.runId,
+                        "attachments" to attachments,
+                    ).toString(2) + "\n",
+                )
+            } catch (failure: Throwable) {
+                passed = false
+                result.putString("report_failure", failure.stackTraceToString())
+            }
         }
+        result.putBoolean("passed", passed)
+        instrumentation.finish(if (passed) Activity.RESULT_OK else Activity.RESULT_CANCELED, result)
     }
 }
