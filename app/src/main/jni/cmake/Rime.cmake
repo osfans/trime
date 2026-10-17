@@ -29,6 +29,8 @@ include(RimePrivacyCompat)
 trime_adapt_rime_privacy()
 include(RimeLuaCompat)
 trime_adapt_rime_lua()
+include(RimeHeaderCompat)
+trime_adapt_rime_headers()
 target_compile_options(
   rime-static PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=." "-Wno-error=deprecated-declarations")
 

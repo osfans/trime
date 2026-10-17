@@ -362,6 +362,28 @@ def main():
         save(out / 'warnings.json', found)
         assert not found, 'Original command warnings present; no filtering or downgrade'
 
+    def header_consumers(binary, stage_source, compile_commands):
+        header_root = binary / 'trime-rime-headers'
+        targets = {name: 0 for name in ('rime-static', 'rime-lua-objs',
+            'rime-octagram-objs', 'rime-predict-objs', 'prediction-native-test')}
+        if args.build_model_tool:
+            targets['prediction-model-native'] = 0
+        for row in compile_commands:
+            argv = row.get('arguments') or shlex.split(row['command'])
+            output = argv[argv.index('-o') + 1] if '-o' in argv else ''
+            owner = re.search(r'(?:^|/)CMakeFiles/([^/]+)\.dir/', output)
+            if not owner or owner[1] not in targets:
+                continue
+            includes = [Path(arg[2:]).resolve() for arg in argv if arg.startswith('-I')]
+            assert header_root in includes, 'Owned Rime header fixes are missing from a native target'
+            for directory in ('src', 'include'):
+                original = stage_source / 'app/src/main/jni/librime' / directory
+                if original in includes:
+                    assert includes.index(header_root) < includes.index(original), 'Original Rime header wins include lookup'
+            targets[owner[1]] += 1
+        assert all(targets.values()), 'Missing compile command for a Rime header consumer'
+        return targets
+
     try:
         # Bind committed entry/helper/assertion sources without a local ignored
         # manifest. prepare.py additionally snapshots every copied native input.
@@ -418,6 +440,9 @@ def main():
         project = binary
         run(plan[0]['argv'], 300)
         warn_free()
+        # Fail a wrong header order before paying for a complete native build.
+        header_consumers(binary, Path(preparation['source_root']),
+                         json.loads((binary / 'compile_commands.json').read_bytes()))
         run(plan[1]['argv'], 3600)
         warn_free()
         checkpoint()
@@ -427,6 +452,8 @@ def main():
         stage_source = Path(preparation['source_root'])
         opencc_definitions = []
         fixture_rows = []
+        header_root = binary / 'trime-rime-headers'
+        header_targets = header_consumers(binary, stage_source, compile_commands)
         for row in compile_commands:
             compilation_file = Path(row['file']).resolve()
             assert compilation_file.is_relative_to(stage_source) or compilation_file.is_relative_to(binary)
@@ -441,6 +468,7 @@ def main():
                 assert '-DRAPIDJSON_NOMEMBERITERATORCLASS' in argv
                 opencc_definitions.append(dict(file=str(compilation_file), version=definitions[0]))
         assert len(fixture_rows) == 1 and opencc_definitions
+        rime_headers = {name: bind(header_root / name) for name in ('darts.h', 'rime/dict/vocabulary.h')}
         configured = binary / 'librime/src/rime/build_config.h'
         assert re.search(r'(?m)^#define RIME_ENABLE_LOGGING(?:\s|$)', configured.read_text())
         target_info = (binary / 'host-targets.txt').read_text()
@@ -470,6 +498,7 @@ def main():
                          link_map=bind(link_map), compile_commands=bind(compile_path),
                          actual_build_config=bind(configured), target_info=bind(binary / 'host-targets.txt'),
                          actual_opencc_version_definitions=opencc_definitions,
+                         rime_headers=rime_headers, rime_header_target_compilations=header_targets,
                          fixture_compile_command=fixture_rows[0], source_only_no_android_claim=True)
         if args.build_model_tool:
             model_sources = preparation['generic_model_sources']
@@ -570,6 +599,8 @@ def main():
                     assert {key: observed[key] for key in ('bytes', 'sha256')} == expected
                 if elf_audit:
                     for row in [elf_audit[key] for key in ('binary', 'link_map', 'compile_commands', 'actual_build_config', 'target_info')] + list(elf_audit['archives'].values()):
+                        assert bind(row['path']) == row
+                    for row in elf_audit['rime_headers'].values():
                         assert bind(row['path']) == row
                     if elf_audit.get('model_builder'):
                         for key in ('binary', 'link_map', 'actual_build_config'):

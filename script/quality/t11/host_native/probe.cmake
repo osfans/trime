@@ -48,6 +48,7 @@ target_link_options(prediction-native-test PRIVATE
 # No fabricated build_config.h. Core, plugin objects and fixture all consume the
 # same real configured build header and the same privacy/config Context types.
 target_include_directories(prediction-native-test BEFORE PRIVATE
+  "${CMAKE_BINARY_DIR}/trime-rime-headers"
   "${CMAKE_BINARY_DIR}/trime-rime-privacy"
   "${CMAKE_BINARY_DIR}/trime-rime-config"
   "${CMAKE_BINARY_DIR}/trime-rime-predict"
@@ -81,6 +82,7 @@ if(TRIME_HOST_BUILD_MODEL_TOOL)
     "-Wl,--build-id=none")
   target_include_directories(prediction-model-native BEFORE PRIVATE
     "${model_dir}"
+    "${CMAKE_BINARY_DIR}/trime-rime-headers"
     "${CMAKE_BINARY_DIR}/trime-rime-privacy"
     "${CMAKE_BINARY_DIR}/trime-rime-config"
     "${CMAKE_BINARY_DIR}/librime/src"
