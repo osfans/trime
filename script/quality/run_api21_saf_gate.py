@@ -44,8 +44,6 @@ T07_ROOT = REPO / "build/t07-privacy"
 RUNTIME_ROOT = T07_ROOT / "runtime"
 QUALITY = REPO / "script/quality"
 RUNTIME_DRIVER = QUALITY / "run_runtime.py"
-APP_NAME = "com.osfans.trime-3.3.13-t9.10-x86_64-debug.apk"
-TEST_NAME = "com.osfans.trime-3.3.13-t9.10-debug-androidTest.apk"
 PACKAGE = "com.osfans.trime.debug"
 TEST_PACKAGE = PACKAGE + ".test"
 MAIN_ACTIVITY = PACKAGE + "/com.osfans.trime.ui.main.MainActivity"
@@ -96,10 +94,22 @@ def validate_output_path(output: Path) -> Path:
     return resolved
 
 
-def validate_candidate(candidate: Path, expected_commit: str) -> dict:
+def validate_candidate(
+    candidate: Path, expected_commit: str, app_apk_name: str, test_apk_name: str
+) -> dict:
     candidate = candidate.resolve()
     if not re.fullmatch(r"[0-9a-f]{40}", expected_commit):
         raise ValueError("--commit must be a full lowercase Git SHA")
+    for name in (app_apk_name, test_apk_name):
+        if (
+            not isinstance(name, str)
+            or not name.endswith(".apk")
+            or any(character in name for character in ("/", "\\", ":", "\0", "\r", "\n"))
+            or Path(name).name != name
+        ):
+            raise ValueError("APK names must be candidate-local .apk leaf filenames")
+    if app_apk_name == test_apk_name:
+        raise ValueError("App and test APK filenames must differ")
     identity_path = candidate / "identity.json"
     if not identity_path.is_file():
         raise FileNotFoundError(identity_path)
@@ -113,7 +123,7 @@ def validate_candidate(candidate: Path, expected_commit: str) -> dict:
     if identity.get("source_unchanged_during_build") is not True:
         raise RuntimeError("Candidate source changed during its build")
     artifacts = {}
-    for name, package in ((APP_NAME, PACKAGE), (TEST_NAME, TEST_PACKAGE)):
+    for name, package in ((app_apk_name, PACKAGE), (test_apk_name, TEST_PACKAGE)):
         path = candidate / name
         if not path.is_file():
             raise FileNotFoundError(path)
@@ -539,12 +549,12 @@ def validate_runtime_evidence(
     }
 
 
-def run_runtime_phase(args, phase: Path, tree_uri: str) -> str:
+def run_runtime_phase(args, phase: Path, tree_uri: str, candidate: dict) -> str:
     namespace = argparse.Namespace(
         adb=str(args.adb.resolve()),
         serial=args.serial,
-        apk=args.candidate.resolve() / APP_NAME,
-        test_apk=args.candidate.resolve() / TEST_NAME,
+        apk=Path(candidate["artifacts"][PACKAGE]["path"]),
+        test_apk=Path(candidate["artifacts"][TEST_PACKAGE]["path"]),
         output=phase,
         probe="saf",
         saf_tree=tree_uri,
@@ -767,7 +777,9 @@ def run_phase(args) -> int:
     args.adb = args.adb.resolve()
     args.candidate = args.candidate.resolve()
     output = validate_output_path(args.output)
-    candidate = validate_candidate(args.candidate, args.commit)
+    candidate = validate_candidate(
+        args.candidate, args.commit, args.app_apk_name, args.test_apk_name
+    )
     if not args.adb.is_file() or not os.access(args.adb, os.X_OK):
         raise FileNotFoundError(f"Executable ADB not found: {args.adb}")
     if not RUNTIME_DRIVER.is_file():
@@ -852,7 +864,7 @@ def run_phase(args) -> int:
                 boundary = stopped_boundary(device, preflight["device"]["picker_packages"])
 
             phase = output / args.stage
-            run_runtime_phase(args, phase, tree_uri)
+            run_runtime_phase(args, phase, tree_uri, candidate)
             if not phase.is_dir():
                 raise RuntimeError("Runtime driver did not create phase evidence")
             (phase / "preferences-before.xml").write_bytes(before_raw)
@@ -1131,6 +1143,8 @@ def main() -> int:
     parser.add_argument("--stage", choices=STAGES)
     parser.add_argument("--candidate", type=Path)
     parser.add_argument("--commit")
+    parser.add_argument("--app-apk-name", help="App APK leaf filename recorded in candidate identity.json")
+    parser.add_argument("--test-apk-name", help="Test APK leaf filename recorded in candidate identity.json")
     parser.add_argument("--adb", type=Path, help="Executable adb; otherwise resolve SDK environment/PATH")
     parser.add_argument("--serial", default="emulator-5560")
     parser.add_argument("--output", type=Path)
@@ -1141,10 +1155,12 @@ def main() -> int:
             args.stage is not None
             or args.candidate is not None
             or args.commit is not None
+            or args.app_apk_name is not None
+            or args.test_apk_name is not None
             or args.output is not None
         ):
             parser.error(
-                "--selftest cannot be combined with a runtime stage/candidate/commit/output"
+                "--selftest cannot be combined with runtime stage/candidate/commit/APK/output arguments"
             )
         return selftest()
     if args.stage is None:
@@ -1155,6 +1171,8 @@ def main() -> int:
         parser.error("--commit is required for a runtime stage")
     if args.output is None:
         parser.error("--output is required")
+    if args.app_apk_name is None or args.test_apk_name is None:
+        parser.error("--app-apk-name and --test-apk-name are required for a runtime stage")
     args.adb = resolve_adb(args.adb)
     return run_phase(args)
 

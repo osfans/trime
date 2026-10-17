@@ -1,6 +1,7 @@
 # T05: separate phonetic fuzzing and digit repair
 
-Development version: `3.3.13-t9.7-dev.1` / `20261110`. Not a published release.
+Historical T05 experiment: `3.3.13-t9.7-dev.1` / `20261110`, not a published release.
+These identifiers describe that experiment, not the current build under test.
 
 ## Interaction contract
 
@@ -23,7 +24,7 @@ these settings have no effect. Existing completion is not relabeled as correctio
 
 ## Engine choice
 
-The pinned librime revision is `33e78140250125871856cdc5b42ddc6a5fcd3cd4`.
+The original experiment used librime revision `33e78140250125871856cdc5b42ddc6a5fcd3cd4`.
 Its [corrector implementation](https://github.com/rime/librime/blob/33e78140250125871856cdc5b42ddc6a5fcd3cd4/src/rime/dict/corrector.cc) uses `NearSearchCorrector` with QWERTY
 adjacency, including a horizontal number row, not this keyboard's 3x3 geometry.
 The component's edit-distance selection is disabled with `#if 0`; the restricted
@@ -86,7 +87,7 @@ commit and canonical user learning across process restart. Run it against the
 **library extracted from the APK under test**, not an older engine:
 
 ```sh
-python3 -B script/t9/run.py --cxx app/.cxx/Debug/4d506gs4/arm64-v8a \
+python3 -B script/t9/run.py --cxx /absolute/matching-build/arm64-v8a \
   --library /absolute/frozen/lib/arm64-v8a/librime_jni.so \
   --adb /absolute/android-sdk/platform-tools/adb --serial emulator-5560 \
   --source assist_test.cc
