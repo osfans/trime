@@ -122,7 +122,7 @@ int execute(const std::string& scenario, const fs::path& directory) {
           } else {
             opencc::SerializableDict::NewFromFile<opencc::TextDict>(source.string());
           }
-        } catch (const std::runtime_error& error) {
+        } catch (const opencc::Exception& error) {
           const auto expected = filenameText ? "Tabular not found" : "Invalid OpenCC dictionary header";
           rejected = std::string(error.what()).find(expected) != std::string::npos;
         }
