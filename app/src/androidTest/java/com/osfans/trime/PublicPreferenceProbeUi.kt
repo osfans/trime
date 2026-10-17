@@ -64,6 +64,30 @@ internal class PublicPreferenceProbeUi(private val c: PublicPreferenceProbeConte
         val field = checkNotNull(c.dialog().findViewById<EditText>(android.R.id.edit))
         check(field.text.toString() == value && field.selectionStart == start && field.selectionEnd == end)
     }
+    fun focusListForSave(): Pair<Int, Boolean> = c.main {
+        val list = when (val dialog = c.dialog()) {
+            is AlertDialog -> dialog.listView
+            is androidx.appcompat.app.AlertDialog -> dialog.listView
+            else -> error("Expected a list dialog")
+        }
+        check(list.requestFocus()) { "List did not accept public focus request before save" }
+        val actual = list.id to list.hasFocus()
+        check(actual == (R.id.select_dialog_listview to true)) {
+            "List save baseline did not own the expected focused hierarchy key: $actual"
+        }
+        actual
+    }
+    fun assertRestoredListFocus(expected: Pair<Int, Boolean>) = c.main {
+        val list = when (val dialog = c.dialog()) {
+            is AlertDialog -> dialog.listView
+            is androidx.appcompat.app.AlertDialog -> dialog.listView
+            else -> error("Expected a list dialog")
+        }
+        val actual = list.id to list.hasFocus()
+        check(actual == expected && actual == (R.id.select_dialog_listview to true)) {
+            "Saved list hierarchy identity/focus was not restored: expected=$expected actual=$actual"
+        }
+    }
     fun oldChoices(expected: Set<Int>) = c.main {
         val dialog = c.dialog() as androidx.appcompat.app.AlertDialog
         check((0 until dialog.listView.count).filter { dialog.listView.isItemChecked(it) }.toSet() == expected)

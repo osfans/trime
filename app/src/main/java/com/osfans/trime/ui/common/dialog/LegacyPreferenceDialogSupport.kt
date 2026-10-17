@@ -42,6 +42,7 @@ import androidx.preference.ListPreference
 import androidx.preference.MultiSelectListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceDialogFragmentCompat
+import com.osfans.trime.R
 
 internal enum class LegacyPreferenceDialogKind { EDIT_TEXT, LIST, MULTI_SELECT }
 
@@ -106,6 +107,10 @@ internal class LegacyPreferenceDialogWindow(
         }
         prepare(builder)
         val dialog = builder.create()
+        if (kind != LegacyPreferenceDialogKind.EDIT_TEXT) {
+            // Keep the old hierarchy key before Dialog restores the saved list and focus.
+            checkNotNull(dialog.listView).id = R.id.select_dialog_listview
+        }
         // Reset the original superclass's private disposition using only its public API and
         // this actual Window's Dialog; no fake DialogInterface or private-field access.
         fragment.onClick(dialog, DialogInterface.BUTTON_NEGATIVE)
