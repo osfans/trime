@@ -26,6 +26,10 @@ class GradleCompatibilityPlugin : Plugin<Settings> {
         }
         target.gradle.lifecycle.beforeProject {
             val patch = Attribute.of("com.osfans.trime.gradle-visible-backport", String::class.java)
+            // Gradle 9.8.1 analysis records the hash of its original JAR. Patch before
+            // that analysis so every classpath view refers to the same bytes.
+            // This internal phase attribute is covered by the exact-version guard.
+            val instrumentation = Attribute.of("org.gradle.internal.instrumented", String::class.java)
             buildscript.dependencies.apply {
                 attributesSchema.attribute(patch)
                 // Keep variant selection unchanged. The attribute belongs to JAR artifacts,
@@ -33,8 +37,10 @@ class GradleCompatibilityPlugin : Plugin<Settings> {
                 artifactTypes.maybeCreate(ArtifactTypeDefinition.JAR_TYPE).attributes.attribute(patch, "upstream")
                 registerTransform(GradleVisibleBackportTransform::class.java) {
                     from.attribute(patch, "upstream")
+                    from.attribute(instrumentation, "not-instrumented")
                     from.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, ArtifactTypeDefinition.JAR_TYPE)
                     to.attribute(patch, "backported")
+                    to.attribute(instrumentation, "not-instrumented")
                     to.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, ArtifactTypeDefinition.JAR_TYPE)
                 }
             }
