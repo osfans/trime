@@ -527,17 +527,8 @@ class ThemeDiagnosticsTest :
         }
 
         Given("the shipped themes") {
-            // The settings the shipped themes carry but the runtime never reads.
-            val trimeYamlFindings =
-                listOf(
-                    "INFO UNKNOWN_TOP_LEVEL_KEY /android_keys",
-                )
-            val tongwenfengFindings =
-                listOf(
-                    "INFO UNKNOWN_TOP_LEVEL_KEY /height",
-                    "INFO UNKNOWN_TOP_LEVEL_KEY /round_corner",
-                    "INFO UNKNOWN_TOP_LEVEL_KEY /colors",
-                )
+            val trimeYamlFindings = emptyList<String>()
+            val tongwenfengFindings = emptyList<String>()
 
             fun lintBuiltin(file: String): List<ThemeDiagnostics.Finding> {
                 val (theme, node) = ThemeTestSupport.themeAndNode("src/main/assets/shared/$file")

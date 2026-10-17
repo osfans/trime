@@ -819,43 +819,6 @@ liquid_keyboard:
     keys: [ 符号: '/fh', 电脑: '/dn', 象棋: '/xq', 麻将: '/mj', 骰子: '/sz', 扑克: '/pk', 天气: '/tq', 音乐: '/yy', 八卦: '/bg', 易经: '/lssg', 天体: '/tt',  星座: '/xz',  星号: '/xh',  方块: '/fk',  几何: '/jh',  箭头: '/jt',  数学: '/sx',  上标: '/sb',  下标: '/xb',  单位: '/dw',  货币: '/hb',  拼音: '/py',  注音: '/zy',  假名: '/jm',  片假: '/pjm',  韩文: '/hw',  希腊: '/xl',  希大: '/xld', 罗马:   '/lm',  罗大:   '/lmd', 俄语:   '/ey',  俄大:   '/eyd', 表情:  '/bq',  一: '/1',  二: '/2',  三: '/3',  四: '/4',  五: '/5',  六: '/6',  七: '/7',  八: '/8',  九: '/9',  零: '/0',  十: '/10',  分数: '/fs',  标点: '/bd',  偏旁: '/pp',  竖标:  '/bdz'  ]
   
 
-android_keys:
-  # 仅供编辑键盘时参考，实际不产生任何效果
-  when:
-    ascii: 西文標籤
-    paging: 翻頁標籤
-    has_menu: 選單標籤
-    composing: 輸入狀態標籤
-    #always: 始終
-    #hover: 滑過
-    combo: 並擊
-    click: 單按
-    long_click: 長按
-    #double_click: 雙按
-    swipe_left: 左滑
-    swipe_right: 右滑
-    swipe_up: 上滑
-    swipe_down: 下滑
-  property:
-    width: 寬度
-    height: 高度
-    gap: 間隔
-    preview: 預覽
-    hint: 提示
-    label: 標籤
-    states: 狀態標籤
-    repeatable: 連續按鍵
-    functional: 功能鍵
-    shift_lock: Shift鎖定 #ascii_long: 英文長按中文單按鎖定, long: 長按鎖定, click: 單按鎖定
-  action:
-    command: 命令
-    option: 參數
-    select: 選擇
-    toggle: 狀態
-    send: 按鍵
-    text: 文字
-    commit: 上屏
-
 preset_keys:
   T9_separator: {label: '|', send: apostrophe}
   T9_backspace: {label: 'ic@backspace_outline', send: BackSpace, repeatable: true, slide_delete: true}
