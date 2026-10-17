@@ -621,7 +621,7 @@ internal object PublicHostWindowProbe {
                         node.getBoundsInScreen(bounds)
                         JSONObject().put("text", text).put("accessibility_class_name", node.className?.toString())
                             .put("window_id", node.windowId).put("bounds", bounds.flattenToString())
-                            .put("checkable", node.isCheckable).put("checked", node.isChecked)
+                            .put("checkable", node.isCheckable).put("checked", node.isCheckedForTest())
                             .put("instance_class_observed", false)
                     }
                 } finally {

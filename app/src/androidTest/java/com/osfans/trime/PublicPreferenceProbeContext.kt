@@ -253,7 +253,7 @@ internal class PublicPreferenceProbeContext(val instrumentation: Instrumentation
         val privacyPreference = AppPrefs.defaultInstance().general.manualPrivacyMode
         val rawPrivacy = privacyPreference.sharedPreferences.all[privacyPreference.key]
         check(rawPrivacy == null || rawPrivacy is Boolean) { "Malformed manual privacy policy; never normalize the saved preference" }
-        val manualPrivacy = rawPrivacy as? Boolean ?: privacyPreference.defaultValue
+        val manualPrivacy = rawPrivacy ?: privacyPreference.defaultValue
         windows.put(
             JSONObject().put("label", label).put("fragment_class", dialogFragment()!!.javaClass.name)
                 .put("dialog_class", dialog().javaClass.name).put("owner_class", owner().javaClass.name)
