@@ -669,19 +669,17 @@ internal object PublicHostWindowProbe {
             expectedWindowId: Int,
             successorTexts: List<String> = emptyList(),
         ): Int {
-            fun serviceInfoIdentity(info: AccessibilityServiceInfo): List<Any?> =
-                listOf(
-                    info.eventTypes,
-                    info.feedbackType,
-                    info.flags,
-                    info.notificationTimeout,
-                    info.packageNames?.toList(),
-                )
+            fun serviceInfoIdentity(info: AccessibilityServiceInfo): List<Any?> = listOf(
+                info.eventTypes,
+                info.feedbackType,
+                info.flags,
+                info.notificationTimeout,
+                info.packageNames?.toList(),
+            )
 
-            fun serviceInfoOptions(info: AccessibilityServiceInfo): JSONObject =
-                JSONObject().put("event_types", info.eventTypes).put("feedback_type", info.feedbackType)
-                    .put("flags", info.flags).put("notification_timeout_ms", info.notificationTimeout)
-                    .put("package_names", JSONArray(info.packageNames?.toList().orEmpty()))
+            fun serviceInfoOptions(info: AccessibilityServiceInfo): JSONObject = JSONObject().put("event_types", info.eventTypes).put("feedback_type", info.feedbackType)
+                .put("flags", info.flags).put("notification_timeout_ms", info.notificationTimeout)
+                .put("package_names", JSONArray(info.packageNames?.toList().orEmpty()))
 
             fun nodeState(node: AccessibilityNodeInfo): JSONObject {
                 val bounds = Rect()
