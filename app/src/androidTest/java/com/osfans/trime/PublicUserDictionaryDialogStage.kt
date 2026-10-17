@@ -413,12 +413,24 @@ internal object PublicUserDictionaryDialogStage {
         }
         private fun recoveryCancel() {
             marker("recovery_show_begin")
-            item(actions(), R.string.userdict_recover_backup)
+            val choices = actions()
+            item(choices, R.string.userdict_recover_backup)
             var dialog: AlertDialog? = null
             await("Actual U recovery confirmation did not show") {
                 main {
                     dialog = liveAuxiliary()
-                    dialog?.let(::laidOut) == true
+                    // The old menu contains the same text as the confirmation title and can
+                    // remain visible until the queued item callback creates the new window.
+                    dialog?.let { recovery ->
+                        val cancel = recovery.getButton(DialogInterface.BUTTON_NEGATIVE)
+                        val visible = Rect()
+                        !choices.isShowing && recovery !== choices && laidOut(recovery) &&
+                            descendants(checkNotNull(recovery.window).decorView).filterIsInstance<TextView>().any {
+                                it.isShown && it.text.toString() == activity.getString(R.string.userdict_recovery_confirmation)
+                            } && cancel != null && cancel.isShown && cancel.isEnabled &&
+                            cancel.width > 0 && cancel.height > 0 && cancel.getLocalVisibleRect(visible) &&
+                            visible == Rect(0, 0, cancel.width, cancel.height)
+                    } == true
                 }
             }
             val recovery = checkNotNull(dialog)
