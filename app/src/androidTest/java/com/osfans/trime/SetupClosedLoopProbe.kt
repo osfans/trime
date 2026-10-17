@@ -22,7 +22,6 @@ import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.inputmethod.BaseInputConnection
-import android.view.inputmethod.EditorInfo
 import android.view.inspector.WindowInspector
 import android.widget.Button
 import android.widget.RadioButton
@@ -127,7 +126,7 @@ object SetupClosedLoopProbe {
         session: RimeSession,
         deployments: AtomicInteger,
         passed: (String) -> Unit,
-    ) {
+    ): Pair<TrimeInputMethodService, Long> {
         fun <T> main(block: () -> T): T {
             var outcome: Result<T>? = null
             instrumentation.runOnMainSync { outcome = runCatching(block) }
@@ -292,10 +291,11 @@ object SetupClosedLoopProbe {
                         }
                     }
                     check(editor.commit())
-                    trial.setText(originalText)
+                    checkNotNull(trial.text).replace(0, trial.length(), originalText)
                 }
             }
         }
+        return service to token
     }
 
     /** Global system touch must reach Advanced, rather than a footer drawn over its centre. */
@@ -897,24 +897,43 @@ object SetupClosedLoopProbe {
                 }
                 val trial = main { fragment(fresh, SetupPage.Try).requireView().findViewById<SetupTrialEditText>(R.id.trial_input) }
                 result.putAll(verifyUnfinishedTrialFooterTouch(instrumentation, fresh, trial, session, ::passed))
-                verifyAppearanceDuringComposition(instrumentation, fresh, trial, session, deployments, ::passed)
-                main {
-                    trial.setText("你好")
-                    check(!fresh.isPageDone(SetupPage.Try))
-                    trial.text?.clear()
-                    val connection = checkNotNull(trial.onCreateInputConnection(EditorInfo()))
-                    check(connection.commitText("nihao", 1))
-                    check(connection.setComposingText("你好", 1))
-                    check(connection.finishComposingText())
+                val (service, trialToken) = verifyAppearanceDuringComposition(instrumentation, fresh, trial, session, deployments, ::passed)
+                fun checkTrialEditor() {
+                    check(trial.hasFocus() && service.editorToken == trialToken && service.isCurrentEditor(trialToken))
+                    check(service.currentInputEditorInfo?.fieldId == trial.id)
+                    check(service.currentInputEditorInfo?.packageName == fresh.packageName)
                 }
+                val connection = main {
+                    checkTrialEditor()
+                    checkNotNull(service.currentInputConnection)
+                }
+                fun commitTrial(text: String) {
+                    main {
+                        checkTrialEditor()
+                        check(service.currentInputConnection === connection)
+                        check(connection.setSelection(0, trial.length()))
+                        check(connection.commitText(text, 1))
+                    }
+                    await("The real trial input connection did not commit the expected text") {
+                        main {
+                            checkTrialEditor()
+                            trial.text.toString() == text
+                        }
+                    }
+                }
+                main {
+                    // Edit the served buffer programmatically without restarting its connection.
+                    checkNotNull(trial.text).replace(0, trial.length(), "你好")
+                    check(!fresh.isPageDone(SetupPage.Try))
+                }
+                // The preceding native hanyu checks already verify unfinished composition.
+                // Use the served editor connection for commits, rather than creating a second one.
+                commitTrial("nihao")
                 SystemClock.sleep(150)
                 main { check(!fresh.isPageDone(SetupPage.Try)) }
                 check(!checkpoints.getBoolean("trial_completed", false))
                 passed("programmatic text, Latin commits and unfinished composition cannot pass the trial")
-                main {
-                    trial.text?.clear()
-                    check(checkNotNull(trial.onCreateInputConnection(EditorInfo())).commitText("你好", 1))
-                }
+                commitTrial("你好")
                 await("A successful committed Han result did not complete the trial") { main { fresh.isPageDone(SetupPage.Try) } }
                 check(checkpoints.all.values.none { it is String && it.contains("你好") })
                 passed("successful Chinese commit completes the trial while wizard preferences keep no trial text")

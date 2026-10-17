@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 package com.osfans.trime
 
+import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.Application
@@ -668,6 +669,20 @@ internal object PublicHostWindowProbe {
             expectedWindowId: Int,
             successorTexts: List<String> = emptyList(),
         ): Int {
+            fun serviceInfoIdentity(info: AccessibilityServiceInfo): List<Any?> =
+                listOf(
+                    info.eventTypes,
+                    info.feedbackType,
+                    info.flags,
+                    info.notificationTimeout,
+                    info.packageNames?.toList(),
+                )
+
+            fun serviceInfoOptions(info: AccessibilityServiceInfo): JSONObject =
+                JSONObject().put("event_types", info.eventTypes).put("feedback_type", info.feedbackType)
+                    .put("flags", info.flags).put("notification_timeout_ms", info.notificationTimeout)
+                    .put("package_names", JSONArray(info.packageNames?.toList().orEmpty()))
+
             fun nodeState(node: AccessibilityNodeInfo): JSONObject {
                 val bounds = Rect()
                 node.getBoundsInScreen(bounds)
@@ -710,6 +725,26 @@ internal object PublicHostWindowProbe {
                 actionEvidence.put("idle_wait_elapsed_ms", SystemClock.uptimeMillis() - idleStarted)
             }
             checkTime()
+
+            // API 21 root lookup and refresh use the accessibility cache. Reapplying unchanged
+            // UiAutomation service options is its public cache invalidation path.
+            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP) {
+                val uiAutomation = instrumentation.uiAutomation
+                val beforeInfo = checkNotNull(uiAutomation.serviceInfo)
+                val beforeIdentity = serviceInfoIdentity(beforeInfo)
+                val cacheEvidence = JSONObject().put(
+                    "mechanism",
+                    "UiAutomation.setServiceInfo with unchanged dynamic options",
+                ).put("service_info_before", serviceInfoOptions(beforeInfo))
+                actionEvidence.put("api21_accessibility_cache_reset", cacheEvidence)
+                uiAutomation.serviceInfo = beforeInfo
+                val afterInfo = checkNotNull(uiAutomation.serviceInfo)
+                cacheEvidence.put("service_info_after", serviceInfoOptions(afterInfo))
+                check(beforeIdentity == serviceInfoIdentity(afterInfo)) {
+                    "UiAutomation service options changed while clearing the API 21 cache"
+                }
+                cacheEvidence.put("service_info_options_preserved", true)
+            }
 
             // Reacquire after the idle boundary. A checkable list row is itself the semantic
             // accessibility target; its ListView ancestor cannot encode which row to activate.
