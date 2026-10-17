@@ -48,9 +48,19 @@ function(trime_add_dependency source_dir binary_dir minimum)
     if(NOT minimum STREQUAL "3.12")
       message(FATAL_ERROR "Re-audit the Trime OpenCC minimum CMake version")
     endif()
+    # This copy has no Git metadata. Prevent GitVersion from discovering the
+    # outer Trime repository, including inherited FindGit result variables.
+    # Function scope keeps the supported archive fallback local to OpenCC.
+    set(CMAKE_DISABLE_FIND_PACKAGE_Git TRUE)
+    set(GIT_FOUND FALSE)
+    set(Git_FOUND FALSE)
     trime_validate_opencc_cmake("${destination}")
     include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/OpenccResourceSafety.cmake")
     trime_adapt_opencc_resources("${destination}/src")
+    include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/OpenccLookupCompat.cmake")
+    trime_adapt_opencc_lookup("${destination}/src")
+    include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/OpenccPluginCompat.cmake")
+    trime_adapt_opencc_plugin("${destination}/src")
   else()
     trime_replace_dependency_cmake(
       "${destination}/CMakeLists.txt"

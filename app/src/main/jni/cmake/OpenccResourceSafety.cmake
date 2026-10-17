@@ -22,9 +22,23 @@ function(trime_adapt_opencc_resources source)
 
   trime_replace_dependency_cmake("${source}/SerializableDict.hpp"
     [=[#include "Dict.hpp"]=]
-    [=[#include <memory>
+    [=[#include <cstdio>
+#include <memory>
 
 #include "Dict.hpp"]=])
+  trime_replace_dependency_cmake("${source}/SerializableDict.hpp"
+    [=[class OPENCC_EXPORT SerializableDict {
+public:]=]
+    [=[class OPENCC_EXPORT SerializableDict {
+  struct FileCloser {
+    void operator()(FILE* file) const noexcept {
+      if (file != nullptr) {
+        (void)std::fclose(file);
+      }
+    }
+  };
+
+public:]=])
   trime_replace_dependency_cmake("${source}/SerializableDict.hpp"
     [=[    FILE* fp = OpenSerializableFileUtf8(fileName, "wb");
     if (fp == NULL) {
@@ -32,8 +46,8 @@ function(trime_adapt_opencc_resources source)
     }
     SerializeToFile(fp);
     fclose(fp);]=]
-    [=[    std::unique_ptr<FILE, decltype(&fclose)> output(
-        OpenSerializableFileUtf8(fileName, "wb"), fclose);
+    [=[    std::unique_ptr<FILE, FileCloser> output(
+        OpenSerializableFileUtf8(fileName, "wb"));
     if (!output) {
       throw FileNotWritable(fileName);
     }
@@ -46,7 +60,7 @@ function(trime_adapt_opencc_resources source)
     fclose(fp);
     *dict = loadedDict;
     return true;]=]
-    [=[    std::unique_ptr<FILE, decltype(&fclose)> input(fp, fclose);
+    [=[    std::unique_ptr<FILE, FileCloser> input(fp);
     if (!input) {
       return false;
     }

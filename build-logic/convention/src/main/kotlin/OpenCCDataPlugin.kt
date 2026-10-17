@@ -49,6 +49,7 @@ class OpenCCDataPlugin : Plugin<Project> {
     private fun registerInstallTask(project: Project) {
         val regionalPhrases = project.tasks.register<GenerateRegionalPhrasesTask>("generateOpenCCRegionalPhrases") {
             sourceDir.set(project.layout.projectDirectory.dir("src/main/jni/OpenCC"))
+            adaptationDir.set(project.layout.projectDirectory.dir("src/main/jni/cmake"))
             outputDir.set(project.layout.buildDirectory.dir("opencc-host"))
             cmakeExecutable.set(
                 project.providers.gradleProperty("openccCmakeExecutable")
@@ -60,7 +61,7 @@ class OpenCCDataPlugin : Plugin<Project> {
             project.tasks.register<InstallOpenCCDataTask>(INSTALL_TASK) {
                 inputDir.set(project.dataBaseDir)
                 outputDir.set(project.dataInstallDir)
-                regionalPhrasesFile.set(regionalPhrases.flatMap { it.outputDir.file("data/STPhrases_GeneratedFromRegionalPhrases.txt") })
+                regionalPhrasesFile.set(regionalPhrases.flatMap { it.outputDir.file("OpenCC/data/STPhrases_GeneratedFromRegionalPhrases.txt") })
             }
         // make sure OpenCC data have been installed before generating data checksums
         project.tasks.getByName(DataChecksumsPlugin.TASK).dependsOn(task)
@@ -84,6 +85,10 @@ class OpenCCDataPlugin : Plugin<Project> {
         @get:InputDirectory
         abstract val sourceDir: DirectoryProperty
 
+        @get:PathSensitive(PathSensitivity.RELATIVE)
+        @get:InputDirectory
+        abstract val adaptationDir: DirectoryProperty
+
         @get:OutputDirectory
         abstract val outputDir: DirectoryProperty
 
@@ -99,18 +104,15 @@ class OpenCCDataPlugin : Plugin<Project> {
             val cmake = cmakeExecutable.get()
             execOperations.exec {
                 commandLine(
-                    cmake, "-S", sourceDir.get().asFile.absolutePath, "-B", output.absolutePath,
-                    "-DCMAKE_BUILD_TYPE=Release", "-DBUILD_SHARED_LIBS=OFF", "-DENABLE_GTEST=OFF",
-                    "-DBUILD_DOCUMENTATION=OFF", "-DOPENCC_ENABLE_INSTALL=OFF",
-                    "-DBUILD_OPENCC_JIEBA_PLUGIN=OFF", "-DOPENCC_DICT_FORMAT=text",
-                    // Match the public pointer-iterator API already used by Android's OpenCC.
-                    "-DCMAKE_CXX_FLAGS=-DRAPIDJSON_NOMEMBERITERATORCLASS",
+                    cmake, "-S", adaptationDir.get().asFile.resolve("opencc-host").absolutePath,
+                    "-B", output.absolutePath, "-DCMAKE_BUILD_TYPE=Release",
+                    "-DTRIME_OPENCC_SOURCE_DIR=${sourceDir.get().asFile.absolutePath}",
                 )
             }.assertNormalExitValue()
             execOperations.exec {
                 commandLine(cmake, "--build", output.absolutePath, "--target", "Dictionaries", "--parallel", "1")
             }.assertNormalExitValue()
-            check(output.resolve("data/STPhrases_GeneratedFromRegionalPhrases.txt").isFile) {
+            check(output.resolve("OpenCC/data/STPhrases_GeneratedFromRegionalPhrases.txt").isFile) {
                 "OpenCC's matching host converter did not generate regional phrases"
             }
         }

@@ -36,8 +36,11 @@ class ThirdPartyCmakeTest(unittest.TestCase):
         # Exercise the exact pinned resource code that the build-tree patch consumes.
         opencc_source = self.source / "vendor/OpenCC/src"
         opencc_source.mkdir()
-        for name in ("MarisaDict.cpp", "SerializableDict.hpp"):
-            (opencc_source / name).write_bytes((OPENCC / name).read_bytes())
+        for name in ("MarisaDict.cpp", "SerializableDict.hpp", "TextDict.cpp", "Dict.hpp", "PrefixMatch.cpp",
+                     "PluginSegmentation.cpp", "plugin/OpenCCPlugin.h"):
+            target = opencc_source / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes((OPENCC / name).read_bytes())
         data = self.source / "vendor/OpenCC/data"
         data.mkdir()
         (data / "CMakeLists.txt").write_text(
@@ -47,7 +50,7 @@ class ThirdPartyCmakeTest(unittest.TestCase):
             'if(NOT result EQUAL 0)\nmessage(FATAL_ERROR "Host Python failed")\nendif()\n',
             encoding="utf-8")
 
-    def configure(self, success=True):
+    def configure(self, success=True, failure_message="Re-audit"):
         result = subprocess.run(
             [CMAKE, "-S", str(self.source), "-B", str(self.build),
              "-Werror=dev", "-Werror=deprecated"],
@@ -57,7 +60,7 @@ class ThirdPartyCmakeTest(unittest.TestCase):
             self.assertNotIn("Warning", result.stdout + result.stderr)
         else:
             self.assertNotEqual(result.returncode, 0)
-            self.assertIn("Re-audit", result.stderr)
+            self.assertIn(failure_message, result.stderr)
         return result
 
     def test_all_adaptations_preserve_sources_and_refresh(self):
@@ -80,13 +83,52 @@ class ThirdPartyCmakeTest(unittest.TestCase):
         self.assertNotIn("void* buffer = malloc", marisa)
         self.assertIn("std::vector<char> buffer(headerLen)", marisa)
         self.assertIn("Invalid OpenCC dictionary header", marisa)
-        self.assertIn("std::unique_ptr<FILE, decltype(&fclose)> input", serializable)
-        self.assertIn("std::unique_ptr<FILE, decltype(&fclose)> output", serializable)
-        self.assertIn('OpenSerializableFileUtf8(fileName, "wb"), fclose)', serializable)
+        self.assertEqual(serializable.count("struct FileCloser {"), 1)
+        self.assertIn("void operator()(FILE* file) const noexcept", serializable)
+        self.assertIn("if (file != nullptr)", serializable)
+        self.assertIn("(void)std::fclose(file);", serializable)
+        self.assertIn("std::unique_ptr<FILE, FileCloser> input(fp);", serializable)
+        self.assertIn("std::unique_ptr<FILE, FileCloser> output", serializable)
+        self.assertNotIn("decltype(&fclose)", serializable)
+        self.assertIn('OpenSerializableFileUtf8(fileName, "wb"));', serializable)
         self.assertIn('OpenSerializableFileUtf8(fileName, "rb")', serializable)
         self.assertNotIn('fopen(fileName.c_str()', serializable)
+        lookup = (patched / "TextDict.cpp").read_text()
+        self.assertEqual(lookup.count("#include <string_view>"), 1)
+        self.assertIn("const std::string_view key(word, len);", lookup)
+        self.assertIn("return entry->KeyView() < query;", lookup)
+        self.assertIn("((*found)->KeyView() == key)", lookup)
+        self.assertNotIn("new NoValueDictEntry", lookup)
+        dictionary = (patched / "Dict.hpp").read_text()
+        self.assertIn("virtual PrefixMatchView MatchPrefixValue(const char*, size_t) const", dictionary)
+        self.assertIn("return PrefixMatchView{};", dictionary)
+        self.assertNotIn("MatchPrefixValue(const char* word", dictionary)
+        prefix = (patched / "PrefixMatch.cpp").read_text()
+        prefix_returns = (
+            ("      CollectAllLeafDicts(dict, leaf.get());\n      return leaf;",
+             "      CollectAllLeafDicts(dict, leaf.get());\n      return std::move(leaf);"),
+            ("    return group;", "    return std::move(group);"),
+            ("  leaf->AddDict(dict);\n  return leaf;",
+             "  leaf->AddDict(dict);\n  return std::move(leaf);"),
+        )
+        for adapted, original in prefix_returns:
+            self.assertEqual(prefix.count(adapted), 1)
+            self.assertNotIn(original, prefix)
+            prefix = prefix.replace(adapted, original, 1)
+        self.assertEqual(prefix, (OPENCC / "PrefixMatch.cpp").read_text())
+        plugin = (patched / "PluginSegmentation.cpp").read_text()
+        minor_check = ('    if (descriptor->abi_minor < OPENCC_SEGMENTATION_PLUGIN_ABI_MINOR) {\n'
+                       '      throw Exception("Plugin ABI minor version is older than required by the host.");\n'
+                       '    }')
+        guarded_minor_check = '#if OPENCC_SEGMENTATION_PLUGIN_ABI_MINOR > 0\n' + minor_check + '\n#endif'
+        self.assertEqual(plugin.count(guarded_minor_check), 1)
+        self.assertEqual(plugin.replace(guarded_minor_check, minor_check, 1),
+                         (OPENCC / "PluginSegmentation.cpp").read_text())
+        self.assertEqual((patched / "plugin/OpenCCPlugin.h").read_bytes(),
+                         (OPENCC / "plugin/OpenCCPlugin.h").read_bytes())
         resource_outputs = {name: (patched / name).read_bytes()
-                            for name in ("MarisaDict.cpp", "SerializableDict.hpp")}
+                            for name in ("MarisaDict.cpp", "SerializableDict.hpp", "TextDict.cpp", "Dict.hpp", "PrefixMatch.cpp",
+                                         "PluginSegmentation.cpp", "plugin/OpenCCPlugin.h")}
         added = self.source / "vendor/snappy/added.txt"
         added.write_text("new input", encoding="utf-8")
         self.configure()
@@ -115,6 +157,47 @@ class ThirdPartyCmakeTest(unittest.TestCase):
                                 capture_output=True, text=True, timeout=60)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertNotIn("Warning", result.stdout + result.stderr)
+
+    def check_opencc_git_fallback_scope(self, parent_setup, parent_checks):
+        path = self.source / "CMakeLists.txt"
+        call = 'trime_add_dependency(vendor/OpenCC OpenCC 3.12)\n'
+        text = path.read_text()
+        self.assertEqual(text.count(call), 1)
+        path.write_text(text.replace(call, parent_setup + call + parent_checks), encoding="utf-8")
+        dependency = self.source / "vendor/OpenCC/CMakeLists.txt"
+        dependency.write_text(dependency.read_text() + f'''
+if(NOT CMAKE_DISABLE_FIND_PACKAGE_Git OR GIT_FOUND OR Git_FOUND)
+  message(FATAL_ERROR "OpenCC inherited Git discovery results")
+endif()
+include("{(OPENCC.parent / 'cmake/GitVersion.cmake').as_posix()}")
+if(NOT OPENCC_VERSION STREQUAL "1.4.2" OR
+   NOT OPENCC_VERSION_SUFFIX STREQUAL "" OR OPENCC_VERSION_IS_RELEASE)
+  message(FATAL_ERROR "OpenCC did not use its real source-archive version fallback")
+endif()
+''', encoding="utf-8")
+        self.configure()
+
+    def test_opencc_git_fallback_shadows_inherited_results_only_locally(self):
+        self.check_opencc_git_fallback_scope(
+            'set(CMAKE_DISABLE_FIND_PACKAGE_Git FALSE)\nset(GIT_FOUND TRUE)\nset(Git_FOUND TRUE)\n',
+            'if(CMAKE_DISABLE_FIND_PACKAGE_Git OR NOT GIT_FOUND OR NOT Git_FOUND)\n'
+            '  message(FATAL_ERROR "OpenCC changed parent Git discovery results")\nendif()\n')
+
+    def test_opencc_git_fallback_preserves_inherited_cache_results(self):
+        self.check_opencc_git_fallback_scope(
+            'set(CMAKE_DISABLE_FIND_PACKAGE_Git FALSE CACHE BOOL "Parent policy")\n'
+            'set(GIT_FOUND TRUE CACHE BOOL "Parent Git result")\n'
+            'set(Git_FOUND TRUE CACHE BOOL "Parent Git result")\n',
+            'if(CMAKE_DISABLE_FIND_PACKAGE_Git OR NOT GIT_FOUND OR NOT Git_FOUND OR\n'
+            '   $CACHE{CMAKE_DISABLE_FIND_PACKAGE_Git} OR NOT $CACHE{GIT_FOUND} OR NOT $CACHE{Git_FOUND})\n'
+            '  message(FATAL_ERROR "OpenCC changed parent cached Git discovery results")\nendif()\n')
+
+    def test_opencc_git_fallback_does_not_publish_results_to_parent(self):
+        variables = ("CMAKE_DISABLE_FIND_PACKAGE_Git", "GIT_FOUND", "Git_FOUND")
+        setup = ''.join(f'unset({name})\nunset({name} CACHE)\n' for name in variables)
+        checks = 'if(' + ' OR '.join(f'DEFINED {name}' for name in variables) + ')\n'
+        checks += '  message(FATAL_ERROR "OpenCC published local Git results to parent")\nendif()\n'
+        self.check_opencc_git_fallback_scope(setup, checks)
 
     def test_python_find_drift_requires_reaudit(self):
         path = self.source / "vendor/OpenCC/data/CMakeLists.txt"
@@ -149,6 +232,20 @@ class ThirdPartyCmakeTest(unittest.TestCase):
                                                 "malloc(headerLen)"), encoding="utf-8")
         self.configure(success=False)
 
+    def test_opencc_serializable_owner_drift_requires_reaudit(self):
+        path = self.source / "vendor/OpenCC/src/SerializableDict.hpp"
+        text = path.read_text()
+        self.assertEqual(text.count("class OPENCC_EXPORT SerializableDict {"), 1)
+        path.write_text(text.replace("class OPENCC_EXPORT SerializableDict {",
+                                     "class OPENCC_EXPORT ChangedSerializableDict {"), encoding="utf-8")
+        self.configure(success=False)
+
+    def test_duplicate_opencc_serializable_owner_requires_reaudit(self):
+        path = self.source / "vendor/OpenCC/src/SerializableDict.hpp"
+        path.write_text(path.read_text() + '\nclass OPENCC_EXPORT SerializableDict {\npublic:\n',
+                        encoding="utf-8")
+        self.configure(success=False)
+
     def test_duplicate_opencc_resource_target_requires_reaudit(self):
         path = self.source / "vendor/OpenCC/src/SerializableDict.hpp"
         ownership = '    std::shared_ptr<DICT> loadedDict = DICT::NewFromFile(fp);'
@@ -158,6 +255,73 @@ class ThirdPartyCmakeTest(unittest.TestCase):
         self.assertIn(ownership, text[start:end])
         path.write_text(text + '\n' + text[start:end] + '\n', encoding="utf-8")
         self.configure(success=False)
+
+    def test_missing_opencc_lookup_source_is_rejected(self):
+        (self.source / "vendor/OpenCC/src/TextDict.cpp").unlink()
+        result = self.configure(success=False, failure_message="file failed to open for reading")
+        self.assertIn("trime-deps/OpenCC/src/TextDict.cpp", result.stderr)
+
+    def test_duplicate_opencc_lookup_target_requires_reaudit(self):
+        path = self.source / "vendor/OpenCC/src/TextDict.cpp"
+        text = path.read_text()
+        start = text.index("Optional<const DictEntry*> TextDict::Match(")
+        end = text.index("LexiconPtr TextDict::GetLexicon()", start)
+        path.write_text(text + '\n' + text[start:end], encoding="utf-8")
+        self.configure(success=False)
+
+    def test_opencc_lookup_drift_requires_reaudit(self):
+        path = self.source / "vendor/OpenCC/src/TextDict.cpp"
+        text = path.read_text()
+        self.assertEqual(text.count("DictEntry::UPtrLessThan"), 1)
+        path.write_text(text.replace("DictEntry::UPtrLessThan", "DictEntry::DifferentComparison"),
+                        encoding="utf-8")
+        self.configure(success=False)
+
+    def test_already_adapted_opencc_lookup_requires_reaudit(self):
+        self.configure()
+        path = self.source / "vendor/OpenCC/src/TextDict.cpp"
+        path.write_bytes((self.build / "trime-deps/OpenCC/src/TextDict.cpp").read_bytes())
+        self.configure(success=False)
+
+    def test_opencc_prefix_return_drift_requires_reaudit(self):
+        path = self.source / "vendor/OpenCC/src/PrefixMatch.cpp"
+        text = path.read_text()
+        self.assertEqual(text.count("    return std::move(group);"), 1)
+        path.write_text(text.replace("    return std::move(group);", "    return group;"),
+                        encoding="utf-8")
+        self.configure(success=False)
+
+    def test_opencc_plugin_minor_minimum_drift_requires_reaudit(self):
+        path = self.source / "vendor/OpenCC/src/plugin/OpenCCPlugin.h"
+        path.write_text(path.read_text().replace("#define OPENCC_SEGMENTATION_PLUGIN_ABI_MINOR 0",
+                                                "#define OPENCC_SEGMENTATION_PLUGIN_ABI_MINOR 1"),
+                        encoding="utf-8")
+        self.configure(success=False)
+
+    def test_opencc_plugin_minor_hex_minimum_drift_requires_reaudit(self):
+        path = self.source / "vendor/OpenCC/src/plugin/OpenCCPlugin.h"
+        path.write_text(path.read_text().replace("#define OPENCC_SEGMENTATION_PLUGIN_ABI_MINOR 0",
+                                                "#define OPENCC_SEGMENTATION_PLUGIN_ABI_MINOR 0x1"),
+                        encoding="utf-8")
+        self.configure(success=False)
+
+    def test_opencc_plugin_minor_signed_type_drift_requires_reaudit(self):
+        path = self.source / "vendor/OpenCC/src/plugin/OpenCCPlugin.h"
+        path.write_text(path.read_text().replace("uint16_t abi_minor;", "int16_t abi_minor;"),
+                        encoding="utf-8")
+        self.configure(success=False)
+
+    def test_opencc_plugin_minor_comparison_drift_requires_reaudit(self):
+        path = self.source / "vendor/OpenCC/src/PluginSegmentation.cpp"
+        path.write_text(path.read_text().replace("descriptor->abi_minor < OPENCC_SEGMENTATION_PLUGIN_ABI_MINOR",
+                                                "descriptor->abi_minor <= OPENCC_SEGMENTATION_PLUGIN_ABI_MINOR"),
+                        encoding="utf-8")
+        self.configure(success=False)
+
+    def test_missing_opencc_plugin_header_is_rejected(self):
+        (self.source / "vendor/OpenCC/src/plugin/OpenCCPlugin.h").unlink()
+        result = self.configure(success=False, failure_message="file failed to open for reading")
+        self.assertIn("trime-deps/OpenCC/src/plugin/OpenCCPlugin.h", result.stderr)
 
     def test_duplicate_patch_target_requires_reaudit(self):
         path = self.source / "vendor/snappy/CMakeLists.txt"
