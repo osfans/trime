@@ -112,12 +112,19 @@ abstract class GenerateDebugCoroutineResourcesTask : DefaultTask() {
     }
 }
 
-/** Read-only audit after resource generation; it is deliberately not the generator's dependency. */
+/** Audit original resources before forwarding the unchanged merged archive to APK packaging. */
 @DisableCachingByDefault(because = "Detects conflicting service resources before packaging exclusions")
 abstract class VerifyDebugCoroutineResourcesTask : DefaultTask() {
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val inputResources: ConfigurableFileCollection
+
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val mergedInputResources: RegularFileProperty
+
+    @get:OutputFile
+    abstract val outputResources: RegularFileProperty
 
     @get:OutputFile
     abstract val resultFile: RegularFileProperty
@@ -147,6 +154,10 @@ abstract class VerifyDebugCoroutineResourcesTask : DefaultTask() {
             }
         }
         DebugCoroutineResources.validateEntries(entries)
+        outputResources.get().asFile.apply {
+            parentFile.mkdirs()
+            mergedInputResources.get().asFile.copyTo(this, overwrite = true)
+        }
         resultFile.get().asFile.apply {
             parentFile.mkdirs()
             writeText(DebugCoroutineResources.VERIFIED)
@@ -154,17 +165,10 @@ abstract class VerifyDebugCoroutineResourcesTask : DefaultTask() {
     }
 }
 
-interface DebugCoroutineInstrumentationParameters : InstrumentationParameters {
-    @get:InputFile
-    @get:PathSensitive(PathSensitivity.NONE)
-    val verifiedResources: RegularFileProperty
-}
-
-abstract class DebugCoroutineVisitorFactory : AsmClassVisitorFactory<DebugCoroutineInstrumentationParameters> {
+abstract class DebugCoroutineVisitorFactory : AsmClassVisitorFactory<InstrumentationParameters.None> {
     override fun isInstrumentable(classData: ClassData) = classData.className.replace('.', '/') in DebugCoroutineVisitor.expectedMethods
 
     override fun createClassVisitor(classContext: ClassContext, nextClassVisitor: ClassVisitor): ClassVisitor {
-        require(parameters.get().verifiedResources.get().asFile.readText() == DebugCoroutineResources.VERIFIED)
         return DebugCoroutineVisitor(classContext.currentClassData.className.replace('.', '/'), nextClassVisitor)
     }
 }

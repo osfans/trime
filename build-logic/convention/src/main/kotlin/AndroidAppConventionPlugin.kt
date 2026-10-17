@@ -90,15 +90,19 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
                         inputResources.from(runtimeJavaResources, checkNotNull(v.sources.resources).all)
                         resultFile.set(target.layout.buildDirectory.file("intermediates/coroutineResources/" + v.name + "/verified.txt"))
                     }
+                    // Make successful resource validation a structural input of APK packaging.
+                    // Dependency ASM transforms must not read outputs of project tasks.
+                    v.artifacts.use(verify).wiredWithFiles(
+                        VerifyDebugCoroutineResourcesTask::mergedInputResources,
+                        VerifyDebugCoroutineResourcesTask::outputResources,
+                    ).toTransform(InternalArtifactType.MERGED_JAVA_RES)
                     v.packaging.resources.excludes.addAll(DebugCoroutineResources.providers.keys.map { DebugCoroutineResources.ORIGINAL + it })
                     // DSL configuration is complete here; variant properties cannot be queried yet.
                     // This project defines merge rules only through the modern resources DSL.
                     val merges = target.extensions.getByType<ApplicationExtension>().packaging.resources.merges.toSet()
                     v.packaging.resources.merges.set(DebugCoroutineResources.packagingMerges(merges))
                     // Only this Android application component is instrumented; no test component is registered.
-                    v.instrumentation.transformClassesWith(DebugCoroutineVisitorFactory::class.java, InstrumentationScope.ALL) { parameters ->
-                        parameters.verifiedResources.set(verify.flatMap(VerifyDebugCoroutineResourcesTask::resultFile))
-                    }
+                    v.instrumentation.transformClassesWith(DebugCoroutineVisitorFactory::class.java, InstrumentationScope.ALL) {}
                     v.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COPY_FRAMES)
                 }
                 // Evaluation should be delayed as we need be able to see other tasks

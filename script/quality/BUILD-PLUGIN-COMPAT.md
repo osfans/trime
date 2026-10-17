@@ -178,10 +178,15 @@ to `trime-services/` before normal APK signing. Release continues to use the
 checked post-R8 removal described above.
 
 `GenerateDebugCoroutineResourcesTask` pins the two original coroutines 1.11.0
-JARs. `VerifyDebugCoroutineResourcesTask` checks dependency Java resources and
-application resource directories before packaging exclusions: exactly the two
-original declarations and two relocated copies must exist, with the reviewed
-provider bytes. AGP 9.4.1 is required. Missing, conflicting, duplicate or extra
+JARs. `VerifyDebugCoroutineResourcesTask` checks the pre-exclusion dependency
+Java resources and application resource directories: exactly the two original
+declarations and two relocated copies must exist, with the reviewed provider
+bytes. The task forwards the merged resource archive unchanged through
+`InternalArtifactType.MERGED_JAVA_RES`, so APK packaging depends on a successful
+audit. Its verification marker remains available for build inspection; dependency
+ASM transforms do not read project task outputs. AGP 9.4.1 has no public
+`SingleArtifact.MERGED_JAVA_RES`; its initial merger producer remains ahead of
+this transform even when the producer is registered after `onVariants`. AGP 9.4.1 is required. Missing, conflicting, duplicate or extra
 service declarations fail the build. Final APK resource inspection is still
 required because compiler-added resources are not necessarily source resources.
 Debug also removes AGP's exact default `/META-INF/services/**` merge rule:
