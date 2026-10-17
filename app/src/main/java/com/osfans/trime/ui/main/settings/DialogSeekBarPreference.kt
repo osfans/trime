@@ -9,9 +9,9 @@ import android.content.Context
 import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.widget.SeekBar
-import androidx.appcompat.app.AlertDialog
 import androidx.preference.DialogPreference
 import com.osfans.trime.R
+import com.osfans.trime.ui.common.dialog.PublicAlertDialogs
 import splitties.dimensions.dp
 import splitties.resources.resolveThemeAttribute
 import splitties.views.dsl.core.add
@@ -110,11 +110,13 @@ class DialogSeekBarPreference : DialogPreference {
      * Shows the seek bar dialog.
      */
     private fun showSeekBarDialog() = with(context) {
-        val textView = textView {
+        val builder = PublicAlertDialogs.builder(this)
+        val dialogContext = builder.context
+        val textView = dialogContext.textView {
             text = getTextForValue(value)
             textAppearance = resolveThemeAttribute(android.R.attr.textAppearanceListItem)
         }
-        val seekBar = seekBar {
+        val seekBar = dialogContext.seekBar {
             max = getProgressForValue(this@DialogSeekBarPreference.max)
             progress = getProgressForValue(value)
             setOnSeekBarChangeListener(
@@ -131,7 +133,7 @@ class DialogSeekBarPreference : DialogPreference {
                 },
             )
         }
-        val dialogView = verticalLayout {
+        val dialogView = dialogContext.verticalLayout {
             gravity = gravityHorizontalCenter
             if (dialogMessage != null) {
                 val messageText = textView { text = dialogMessage }
@@ -158,8 +160,7 @@ class DialogSeekBarPreference : DialogPreference {
                 },
             )
         }
-        AlertDialog
-            .Builder(this)
+        builder
             .setTitle(this@DialogSeekBarPreference.title)
             .setView(dialogView)
             .setPositiveButton(android.R.string.ok) { _, _ ->

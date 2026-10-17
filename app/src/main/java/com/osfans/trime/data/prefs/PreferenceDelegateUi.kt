@@ -10,6 +10,7 @@ import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.SwitchPreference
+import com.osfans.trime.ui.common.dialog.PublicBoundEditTextPreference
 import com.osfans.trime.ui.main.settings.DialogSeekBarPreference
 import com.osfans.trime.ui.main.settings.EditTextIntPreference
 
@@ -118,7 +119,7 @@ abstract class PreferenceDelegateUi<T : Preference>(
         val message: Int? = null,
         enableUiOn: (() -> Boolean)? = null,
     ) : PreferenceDelegateUi<EditTextPreference>(key, enableUiOn) {
-        override fun createUi(context: Context) = EditTextPreference(context).apply {
+        override fun createUi(context: Context) = PublicBoundEditTextPreference(context).apply {
             key = this@EditText.key
             isIconSpaceReserved = false
             isSingleLineTitle = false

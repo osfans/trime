@@ -12,7 +12,7 @@ import androidx.fragment.app.FragmentActivity
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.prefs.PreferenceDelegate
 
-/** Only the diagnostics pilot uses this public Window owner; no AppCompatDelegate is installed. */
+/** Shared settings/diagnostics Window owner; no AppCompatDelegate is installed. */
 abstract class PublicWindowPilotActivity : FragmentActivity() {
     private var attachedUiMode = AppPrefs.Advanced.UiMode.AUTO
     private var listenerRegistered = false

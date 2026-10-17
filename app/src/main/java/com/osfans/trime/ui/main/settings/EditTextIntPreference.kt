@@ -10,7 +10,7 @@ import android.os.Build
 import android.text.InputType
 import android.text.method.DigitsKeyListener
 import android.util.AttributeSet
-import androidx.preference.EditTextPreference
+import com.osfans.trime.ui.common.dialog.PublicBoundEditTextPreference
 import java.util.Locale
 
 class EditTextIntPreference
@@ -19,7 +19,7 @@ constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = androidx.preference.R.attr.editTextPreferenceStyle,
-) : EditTextPreference(context, attrs, defStyleAttr) {
+) : PublicBoundEditTextPreference(context, attrs, defStyleAttr) {
     private var value = 0
     var min: Int = Int.MIN_VALUE
     var max: Int = Int.MAX_VALUE

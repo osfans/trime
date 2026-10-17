@@ -20,6 +20,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
+import android.view.accessibility.AccessibilityNodeInfo
 import android.view.inputmethod.BaseInputConnection
 import android.view.inputmethod.EditorInfo
 import android.view.inspector.WindowInspector
@@ -80,6 +81,42 @@ object SetupClosedLoopProbe {
         val instance = type.getMethod("getInstance").invoke(null)
         @Suppress("UNCHECKED_CAST")
         return (type.getDeclaredField("mViews").apply { isAccessible = true }.get(instance) as List<View>).toList()
+    }
+
+    /** Inspect only the actual active public accessibility window, including on API21. */
+    private fun skipNoBounds(instrumentation: Instrumentation, activity: SetupActivity): Rect? {
+        val root = instrumentation.uiAutomation.rootInActiveWindow ?: return null
+        val owned = mutableListOf(root)
+        try {
+            if (root.packageName?.toString() != activity.packageName) return null
+            val prompts = root.findAccessibilityNodeInfosByText(activity.getString(R.string.setup__skip_hint))
+            owned.addAll(prompts)
+            val matchingPrompts = prompts.filter {
+                it.isVisibleToUser && it.text?.toString() == activity.getString(R.string.setup__skip_hint)
+            }
+            check(matchingPrompts.size <= 1) { "Actual Skip prompt is ambiguous" }
+            if (matchingPrompts.isEmpty()) return null
+            val buttons = root.findAccessibilityNodeInfosByText(activity.getString(R.string.setup__skip_hint_no))
+            owned.addAll(buttons)
+            val matchingButtons = buttons.filter {
+                it.isVisibleToUser && it.isEnabled && it.isClickable && it.windowId == root.windowId &&
+                    it.text?.toString() == activity.getString(R.string.setup__skip_hint_no)
+            }
+            check(matchingButtons.size <= 1) { "Actual Skip No button is ambiguous" }
+            val button = matchingButtons.singleOrNull() ?: return null
+            return Rect().also { bounds ->
+                button.getBoundsInScreen(bounds)
+                val window = Rect().also(root::getBoundsInScreen)
+                check(!bounds.isEmpty && window.contains(bounds)) { "Skip No is not fully inside its real window" }
+            }
+        } finally {
+            // API21-32 return these public nodes to the platform pool; API33+ no longer pools them.
+            @Suppress("DEPRECATION")
+            fun recycle(node: AccessibilityNodeInfo) {
+                if (Build.VERSION.SDK_INT < 33) node.recycle()
+            }
+            owned.forEach(::recycle)
+        }
     }
 
     /** Native unfinished input and the real bound candidate labels, without selecting a word. */
@@ -412,6 +449,45 @@ object SetupClosedLoopProbe {
         }
         val beforeTrial = main { trial.text.toString().also { check(it == fictionalTrialText) } }
         check(!checkpoints.getBoolean("trial_completed", false) && !checkpoints.getBoolean("deferred", false))
+        val beforeSkipPage = main { activity.currentSetupPage }
+        val beforeSkipPreferences = AppPrefs.defaultInstance().profile.freshInputSetupPending.sharedPreferences.all.toMap()
+        val skipDeadline = SystemClock.uptimeMillis() + 30_000
+        instrumentation.sendStatus(0, Bundle().apply { putString("setup_skip_no_stage", "before-real-skip-touch") })
+        touch(main { activity.findViewById<Button>(R.id.skip_button) }, "actual-skip-centre-down-up")
+        var noBounds: Rect? = null
+        await("The actual Skip confirmation and unique No action did not appear", skipDeadline) {
+            skipNoBounds(instrumentation, activity).also { noBounds = it } != null
+        }
+        val actualNoBounds = checkNotNull(noBounds)
+        instrumentation.sendStatus(
+            0,
+            Bundle().apply {
+                putString("setup_skip_no_stage", "actual-no-centre-down-up")
+                putString("setup_skip_no_actual_button_rect", actualNoBounds.flattenToString())
+            },
+        )
+        val skipDown = SystemClock.uptimeMillis()
+        motion(skipDown, MotionEvent.ACTION_DOWN, actualNoBounds.exactCenterX(), actualNoBounds.exactCenterY())
+        SystemClock.sleep(60)
+        motion(skipDown, MotionEvent.ACTION_UP, actualNoBounds.exactCenterX(), actualNoBounds.exactCenterY())
+        instrumentation.waitForIdleSync()
+        await("Skip No did not return the same unfinished Setup window", skipDeadline) {
+            main { !activity.isFinishing && !activity.isDestroyed && activity.hasWindowFocus() }
+        }
+        check(main { activity.currentSetupPage == beforeSkipPage }) { "Skip No changed the current page" }
+        check(main { trial.text.toString() == beforeTrial }) { "Skip No changed the nonempty trial draft" }
+        check(checkpoints.all == beforeCheckpoints) { "Skip No changed setup checkpoints" }
+        check(AppPrefs.defaultInstance().profile.freshInputSetupPending.sharedPreferences.all == beforeSkipPreferences) {
+            "Skip No changed preference key presence, runtime types or values"
+        }
+        check(runBlocking { session.runOnReady { inspectInputSetup() } } == beforeInput) { "Skip No changed the active input configuration" }
+        check(
+            main { activity.inputChoice == beforeChoice && activity.keepCurrentInput == beforeKeepCurrent } &&
+                AppPrefs.defaultInstance().profile.freshInputSetupPending.getValue() == beforeFreshPending,
+        ) {
+            "Skip No changed input choices or fresh-setup state"
+        }
+        instrumentation.sendStatus(0, Bundle().apply { putString("setup_skip_no_stage", "draft-checkpoints-input-page-preserved") })
         geometry("unfinished-try-before-advanced")
         passed("unfinished Try keeps its real viewport above every visible navigation button when Next is gone")
         val advanced = main {
@@ -640,6 +716,7 @@ object SetupClosedLoopProbe {
             passed("actual Advanced centre touch opens schema settings and real Back preserves unfinished Setup checkpoints, input and trial text")
             return Bundle().apply {
                 putInt("setup_footer_touch_checks", 2)
+                putInt("setup_skip_no_checks", 1)
                 putInt("setup_footer_touch_geometry_checks", geometryChecks)
                 putInt("setup_footer_touch_swipes", scrolls)
                 putInt("setup_footer_touch_backs", backs)

@@ -10,26 +10,13 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.annotation.Keep
-import androidx.appcompat.app.AppCompatDelegate
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.prefs.PreferenceDelegate
 import com.osfans.trime.data.prefs.PreferenceDelegateFragment
 
 class AdvancedSettingsFragment : PreferenceDelegateFragment(AppPrefs.defaultInstance().advanced) {
 
-    private val uiMode = AppPrefs.defaultInstance().advanced.uiMode
-
     private val showAppIcon = AppPrefs.defaultInstance().advanced.showAppIcon
-
-    @Keep
-    private val onUiModeChange = PreferenceDelegate.OnChangeListener<AppPrefs.Advanced.UiMode> { _, v ->
-        val mode = when (v) {
-            AppPrefs.Advanced.UiMode.AUTO -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-            AppPrefs.Advanced.UiMode.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
-            AppPrefs.Advanced.UiMode.DARK -> AppCompatDelegate.MODE_NIGHT_YES
-        }
-        AppCompatDelegate.setDefaultNightMode(mode)
-    }
 
     @Keep
     private val onShowAppIconChange = PreferenceDelegate.OnChangeListener<Boolean> { _, v ->
@@ -38,12 +25,10 @@ class AdvancedSettingsFragment : PreferenceDelegateFragment(AppPrefs.defaultInst
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        uiMode.registerOnChangeListener(onUiModeChange)
         showAppIcon.registerOnChangeListener(onShowAppIconChange)
     }
 
     override fun onDestroy() {
-        uiMode.unregisterOnChangeListener(onUiModeChange)
         showAppIcon.unregisterOnChangeListener(onShowAppIconChange)
         super.onDestroy()
     }

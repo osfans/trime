@@ -40,28 +40,28 @@ SPDX-License-Identifier: GPL-3.0-or-later
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/clearButton"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/clear" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/exportButton"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/export" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/copyButton"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@android:string/copy" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/jumpToBottomButton"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"

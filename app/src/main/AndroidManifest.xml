@@ -81,6 +81,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <!-- Settings activity -->
         <activity
             android:name=".ui.main.MainActivity"
+            android:theme="@style/Theme.TrimePublicWindowPilot"
             android:exported="true"
             android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize" />
@@ -92,12 +93,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
         <activity
             android:name=".ui.setup.SetupAdvancedSettingsActivity"
+            android:theme="@style/Theme.TrimePublicWindowPilot"
             android:exported="false"
             android:launchMode="standard"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".ui.main.LogActivity"
+            android:theme="@style/Theme.TrimePublicWindowPilot"
             android:directBootAware="true"
             android:exported="false"
             android:launchMode="singleTask"

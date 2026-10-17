@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<resources>
+    <!-- A public framework AlertDialog Window; no AppCompatDialog/Delegate is installed. -->
+    <style name="Theme.TrimePublicAlertDialog" parent="@android:style/Theme.Material.Light.Dialog.Alert">
+        <item name="android:colorAccent">@color/colorAccent</item>
+        <!-- Keep explicit AppCompat widgets compatible with the framework dialog palette. -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlNormal">?android:attr/colorControlNormal</item>
+        <item name="colorControlActivated">?android:attr/colorControlActivated</item>
+        <item name="colorControlHighlight">?android:attr/colorControlHighlight</item>
+        <item name="colorButtonNormal">?android:attr/colorButtonNormal</item>
+    </style>
+</resources>

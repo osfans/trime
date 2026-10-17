@@ -5,6 +5,7 @@
 
 package com.osfans.trime.ui.main.settings.userdict
 
+import android.app.AlertDialog
 import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
@@ -15,7 +16,6 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.ScrollView
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -23,6 +23,7 @@ import com.osfans.trime.R
 import com.osfans.trime.data.userdict.CustomPhraseStore
 import com.osfans.trime.data.userdict.UserDictManager
 import com.osfans.trime.ime.core.EditorPolicy
+import com.osfans.trime.ui.common.dialog.PublicAlertDialogs
 import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.util.importErrorDialog
 import com.osfans.trime.util.item
@@ -164,7 +165,7 @@ class UserDictionaryFragment : Fragment() {
 
     private fun confirmRecovery(action: () -> Unit) {
         trackDialog(
-            AlertDialog.Builder(requireContext())
+            PublicAlertDialogs.builder(requireContext())
                 .setTitle(R.string.userdict_recover_backup)
                 .setMessage(R.string.userdict_recovery_confirmation)
                 .setNegativeButton(android.R.string.cancel, null)
@@ -187,7 +188,7 @@ class UserDictionaryFragment : Fragment() {
             getString(R.string.userdict_recover_backup),
         )
         trackDialog(
-            AlertDialog.Builder(requireContext())
+            PublicAlertDialogs.builder(requireContext())
                 .setTitle(R.string.userdict_phrases)
                 .setItems(options) { _, selected ->
                     when (selected) {
@@ -243,7 +244,8 @@ class UserDictionaryFragment : Fragment() {
     }
 
     private fun showPhraseEditor(text: String) {
-        val ctx = requireContext()
+        val builder = PublicAlertDialogs.builder(requireContext())
+        val ctx = builder.context
         val input = EditText(ctx).apply {
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
             imeOptions = imeOptions or EditorPolicy.NO_PERSONALIZED_LEARNING_FLAG
@@ -251,7 +253,7 @@ class UserDictionaryFragment : Fragment() {
             minLines = 5
             setPadding(ctx.dp(16), ctx.dp(8), ctx.dp(16), ctx.dp(8))
         }
-        val dialog = AlertDialog.Builder(ctx)
+        val dialog = builder
             .setTitle(R.string.userdict_edit_phrases)
             .setMessage(R.string.userdict_phrase_help)
             .setView(ScrollView(ctx).apply { addView(input) })
@@ -285,7 +287,8 @@ class UserDictionaryFragment : Fragment() {
     }
 
     private fun appendPhrase(editor: EditText) {
-        val ctx = requireContext()
+        val builder = PublicAlertDialogs.builder(requireContext())
+        val ctx = builder.context
         val phrase = EditText(ctx).apply {
             hint = getString(R.string.userdict_phrase)
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
@@ -302,7 +305,7 @@ class UserDictionaryFragment : Fragment() {
             addView(phrase)
             addView(code)
         }
-        val dialog = AlertDialog.Builder(ctx)
+        val dialog = builder
             .setTitle(R.string.userdict_add_phrase)
             .setView(fields)
             .setNegativeButton(android.R.string.cancel, null)

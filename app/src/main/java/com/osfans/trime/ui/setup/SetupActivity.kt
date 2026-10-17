@@ -15,7 +15,6 @@ import android.provider.Settings
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
@@ -44,6 +43,7 @@ import com.osfans.trime.data.prefs.InputSetupFailure
 import com.osfans.trime.data.prefs.InputSetupSelection
 import com.osfans.trime.data.prefs.InputSetupState
 import com.osfans.trime.databinding.ActivitySetupBinding
+import com.osfans.trime.ui.common.dialog.PublicAlertDialogs
 import com.osfans.trime.ui.main.MainActivity
 import com.osfans.trime.ui.main.NavigationRoute
 import com.osfans.trime.ui.setup.SetupPage.Companion.isLastPage
@@ -408,8 +408,8 @@ class SetupActivity : FragmentActivity() {
         skipButton = binding.skipButton.apply {
             text = getString(R.string.setup__skip)
             setOnClickListener {
-                AlertDialog
-                    .Builder(this@SetupActivity)
+                PublicAlertDialogs
+                    .builder(this@SetupActivity)
                     .setMessage(R.string.setup__skip_hint)
                     .setPositiveButton(R.string.setup__skip_hint_yes) { _, _ ->
                         completeSetup(deferred = true)

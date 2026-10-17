@@ -5,18 +5,21 @@
 
 package com.osfans.trime.ui.main
 
+import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.AttributeSet
 import android.view.Menu
+import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.app.AppCompatViewInflater
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
+import androidx.core.app.NavUtils
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -37,9 +40,11 @@ import com.osfans.trime.R
 import com.osfans.trime.TrimeApplication
 import com.osfans.trime.core.data.UserDataManager
 import com.osfans.trime.daemon.RimeDaemon
-import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.soundeffect.SoundEffectManager
 import com.osfans.trime.databinding.ActivityMainBinding
+import com.osfans.trime.ui.common.PublicWindowPilotActivity
+import com.osfans.trime.ui.common.dialog.LegacyPublicPreferenceDialogFactory
+import com.osfans.trime.ui.common.dialog.PublicAlertDialogs
 import com.osfans.trime.ui.setup.SetupActivity
 import com.osfans.trime.util.item
 import com.osfans.trime.util.parcelable
@@ -49,12 +54,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import splitties.views.topPadding
 
-open class MainActivity : AppCompatActivity() {
+open class MainActivity : PublicWindowPilotActivity() {
     protected open val shouldCheckSetup: Boolean get() = true
 
     private val viewModel: MainViewModel by viewModels()
 
-    private val uiMode by AppPrefs.defaultInstance().advanced.uiMode
+    private val compatViewInflater by lazy(LazyThreadSafetyMode.NONE) { AppCompatViewInflater() }
 
     private lateinit var navController: NavController
     private var testInputPanel: TestInputPanel? = null
@@ -72,13 +77,12 @@ open class MainActivity : AppCompatActivity() {
     private var contentInflationRunnable: Runnable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val uiMode =
-            when (uiMode) {
-                AppPrefs.Advanced.UiMode.AUTO -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                AppPrefs.Advanced.UiMode.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
-                AppPrefs.Advanced.UiMode.DARK -> AppCompatDelegate.MODE_NIGHT_YES
-            }
-        AppCompatDelegate.setDefaultNightMode(uiMode)
+        // The shared base attaches the public UI-policy context; keep the Activity theme's framework flags explicit.
+        setTheme(R.style.Theme_TrimePublicWindowPilot)
+        val previousFactory = supportFragmentManager.fragmentFactory
+        if (previousFactory !is LegacyPublicPreferenceDialogFactory) {
+            supportFragmentManager.fragmentFactory = LegacyPublicPreferenceDialogFactory(previousFactory)
+        }
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val restoreCreatedContent = savedInstanceState?.getBoolean(STATE_CONTENT_CREATED) == true
@@ -204,7 +208,7 @@ open class MainActivity : AppCompatActivity() {
                 return@setNavigationOnClickListener
             }
             // "minimize" the activity if we can't go back
-            navController.navigateUp() || onSupportNavigateUp() || moveTaskToBack(false)
+            navController.navigateUp() || navigateToActivityParent() || moveTaskToBack(false)
         }
         val panelBackCallback = onBackPressedDispatcher.addCallback(this, enabled = binding.testInputPanel.isVisible) {
             binding.testInputPanel.dismiss()
@@ -224,8 +228,22 @@ open class MainActivity : AppCompatActivity() {
                 }
         }
 
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        binding.mainToolbar.toolbar.setNavigationContentDescription(R.string.public_window_navigate_up)
         processIntent(intent)
+    }
+
+    // API21+ already applies android:theme. These are the exact AppCompat1.7.1 widget-only
+    // inflater switches for our minSdk; no AppCompatDelegate or Window factory is installed.
+    override fun onCreateView(parent: View?, name: String, context: Context, attrs: AttributeSet): View? = compatViewInflater.createView(parent, name, context, attrs, false, false, true, false)
+        ?: super.onCreateView(parent, name, context, attrs)
+
+    override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? = compatViewInflater.createView(null, name, context, attrs, false, false, true, false)
+        ?: super.onCreateView(name, context, attrs)
+
+    private fun navigateToActivityParent(): Boolean {
+        if (NavUtils.getParentActivityIntent(this) == null) return false
+        navigateToManifestParent()
+        return true
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -399,8 +417,8 @@ open class MainActivity : AppCompatActivity() {
             return
         }
         val dialog =
-            AlertDialog
-                .Builder(this)
+            PublicAlertDialogs
+                .builder(this)
                 .setIconAttribute(android.R.attr.alertDialogIcon)
                 .setTitle(R.string.notification_permission_title)
                 .setMessage(R.string.notification_permission_message)

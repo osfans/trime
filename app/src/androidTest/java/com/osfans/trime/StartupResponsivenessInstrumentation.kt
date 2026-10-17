@@ -63,6 +63,11 @@ class StartupResponsivenessInstrumentation : Instrumentation() {
     private var editorsAnimationCallbacks = true
     private var logResourcesOnly = false
     private var privacyOnly = false
+    private var publicHostMode: String? = null
+    private var publicHostDisposable = false
+    private var publicPreferenceOnly = false
+    private var publicPreferenceDisposable = false
+    private var publicPreferenceCode = ""
     private var publicWindowPilotOnly = false
     private var publicWindowPilotDisposable = false
     private var publicWindowPilotCopyShare = false
@@ -96,6 +101,11 @@ class StartupResponsivenessInstrumentation : Instrumentation() {
         editorsAnimationCallbacks = arguments?.getString("editorsAnimationCallbacks") != "false"
         logResourcesOnly = arguments?.getString("log_resources") == "true"
         privacyOnly = arguments?.getString("privacy") == "true"
+        publicHostMode = arguments?.getString("public_host_mode")
+        publicHostDisposable = arguments?.getString("public_host_disposable") == "true"
+        publicPreferenceOnly = arguments?.getString("public_preference_dialogs") == "true"
+        publicPreferenceDisposable = arguments?.getString("public_preference_disposable") == "true"
+        publicPreferenceCode = arguments?.getString("public_preference_code_sha") ?: ""
         publicWindowPilotOnly = arguments?.getString("public_window_pilot") == "true"
         publicWindowPilotDisposable = arguments?.getString("public_window_pilot_disposable") == "true"
         publicWindowPilotCopyShare = arguments?.getString("public_window_pilot_copy_share") == "true"
@@ -109,6 +119,15 @@ class StartupResponsivenessInstrumentation : Instrumentation() {
         val applicationWait = SystemClock.uptimeMillis()
         waitForIdleSync()
         sendStatus(0, Bundle().apply { putLong("application_ready_wait_ms", SystemClock.uptimeMillis() - applicationWait) })
+        val hostMode = publicHostMode
+        if (hostMode != null) {
+            PublicHostWindowProbe.run(this, publicHostDisposable, hostMode)
+            return
+        }
+        if (publicPreferenceOnly) {
+            PublicPreferenceDialogProbe.run(this, publicPreferenceDisposable, publicPreferenceCode)
+            return
+        }
         if (publicWindowPilotOnly) {
             PublicWindowPilotProbe.run(this, publicWindowPilotDisposable, publicWindowPilotCopyShare)
             return

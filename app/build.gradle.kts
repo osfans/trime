@@ -140,8 +140,9 @@ android {
                     "/META-INF/*.version",
                     "/META-INF/*.kotlin_module", // cannot be excluded actually
                     "/META-INF/androidx/**",
-                    // SDK Console ownership metadata is not used by serialization at runtime.
+                    // SDK Console ownership metadata is not used by these libraries at runtime.
                     "/META-INF/org/jetbrains/kotlinx/kotlinx-serialization-core-jvm/verification.properties",
+                    "/META-INF/com/mikepenz/aboutlibraries-core/verification.properties",
                     "/DebugProbesKt.bin",
                     "/kotlin-tooling-metadata.json",
                 )

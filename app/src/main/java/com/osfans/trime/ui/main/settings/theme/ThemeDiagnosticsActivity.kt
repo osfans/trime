@@ -87,6 +87,8 @@ class ThemeDiagnosticsActivity : PublicWindowPilotActivity() {
                 setNavigationOnClickListener { navigateToManifestParent() }
             }
             findingsList.layoutManager = verticalLayoutManager()
+            // Theme loading can suspend beyond the first layout pass.
+            findingsList.adapter = ThemeDiagnosticListAdapter(emptyList())
             emptyState.isVisible = false
             copyButton.isEnabled = false
             shareButton.isEnabled = false

@@ -2,6 +2,7 @@
 package com.osfans.trime
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.Instrumentation
 import android.content.Intent
 import android.os.Build
@@ -10,7 +11,6 @@ import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.widget.Button
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController

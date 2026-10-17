@@ -7,7 +7,6 @@ package com.osfans.trime.ui.main.settings
 
 import android.os.Bundle
 import android.provider.DocumentsContract
-import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toUri
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -23,6 +22,7 @@ import com.osfans.trime.core.data.UserDataManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.prefs.PreferenceDelegate
 import com.osfans.trime.ui.common.PaddingPreferenceFragment
+import com.osfans.trime.ui.common.dialog.PublicAlertDialogs
 import com.osfans.trime.ui.common.withLoadingDialog
 import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.util.ResourceUtils
@@ -183,7 +183,11 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                             failure != null -> getString(R.string.configuration_import_recovery_failed)
                             else -> getString(R.string.setup__data_path_import_failed)
                         }
-                        AlertDialog.Builder(ctx).setMessage(message).setPositiveButton(android.R.string.ok, null).show()
+                        withContext(Dispatchers.Main.immediate) {
+                            if (PublicAlertDialogs.canShow(ctx)) {
+                                PublicAlertDialogs.builder(ctx).setMessage(message).setPositiveButton(android.R.string.ok, null).show()
+                            }
+                        }
                     }
                 }
             }
@@ -191,8 +195,8 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
     }
 
     private fun promptSelectAnotherDirectory() {
-        AlertDialog
-            .Builder(requireContext())
+        PublicAlertDialogs
+            .builder(requireContext())
             .setMessage(R.string.select_another_directory_to_sync)
             .setPositiveButton(R.string.select_another_directory) { _, _ ->
                 // The current folder stays in place until the user picks another one.
@@ -203,8 +207,8 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
 
     private fun promptExternalSyncFolderSelection() {
         val ctx = requireContext()
-        AlertDialog
-            .Builder(ctx)
+        PublicAlertDialogs
+            .builder(ctx)
             .setMessage(R.string.external_sync_select_folder_message)
             .setPositiveButton(R.string.setup__select_data_path) { _, _ ->
                 pendingExternalSyncSetup = true
@@ -255,7 +259,11 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                                     }
                                 }
                                 updateDataPathSummary()
-                                if (needsPicker) promptExternalSyncFolderSelection()
+                                if (needsPicker) {
+                                    withContext(Dispatchers.Main.immediate) {
+                                        if (PublicAlertDialogs.canShow(ctx)) promptExternalSyncFolderSelection()
+                                    }
+                                }
                             }
                             false
                         }
@@ -355,8 +363,8 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                 addPreference(R.string.reset, R.string.reset_hint) {
                     val items = ctx.assets.list("shared") ?: return@addPreference
                     val checked = BooleanArray(items.size) { false }
-                    AlertDialog
-                        .Builder(ctx)
+                    PublicAlertDialogs
+                        .builder(ctx)
                         .setTitle(R.string.reset)
                         .setMultiChoiceItems(items, checked) { _, id, isChecked ->
                             checked[id] = isChecked

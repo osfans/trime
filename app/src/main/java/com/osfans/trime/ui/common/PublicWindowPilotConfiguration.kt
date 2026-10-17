@@ -21,12 +21,17 @@ import android.os.Build
 import android.view.ContextThemeWrapper
 import androidx.annotation.DoNotInline
 import androidx.annotation.RequiresApi
+import androidx.annotation.StyleRes
 import com.osfans.trime.R
 import com.osfans.trime.data.prefs.AppPrefs
 
 /** Public configuration-only subset of AppCompat's base-context strategy; owns no Window. */
 internal object PublicWindowPilotConfiguration {
-    fun wrap(base: Context, mode: AppPrefs.Advanced.UiMode): ContextThemeWrapper {
+    fun wrap(
+        base: Context,
+        mode: AppPrefs.Advanced.UiMode,
+        @StyleRes themeResId: Int = R.style.Theme_TrimePublicWindowPilot,
+    ): ContextThemeWrapper {
         val baseConfig = base.resources.configuration
         // Preserve a custom Activity/display base overlay on older createConfigurationContext.
         // A delta (fontScale=0) also avoids pinning every current width/locale/font value forever.
@@ -43,7 +48,7 @@ internal object PublicWindowPilotConfiguration {
             AppPrefs.Advanced.UiMode.DARK -> Configuration.UI_MODE_NIGHT_YES
         }
         configurationOverride.uiMode = (configurationOverride.uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or night
-        return ContextThemeWrapper(base, R.style.Theme_TrimePublicWindowPilot).apply {
+        return ContextThemeWrapper(base, themeResId).apply {
             // Public API17; call once before this wrapper's resources/assets/theme are read.
             applyOverrideConfiguration(configurationOverride)
         }

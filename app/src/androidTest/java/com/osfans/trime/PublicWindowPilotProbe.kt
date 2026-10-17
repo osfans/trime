@@ -38,11 +38,13 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.children
 import androidx.lifecycle.Lifecycle
+import com.osfans.trime.core.RimeLifecycle
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ThemeDiagnostics
 import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ui.common.PublicWindowPilotConfiguration
 import com.osfans.trime.ui.common.PublicWindowPilotConfigurationAssertions
 import com.osfans.trime.ui.main.MainActivity
@@ -422,7 +424,18 @@ internal object PublicWindowPilotProbe {
                     }
                 }
             }
-            beforeSessions?.let { initial -> clean { main { check(sessions() == initial) { "Pilot left different Rime session owners" } } } }
+            beforeSessions?.let { initial ->
+                clean {
+                    main {
+                        val observed = sessions()
+                        report.put("session_owners_after", JSONArray(observed.sorted()))
+                            .put("session_owners_added", JSONArray((observed - initial).sorted()))
+                            .put("session_owners_removed", JSONArray((initial - observed).sorted()))
+                            .put("session_engine_after", RimeDaemon.engineState.value.name)
+                        check(observed == initial) { "Pilot left different Rime session owners: before=$initial after=$observed" }
+                    }
+                }
+            }
             beforeIme?.let { initial -> clean { check(ime(context) == initial) { "Default IME presence/value changed; probe never sets IME" } } }
             if (callbacksRegistered) clean { main { application.unregisterActivityLifecycleCallbacks(callbacks) } }
             if (directory.isDirectory) {
@@ -475,7 +488,31 @@ internal object PublicWindowPilotProbe {
             originalMode = prefs.advanced.uiMode.getValue()
             originalDelegateMode = AppCompatDelegate.getDefaultNightMode()
             beforeIme = ime(context)
-            beforeSessions = main(::sessions)
+            val imeClass = TrimeInputMethodService::class.java.name
+            val selectedIme = "${context.packageName}/$imeClass"
+            check(beforeIme == (true to selectedIme)) { "Pilot requires the actual candidate IME to stay selected" }
+            val imeOwnerPrefix = "$imeClass#"
+            // Public selection can still refer to the service in a process replaced by instrumentation.
+            // Wait for this PID's actual IME session before taking the full lifecycle baseline.
+            await("The selected IME did not establish one READY session in this process before any pilot Window") {
+                main {
+                    val observed = sessions()
+                    val state = RimeDaemon.engineState.value
+                    report.put("session_owners_preflight_observed", JSONArray(observed.sorted()))
+                        .put("session_engine_preflight_observed", state.name)
+                    observed.size == 1 && observed.single().startsWith(imeOwnerPrefix) && state == RimeLifecycle.State.READY
+                }
+            }
+            beforeSessions = main {
+                val observed = sessions()
+                check(
+                    observed.size == 1 && observed.single().startsWith(imeOwnerPrefix) &&
+                        RimeDaemon.engineState.value == RimeLifecycle.State.READY,
+                )
+                observed
+            }
+            report.put("session_owners_before", JSONArray(checkNotNull(beforeSessions).sorted()))
+                .put("session_baseline_elapsed_ms", SystemClock.uptimeMillis() - started)
             main {
                 application.registerActivityLifecycleCallbacks(callbacks)
                 callbacksRegistered = true
