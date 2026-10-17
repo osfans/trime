@@ -2,10 +2,35 @@
 
 import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class OpenCCDataTest {
+    @Test
+    fun windowsHostGeneratorUsesTheNativeExecutableArchitecture() {
+        val aliases = mapOf(
+            "x64" to listOf("amd64", "x86_64"),
+            "ARM64" to listOf("aarch64", "arm64"),
+            "Win32" to listOf("x86", "i386", "i486", "i586", "i686"),
+        )
+        aliases.forEach { (platform, architectures) ->
+            architectures.forEach { architecture ->
+                assertEquals(
+                    listOf("-G", "Visual Studio 17 2022", "-A", platform),
+                    openccHostCmakeArguments("Windows Server 2025", architecture),
+                )
+            }
+        }
+        assertFailsWith<IllegalStateException> { openccHostCmakeArguments("Windows 11", "riscv64") }
+    }
+
+    @Test
+    fun unixHostKeepsTheSingleConfigurationReleaseBuild() {
+        assertEquals(listOf("-DCMAKE_BUILD_TYPE=Release"), openccHostCmakeArguments("Linux", "amd64"))
+        assertEquals(listOf("-DCMAKE_BUILD_TYPE=Release"), openccHostCmakeArguments("Mac OS X", "aarch64"))
+    }
+
     @Test
     fun regionalDictionaryCannotBeSkippedWhileItsConfigIsShipped() {
         val directory = createTempDirectory("opencc-assets-test").toFile()

@@ -23,6 +23,18 @@ import java.io.File
 import java.util.regex.Pattern
 import javax.inject.Inject
 
+/** Visual Studio discovers its native toolchain without a Developer Command Prompt. */
+internal fun openccHostCmakeArguments(osName: String, osArch: String): List<String> {
+    if (!osName.startsWith("Windows", ignoreCase = true)) return listOf("-DCMAKE_BUILD_TYPE=Release")
+    val platform = when (osArch.lowercase()) {
+        "amd64", "x86_64" -> "x64"
+        "aarch64", "arm64" -> "ARM64"
+        "x86", "i386", "i486", "i586", "i686" -> "Win32"
+        else -> error("Unsupported Windows OpenCC host architecture: $osArch")
+    }
+    return listOf("-G", "Visual Studio 17 2022", "-A", platform)
+}
+
 /** Reject an asset set that would make a bundled conversion config fail at runtime. */
 internal fun requireOpenCCDictionaryAssets(names: Set<String>, directory: File) {
     val missing = names.filterNot { name -> directory.resolve("$name.txt").let { it.isFile && it.length() > 0L } }
@@ -95,6 +107,10 @@ class OpenCCDataPlugin : Plugin<Project> {
         @get:Input
         abstract val cmakeExecutable: Property<String>
 
+        @get:Input
+        val hostCmakeArguments: List<String>
+            get() = openccHostCmakeArguments(System.getProperty("os.name"), System.getProperty("os.arch"))
+
         @TaskAction
         fun execute() {
             val output = outputDir.get().asFile
@@ -104,17 +120,18 @@ class OpenCCDataPlugin : Plugin<Project> {
             val cmake = cmakeExecutable.get()
             execOperations.exec {
                 commandLine(
-                    cmake,
-                    "-S",
-                    adaptationDir.get().asFile.resolve("opencc-host").absolutePath,
-                    "-B",
-                    output.absolutePath,
-                    "-DCMAKE_BUILD_TYPE=Release",
-                    "-DTRIME_OPENCC_SOURCE_DIR=${sourceDir.get().asFile.absolutePath}",
+                    listOf(
+                        cmake,
+                        "-S",
+                        adaptationDir.get().asFile.resolve("opencc-host").absolutePath,
+                        "-B",
+                        output.absolutePath,
+                        "-DTRIME_OPENCC_SOURCE_DIR=${sourceDir.get().asFile.absolutePath}",
+                    ) + hostCmakeArguments,
                 )
             }.assertNormalExitValue()
             execOperations.exec {
-                commandLine(cmake, "--build", output.absolutePath, "--target", "Dictionaries", "--parallel", "1")
+                commandLine(cmake, "--build", output.absolutePath, "--config", "Release", "--target", "Dictionaries", "--parallel", "1")
             }.assertNormalExitValue()
             check(output.resolve("OpenCC/data/STPhrases_GeneratedFromRegionalPhrases.txt").isFile) {
                 "OpenCC's matching host converter did not generate regional phrases"
