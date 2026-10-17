@@ -19,7 +19,7 @@ class NativeAppConventionPlugin : NativeBaseConventionPlugin() {
     private val Project.openccVersion: String
         get() =
             runCmd(
-                "git -C app/src/main/jni/OpenCC describe --tags --long --always",
+                "git -C app/src/main/jni/librime/deps/opencc describe --tags --long --always",
             )
 
     override fun apply(target: Project) {

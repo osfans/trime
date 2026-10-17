@@ -26,7 +26,7 @@ class OpenCCDataPlugin : Plugin<Project> {
     }
 
     private val Project.dataBaseDir
-        get() = file("src/main/jni/OpenCC/data")
+        get() = file("src/main/jni/librime/deps/opencc/data")
 
     private val Project.dataInstallDir
         get() = assetsDir.resolve("shared/opencc")
