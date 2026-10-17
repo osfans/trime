@@ -36,11 +36,15 @@ class ThirdPartyCmakeTest(unittest.TestCase):
         # Exercise the exact pinned resource code that the build-tree patch consumes.
         opencc_source = self.source / "vendor/OpenCC/src"
         opencc_source.mkdir()
-        for name in ("MarisaDict.cpp", "SerializableDict.hpp", "TextDict.cpp", "Dict.hpp", "PrefixMatch.cpp",
-                     "PluginSegmentation.cpp", "plugin/OpenCCPlugin.h"):
+        for name in ("DartsDict.cpp", "MarisaDict.cpp", "SerializableDict.hpp", "TextDict.cpp",
+                     "Dict.hpp", "PrefixMatch.cpp", "PluginSegmentation.cpp", "plugin/OpenCCPlugin.h"):
             target = opencc_source / name
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes((OPENCC / name).read_bytes())
+        darts_relative = Path("deps/darts-clone-0.32h/include/darts.h")
+        darts_header = self.source / "vendor/OpenCC" / darts_relative
+        darts_header.parent.mkdir(parents=True, exist_ok=True)
+        darts_header.write_bytes((OPENCC.parent / darts_relative).read_bytes())
         data = self.source / "vendor/OpenCC/data"
         data.mkdir()
         (data / "CMakeLists.txt").write_text(
