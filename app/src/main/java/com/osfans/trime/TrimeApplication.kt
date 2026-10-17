@@ -187,7 +187,7 @@ class TrimeApplication : Application() {
                 ThemeManager.syncToDeviceEncryptedStorage()
             }
             registerBroadcastReceiver()
-            if (shouldStartWorkManager(isDirectBootMode)) startWorkManager()
+            startWorkManager()
         } catch (e: Exception) {
             e.fillInStackTrace()
             return
@@ -219,8 +219,6 @@ class TrimeApplication : Application() {
         fun getLastPid() = lastPid
 
         private const val MAX_STACKTRACE_SIZE = 128000
-
-        internal fun shouldStartWorkManager(isDirectBootMode: Boolean) = !isDirectBootMode
 
         /**
          * This permission is requested by com.android.shell, makes it possible to start
