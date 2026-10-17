@@ -187,7 +187,7 @@ class TrimeApplication : Application() {
                 ThemeManager.syncToDeviceEncryptedStorage()
             }
             registerBroadcastReceiver()
-            startWorkManager()
+            if (!isDirectBootMode) startWorkManager()
         } catch (e: Exception) {
             e.fillInStackTrace()
             return
