@@ -2,4 +2,5 @@
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <resources>
     <string name="app_name_release">Trime startup tests</string>
+    <string name="app_name_debug">@string/app_name_release</string>
 </resources>
