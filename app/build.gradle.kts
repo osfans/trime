@@ -18,7 +18,8 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
-val appVersionName = project.buildVersionName
+// The default is the upstream release identity; never infer the manifest version from git describe.
+val appVersionName = project.envOrPropOrNull("BUILD_VERSION_NAME", "buildVersionName") ?: "3.3.13"
 require(appVersionName.isNotBlank()) { "A nonempty buildVersionName is required" }
 
 val selectedTestBuildType = providers.gradleProperty("trime.testBuildType").orElse("debug").get()
