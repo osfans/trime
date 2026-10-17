@@ -163,6 +163,36 @@ def source_status(allow_model_source_change):
     return status
 
 
+def audit_opencc_compilations(binary, compile_commands, require_objects=False):
+    """Audit the library target, not every optional tool sharing its directory."""
+    binary = Path(binary).resolve()
+    owned_source = binary / 'trime-deps/OpenCC/src'
+    definitions = []
+    for row in compile_commands:
+        argv = row.get('arguments') or shlex.split(row['command'])
+        output = argv[argv.index('-o') + 1] if '-o' in argv else ''
+        owner = re.search(r'(?:^|/)CMakeFiles/([^/]+)\.dir/', output)
+        if not owner or owner[1] != 'libopencc':
+            continue
+        compilation_file = Path(row['file']).resolve()
+        assert compilation_file.is_relative_to(owned_source) and compilation_file.suffix in ('.cc', '.cpp'), (
+            'OpenCC library compilation escaped the owned source')
+        version = [arg for arg in argv if arg.startswith('-DOPENCC_VERSION=')]
+        assert version == ['-DOPENCC_VERSION="1.4.2"'], (
+            'Actual OpenCC compile version differs from supported source fallback')
+        assert '-DRAPIDJSON_NOMEMBERITERATORCLASS' in argv, 'OpenCC library pointer-iterator definition missing'
+        object_file = Path(output)
+        if not object_file.is_absolute():
+            object_file = Path(row['directory']) / object_file
+        object_file = object_file.resolve()
+        assert object_file.is_relative_to(binary), 'OpenCC object escaped the owned build'
+        if require_objects:
+            assert object_file.is_file() and not object_file.is_symlink(), 'OpenCC library object was not built'
+        definitions.append(dict(file=str(compilation_file), version=version[0], object=str(object_file)))
+    assert definitions, 'Missing compile commands for the owned OpenCC library'
+    return definitions
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--out', '--output', dest='output', type=Path, required=True)
@@ -440,9 +470,10 @@ def main():
         project = binary
         run(plan[0]['argv'], 300)
         warn_free()
-        # Fail a wrong header order before paying for a complete native build.
-        header_consumers(binary, Path(preparation['source_root']),
-                         json.loads((binary / 'compile_commands.json').read_bytes()))
+        # Check target definitions and header order before a complete build.
+        configured_commands = json.loads((binary / 'compile_commands.json').read_bytes())
+        header_consumers(binary, Path(preparation['source_root']), configured_commands)
+        audit_opencc_compilations(binary, configured_commands)
         run(plan[1]['argv'], 3600)
         warn_free()
         checkpoint()
@@ -450,7 +481,7 @@ def main():
         compile_commands = json.loads(compile_path.read_bytes())
         assert compile_commands
         stage_source = Path(preparation['source_root'])
-        opencc_definitions = []
+        opencc_definitions = audit_opencc_compilations(binary, compile_commands, require_objects=True)
         fixture_rows = []
         header_root = binary / 'trime-rime-headers'
         header_targets = header_consumers(binary, stage_source, compile_commands)
@@ -462,11 +493,6 @@ def main():
                        for word in argv), 'Distribution private native header admitted'
             if compilation_file.name == 'prediction_native_test.cc':
                 fixture_rows.append(row)
-            if '/OpenCC/src/' in str(compilation_file) and compilation_file.suffix in ('.cc', '.cpp'):
-                definitions = [arg for arg in argv if arg.startswith('-DOPENCC_VERSION=')]
-                assert definitions == ['-DOPENCC_VERSION="1.4.2"'], 'Actual OpenCC compile version differs from supported source fallback'
-                assert '-DRAPIDJSON_NOMEMBERITERATORCLASS' in argv
-                opencc_definitions.append(dict(file=str(compilation_file), version=definitions[0]))
         assert len(fixture_rows) == 1 and opencc_definitions
         rime_headers = {name: bind(header_root / name) for name in ('darts.h', 'rime/dict/vocabulary.h')}
         configured = binary / 'librime/src/rime/build_config.h'
