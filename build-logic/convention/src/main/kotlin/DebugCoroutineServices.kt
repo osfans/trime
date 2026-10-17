@@ -34,6 +34,9 @@ internal object DebugCoroutineResources {
         "d1d75aa01dffbb4d1c520e67e4c4e7f5f6174718e7cb4632412503f2f0e604fa",
     )
 
+    // AGP applies MERGE before EXCLUDE, including its default service wildcard.
+    fun packagingMerges(current: Set<String>): Set<String> = current - "/META-INF/services/**"
+
     fun sha256(file: File): String {
         val digest = MessageDigest.getInstance("SHA-256")
         file.inputStream().use { stream ->

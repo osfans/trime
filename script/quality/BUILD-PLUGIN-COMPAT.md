@@ -184,6 +184,9 @@ original declarations and two relocated copies must exist, with the reviewed
 provider bytes. AGP 9.4.1 is required. Missing, conflicting, duplicate or extra
 service declarations fail the build. Final APK resource inspection is still
 required because compiler-added resources are not necessarily source resources.
+Debug also removes AGP's exact default `/META-INF/services/**` merge rule:
+AGP evaluates merge rules before exclusions. Other merge rules remain intact;
+a regression test uses AGP's actual matcher to check this precedence.
 
 The Debug application ASM transform redirects four service-loading calls in
 three coroutine classes to `DebugCoroutineServices`. It checks the class,

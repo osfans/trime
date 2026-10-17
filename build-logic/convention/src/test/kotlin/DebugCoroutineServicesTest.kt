@@ -1,4 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
+import com.android.builder.packaging.ParsedPackagingOptions
+import com.android.builder.packaging.ParsedPackagingOptions.JavaResPackagingFileAction
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
@@ -9,6 +11,22 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class DebugCoroutineServicesTest {
+    @Test
+    fun excludeOriginalServicesDespiteAgpDefaultMergeWhileKeepingUnrelatedMerges() {
+        val defaults = setOf("/META-INF/services/**", "/example/merged.txt")
+        val excludes = DebugCoroutineResources.providers.keys.map { DebugCoroutineResources.ORIGINAL + it }
+        val before = ParsedPackagingOptions(excludes, emptySet(), defaults)
+        val retained = DebugCoroutineResources.packagingMerges(defaults)
+        assertEquals(setOf("/example/merged.txt"), retained)
+        val after = ParsedPackagingOptions(excludes, emptySet(), retained)
+        DebugCoroutineResources.providers.keys.forEach { service ->
+            assertEquals(JavaResPackagingFileAction.MERGE, before.getAction(DebugCoroutineResources.ORIGINAL + service))
+            assertEquals(JavaResPackagingFileAction.EXCLUDE, after.getAction(DebugCoroutineResources.ORIGINAL + service))
+            assertEquals(JavaResPackagingFileAction.NONE, after.getAction(DebugCoroutineResources.RELOCATED + service))
+        }
+        assertEquals(JavaResPackagingFileAction.MERGE, after.getAction("example/merged.txt"))
+    }
+
     @Test
     fun acceptExactlyOneReviewedOriginalAndRelocatedProviderPerService() {
         DebugCoroutineResources.validateEntries(DebugCoroutineResources.expectedEntries().toList())

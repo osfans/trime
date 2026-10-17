@@ -28,6 +28,7 @@ dependencies {
     implementation(libs.snakeyaml)
     testImplementation(kotlin("test"))
     testImplementation("org.ow2.asm:asm:9.9")
+    testImplementation("com.android.tools.build:builder:${libs.versions.androidGradlePlugin.get()}")
 }
 
 gradlePlugin {

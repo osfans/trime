@@ -91,6 +91,8 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
                         resultFile.set(target.layout.buildDirectory.file("intermediates/coroutineResources/" + v.name + "/verified.txt"))
                     }
                     v.packaging.resources.excludes.addAll(DebugCoroutineResources.providers.keys.map { DebugCoroutineResources.ORIGINAL + it })
+                    val merges = v.packaging.resources.merges
+                    merges.set(DebugCoroutineResources.packagingMerges(merges.get()))
                     // Only this Android application component is instrumented; no test component is registered.
                     v.instrumentation.transformClassesWith(DebugCoroutineVisitorFactory::class.java, InstrumentationScope.ALL) { parameters ->
                         parameters.verifiedResources.set(verify.flatMap(VerifyDebugCoroutineResourcesTask::resultFile))
