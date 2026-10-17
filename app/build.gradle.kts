@@ -67,7 +67,6 @@ android {
     buildFeatures {
         buildConfig = true
         viewBinding = true
-        resValues = true
     }
 
     buildTypes {
@@ -88,13 +87,10 @@ android {
                         keyPassword = project.signKeyPwd
                     }
                 }
-
-            resValue("string", "trime_app_name", "@string/app_name_release")
         }
         debug {
             isDebuggable = true
             applicationIdSuffix = ".debug"
-            resValue("string", "trime_app_name", "@string/app_name_debug")
         }
         all {
             // remove META-INF/version-control-info.textproto
