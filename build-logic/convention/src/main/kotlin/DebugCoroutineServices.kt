@@ -168,9 +168,7 @@ abstract class VerifyDebugCoroutineResourcesTask : DefaultTask() {
 abstract class DebugCoroutineVisitorFactory : AsmClassVisitorFactory<InstrumentationParameters.None> {
     override fun isInstrumentable(classData: ClassData) = classData.className.replace('.', '/') in DebugCoroutineVisitor.expectedMethods
 
-    override fun createClassVisitor(classContext: ClassContext, nextClassVisitor: ClassVisitor): ClassVisitor {
-        return DebugCoroutineVisitor(classContext.currentClassData.className.replace('.', '/'), nextClassVisitor)
-    }
+    override fun createClassVisitor(classContext: ClassContext, nextClassVisitor: ClassVisitor): ClassVisitor = DebugCoroutineVisitor(classContext.currentClassData.className.replace('.', '/'), nextClassVisitor)
 }
 
 /** Changes four invocation instructions only; methods, frames and all coroutine flags stay intact. */
