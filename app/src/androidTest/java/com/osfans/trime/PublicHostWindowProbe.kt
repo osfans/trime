@@ -26,6 +26,9 @@ import android.view.ViewGroup
 import android.view.Window
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Button
+import android.widget.Checkable
+import android.widget.ListView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatTextView
@@ -36,6 +39,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.children
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.NavHostFragment
 import androidx.preference.ListPreference
@@ -668,6 +672,7 @@ internal object PublicHostWindowProbe {
             companionTexts: List<String>,
             expectedWindowId: Int,
             successorTexts: List<String> = emptyList(),
+            ownedListDialog: (() -> AlertDialog?)? = null,
         ): Int {
             fun serviceInfoIdentity(info: AccessibilityServiceInfo): List<Any?> = listOf(
                 info.eventTypes,
@@ -692,6 +697,85 @@ internal object PublicHostWindowProbe {
                     .put("checkable", node.isCheckable).put("checked", node.isCheckedForTest())
                     .put("action_ids", JSONArray(actionIds))
                     .put("supports_click_action", AccessibilityNodeInfo.ACTION_CLICK in actionIds)
+            }
+
+            fun ownedListState(
+                dialog: AlertDialog,
+                list: ListView,
+                child: View,
+                freshRemote: AccessibilityNodeInfo,
+            ): JSONObject = main {
+                val bounds = Rect()
+                val globallyVisible = child.getGlobalVisibleRect(bounds)
+                val position = list.getPositionForView(child)
+                val adapter = list.adapter
+                val listener = list.onItemClickListener
+                val validPosition = adapter != null && position in 0 until adapter.count
+                val itemEnabled = if (adapter == null || position !in 0 until adapter.count) {
+                    JSONObject.NULL
+                } else {
+                    adapter.isEnabled(position)
+                }
+                val itemId = if (adapter == null || position !in 0 until adapter.count) {
+                    JSONObject.NULL
+                } else {
+                    adapter.getItemId(position)
+                }
+                val itemText = if (adapter == null || position !in 0 until adapter.count) {
+                    JSONObject.NULL
+                } else {
+                    adapter.getItem(position)?.toString() ?: JSONObject.NULL
+                }
+                val localResult = runCatching { child.createAccessibilityNodeInfo() }
+                val local = localResult.getOrNull()
+                try {
+                    JSONObject().put("dialog_class", dialog.javaClass.name)
+                        .put("dialog_identity", System.identityHashCode(dialog))
+                        .put("dialog_showing", dialog.isShowing)
+                        .put("list_class", list.javaClass.name).put("list_identity", System.identityHashCode(list))
+                        .put("list_id", list.id).put("list_attached", list.isAttachedToWindow)
+                        .put("list_shown", list.isShown).put("list_enabled", list.isEnabled)
+                        .put("list_clickable", list.isClickable).put("list_choice_mode", list.choiceMode)
+                        .put("list_checked_position", list.checkedItemPosition).put("list_child_count", list.childCount)
+                        .put("list_first_visible_position", list.firstVisiblePosition)
+                        .put("list_last_visible_position", list.lastVisiblePosition)
+                        .put("adapter_class", adapter?.javaClass?.name ?: JSONObject.NULL)
+                        .put(
+                            "adapter_identity",
+                            if (adapter == null) JSONObject.NULL else System.identityHashCode(adapter),
+                        )
+                        .put("adapter_count", adapter?.count ?: JSONObject.NULL)
+                        .put("adapter_has_stable_ids", adapter?.hasStableIds() ?: JSONObject.NULL)
+                        .put("adapter_position_valid", validPosition)
+                        .put("adapter_item_enabled", itemEnabled).put("adapter_item_id", itemId)
+                        .put("adapter_item_text", itemText)
+                        .put("on_item_click_listener_present", listener != null)
+                        .put("on_item_click_listener_class", listener?.javaClass?.name ?: JSONObject.NULL)
+                        .put(
+                            "on_item_click_listener_identity",
+                            if (listener == null) JSONObject.NULL else System.identityHashCode(listener),
+                        )
+                        .put("adapter_position", position).put("child_index", list.indexOfChild(child))
+                        .put("child_class", child.javaClass.name).put("child_identity", System.identityHashCode(child))
+                        .put("child_id", child.id)
+                        .put("child_text", (child as? TextView)?.text?.toString() ?: JSONObject.NULL)
+                        .put("child_parent_is_list", child.parent === list).put("child_attached", child.isAttachedToWindow)
+                        .put("child_shown", child.isShown).put("child_enabled", child.isEnabled)
+                        .put("child_clickable", child.isClickable).put("child_checkable", child is Checkable)
+                        .put("child_checked", (child as? Checkable)?.isChecked ?: JSONObject.NULL)
+                        .put("child_window_token_present", child.windowToken != null)
+                        .put("child_visible_in_root_coordinates", globallyVisible)
+                        .put("child_visible_bounds_in_root", bounds.flattenToString())
+                        .put("local_node_present", local != null)
+                        .put("local_node_creation_error", localResult.exceptionOrNull()?.toString() ?: JSONObject.NULL)
+                        .put("local_node_state", if (local == null) JSONObject.NULL else nodeState(local))
+                        .put(
+                            "fresh_remote_equals_local_source_window",
+                            local?.equals(freshRemote) ?: JSONObject.NULL,
+                        )
+                } finally {
+                    local?.let(::recycle)
+                }
             }
 
             val required = (listOf(text) + companionTexts).distinct()
@@ -786,9 +870,66 @@ internal object PublicHostWindowProbe {
                         check(node.actionList.any { it.id == AccessibilityNodeInfo.ACTION_CLICK }) {
                             "Actual visible dialog action node does not advertise ACTION_CLICK"
                         }
-                        actionEvidence.put("perform_action_count", 1)
-                        actionAccepted = node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                        actionEvidence.put("perform_action_result", actionAccepted)
+                        var attachCallbacks = 0
+                        var detachCallbacks = 0
+                        val attachObserver = object : View.OnAttachStateChangeListener {
+                            override fun onViewAttachedToWindow(view: View) {
+                                attachCallbacks += 1
+                            }
+
+                            override fun onViewDetachedFromWindow(view: View) {
+                                detachCallbacks += 1
+                            }
+                        }
+                        var ownedTarget: Triple<AlertDialog, ListView, View>? = null
+                        if (ownedListDialog != null) {
+                            try {
+                                ownedTarget = main {
+                                    val dialog = checkNotNull(ownedListDialog())
+                                    val list = checkNotNull(dialog.listView)
+                                    val child = checkNotNull(
+                                        list.children.singleOrNull {
+                                            (it as? TextView)?.text?.toString() == text
+                                        },
+                                    )
+                                    child.addOnAttachStateChangeListener(attachObserver)
+                                    Triple(dialog, list, child)
+                                }
+                                val (dialog, list, child) = checkNotNull(ownedTarget)
+                                actionEvidence.put(
+                                    "owned_list_before_dispatch",
+                                    ownedListState(dialog, list, child, node),
+                                )
+                            } catch (failure: Exception) {
+                                actionEvidence.put("owned_list_diagnostic_setup_error", failure.toString())
+                            }
+                        }
+                        actionAccepted = try {
+                            actionEvidence.put("perform_action_count", 1)
+                            node.performAction(AccessibilityNodeInfo.ACTION_CLICK).also { accepted ->
+                                actionEvidence.put("perform_action_result", accepted)
+                            }
+                        } finally {
+                            ownedTarget?.let { (dialog, list, child) ->
+                                try {
+                                    actionEvidence.put(
+                                        "owned_list_after_dispatch",
+                                        ownedListState(dialog, list, child, node),
+                                    )
+                                } catch (failure: Exception) {
+                                    actionEvidence.put("owned_list_diagnostic_post_error", failure.toString())
+                                }
+                                try {
+                                    main { child.removeOnAttachStateChangeListener(attachObserver) }
+                                    actionEvidence.put("owned_list_attach_observer_removed", true)
+                                } catch (failure: Exception) {
+                                    actionEvidence.put("owned_list_attach_observer_removed", false)
+                                        .put("owned_list_attach_observer_remove_error", failure.toString())
+                                }
+                                actionEvidence.put("owned_list_attach_callbacks", attachCallbacks)
+                                    .put("owned_list_detach_callbacks", detachCallbacks)
+                            }
+                        }
                     } finally {
                         parents.forEach(::recycle)
                     }
@@ -1004,6 +1145,11 @@ internal object PublicHostWindowProbe {
                         listOf(localLabel),
                         storageListWindowId,
                         successorTexts = listOf(text, activity.getString(android.R.string.cancel)),
+                        ownedListDialog = {
+                            (fragment.parentFragmentManager.findFragmentByTag(
+                                "androidx.preference.PreferenceFragment.DIALOG",
+                            ) as? DialogFragment)?.dialog as? AlertDialog
+                        },
                     ),
                 )
             marker("profile_external_prompt_await")
