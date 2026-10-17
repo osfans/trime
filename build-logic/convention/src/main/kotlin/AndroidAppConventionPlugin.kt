@@ -3,7 +3,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.instrumentation.FramesComputationMode
+import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.InternalMultipleArtifactType
 import com.android.build.gradle.internal.tasks.CompileArtProfileTask
@@ -12,6 +15,7 @@ import com.android.build.gradle.internal.tasks.MergeArtProfileTask
 import com.android.build.gradle.tasks.PackageApplication
 import org.gradle.api.Project
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+import org.gradle.api.artifacts.type.ArtifactTypeDefinition
 import org.gradle.api.file.RegularFile
 import org.gradle.api.internal.provider.AbstractProperty
 import org.gradle.api.internal.provider.Providers
@@ -50,6 +54,49 @@ class AndroidAppConventionPlugin : AndroidBaseConventionPlugin() {
             // Add dependency relationships for data checksums task
             onVariants { v ->
                 val variantName = v.name.replaceFirstChar { it.uppercase() }
+                if (v.buildType == "debug") {
+                    check(pluginVersion.version == OptimizedCoroutineServices.AGP_VERSION) {
+                        "Debug coroutine resource discovery requires reviewed AGP 9.4.1"
+                    }
+                    check(!target.extensions.getByType<ApplicationExtension>().buildTypes.getByName("debug").isMinifyEnabled) {
+                        "Debug coroutine relocation requires an unminified Debug variant"
+                    }
+                    val modules = setOf("kotlinx-coroutines-android", "kotlinx-coroutines-core-jvm")
+                    val runtime = v.runtimeConfiguration.incoming.artifactView {
+                        componentFilter { id ->
+                            id is ModuleComponentIdentifier && id.group == "org.jetbrains.kotlinx" && id.module in modules
+                        }
+                    }
+                    val generate = target.tasks.register<GenerateDebugCoroutineResourcesTask>("generate" + variantName + "CoroutineResources") {
+                        coroutineArtifacts.from(runtime.files)
+                        coroutineCoordinates.set(
+                            runtime.artifacts.resolvedArtifacts.map { artifacts ->
+                                artifacts.map { artifact ->
+                                    val id = artifact.id.componentIdentifier as ModuleComponentIdentifier
+                                    id.group + ":" + id.module + ":" + id.version
+                                }
+                            },
+                        )
+                        outputDirectory.set(target.layout.buildDirectory.dir("generated/coroutineResources/" + v.name))
+                    }
+                    // The generator must not consume the resource collection which contains its output.
+                    checkNotNull(v.sources.resources).addGeneratedSourceDirectory(generate, GenerateDebugCoroutineResourcesTask::outputDirectory)
+                    // Use the same pre-exclusion dependency resource type as AGP's app merger.
+                    // ScopedArtifact.JAVA_RES does not include all original app resources in AGP 9.4.1.
+                    val runtimeJavaResources = v.runtimeConfiguration.incoming.artifactView {
+                        attributes.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, AndroidArtifacts.ArtifactType.JAVA_RES.type)
+                    }.files
+                    val verify = target.tasks.register<VerifyDebugCoroutineResourcesTask>("verify" + variantName + "CoroutineResources") {
+                        inputResources.from(runtimeJavaResources, checkNotNull(v.sources.resources).all)
+                        resultFile.set(target.layout.buildDirectory.file("intermediates/coroutineResources/" + v.name + "/verified.txt"))
+                    }
+                    v.packaging.resources.excludes.addAll(DebugCoroutineResources.providers.keys.map { DebugCoroutineResources.ORIGINAL + it })
+                    // Only this Android application component is instrumented; no test component is registered.
+                    v.instrumentation.transformClassesWith(DebugCoroutineVisitorFactory::class.java, InstrumentationScope.ALL) { parameters ->
+                        parameters.verifiedResources.set(verify.flatMap(VerifyDebugCoroutineResourcesTask::resultFile))
+                    }
+                    v.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COPY_FRAMES)
+                }
                 // Evaluation should be delayed as we need be able to see other tasks
                 target.afterEvaluate {
                     tasks.findByName(DataChecksumsPlugin.TASK)?.also {

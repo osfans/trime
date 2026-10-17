@@ -167,3 +167,43 @@ block the operation. Every retained resource entry's bytes are checked against
 the original archive. The eight binary DEX/ZIP tests include actual preservation
 and rejection cases; actual Release DEX semantic review, signature verification
 and Android acceptance are still required for publication.
+
+## Debug coroutine service resources
+
+Unminified Debug builds still need coroutine service discovery. Android v1
+verification excludes `META-INF` entries from signature coverage, so keeping
+the two provider declarations there produces signature warnings even when the
+manifest contains their digests. Debug builds relocate their unchanged bytes
+to `trime-services/` before normal APK signing. Release continues to use the
+checked post-R8 removal described above.
+
+`GenerateDebugCoroutineResourcesTask` pins the two original coroutines 1.11.0
+JARs. `VerifyDebugCoroutineResourcesTask` checks dependency Java resources and
+application resource directories before packaging exclusions: exactly the two
+original declarations and two relocated copies must exist, with the reviewed
+provider bytes. AGP 9.4.1 is required. Missing, conflicting, duplicate or extra
+service declarations fail the build. Final APK resource inspection is still
+required because compiler-added resources are not necessarily source resources.
+
+The Debug application ASM transform redirects four service-loading calls in
+three coroutine classes to `DebugCoroutineServices`. It checks the class,
+method, invocation signature and occurrence count; it preserves other
+instructions, frames and coroutine debug/recovery flags. The helper uses the
+platform ServiceLoader and the original defining loader, adding the relocated
+resource location. The supported APK has one built-in provider per service;
+this is not a general ordering guarantee for arbitrary external providers.
+The Android unit-test classpath is checked to retain the original coroutine
+bytecode and service resources.
+
+Run `:app:verifyDebugCoroutineResources`, the build-logic and Debug unit tests,
+and normal Debug assembly. Inspect the resulting APK resources and all four
+DEX call sites, then run `apksigner verify --verbose --print-certs` without
+filtering its output. The dedicated `CoroutineFastPackagingInstrumentation`
+and `CoroutineSlowPackagingInstrumentation` components require
+`-e coroutine_packaging true` and separate fresh emulator target processes.
+They set loader/debug/recovery properties before the real Application
+constructor, check the actual initialized fields and provider collection, and
+exercise Main and Main.immediate dispatch. They do not induce an uncaught
+exception or prove Android 8.0/8.1 pre-handler execution. If ART does not enable
+class assertions, the result records that limitation instead of claiming a
+positive assertion test. These checks do not replace general device acceptance.

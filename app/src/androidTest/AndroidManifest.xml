@@ -8,4 +8,10 @@
     <instrumentation
         android:name="com.osfans.trime.UserDictionaryUpgradeInstrumentation"
         android:targetPackage="${trimeTestedApplicationId}" />
+    <instrumentation
+        android:name="com.osfans.trime.CoroutineFastPackagingInstrumentation"
+        android:targetPackage="${trimeTestedApplicationId}" />
+    <instrumentation
+        android:name="com.osfans.trime.CoroutineSlowPackagingInstrumentation"
+        android:targetPackage="${trimeTestedApplicationId}" />
 </manifest>

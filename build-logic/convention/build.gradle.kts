@@ -27,6 +27,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.snakeyaml)
     testImplementation(kotlin("test"))
+    testImplementation("org.ow2.asm:asm:9.9")
 }
 
 gradlePlugin {
