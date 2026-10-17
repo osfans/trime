@@ -662,12 +662,59 @@ internal object PublicHostWindowProbe {
             }
         }
 
-        private fun clickVisibleTextInWindow(text: String, companionTexts: List<String>, expectedWindowId: Int): Int {
+        private fun clickVisibleTextInWindow(
+            text: String,
+            companionTexts: List<String>,
+            expectedWindowId: Int,
+            successorTexts: List<String> = emptyList(),
+        ): Int {
+            fun nodeState(node: AccessibilityNodeInfo): JSONObject {
+                val bounds = Rect()
+                node.getBoundsInScreen(bounds)
+                val actionIds = node.actionList.map { it.id }
+                return JSONObject().put("text", node.text?.toString()).put("class", node.className?.toString())
+                    .put("package", node.packageName?.toString()).put("window_id", node.windowId)
+                    .put("bounds", bounds.flattenToString()).put("visible", node.isVisibleToUser)
+                    .put("enabled", node.isEnabled).put("clickable", node.isClickable)
+                    .put("checkable", node.isCheckable).put("checked", node.isCheckedForTest())
+                    .put("action_ids", JSONArray(actionIds))
+                    .put("supports_click_action", AccessibilityNodeInfo.ACTION_CLICK in actionIds)
+            }
+
             val required = (listOf(text) + companionTexts).distinct()
+            val actionHistory = report.optJSONArray("dialog_accessibility_actions") ?: JSONArray().also {
+                report.put("dialog_accessibility_actions", it)
+            }
+            val actionEvidence = JSONObject().put("ordinal", actionHistory.length() + 1)
+                .put("requested_text", text).put("companion_texts", JSONArray(companionTexts))
+                .put("successor_texts", JSONArray(successorTexts))
+                .put("expected_window_id", expectedWindowId).put("perform_action_count", 0)
+            actionHistory.put(actionEvidence)
             await("Visible action '$text' did not remain in its evidenced dialog window") {
                 activeTextStates(required, expectedWindowId = expectedWindowId) != null
             }
+
+            val remaining = workDeadline - SystemClock.uptimeMillis()
+            check(remaining > 0L) { "No work budget remains for the bounded accessibility idle wait" }
+            val idleGlobalTimeout = minOf(2_000L, remaining)
+            val idleQuietTimeout = minOf(200L, idleGlobalTimeout)
+            actionEvidence.put("idle_quiet_timeout_ms", idleQuietTimeout)
+                .put("idle_global_timeout_ms", idleGlobalTimeout)
+            val idleStarted = SystemClock.uptimeMillis()
+            try {
+                instrumentation.uiAutomation.waitForIdle(idleQuietTimeout, idleGlobalTimeout)
+            } catch (failure: Exception) {
+                actionEvidence.put("idle_wait_error", failure.toString())
+                throw failure
+            } finally {
+                actionEvidence.put("idle_wait_elapsed_ms", SystemClock.uptimeMillis() - idleStarted)
+            }
+            checkTime()
+
+            // Reacquire after the idle boundary. A checkable list row is itself the semantic
+            // accessibility target; its ListView ancestor cannot encode which row to activate.
             val root = checkNotNull(instrumentation.uiAutomation.rootInActiveWindow)
+            val actionAccepted: Boolean
             val actionWindowId = try {
                 check(root.packageName?.toString() == context.packageName && root.windowId == expectedWindowId)
                 companionTexts.forEach { companion ->
@@ -678,17 +725,37 @@ internal object PublicHostWindowProbe {
                     var node = matches.single {
                         it.text?.toString() == text && it.isVisibleToUser && it.isEnabled && it.windowId == expectedWindowId
                     }
+                    val exactTargetIsCheckable = node.isCheckable
+                    actionEvidence.put("exact_node_after_reacquire", nodeState(node))
+                        .put("exact_target_is_checkable", exactTargetIsCheckable)
                     val parents = mutableListOf<AccessibilityNodeInfo>()
                     try {
-                        repeat(4) {
-                            if (!node.isClickable) {
-                                node = checkNotNull(node.parent)
-                                parents += node
-                                check(node.windowId == expectedWindowId)
+                        if (!exactTargetIsCheckable) {
+                            repeat(4) {
+                                if (!node.isClickable) {
+                                    node = checkNotNull(node.parent)
+                                    parents += node
+                                    check(node.windowId == expectedWindowId)
+                                }
                             }
                         }
-                        check(node.isClickable && node.isVisibleToUser && node.isEnabled)
-                        check(node.performAction(AccessibilityNodeInfo.ACTION_CLICK)) { "Actual visible dialog action was rejected" }
+                        actionEvidence.put("ancestor_hops", parents.size)
+                        val refreshed = node.refresh()
+                        actionEvidence.put("refresh_succeeded", refreshed)
+                        check(refreshed) { "Actual visible dialog action node became obsolete before dispatch" }
+                        actionEvidence.put("action_node_after_refresh", nodeState(node))
+                        check(node.windowId == expectedWindowId && node.isVisibleToUser && node.isEnabled && node.isClickable)
+                        if (exactTargetIsCheckable) {
+                            check(parents.isEmpty() && node.text?.toString() == text && node.isCheckable) {
+                                "A checkable dialog row must remain its own accessibility action target"
+                            }
+                        }
+                        check(node.actionList.any { it.id == AccessibilityNodeInfo.ACTION_CLICK }) {
+                            "Actual visible dialog action node does not advertise ACTION_CLICK"
+                        }
+                        actionEvidence.put("perform_action_count", 1)
+                        actionAccepted = node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                        actionEvidence.put("perform_action_result", actionAccepted)
                     } finally {
                         parents.forEach(::recycle)
                     }
@@ -699,6 +766,87 @@ internal object PublicHostWindowProbe {
             } finally {
                 recycle(root)
             }
+
+            if (!actionAccepted) {
+                val post = JSONObject()
+                actionEvidence.put("post_rejection", post)
+                try {
+                    val postRoot = instrumentation.uiAutomation.rootInActiveWindow
+                    if (postRoot == null) {
+                        post.put("active_window_present", false)
+                    } else {
+                        try {
+                            post.put("active_window_present", true).put("active_window_id", postRoot.windowId)
+                                .put("active_window_package", postRoot.packageName?.toString())
+                                .put("active_window_class", postRoot.className?.toString())
+                                .put("expected_window_still_active", postRoot.windowId == expectedWindowId)
+                            val knownStates = JSONArray()
+                            required.forEach { knownText ->
+                                val state = try {
+                                    accessibleState(postRoot, knownText)
+                                } catch (failure: Exception) {
+                                    JSONObject().put("text", knownText).put("inspection_error", failure.toString())
+                                }
+                                knownStates.put(state ?: JSONObject().put("text", knownText).put("present", false))
+                            }
+                            post.put("known_text_states", knownStates)
+                            val successorStates = JSONArray()
+                            var successorWindowId: Int? = null
+                            var successorTextsShareActiveWindow = successorTexts.isNotEmpty()
+                            successorTexts.forEach { successorText ->
+                                var state: JSONObject? = null
+                                val stateEvidence = try {
+                                    val observed = accessibleState(postRoot, successorText)
+                                    state = observed
+                                    observed ?: JSONObject().put("text", successorText).put("present", false)
+                                } catch (failure: Exception) {
+                                    JSONObject().put("text", successorText).put("inspection_error", failure.toString())
+                                }
+                                successorStates.put(stateEvidence)
+                                val stateWindowId = state?.getInt("window_id")
+                                if (stateWindowId == null || stateWindowId != postRoot.windowId ||
+                                    (successorWindowId != null && successorWindowId != stateWindowId)
+                                ) {
+                                    successorTextsShareActiveWindow = false
+                                } else {
+                                    successorWindowId = stateWindowId
+                                }
+                            }
+                            post.put("successor_text_states", successorStates)
+                                .put("successor_texts_share_active_window", successorTextsShareActiveWindow)
+                                .put("successor_window_id", successorWindowId ?: JSONObject.NULL)
+                                .put(
+                                    "successor_window_is_new",
+                                    successorTextsShareActiveWindow && successorWindowId != expectedWindowId,
+                                )
+                        } finally {
+                            recycle(postRoot)
+                        }
+                    }
+                } catch (failure: Exception) {
+                    post.put("active_window_inspection_error", failure.toString())
+                }
+                try {
+                    val bitmap = instrumentation.uiAutomation.takeScreenshot()
+                    if (bitmap == null) {
+                        post.put("screenshot_present", false)
+                    } else {
+                        try {
+                            val file = File(directory, "dialog-action-rejected-${actionEvidence.getInt("ordinal")}.png")
+                            file.outputStream().use { check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)) }
+                            val image = binding(file).put("human_reviewed", false)
+                                .put("capture_kind", "actual UiAutomation screen after rejected accessibility action")
+                            screenshots.put(image)
+                            post.put("screenshot_present", true).put("screenshot", image)
+                        } finally {
+                            bitmap.recycle()
+                        }
+                    }
+                } catch (failure: Exception) {
+                    post.put("screenshot_error", failure.toString())
+                }
+            }
+            check(actionAccepted) { "Actual visible dialog action was rejected" }
             checkTime()
             return actionWindowId
         }
@@ -816,7 +964,15 @@ internal object PublicHostWindowProbe {
             val storageListWindowId = localChoice.getInt("window_id")
             check(externalChoice.getInt("window_id") == storageListWindowId)
             report.put("storage_list_initial_checked", localChoice).put("storage_list_initial_unchecked", externalChoice)
-                .put("storage_list_action_window_id", clickVisibleTextInWindow(externalLabel, listOf(localLabel), storageListWindowId))
+                .put(
+                    "storage_list_action_window_id",
+                    clickVisibleTextInWindow(
+                        externalLabel,
+                        listOf(localLabel),
+                        storageListWindowId,
+                        successorTexts = listOf(text, activity.getString(android.R.string.cancel)),
+                    ),
+                )
             marker("profile_external_prompt_await")
             val cancel = activity.getString(android.R.string.cancel)
             val promptWindow = dialogScreen(

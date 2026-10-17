@@ -2903,37 +2903,117 @@ object EditorLifecycleProbe {
                         val tipJobField = Rime::class.java.getDeclaredField("asciiSwitchTipsJob").apply {
                             isAccessible = true
                         }
+                        val engineEditorTokenField = Rime::class.java.getDeclaredField("editorToken").apply {
+                            isAccessible = true
+                        }
+                        val nullInputTypeField = Rime::class.java.getDeclaredField("isNullInputType").apply {
+                            isAccessible = true
+                        }
+                        val configurationImportField = Rime::class.java.getDeclaredField("configurationImportInProgress").apply {
+                            isAccessible = true
+                        }
+                        fun asciiTipDiagnostic(job: Job?): String {
+                            val snapshot = realRime.candidateSnapshotCached
+                            return "preference=${tipsPreference.getValue()}, " +
+                                "engineOwner=${engineEditorTokenField.getLong(null)}, " +
+                                "snapshotOwner=${snapshot.editorToken}, snapshotGeneration=${snapshot.generation}, " +
+                                "prediction=${snapshot.isPrediction}, nullInput=${nullInputTypeField.getBoolean(realRime)}, " +
+                                "configurationImport=${configurationImportField.getBoolean(null)}, " +
+                                "statusAscii=${realRime.statusCached.isAsciiMode}, " +
+                                "cachedAscii=${realRime.getRuntimeOptionCached("ascii_mode")}, " +
+                                "jobIdentity=${job?.let(System::identityHashCode)}, active=${job?.isActive}, " +
+                                "completed=${job?.isCompleted}, cancelled=${job?.isCancelled}"
+                        }
                         try {
                             main { tipsPreference.setValue(true) }
                             var editorTip: Job? = null
                             val previousTipOwner = main { service.editorToken }
                             api {
+                                check(!statusCached.isAsciiMode) {
+                                    "Expected Chinese mode before editor-tip preparation; " +
+                                        asciiTipDiagnostic(tipJobField.get(realRime) as Job?)
+                                }
+                                val tipBeforePreparation = tipJobField.get(realRime) as Job?
                                 setRuntimeOption("ascii_mode", true)
+                                val preparationTip = checkNotNull(tipJobField.get(realRime) as Job?)
+                                check(preparationTip !== tipBeforePreparation && preparationTip.isActive && statusCached.isAsciiMode) {
+                                    "No fresh pending ASCII preparation tip; ${asciiTipDiagnostic(preparationTip)}"
+                                }
+                                withTimeout(5000) { preparationTip.join() }
+                                check(preparationTip.isCompleted && !preparationTip.isCancelled) {
+                                    "ASCII preparation tip did not clear normally; ${asciiTipDiagnostic(preparationTip)}"
+                                }
+                            }
+                            api {
+                                check(statusCached.isAsciiMode) {
+                                    "ASCII preparation did not preserve its mode; " +
+                                        asciiTipDiagnostic(tipJobField.get(realRime) as Job?)
+                                }
+                                val tipBeforeToggle = tipJobField.get(realRime) as Job?
                                 setRuntimeOption("ascii_mode", false)
-                                editorTip = checkNotNull(tipJobField.get(realRime) as Job?)
-                                check(checkNotNull(editorTip).isActive) { "No pending ASCII tip before real editor change" }
+                                val pendingTip = checkNotNull(tipJobField.get(realRime) as Job?)
+                                editorTip = pendingTip
+                                check(pendingTip !== tipBeforeToggle && pendingTip.isActive && !statusCached.isAsciiMode) {
+                                    "No fresh pending Chinese-mode tip before real editor change; ${asciiTipDiagnostic(pendingTip)}"
+                                }
                             }
                             focus(other)
                             until("ASCII-tip owner changes with real focus") {
                                 service.editorToken != previousTipOwner && service.currentInputEditorInfo?.fieldId == other.id
                             }
                             api {
-                                check(checkNotNull(editorTip).isCancelled) { "Old editor's ASCII tip survived focus change" }
-                                check(tipJobField.get(realRime) !== editorTip) { "Next editor retained the old ASCII-tip job" }
+                                val cancelledTip = checkNotNull(editorTip)
+                                check(cancelledTip.isCancelled) {
+                                    "Old editor's ASCII tip survived focus change; ${asciiTipDiagnostic(cancelledTip)}"
+                                }
+                                check(tipJobField.get(realRime) !== cancelledTip) {
+                                    "Next editor retained the old ASCII-tip job; ${asciiTipDiagnostic(cancelledTip)}"
+                                }
                             }
                             focus(chat)
                             phase("PASS: real editor focus change cancels the previous editor's ASCII tip")
                             api {
+                                check(!statusCached.isAsciiMode) {
+                                    "Chat did not restore Chinese mode before redeploy preparation; " +
+                                        asciiTipDiagnostic(tipJobField.get(realRime) as Job?)
+                                }
+                                val tipBeforePreparation = tipJobField.get(realRime) as Job?
                                 setRuntimeOption("ascii_mode", true)
+                                val preparationTip = checkNotNull(tipJobField.get(realRime) as Job?)
+                                check(preparationTip !== tipBeforePreparation && preparationTip.isActive && statusCached.isAsciiMode) {
+                                    "No fresh pending redeploy preparation tip; ${asciiTipDiagnostic(preparationTip)}"
+                                }
+                                withTimeout(5000) { preparationTip.join() }
+                                check(preparationTip.isCompleted && !preparationTip.isCancelled) {
+                                    "Redeploy preparation tip did not clear normally; ${asciiTipDiagnostic(preparationTip)}"
+                                }
+                            }
+                            api {
+                                check(statusCached.isAsciiMode) {
+                                    "Redeploy preparation did not preserve ASCII mode; " +
+                                        asciiTipDiagnostic(tipJobField.get(realRime) as Job?)
+                                }
+                                val tipBeforeToggle = tipJobField.get(realRime) as Job?
                                 setRuntimeOption("ascii_mode", false)
                                 val previousTip = checkNotNull(tipJobField.get(realRime) as Job?)
-                                check(previousTip.isActive) { "No pending ASCII tip before redeploy" }
+                                check(previousTip !== tipBeforeToggle && previousTip.isActive && !statusCached.isAsciiMode) {
+                                    "No fresh pending Chinese-mode tip before redeploy; ${asciiTipDiagnostic(previousTip)}"
+                                }
                                 updateConfig()
-                                check(previousTip.isCancelled) { "Old native context's ASCII tip survived redeploy" }
+                                check(previousTip.isCancelled) {
+                                    "Old native context's ASCII tip survived redeploy; ${asciiTipDiagnostic(previousTip)}"
+                                }
                                 val currentTip = checkNotNull(tipJobField.get(realRime) as Job?)
-                                check(currentTip !== previousTip) { "Redeploy reused the old ASCII-tip timer" }
+                                check(currentTip !== previousTip) {
+                                    "Redeploy reused the old ASCII-tip timer; ${asciiTipDiagnostic(currentTip)}"
+                                }
                                 withTimeout(5000) { currentTip.join() }
-                                check(currentTip.isCompleted && !currentTip.isCancelled) { "New engine's ASCII tip did not clear normally" }
+                                check(currentTip.isCompleted && !currentTip.isCancelled) {
+                                    "New engine's ASCII tip did not clear normally; ${asciiTipDiagnostic(currentTip)}"
+                                }
+                                check(!statusCached.isAsciiMode) {
+                                    "Native restart lost Chinese mode; ${asciiTipDiagnostic(currentTip)}"
+                                }
                                 // startRime() publishes a fresh tip for the active editor's empty
                                 // composition. Assert the complete transient-state boundary after that new
                                 // timer restores the native engine's empty composition.
