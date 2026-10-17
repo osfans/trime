@@ -20,7 +20,8 @@ class PrivacyTransitionBoundary final {
   ~PrivacyTransitionBoundary() noexcept;
 
   PrivacyTransitionBoundary(const PrivacyTransitionBoundary&) = delete;
-  PrivacyTransitionBoundary& operator=(const PrivacyTransitionBoundary&) = delete;
+  PrivacyTransitionBoundary& operator=(const PrivacyTransitionBoundary&) =
+      delete;
 };
 
 }  // namespace trime

@@ -14,7 +14,8 @@ class PredictionTransitionBoundary final {
   PredictionTransitionBoundary() noexcept;
   ~PredictionTransitionBoundary() noexcept;
   PredictionTransitionBoundary(const PredictionTransitionBoundary&) = delete;
-  PredictionTransitionBoundary& operator=(const PredictionTransitionBoundary&) = delete;
+  PredictionTransitionBoundary& operator=(const PredictionTransitionBoundary&) =
+      delete;
 };
 
 }  // namespace trime

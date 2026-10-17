@@ -22,10 +22,10 @@ class PinnedTranslation : public rime::Translation {
       if (!candidate) break;
       prefix_.push_back(candidate);
     }
-    auto found = std::find_if(prefix_.begin(), prefix_.end(),
-                              [&](const auto& c) { return c->text() == pinned; });
-    if (found != prefix_.end())
-      std::rotate(prefix_.begin(), found, found + 1);
+    auto found =
+        std::find_if(prefix_.begin(), prefix_.end(),
+                     [&](const auto& c) { return c->text() == pinned; });
+    if (found != prefix_.end()) std::rotate(prefix_.begin(), found, found + 1);
     set_exhausted(prefix_.empty());
   }
 

@@ -2,19 +2,19 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include <rime_levers_api.h>
+#include <fcntl.h>
 #include <rime/deployer.h>
 #include <rime/dict/db_utils.h>
 #include <rime/dict/user_db.h>
 #include <rime/service.h>
+#include <rime_levers_api.h>
+#include <unistd.h>
 
-#include <memory>
-#include <filesystem>
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
-#include <fcntl.h>
-#include <unistd.h>
+#include <filesystem>
+#include <memory>
 
 static bool ensureDictionaryInstallation() {
   auto& deployer = rime::Service::instance().deployer();
@@ -26,9 +26,8 @@ static bool ensureDictionaryInstallation() {
   const auto& user_id = deployer.user_id;
   return !user_id.empty() && user_id != "unknown" && user_id != "." &&
          user_id != ".." && user_id.find_first_of("/\\") == std::string::npos &&
-         std::none_of(user_id.begin(), user_id.end(), [](unsigned char c) {
-           return c < 0x20 || c == 0x7f;
-         });
+         std::none_of(user_id.begin(), user_id.end(),
+                      [](unsigned char c) { return c < 0x20 || c == 0x7f; });
 }
 
 static bool backupDictionaryChecked(const std::string& name) {
@@ -37,9 +36,11 @@ static bool backupDictionaryChecked(const std::string& name) {
   std::unique_ptr<rime::Db> db(component->Create(name));
   if (!db->OpenReadOnly() || !rime::UserDbHelper(db.get()).IsUserDb())
     return false;
-  const auto directory = rime::Service::instance().deployer().user_data_sync_dir();
+  const auto directory =
+      rime::Service::instance().deployer().user_data_sync_dir();
   std::filesystem::create_directories(directory);
-  const auto destination = directory / (name + rime::UserDb::snapshot_extension());
+  const auto destination =
+      directory / (name + rime::UserDb::snapshot_extension());
   auto pattern = destination.string() + ".tmp.XXXXXX";
   std::vector<char> filename(pattern.begin(), pattern.end());
   filename.push_back('\0');
@@ -68,7 +69,8 @@ static bool backupDictionaryChecked(const std::string& name) {
     rime::DbSource source(db.get());
     std::string key, value;
     while (source.MetaGet(&key, &value)) {
-      if (!field(key) || !field(value) || !write("#@" + key + "\t" + value + "\n"))
+      if (!field(key) || !field(value) ||
+          !write("#@" + key + "\t" + value + "\n"))
         return false;
     }
     while (source.Get(&key, &value)) {
@@ -216,8 +218,9 @@ Java_com_osfans_trime_data_userdict_UserDictManager_backupUserDict(
     SwitcherSettings switcher;
     const std::string name(*CString(env, dict_name));
     if (!switcher.backupUserDict(name)) return false;
-    const auto file = rime::Service::instance().deployer().user_data_sync_dir() /
-                      (name + rime::UserDb::snapshot_extension());
+    const auto file =
+        rime::Service::instance().deployer().user_data_sync_dir() /
+        (name + rime::UserDb::snapshot_extension());
     return std::filesystem::is_regular_file(file) &&
            std::filesystem::file_size(file) > 0;
   });

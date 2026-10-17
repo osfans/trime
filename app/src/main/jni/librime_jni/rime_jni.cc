@@ -12,21 +12,21 @@
 #include <rime_api.h>
 
 #include <algorithm>
+#include <map>
 #include <memory>
 #include <mutex>
-#include <map>
 #include <string>
 #include <vector>
 
-#include "frontend.h"
 #include "candidate_ranking.h"
+#include "frontend.h"
 #include "jni-utils.h"
 #include "objconv.h"
+#include "predict/prediction_key_policy.h"
 #include "session.h"
 #include "t9.h"
-#include "trime_privacy_guard.h"
 #include "trime_prediction_guard.h"
-#include "predict/prediction_key_policy.h"
+#include "trime_privacy_guard.h"
 
 #define MAX_BUFFER_LENGTH 2048
 
@@ -115,8 +115,8 @@ class Rime {
     auto current = rime::Service::instance().GetSession(session());
     // T9 intercepts physical digits before Rime processors. Remove the
     // optional next-word menu first so this very key starts fresh T9 input.
-    if (hasPrediction() && trime::prediction::ShouldDismissForKey(
-                               rime::KeyEvent(keycode, mask)))
+    if (hasPrediction() &&
+        trime::prediction::ShouldDismissForKey(rime::KeyEvent(keycode, mask)))
       clearPredictionContext();
     const bool handled = t9_.ProcessKey(current.get(), keycode, mask) ||
                          rime->process_key(session(), keycode, mask);
@@ -126,8 +126,9 @@ class Rime {
 
   bool simulateKeySequence(const std::string& sequence) {
     const auto state = t9Snapshot();
-    const bool has_locked = std::any_of(state.segments.begin(), state.segments.end(),
-                                       [](const auto& span) { return span.locked; });
+    const bool has_locked =
+        std::any_of(state.segments.begin(), state.segments.end(),
+                    [](const auto& span) { return span.locked; });
     rime::KeySequence keys;
     if (!keys.Parse(sequence)) return false;
     for (const auto& key : keys) {
@@ -171,12 +172,13 @@ class Rime {
 
   bool setPredictionEnabled(bool enabled) {
     trime::SetPredictionRequested(enabled);
-    const bool allowed = enabled && !privacy_mode_ &&
-                           !trime::IsPrivacyModeEnabled();
+    const bool allowed =
+        enabled && !privacy_mode_ && !trime::IsPrivacyModeEnabled();
     const auto id = session(false);
     auto current = id ? rime::Service::instance().GetSession(id) : nullptr;
     if (current) current->ResetPredictionContexts(allowed, true);
-    return allowed && (!current || !current->context()->get_option("ascii_mode"));
+    return allowed &&
+           (!current || !current->context()->get_option("ascii_mode"));
   }
 
   void clearComposition() {
@@ -348,8 +350,8 @@ class Rime {
   }
 
   bool selectCandidate(size_t index, bool global) {
-    if (hasPrediction() && (!trime::IsPredictionRequested() ||
-                            trime::IsPrivacyModeEnabled())) {
+    if (hasPrediction() &&
+        (!trime::IsPredictionRequested() || trime::IsPrivacyModeEnabled())) {
       clearPredictionContext();
       return false;
     }
@@ -368,17 +370,20 @@ class Rime {
     const auto page_size = current->schema()->page_size();
     if (page_size <= 0 || (!global && index >= static_cast<size_t>(page_size)))
       return false;
-    const auto actual = global ? index :
-        (segment.selected_index / page_size) * page_size + index;
+    const auto actual =
+        global ? index
+               : (segment.selected_index / page_size) * page_size + index;
     if (!segment.GetCandidateAt(actual)) return false;
     auto previous_menu = segment.menu;
-    const bool accepted = global ? rime->delete_candidate(session(), index) :
-        rime->delete_candidate_on_current_page(session(), index);
+    const bool accepted =
+        global ? rime->delete_candidate(session(), index)
+               : rime->delete_candidate_on_current_page(session(), index);
     // Rime's Boolean acknowledges dispatch even when no translator handles it.
     // A handling Memory refreshes the menu; this still does not promise durable
     // storage success, which the UI accurately describes as a forget request.
-    return accepted && (current->context()->composition().empty() ||
-           current->context()->composition().back().menu != previous_menu);
+    return accepted &&
+           (current->context()->composition().empty() ||
+            current->context()->composition().back().menu != previous_menu);
   }
 
   bool changePage(bool backward) {
@@ -430,7 +435,8 @@ class Rime {
       if (page_size <= 0 || index < 0 || index >= page_size) return {};
       index += (segment.selected_index / page_size) * page_size;
     }
-    if (index < 0 || index >= static_cast<int>(trime::PinnedTranslation::kWindow))
+    if (index < 0 ||
+        index >= static_cast<int>(trime::PinnedTranslation::kWindow))
       return {};
     auto candidate = segment.GetCandidateAt(index);
     if (!candidate) return {};
@@ -454,13 +460,16 @@ class Rime {
     original_menu_ = segment.menu;
     auto selected = segment.GetSelectedCandidate();
     const auto selected_index = segment.selected_index;
-    auto translation = rime::New<trime::PinnedTranslation>(original_menu_, found->second);
+    auto translation =
+        rime::New<trime::PinnedTranslation>(original_menu_, found->second);
     ranked_menu_ = rime::New<rime::Menu>();
     ranked_menu_->AddTranslation(translation);
     segment.menu = ranked_menu_;
-    // A guessed first candidate becomes the pinned candidate. Explicit navigation
-    // retains its selected object even when its index moves within the window.
-    if (selected_index > 0 && selected_index < trime::PinnedTranslation::kWindow)
+    // A guessed first candidate becomes the pinned candidate. Explicit
+    // navigation retains its selected object even when its index moves within
+    // the window.
+    if (selected_index > 0 &&
+        selected_index < trime::PinnedTranslation::kWindow)
       segment.selected_index = translation->indexOf(selected);
   }
 
@@ -651,26 +660,26 @@ Java_com_osfans_trime_core_Rime_exitRime(JNIEnv* env, jclass /* thiz */) {
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_osfans_trime_core_Rime_suspendRimeUserDictionarySession(JNIEnv* env,
-                                                               jclass) {
+                                                                 jclass) {
   jniCall(env, [&] { Rime::Instance().suspendUserDictionarySession(); });
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_osfans_trime_core_Rime_setRimeCandidatePins(JNIEnv* env, jclass,
-                                                   jobjectArray schemas,
-                                                   jobjectArray inputs,
-                                                   jobjectArray texts) {
+                                                     jobjectArray schemas,
+                                                     jobjectArray inputs,
+                                                     jobjectArray texts) {
   jniCall(env, [&] {
     Rime::Instance().setCandidatePins(stringArrayToStringVector(env, schemas),
-                                    stringArrayToStringVector(env, inputs),
-                                    stringArrayToStringVector(env, texts));
+                                      stringArrayToStringVector(env, inputs),
+                                      stringArrayToStringVector(env, texts));
   });
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL
 Java_com_osfans_trime_core_Rime_getRimeCandidatePinIdentity(JNIEnv* env, jclass,
-                                                          jint index,
-                                                          jboolean global) {
+                                                            jint index,
+                                                            jboolean global) {
   return jniCall(env, [&]() -> jobjectArray {
     return stringVectorToJStringArray(
         env, Rime::Instance().candidatePinIdentity(index, global));
@@ -762,17 +771,17 @@ Java_com_osfans_trime_core_Rime_setRimePrivacyMode(JNIEnv*, jclass,
 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_setRimePredictionEnabled(JNIEnv* env, jclass,
-                                                       jboolean enabled) {
+                                                         jboolean enabled) {
   return jniCall(env, [&] {
     return Rime::Instance().setPredictionEnabled(enabled == JNI_TRUE);
   });
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_osfans_trime_core_Rime_clearRimePredictionContext(JNIEnv* env, jclass) {
-  return jniCall(env, [&] {
-    return Rime::Instance().clearPredictionContext();
-  });
+Java_com_osfans_trime_core_Rime_clearRimePredictionContext(JNIEnv* env,
+                                                           jclass) {
+  return jniCall(env,
+                 [&] { return Rime::Instance().clearPredictionContext(); });
 }
 
 extern "C" JNIEXPORT jint JNICALL
@@ -844,8 +853,8 @@ Java_com_osfans_trime_core_Rime_selectRimeCandidate(JNIEnv* env,
                                                     jboolean global) {
   if (index < 0) return JNI_FALSE;
   return jniCall(env, [&] {
-    return static_cast<jboolean>(Rime::Instance().selectCandidate(
-        static_cast<size_t>(index), global));
+    return static_cast<jboolean>(
+        Rime::Instance().selectCandidate(static_cast<size_t>(index), global));
   });
 }
 
@@ -856,8 +865,8 @@ Java_com_osfans_trime_core_Rime_deleteRimeCandidate(JNIEnv* env,
                                                     jboolean global) {
   if (index < 0) return JNI_FALSE;
   return jniCall(env, [&] {
-    return static_cast<jboolean>(Rime::Instance().deleteCandidate(
-        static_cast<size_t>(index), global));
+    return static_cast<jboolean>(
+        Rime::Instance().deleteCandidate(static_cast<size_t>(index), global));
   });
 }
 
@@ -911,11 +920,13 @@ Java_com_osfans_trime_core_Rime_getRimeResponse(JNIEnv* env, jclass clazz,
     // This flag describes the very same native snapshot as the candidate
     // objects above; no per-candidate or extra frontend JNI query is needed.
     if (!jCandidates || env->ExceptionCheck()) return nullptr;
-    const auto set_prediction = paging_mode ? GlobalRef->CandidatesPagedSetPrediction
-                                            : GlobalRef->CandidatesBulkSetPrediction;
+    const auto set_prediction = paging_mode
+                                    ? GlobalRef->CandidatesPagedSetPrediction
+                                    : GlobalRef->CandidatesBulkSetPrediction;
     if (!set_prediction) return nullptr;
-    env->CallVoidMethod(jCandidates, set_prediction,
-                        Rime::Instance().hasPrediction() ? JNI_TRUE : JNI_FALSE);
+    env->CallVoidMethod(
+        jCandidates, set_prediction,
+        Rime::Instance().hasPrediction() ? JNI_TRUE : JNI_FALSE);
     if (env->ExceptionCheck()) return nullptr;
     return rimeResponseToJObject(env, jCommit, jComposition, jCandidates,
                                  jStatus);
