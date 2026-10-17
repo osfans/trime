@@ -6,7 +6,7 @@ fixtures. It does not reset the Rime user dictionary or run orphan cleanup
 against the application's live Rime data directory.
 
 ```sh
-adb -s emulator-5560 shell am instrument -w -r -e saf true \
+adb -s SERIAL shell am instrument -w -r -e saf true \
   com.osfans.trime.debug.test/com.osfans.trime.StartupResponsivenessInstrumentation
 ```
 
@@ -25,7 +25,7 @@ For the real system provider, select a newly created `trime-saf-UUID` directory
 in the system document picker on the disposable emulator. Pass its granted URI:
 
 ```sh
-adb -s emulator-5560 shell am instrument -w -r -e saf true \
+adb -s SERIAL shell am instrument -w -r -e saf true \
   -e safTree 'content://com.android.externalstorage.documents/tree/primary%3ADocuments%2Ftrime-saf-UUID' \
   com.osfans.trime.debug.test/com.osfans.trime.StartupResponsivenessInstrumentation
 ```

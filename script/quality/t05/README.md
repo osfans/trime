@@ -1,7 +1,7 @@
 # T05: separate phonetic fuzzing and digit repair
 
-Historical T05 experiment: `3.3.13-t9.7-dev.1` / `20261110`, not a published release.
-These identifiers describe that experiment, not the current build under test.
+This document describes the historical T05 experiment, not a published release.
+Bind each result to the frozen APK's manifest identity and SHA-256.
 
 ## Interaction contract
 
@@ -89,7 +89,7 @@ commit and canonical user learning across process restart. Run it against the
 ```sh
 python3 -B script/t9/run.py --cxx /absolute/matching-build/arm64-v8a \
   --library /absolute/frozen/lib/arm64-v8a/librime_jni.so \
-  --adb /absolute/android-sdk/platform-tools/adb --serial emulator-5560 \
+  --adb /absolute/android-sdk/platform-tools/adb --serial SERIAL \
   --source assist_test.cc
 ```
 
@@ -103,7 +103,7 @@ on a memory-constrained host.
 
 ```sh
 python3 -B script/quality/run_t03.py --probe t05 --case 360 \
-  --adb /absolute/android-sdk/platform-tools/adb --serial emulator-5560 \
+  --adb /absolute/android-sdk/platform-tools/adb --serial SERIAL \
   --output build/t05/ui-360
 ```
 
@@ -144,7 +144,7 @@ runner) measures the main looper through wizard launch, 300 coalesced refresh
 requests, actual navigation and pause. It does not change storage modes or clear
 data. Require both `passed=true` and `INSTRUMENTATION_CODE: -1`.
 
-`run_startup.py --adb PATH --serial emulator-5560 --output NEWDIR --runs 5`
+`run_startup.py --adb PATH --serial SERIAL --output NEWDIR --runs 5`
 records the installed APK checksum and repeats that wizard probe in separate
 processes. It refuses non-emulators. The runner's `-e shutdown true` probe checks
 that losing the last client during STARTING eventually stops the engine, while a

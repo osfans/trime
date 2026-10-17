@@ -25,7 +25,7 @@ from editor_pixels import audit_t9_pixels, normalize_screenshot
 from runtime_audit import LOG_LINE, audit_log, device_audit_lock, log_after_marker, record_logcat
 
 PACKAGE = 'com.osfans.trime.debug'
-FIXTURE = 'org.x2m7.trime.editorfixture'
+FIXTURE = 'com.osfans.trime.editorfixture'
 
 
 def main():
@@ -63,7 +63,7 @@ def run(args):
                 'serial': args.serial, 'source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                 'fullscreen_matrix': not args.split_screen_only, 'split_screen': args.split_screen,
                 'release': args.release, 'process_kill': 'root_shell' if args.release else 'run_as', 'packages': {}}
-    for package, path in ((PACKAGE, args.apk), (FIXTURE, args.fixture_apk), ('org.x2m7.trime.editorobserver', args.observer_apk)):
+    for package, path in ((PACKAGE, args.apk), (FIXTURE, args.fixture_apk), ('com.osfans.trime.editorobserver', args.observer_apk)):
         remote = shell('pm', 'path', package).removeprefix('package:')
         assert remote.startswith('/') and '\n' not in remote
         with tempfile.TemporaryFile() as apk:

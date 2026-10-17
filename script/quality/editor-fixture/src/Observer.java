@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
-package org.x2m7.trime.editorobserver;
+package com.osfans.trime.editorobserver;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Activity;

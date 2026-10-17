@@ -1146,7 +1146,7 @@ def main() -> int:
     parser.add_argument("--app-apk-name", help="App APK leaf filename recorded in candidate identity.json")
     parser.add_argument("--test-apk-name", help="Test APK leaf filename recorded in candidate identity.json")
     parser.add_argument("--adb", type=Path, help="Executable adb; otherwise resolve SDK environment/PATH")
-    parser.add_argument("--serial", default="emulator-5560")
+    parser.add_argument("--serial")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--selftest", action="store_true")
     args = parser.parse_args()
@@ -1165,6 +1165,8 @@ def main() -> int:
         return selftest()
     if args.stage is None:
         parser.error("--stage is required")
+    if args.serial is None:
+        parser.error("--serial is required for a runtime stage")
     if args.candidate is None:
         parser.error("--candidate is required for a runtime stage")
     if args.commit is None:

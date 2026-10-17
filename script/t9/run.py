@@ -21,7 +21,7 @@ def main():
     p.add_argument('--cxx', type=pathlib.Path, required=True)
     p.add_argument('--library', type=pathlib.Path, required=True)
     p.add_argument('--adb', type=pathlib.Path, required=True)
-    p.add_argument('--serial', default='emulator-5554')
+    p.add_argument('--serial', required=True)
     p.add_argument('--source', choices=['experiment.cc', 'controller_test.cc', 'assist_test.cc', 'assist_benchmark.cc', 'jni_bridge_test.cc', 'deployment_test.cc'], default='experiment.cc')
     p.add_argument('--benchmark-shared', type=pathlib.Path,
                    help='Isolated system resources including build/*.bin for assist_benchmark.cc')

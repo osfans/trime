@@ -65,7 +65,7 @@ python3 -B script/quality/t04/layers.py --out build/t04/packs-local
 python3 -B script/quality/t04/run.py \
   --baseline "$BASELINE" --packs build/t04/packs-local \
   --cxx "$CXX" --adb "$ANDROID_SDK_ROOT/platform-tools/adb" \
-  --serial emulator-5560
+  --serial SERIAL
 python3 -B script/quality/t04/summarize.py build/t04/runs/RUN_ID
 python3 -B script/quality/t04/audit.py path/to/application.apk
 ```

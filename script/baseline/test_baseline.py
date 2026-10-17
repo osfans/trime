@@ -40,7 +40,7 @@ class BaselineTest(unittest.TestCase):
                                     baseline.HERE / "corpus.json", self.sdk_tools, compiled_from)
 
     def test_fetch_latest_repository_is_explicit_and_recorded(self):
-        for repository in ("osfans/trime", "X2M7/trime"):
+        for repository in ("osfans/trime", "sample-owner/sample-repo"):
             payload = b"synthetic-not-an-apk"
             asset = dict(name="fixture-arm64-v8a.apk", browser_download_url="https://example.invalid/fixture.apk",
                          digest="sha256:" + baseline.hashlib.sha256(payload).hexdigest())

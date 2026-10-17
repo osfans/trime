@@ -54,7 +54,7 @@ python3 script/t9/run.py \
   --cxx app/.cxx/Debug/BUILD_HASH/arm64-v8a \
   --library /path/to/librime_jni.so \
   --adb /path/to/android-sdk/platform-tools/adb \
-  --serial emulator-5554 \
+  --serial SERIAL \
   --double-schema /usr/share/rime-data/double_pinyin.schema.yaml
 ```
 
@@ -86,7 +86,7 @@ python3 script/t9/run.py \
 安装同一次构建的 debug APK 与 androidTest APK，并在独立测试模拟器中启用该输入法后执行：
 
 ```sh
-adb -s emulator-5560 shell am instrument -w -r -e t02 true \
+adb -s SERIAL shell am instrument -w -r -e t02 true \
   com.osfans.trime.debug.test/com.osfans.trime.StartupResponsivenessInstrumentation
 ```
 

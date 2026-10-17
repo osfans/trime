@@ -17,7 +17,7 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--observer', action='store_true')
     args = parser.parse_args()
-    package = 'org.x2m7.trime.' + ('editorobserver' if args.observer else 'editorfixture')
+    package = 'com.osfans.trime.' + ('editorobserver' if args.observer else 'editorfixture')
     source = Path(__file__).resolve().parent
     out = args.output.resolve()
     out.mkdir(parents=True, exist_ok=False)

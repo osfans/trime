@@ -1,7 +1,7 @@
 # Stable build-plugin backport
 
 AGP 9.4.1 and KSP 2.3.11 still call `Configuration.setVisible(false)`.
-Build8 emitted 52 AGP and 3 KSP deprecations per build phase on Gradle 9.8.1.
+A Gradle 9.8.1 configuration run emits 52 AGP and 3 KSP deprecations per build phase.
 There are 28 distinct AGP bytecode call sites and 3 KSP call sites; source-set
 configuration executes some AGP sites repeatedly. These are build-plugin calls,
 not application compiler or Android Lint warnings.
@@ -66,11 +66,18 @@ Their complete class-name sets match the corresponding original JARs. All
 and discarded result; the real consumption/resolution flag invocations also
 match (AGP 28/8, KSP 3/3 in the inspected classes). Raw and instrumented inputs
 are independently hash-checked against their own complete bytes before
-patching. The audit receipt and all four actual `javap` outputs are under
-`build/stable-warning-debug/plugin-input-audit2/`; the earlier audit1 resource
-set assumption failed and is preserved. Class-only instrumented JARs do not
-contain the original resources; the separate raw route retains those exact
-resources and plugin registrations.
+patching. Reproduce the executable checks from a clean checkout with:
+
+```sh
+./gradlew :build-logic:compatibility:test
+./gradlew help --warning-mode=fail
+```
+
+For a bytecode inventory, resolve the pinned artifacts above, verify their
+complete SHA-256 values, and run `javap -c -p` on the 18 class names listed in
+`GradleVisibleBackport.kt`. Class-only instrumented JARs do not contain the
+original resources; the separate raw route retains those exact resources and
+plugin registrations.
 
 The plugin explicitly requires Gradle 9.8.1 and JDK 17. A different version,
 an unknown instrumented artifact or a changed generated hash fails rather than
@@ -126,9 +133,20 @@ the guards merely to accommodate a new plugin release.
 
 Removing the legacy application keep rules lets the bundled coroutines 1.11.0
 R8 rules rewrite service loading into direct Android provider construction.
-The first actual t9.12 build still retained two service files, renamed after
-interface merging, and each Release APK still emitted two v1 signature warnings.
-That failed inspection is retained under `build/stable-warning-debug/inspection1/`.
+A pre-fix Release inspection retained two service files renamed after interface
+merging, and each Release APK emitted two v1 signature warnings. Reproduce the
+post-fix packaging and signature checks from a clean checkout with:
+
+```sh
+./gradlew :app:assembleRelease --warning-mode=fail
+for apk in app/build/outputs/apk/release/*.apk; do
+  if unzip -Z1 "$apk" | grep -E 'META-INF/services/kotlinx[.]coroutines[.](internal[.]MainDispatcherFactory|CoroutineExceptionHandler|android[.]AndroidDispatcherFactory|android[.]AndroidExceptionPreHandler)'; then
+    echo "unexpected optimized coroutine service descriptor in $apk" >&2
+    exit 1
+  fi
+  "$ANDROID_SDK_ROOT/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$apk"
+done
+```
 
 `RemoveOptimizedCoroutineServicesTask` transforms the R8-produced Java resource
 archive before APK packaging and signing. The original service descriptors stay

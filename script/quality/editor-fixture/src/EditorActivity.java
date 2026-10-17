@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-package org.x2m7.trime.editorfixture;
+package com.osfans.trime.editorfixture;
 
 import android.app.Activity;
 import android.os.Bundle;

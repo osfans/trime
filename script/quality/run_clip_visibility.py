@@ -33,7 +33,7 @@ from runtime_audit import audit_log, device_audit_lock, filter_pid_log, log_afte
 PACKAGE = "com.osfans.trime.debug"
 ACTIVITY = PACKAGE + "/com.osfans.trime.ui.main.ClipEditActivity"
 IME = PACKAGE + "/com.osfans.trime.ime.core.TrimeInputMethodService"
-OBSERVER = "org.x2m7.trime.editorobserver"
+OBSERVER = "com.osfans.trime.editorobserver"
 FIELD = PACKAGE + ":id/clip_edit_text"
 OK = PACKAGE + ":id/clip_edit_ok"
 CANCEL = PACKAGE + ":id/clip_edit_cancel"
@@ -384,7 +384,7 @@ def main():
     parser.add_argument("--apk", required=True, type=Path)
     parser.add_argument("--output", type=Path, default=REPO / "build/t06-runtime" / ("clip-largefont-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")))
     parser.add_argument("--adb", type=Path, help="Executable adb; otherwise resolve SDK environment/PATH")
-    parser.add_argument("--serial", choices=["emulator-5560"], default="emulator-5560")
+    parser.add_argument("--serial", required=True)
     parser.add_argument("--latin-ime", default="com.android.inputmethod.latin/.LatinIME")
     args = parser.parse_args()
     args.adb = resolve_adb(args.adb)

@@ -102,7 +102,7 @@ python3 script/baseline/baseline.py prepare --apk /path/to/application.apk --lab
 
 ### 使用已安装的模拟器
 
-同一套 `device`、`run`、`capture` 命令也支持模拟器，将 `SERIAL` 替换为实际序列号（例如 `emulator-5554`）。
+同一套 `device`、`run`、`capture` 命令也支持模拟器，将 `SERIAL` 替换为 `adb devices -l` 显示的实际序列号。
 优先使用独立测试 AVD；也可用 `emulator -avd NAME -read-only -no-snapshot` 启动已有 AVD 的临时会话，避免保存安装与配置变化。
 不要对日常使用的 AVD 执行 `-wipe-data` 或 `pm clear`。控制模拟器为两个 CPU 核心，并顺序运行测试。
 
@@ -145,7 +145,9 @@ python3 script/baseline/baseline.py capture --run /path/to/RUN --serial SERIAL
 截图与内存采集反映现有 Android 应用状态，标为 `installed_uncontrolled`，不会错误归入隔离引擎的 cold/learned 组。
 真实界面当前使用的 schema 尚未通过此工具读取，因此 `schema_state` 标为 `not_observed`；APK 内置方案不能冒充手机当前部署方案。
 可用 `--runtime-export /path/to/export` 对手动导出的运行配置记录文件摘要，不复制其内容；导出目录可能不是实时快照，报告会保留这一限制。
-提交问题时一并附上 `report.json` 与相关 `.identity.json`，补充当前实际方案、配置变更和复现步骤。
+原始 `report.json` 与 `.identity.json` 会保留设备序列号、构建指纹、型号和 AVD 名称，
+用于在本地绑定验收证据。提交问题前请制作并明确标记一份脱敏副本，移除或替换这些字段；
+不要改写作为验收依据的原始文件。提交脱敏副本时一并补充当前实际方案、配置变更和复现步骤。
 
 ```sh
 python3 script/baseline/baseline.py compare /path/to/LATEST_RUN /path/to/DEVELOP_RUN --out build/baseline/comparison.md

@@ -23,7 +23,7 @@ from runtime_audit import (
 )
 
 PACKAGE = 'com.osfans.trime.debug'
-FIXTURE = 'org.x2m7.trime.editorfixture'
+FIXTURE = 'com.osfans.trime.editorfixture'
 IME = PACKAGE + '/com.osfans.trime.ime.core.TrimeInputMethodService'
 EDITOR_ID = FIXTURE + ':id/editor'
 SYSTEM_NAV_PACKAGES = frozenset({'com.android.systemui', 'com.android.launcher3'})
@@ -271,7 +271,7 @@ def run(args):
         'source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         'packages': {},
     }
-    for package in (PACKAGE, FIXTURE, 'org.x2m7.trime.editorobserver'):
+    for package in (PACKAGE, FIXTURE, 'com.osfans.trime.editorobserver'):
         path = shell('pm', 'path', package).removeprefix('package:')
         content = subprocess.check_output(adb + ['exec-out', 'cat', path], timeout=120)
         identity['packages'][package] = hashlib.sha256(content).hexdigest()

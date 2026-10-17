@@ -278,7 +278,7 @@ if __name__ == "__main__":
     parser.add_argument("--packs", type=Path, required=True)
     parser.add_argument("--cxx", type=Path, required=True)
     parser.add_argument("--adb", type=Path, required=True)
-    parser.add_argument("--serial", default="emulator-5560")
+    parser.add_argument("--serial", required=True)
     parser.add_argument("--corpus", type=Path, default=HERE / "corpus.json")
     parser.add_argument("--out", type=Path, default=ROOT / "build/t04/runs")
     parser.add_argument("--profiles", nargs="+", choices=["luna", "common", "extended", "balanced", "compact"],
