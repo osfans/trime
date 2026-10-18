@@ -38,7 +38,7 @@ class ClipEditActivity : Activity() {
                 clipEditOk.setOnClickListener { finishEditing() }
             }
         setContentView(binding.root)
-        inputMethodManager.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+        inputMethodManager.showSoftInput(editText, 0)
         processIntent(intent)
     }
 
