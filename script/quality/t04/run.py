@@ -56,7 +56,7 @@ def compile_probe(cxx, library, output, remote="$ORIGIN"):
             i += 1
     subprocess.run([command[0], *flags, "-std=c++17", "-O1", "-g0", "-Wall", "-Wextra",
                     "-Wno-missing-field-initializers", "-Wno-deprecated-declarations",
-                    "-isystem", str(ROOT / "app/src/main/jni/OpenCC/deps/rapidjson-1.1.0"),
+                    "-isystem", str(ROOT / "app/src/main/jni/librime/deps/opencc/deps/rapidjson-1.1.0"),
                     str(HERE / "probe.cc"), "-L" + str(library.parent), "-lrime_jni",
                     "-ldl", "-static-libstdc++", "-Wl,-rpath," + remote, "-o", str(output)],
                    cwd=base["directory"], check=True)

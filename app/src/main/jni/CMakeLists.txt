@@ -64,7 +64,7 @@ target_compile_options(
 
 set(LIBMARISA marisa)
 option(USE_SYSTEM_MARISA "" ON)
-trime_add_dependency(OpenCC OpenCC 3.12)
+trime_add_dependency(librime/deps/opencc OpenCC 3.12)
 include(OpenccWorkarounds)
 
 set(X11Keysym "${CMAKE_SOURCE_DIR}/librime/include")

@@ -20,6 +20,12 @@ jobs:
           - windows-2025
     env:
       BUILD_ABI: armeabi-v7a,arm64-v8a,x86,x86_64
+      # Keep audited source bytes unchanged in the checkout and all submodules.
+      GIT_CONFIG_COUNT: '2'
+      GIT_CONFIG_KEY_0: core.autocrlf
+      GIT_CONFIG_VALUE_0: 'false'
+      GIT_CONFIG_KEY_1: core.eol
+      GIT_CONFIG_VALUE_1: lf
     steps:
       - name: Fetch source code
         uses: actions/checkout@v7
@@ -38,6 +44,9 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+
+      - name: Verify pinned prediction source bytes
+        run: python3 -B script/ci/check_predict_source_pins.py
 
       - name: Setup Java
         uses: actions/setup-java@v6
@@ -62,12 +71,21 @@ jobs:
           import subprocess
           import sys
 
+          subprocess.run([sys.executable, "-B", "-m", "unittest", "discover", "-s", "script/ci", "-p", "test_*.py"], check=True, timeout=30)
+          if sys.platform == "win32":
+              import runpy
+              runpy.run_path("script/ci/setup_windows_host_tools.py", run_name="__main__")
+
           sdk = Path(os.environ["ANDROID_HOME"])
           cmake_dir = sdk / "cmake" / "3.31.6" / "bin"
           cmake = cmake_dir / ("cmake.exe" if sys.platform == "win32" else "cmake")
           if not cmake.is_file():
               raise SystemExit(f"Missing SDK CMake: {cmake}")
           subprocess.run([str(cmake), "--version"], check=True, timeout=30)
+          ninja = cmake_dir / ("ninja.exe" if sys.platform == "win32" else "ninja")
+          if not ninja.is_file():
+              raise SystemExit(f"Missing SDK Ninja: {ninja}")
+          subprocess.run([str(ninja), "--version"], check=True, timeout=30)
           # The resource installer invokes python3; check that exact command too.
           subprocess.run(["python3", "-c", "import sys; print(sys.executable); print(sys.version); raise SystemExit(0 if sys.version_info >= (3, 11) else 'Python 3.11+ required')"], check=True, timeout=30)
           with open(os.environ["GITHUB_PATH"], "a", encoding="utf-8") as stream:
@@ -95,7 +113,7 @@ jobs:
       - name: Calculate JNI cache hash
         id: cache-hash
         run: |
-            ./gradlew :app:calculateNativeCacheHash
+            ./gradlew --warning-mode=fail :app:calculateNativeCacheHash
 
       - name: Fetch JNI cache
         uses: actions/cache@v6
@@ -188,3 +206,8 @@ jobs:
           path: app/build/intermediates/merged_native_libs/debug/mergeDebugNativeLibs/out/lib/*
           # keep 90 days
           retention-days: 90
+
+      # setup-java saves Gradle caches in its post step; release Windows file locks first.
+      - name: Stop Gradle daemons before cache save
+        if: ${{ always() && runner.os == 'Windows' }}
+        run: ./gradlew --stop

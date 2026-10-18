@@ -11,18 +11,20 @@ class OpenCCDataTest {
     fun windowsHostGeneratorUsesTheNativeExecutableArchitecture() {
         val aliases = mapOf(
             "x64" to listOf("amd64", "x86_64"),
-            "ARM64" to listOf("aarch64", "arm64"),
-            "Win32" to listOf("x86", "i386", "i486", "i586", "i686"),
+            "arm64" to listOf("aarch64", "arm64"),
+            "x86" to listOf("x86", "i386", "i486", "i586", "i686"),
         )
         aliases.forEach { (platform, architectures) ->
             architectures.forEach { architecture ->
                 assertEquals(
-                    listOf("-G", "Visual Studio 17 2022", "-A", platform),
-                    openccHostCmakeArguments("Windows Server 2025", architecture),
+                    listOf("-G", "Ninja", "-DCMAKE_BUILD_TYPE=Release", "-DCMAKE_CXX_COMPILER=cl"),
+                    openccHostCmakeArguments("Windows Server 2025", architecture, platform),
                 )
             }
         }
         assertFailsWith<IllegalStateException> { openccHostCmakeArguments("Windows 11", "riscv64") }
+        assertFailsWith<IllegalStateException> { openccHostCmakeArguments("Windows 11", "amd64") }
+        assertFailsWith<IllegalStateException> { openccHostCmakeArguments("Windows 11", "amd64", "arm64") }
     }
 
     @Test

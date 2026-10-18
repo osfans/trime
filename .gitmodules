@@ -2,9 +2,6 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-[submodule "OpenCC"]
-	path = app/src/main/jni/OpenCC
-	url = https://github.com/BYVoid/OpenCC.git
 [submodule "snappy"]
 	path = app/src/main/jni/snappy
 	url = https://github.com/google/snappy.git

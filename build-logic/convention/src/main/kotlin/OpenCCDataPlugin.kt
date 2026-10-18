@@ -23,16 +23,19 @@ import java.io.File
 import java.util.regex.Pattern
 import javax.inject.Inject
 
-/** Visual Studio discovers its native toolchain without a Developer Command Prompt. */
-internal fun openccHostCmakeArguments(osName: String, osArch: String): List<String> {
+/** Ninja uses the initialized native MSVC environment without a versioned VS generator. */
+internal fun openccHostCmakeArguments(osName: String, osArch: String, msvcTargetArch: String? = null): List<String> {
     if (!osName.startsWith("Windows", ignoreCase = true)) return listOf("-DCMAKE_BUILD_TYPE=Release")
     val platform = when (osArch.lowercase()) {
         "amd64", "x86_64" -> "x64"
-        "aarch64", "arm64" -> "ARM64"
-        "x86", "i386", "i486", "i586", "i686" -> "Win32"
+        "aarch64", "arm64" -> "arm64"
+        "x86", "i386", "i486", "i586", "i686" -> "x86"
         else -> error("Unsupported Windows OpenCC host architecture: $osArch")
     }
-    return listOf("-G", "Visual Studio 17 2022", "-A", platform)
+    check(msvcTargetArch.equals(platform, ignoreCase = true)) {
+        "Initialize the native MSVC Developer Command Prompt for $platform before generating OpenCC data"
+    }
+    return listOf("-G", "Ninja", "-DCMAKE_BUILD_TYPE=Release", "-DCMAKE_CXX_COMPILER=cl")
 }
 
 /** Reject an asset set that would make a bundled conversion config fail at runtime. */
@@ -48,7 +51,7 @@ class OpenCCDataPlugin : Plugin<Project> {
     }
 
     private val Project.dataBaseDir
-        get() = file("src/main/jni/OpenCC/data")
+        get() = file("src/main/jni/librime/deps/opencc/data")
 
     private val Project.dataInstallDir
         get() = assetsDir.resolve("shared/opencc")
@@ -60,7 +63,7 @@ class OpenCCDataPlugin : Plugin<Project> {
 
     private fun registerInstallTask(project: Project) {
         val regionalPhrases = project.tasks.register<GenerateRegionalPhrasesTask>("generateOpenCCRegionalPhrases") {
-            sourceDir.set(project.layout.projectDirectory.dir("src/main/jni/OpenCC"))
+            sourceDir.set(project.layout.projectDirectory.dir("src/main/jni/librime/deps/opencc"))
             adaptationDir.set(project.layout.projectDirectory.dir("src/main/jni/cmake"))
             outputDir.set(project.layout.buildDirectory.dir("opencc-host"))
             cmakeExecutable.set(
@@ -109,7 +112,11 @@ class OpenCCDataPlugin : Plugin<Project> {
 
         @get:Input
         val hostCmakeArguments: List<String>
-            get() = openccHostCmakeArguments(System.getProperty("os.name"), System.getProperty("os.arch"))
+            get() = openccHostCmakeArguments(System.getProperty("os.name"), hostArchitecture, System.getenv("VSCMD_ARG_TGT_ARCH"))
+
+        @get:Input
+        val hostArchitecture: String
+            get() = System.getProperty("os.arch")
 
         @TaskAction
         fun execute() {

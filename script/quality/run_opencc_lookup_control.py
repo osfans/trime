@@ -73,7 +73,7 @@ def main():
     out.mkdir(parents=True, exist_ok=False)
     started = time.monotonic()
     deadline = started + 1800
-    source = NATIVE / "OpenCC"
+    source = NATIVE / "librime/deps/opencc"
     adaptation = NATIVE / "cmake"
     fixture = Path(__file__).with_name("opencc_lookup_control.cpp")
     darts_fixture = Path(__file__).with_name("opencc_darts_control.cpp")

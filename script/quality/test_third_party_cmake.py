@@ -10,7 +10,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[2]
 CMAKE = os.environ.get("CMAKE_EXECUTABLE", "cmake")
 ADAPTER = ROOT / "app/src/main/jni/cmake/ThirdPartyCmake.cmake"
-OPENCC = ROOT / "app/src/main/jni/OpenCC/src"
+OPENCC = ROOT / "app/src/main/jni/librime/deps/opencc/src"
 
 
 class ThirdPartyCmakeTest(unittest.TestCase):
@@ -37,7 +37,8 @@ class ThirdPartyCmakeTest(unittest.TestCase):
         opencc_source = self.source / "vendor/OpenCC/src"
         opencc_source.mkdir()
         for name in ("DartsDict.cpp", "MarisaDict.cpp", "SerializableDict.hpp", "TextDict.cpp",
-                     "Dict.hpp", "PrefixMatch.cpp", "PluginSegmentation.cpp", "plugin/OpenCCPlugin.h"):
+                     "Dict.hpp", "PrefixMatch.cpp", "PluginSegmentation.cpp", "plugin/OpenCCPlugin.h",
+                     "tools/CommandLineMain.cpp"):
             target = opencc_source / name
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes((OPENCC / name).read_bytes())
@@ -45,6 +46,11 @@ class ThirdPartyCmakeTest(unittest.TestCase):
         darts_header = self.source / "vendor/OpenCC" / darts_relative
         darts_header.parent.mkdir(parents=True, exist_ok=True)
         darts_header.write_bytes((OPENCC.parent / darts_relative).read_bytes())
+        for name in ("io/reader.cc", "io/writer.cc", "vector/bit-vector.cc"):
+            relative = Path("deps/marisa-0.3.1/lib/marisa/grimoire") / name
+            target = self.source / "vendor/OpenCC" / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes((OPENCC.parent / relative).read_bytes())
         data = self.source / "vendor/OpenCC/data"
         data.mkdir()
         (data / "CMakeLists.txt").write_text(
@@ -119,7 +125,19 @@ class ThirdPartyCmakeTest(unittest.TestCase):
             self.assertEqual(prefix.count(adapted), 1)
             self.assertNotIn(original, prefix)
             prefix = prefix.replace(adapted, original, 1)
-        self.assertEqual(prefix, (OPENCC / "PrefixMatch.cpp").read_text())
+        original_prefix = (OPENCC / "PrefixMatch.cpp").read_text(encoding="utf-8")
+        include = '#include "DictGroup.hpp"\n#include "Exception.hpp"'
+        self.assertEqual(prefix.count(include), 1)
+        prefix = prefix.replace(include, '#include "DictGroup.hpp"', 1)
+        self.assertEqual(prefix.count("    throw ShouldNotBeHere();"), 1)
+        prefix = prefix.replace("    throw ShouldNotBeHere();",
+                                "    Unreachable();\n    return Candidate{};", 1)
+        unreachable = original_prefix[original_prefix.index("void Unreachable() {"):
+                                      original_prefix.index("// Marks a single key")]
+        self.assertNotIn("void Unreachable()", prefix)
+        self.assertEqual(prefix.count("// Marks a single key"), 1)
+        prefix = prefix.replace("// Marks a single key", unreachable + "// Marks a single key", 1)
+        self.assertEqual(prefix, original_prefix)
         plugin = (patched / "PluginSegmentation.cpp").read_text()
         minor_check = ('    if (descriptor->abi_minor < OPENCC_SEGMENTATION_PLUGIN_ABI_MINOR) {\n'
                        '      throw Exception("Plugin ABI minor version is older than required by the host.");\n'
@@ -146,6 +164,58 @@ class ThirdPartyCmakeTest(unittest.TestCase):
         for name in resource_outputs:
             self.assertEqual((self.source / "vendor/OpenCC/src" / name).read_bytes(),
                              (OPENCC / name).read_bytes())
+
+    def adapt_marisa(self, success=True):
+        script = self.root / "adapt-marisa.cmake"
+        script.write_text(f'include("{ADAPTER.as_posix()}")\n'
+                          f'include("{(ADAPTER.parent / "OpenccMarisaCompat.cmake").as_posix()}")\n'
+                          f'trime_adapt_opencc_marisa("{(self.source / "vendor/OpenCC").as_posix()}")\n',
+                          encoding="utf-8")
+        result = subprocess.run([CMAKE, "-Werror=dev", "-Werror=deprecated", "-P", str(script)],
+                                capture_output=True, text=True, timeout=30)
+        if success:
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertNotIn("Warning", result.stdout + result.stderr)
+        else:
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Re-audit the OpenCC MARISA source SHA", result.stderr)
+        return result
+
+    def test_marisa_adaptation_keeps_io_accounting_and_bit_selection_exact(self):
+        base = self.source / "vendor/OpenCC/deps/marisa-0.3.1/lib/marisa/grimoire"
+        original = {name: (base / name).read_text(encoding="utf-8")
+                    for name in ("io/reader.cc", "io/writer.cc", "vector/bit-vector.cc")}
+        self.adapt_marisa()
+        before = "      const unsigned int count = (size < CHUNK_SIZE) ? size : CHUNK_SIZE;"
+        after = ("      const unsigned int count =\n"
+                 "          static_cast<unsigned int>((size < CHUNK_SIZE) ? size : CHUNK_SIZE);")
+        for name in ("io/reader.cc", "io/writer.cc"):
+            actual = (base / name).read_text(encoding="utf-8")
+            self.assertEqual(actual.count(after), 1)
+            self.assertEqual(actual.replace(after, before, 1), original[name])
+        actual = (base / "vector/bit-vector.cc").read_text(encoding="utf-8")
+        self.assertEqual(actual.count("const std::size_t skip = countr_zero(x >> 7);"), 1)
+        self.assertEqual(actual.replace("const std::size_t skip = countr_zero(x >> 7);",
+                                        "const int skip = countr_zero(x >> 7);", 1),
+                         original["vector/bit-vector.cc"])
+
+    def test_marisa_source_byte_drift_is_rejected_before_any_adaptation(self):
+        base = self.source / "vendor/OpenCC/deps/marisa-0.3.1/lib/marisa/grimoire"
+        target = base / "vector/bit-vector.cc"
+        target.write_bytes(target.read_bytes() + b"\n")
+        before = {name: (base / name).read_bytes()
+                  for name in ("io/reader.cc", "io/writer.cc", "vector/bit-vector.cc")}
+        self.adapt_marisa(success=False)
+        self.assertEqual(before, {name: (base / name).read_bytes() for name in before})
+
+    def test_marisa_crlf_checkout_is_rejected_before_any_adaptation(self):
+        base = self.source / "vendor/OpenCC/deps/marisa-0.3.1/lib/marisa/grimoire"
+        target = base / "io/writer.cc"
+        target.write_bytes(target.read_bytes().replace(b"\n", b"\r\n"))
+        before = {name: (base / name).read_bytes()
+                  for name in ("io/reader.cc", "io/writer.cc", "vector/bit-vector.cc")}
+        self.adapt_marisa(success=False)
+        self.assertEqual(before, {name: (base / name).read_bytes() for name in before})
 
     def test_minimum_version_drift_requires_reaudit(self):
         path = self.source / "vendor/snappy/CMakeLists.txt"
@@ -331,6 +401,30 @@ endif()
         path = self.source / "vendor/snappy/CMakeLists.txt"
         path.write_text(path.read_text() * 2, encoding="utf-8")
         self.configure(success=False)
+
+    def test_msvc_adapter_rejects_drift_before_any_source_write(self):
+        for relative, ending in (("tools/CommandLineMain.cpp", False),
+                                 ("PrefixMatch.cpp", False),
+                                 ("PrefixMatch.cpp", True)):
+            with self.subTest(relative=relative, crlf=ending):
+                base = self.source / "vendor/OpenCC/src"
+                path = base / relative
+                original = path.read_bytes()
+                path.write_bytes(original.replace(b"\n", b"\r\n") if ending else original + b"\n")
+                before = {p.relative_to(base): p.read_bytes()
+                          for p in base.rglob("*") if p.is_file()}
+                script = self.root / "adapt-msvc.cmake"
+                script.write_text(f'include("{ADAPTER.as_posix()}")\n'
+                                  f'include("{(ADAPTER.parent / "OpenccMsvcCompat.cmake").as_posix()}")\n'
+                                  f'trime_adapt_opencc_msvc("{base.as_posix()}")\n',
+                                  encoding="utf-8")
+                result = subprocess.run([CMAKE, "-Werror=dev", "-Werror=deprecated", "-P", str(script)],
+                                        capture_output=True, text=True, timeout=30)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("Re-audit the OpenCC MSVC source SHA", result.stderr)
+                self.assertEqual(before, {p.relative_to(base): p.read_bytes()
+                                         for p in base.rglob("*") if p.is_file()})
+                path.write_bytes(original)
 
 
 if __name__ == "__main__":

@@ -28,7 +28,6 @@ HERE = Path(__file__).resolve().parent
 BOOST_SHA = "9bed76128d4e46755dbe818487788c6fceb6f72b378f4daa49b7e1e600d9088d"
 PINS = {
     "app/src/main/jni/librime": "7bc3fb0005a03aff1c086611e4d52bb7f6444fdd",
-    "app/src/main/jni/OpenCC": "025f371dc76b598d77384fbdab90c937471844d8",
     "app/src/main/jni/librime/deps/opencc": "025f371dc76b598d77384fbdab90c937471844d8",
 }
 

@@ -372,7 +372,7 @@ def compile_probe(output, compiler, android=False):
     command = [compiler, "-std=c++17", "-O1", "-Wall", "-Wextra",
                "-Wno-missing-field-initializers", "-Wno-deprecated-declarations",
                "-I", REPO / "app/src/main/jni/librime/src",
-               "-I", REPO / "app/src/main/jni/OpenCC/deps/rapidjson-1.1.0",
+               "-I", REPO / "app/src/main/jni/librime/deps/opencc/deps/rapidjson-1.1.0",
                HERE / "engine_probe.cc", "-ldl", "-o", output]
     if android:
         command.append("-static-libstdc++")

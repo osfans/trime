@@ -29,7 +29,7 @@ parser.add_argument("--cmake",default="cmake",help="Host CMake executable (for e
 parser.add_argument("--compiler",default="clang++",help="ASAN/LSAN host C++ compiler")
 args=parser.parse_args()
 OUT=args.output.resolve();OUT.mkdir(parents=True,exist_ok=False)
-SOURCE=ROOT/'app/src/main/jni/OpenCC'
+SOURCE=ROOT/'app/src/main/jni/librime/deps/opencc'
 THIRD=ROOT/'app/src/main/jni/cmake/ThirdPartyCmake.cmake'
 SAFETY=ROOT/'app/src/main/jni/cmake/OpenccResourceSafety.cmake'
 LOOKUP=ROOT/'app/src/main/jni/cmake/OpenccLookupCompat.cmake'

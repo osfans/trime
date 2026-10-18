@@ -65,7 +65,7 @@ def generate(cache, out):
     lock = json.loads(lock_file.read_text())
     if lock["commit"] != COMMIT or lock["files"] != hashes:
         raise ValueError("Pinned source checksum mismatch")
-    data = ROOT / "app/src/main/jni/OpenCC/data"
+    data = ROOT / "app/src/main/jni/librime/deps/opencc/data"
     data_hashes = {name: sha(data / "dictionary" / name) for name in lock["OpenCC"]["data_sha256"]}
     conversion_commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=data.parent,
                                        capture_output=True, text=True, check=True).stdout.strip()
