@@ -214,7 +214,7 @@ public final class UserDictionaryNativeUpgradeProbe {
                         hash(stateFile).equals(boundary.getString("state_sha256")),
                 "Cache boundary does not identify immutable old native state");
         Map<String, String> expected = stringMap(state.getJSONObject("owned_tree"));
-        check(expected.size() == 17, "Exactly seventeen old owned files required");
+        validateOwnedSnapshot(expected);
         JSONObject caches = boundary.getJSONObject("cache_files");
         String stem = "build/" + prefix;
         exactKeys(caches, stem + "_full.schema.yaml", stem + "_full.prism.bin",
@@ -305,6 +305,60 @@ public final class UserDictionaryNativeUpgradeProbe {
         Map<String, String> output = new TreeMap<>();
         walk(user, "", false, output);
         return output;
+    }
+
+    private static void validateOwnedTree(String prefix, Map<String, String> tree) {
+        check(prefix.matches("__t10_upgrade_[a-f0-9]{32}"), "Untrusted owned fixture prefix");
+        LinkedHashSet<String> fixed = new LinkedHashSet<>(Arrays.asList(
+                prefix + ".dict.yaml", prefix + "_full.schema.yaml", prefix + "_t9.schema.yaml",
+                "build/" + prefix + ".table.bin", "build/" + prefix + ".reverse.bin",
+                "build/" + prefix + "_full.schema.yaml", "build/" + prefix + "_full.prism.bin",
+                "build/" + prefix + "_t9.schema.yaml", "build/" + prefix + "_t9.prism.bin"));
+        check(tree.keySet().containsAll(fixed), "Required owned fixture files missing");
+        LinkedHashSet<String> database = new LinkedHashSet<>();
+        Pattern numbered = Pattern.compile("(?:MANIFEST-([0-9]+)|([0-9]+)\\.(?:log|sst|ldb|dbtmp))");
+        String stem = prefix + ".userdb/";
+        boolean manifest = false, table = false, log = false;
+        for (Map.Entry<String, String> item : tree.entrySet()) {
+            String path = item.getKey(), digest = item.getValue();
+            check(path != null && digest != null && digest.matches("[a-f0-9]{64}"),
+                    "Invalid owned path or SHA-256");
+            if (fixed.contains(path)) continue;
+            check(path.startsWith(stem), "File is outside the owned fixture");
+            String name = path.substring(stem.length());
+            if (!Arrays.asList("CURRENT", "LOCK", "LOG", "LOG.old").contains(name)) {
+                Matcher match = numbered.matcher(name);
+                check(match.matches(), "Unknown or nested LevelDB filename");
+                String number = (match.group(1) != null ? match.group(1) : match.group(2))
+                        .replaceFirst("^0+(?!$)", "");
+                check(number.length() < 20 || (number.length() == 20 &&
+                                number.compareTo("18446744073709551615") <= 0),
+                        "LevelDB file number exceeds uint64");
+            }
+            database.add(name);
+            manifest |= name.matches("MANIFEST-[0-9]+");
+            table |= name.matches("[0-9]+\\.(?:ldb|sst)");
+            log |= name.matches("[0-9]+\\.log");
+        }
+        check(database.containsAll(Arrays.asList("CURRENT", "LOCK", "LOG")) && manifest && table && log,
+                "Required stopped LevelDB structure missing");
+    }
+
+    private void validateOwnedSnapshot(Map<String, String> tree) throws Exception {
+        validateOwnedTree(prefix, tree);
+        String stem = prefix + ".userdb/";
+        File current = new File(user, stem + "CURRENT");
+        check(current.isFile() && current.getCanonicalFile().equals(current.getAbsoluteFile()) &&
+                        hash(current).equals(tree.get(stem + "CURRENT")),
+                "Stopped LevelDB CURRENT bytes differ");
+        String pointer = text(current);
+        check(pointer.matches("MANIFEST-[0-9]+\\n") &&
+                        tree.containsKey(stem + pointer.substring(0, pointer.length() - 1)),
+                "Stopped LevelDB CURRENT does not identify an owned manifest");
+        File manifest = new File(user, stem + pointer.substring(0, pointer.length() - 1));
+        check(manifest.isFile() && manifest.getCanonicalFile().equals(manifest.getAbsoluteFile()) &&
+                        hash(manifest).equals(tree.get(stem + pointer.substring(0, pointer.length() - 1))),
+                "Stopped LevelDB manifest bytes differ");
     }
 
     private static Map<String, String> stringMap(JSONObject value) throws Exception {
@@ -724,7 +778,7 @@ public final class UserDictionaryNativeUpgradeProbe {
             finalizeNative();
             if ("prepare".equals(phase)) {
                 Map<String, String> tree = ownedTree();
-                check(!tree.isEmpty(), "Stopped native fixture tree is empty");
+                validateOwnedSnapshot(tree);
                 state.put("owned_tree", new JSONObject(tree));
                 check(stateFile.createNewFile(), "Owned state must not replace previous evidence");
                 write(stateFile, state.toString(2));

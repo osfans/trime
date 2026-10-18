@@ -6,6 +6,7 @@ import copy
 import hashlib
 import json
 from pathlib import Path
+import re
 import tempfile
 from types import SimpleNamespace
 import unittest
@@ -311,7 +312,8 @@ class CacheBoundaryTest(unittest.TestCase):
             after[name + ".schema.yaml"] = changed
             after[name + ".prism.bin"] = prism(changed)
         tree = {path: hashlib.sha256(raw).hexdigest() for path, raw in before.items()}
-        tree.update({prefix + ".userdb/file" + str(i): "b" * 64 for i in range(8)})
+        tree.update({prefix + ".userdb/" + name: "b" * 64 for name in
+                     ("000019.ldb", "000021.ldb", "000022.log", "CURRENT", "LOCK", "LOG", "LOG.old", "MANIFEST-000020")})
         tree.update({prefix + name: "c" * 64 for name in (".dict.yaml", "_full.schema.yaml", "_t9.schema.yaml")})
         tree.update({"build/" + prefix + name: "d" * 64 for name in (".table.bin", ".reverse.bin")})
         state = dict(prefix=prefix, package=gate.PACKAGE, uid=10053, old_version_code=10,
@@ -333,6 +335,74 @@ class CacheBoundaryTest(unittest.TestCase):
             observed = dict(expected); observed[path] = "0" * 64
             self.assertNotEqual(expected, observed)
         gate.cache_boundary(state, raw, before, before)
+
+    def test_variable_complete_leveldb_tables_preserve_the_original_map(self):
+        state, _, before, after = self.fixture()
+        for extra in (0, 1, 5):
+            changed = copy.deepcopy(state)
+            for index in range(extra):
+                changed["owned_tree"][state["prefix"] + ".userdb/" + str(100 + index) + ".sst"] = "e" * 64
+            raw = json.dumps(changed).encode()
+            original = copy.deepcopy(changed)
+            with self.subTest(files=17 + extra):
+                self.assertIs(changed["owned_tree"], gate.require_owned_tree(changed["prefix"], changed["owned_tree"]))
+                boundary = gate.cache_boundary(changed, raw, before, after)
+                self.assertEqual(4, len(boundary["cache_files"]))
+                self.assertEqual(original, changed)
+                self.assertEqual(hashlib.sha256(raw).hexdigest(), boundary["state_sha256"])
+
+    def test_missing_fixed_or_required_database_structure_rejected(self):
+        state, _, _, _ = self.fixture()
+        stem = state["prefix"] + ".userdb/"
+        fixed = [path for path in state["owned_tree"] if not path.startswith(stem)]
+        missing = [[path] for path in fixed + [stem + name for name in ("CURRENT", "LOCK", "LOG")]]
+        missing += [[path for path in state["owned_tree"] if path.startswith(stem) and re.fullmatch(pattern, path[len(stem):])]
+                    for pattern in (r"MANIFEST-[0-9]+", r"[0-9]+\.(?:ldb|sst)", r"[0-9]+\.log")]
+        for paths in missing:
+            tree = dict(state["owned_tree"])
+            for path in paths:
+                del tree[path]
+            with self.subTest(missing=paths), self.assertRaises(RuntimeError):
+                gate.require_owned_tree(state["prefix"], tree)
+
+    def test_unowned_nested_unknown_files_and_invalid_hash_or_number_rejected(self):
+        state, _, _, _ = self.fixture()
+        prefix = state["prefix"]
+        for invalid in (None, 1, prefix[:-1], prefix + "x", "../" + prefix, prefix.upper()):
+            with self.subTest(prefix=invalid), self.assertRaisesRegex(RuntimeError, "Untrusted owned fixture prefix"):
+                gate.require_owned_tree(invalid, state["owned_tree"])
+        for path in (prefix + "x.userdb/000100.ldb", prefix + ".userdb/../000100.ldb",
+                     prefix + ".userdb/nested/000100.ldb", "/" + prefix + ".userdb/000100.ldb",
+                     prefix + ".userdb/unknown", prefix + ".userdb/18446744073709551616.ldb"):
+            tree = dict(state["owned_tree"]); tree[path] = "e" * 64
+            with self.subTest(path=path), self.assertRaises(RuntimeError):
+                gate.require_owned_tree(prefix, tree)
+        for digest in ("x" * 64, "A" * 64, "a" * 63, None):
+            tree = dict(state["owned_tree"]); tree[prefix + ".userdb/CURRENT"] = digest
+            with self.subTest(digest=digest), self.assertRaises(RuntimeError):
+                gate.require_owned_tree(prefix, tree)
+        tree = dict(state["owned_tree"])
+        for name in ("18446744073709551615.sst", "000023.dbtmp", "MANIFEST-000024"):
+            tree[prefix + ".userdb/" + name] = "e" * 64
+        self.assertIs(tree, gate.require_owned_tree(prefix, tree))
+
+    def test_complete_stopped_install_tree_rejects_extra_missing_or_changed_userdb(self):
+        state, raw, before, after = self.fixture()
+        boundary = gate.cache_boundary(state, raw, before, after)
+        expected = dict(state["owned_tree"])
+        expected.update({path: row["after_sha256"] for path, row in boundary["cache_files"].items()})
+        gate.require_stopped_install_tree(state, boundary, expected)
+        table = state["prefix"] + ".userdb/000019.ldb"
+        for mode in ("extra", "missing", "changed"):
+            observed = dict(expected)
+            if mode == "extra":
+                observed[state["prefix"] + ".userdb/000099.ldb"] = "e" * 64
+            elif mode == "missing":
+                del observed[table]
+            else:
+                observed[table] = "0" * 64
+            with self.subTest(mode=mode), self.assertRaisesRegex(RuntimeError, "complete stopped install tree"):
+                gate.require_stopped_install_tree(state, boundary, observed)
 
     def test_schema_semantic_and_nonnumeric_changes_rejected_with_correct_crc(self):
         state, raw, before, after = self.fixture()

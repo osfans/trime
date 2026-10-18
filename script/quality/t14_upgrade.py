@@ -82,6 +82,47 @@ def cache_paths(prefix):
             for suffix in ("full", "t9") for extension in ("schema.yaml", "prism.bin")]
 
 
+def require_owned_tree(prefix, tree):
+    """Keep every stopped fixture file; LevelDB table counts are not fixed."""
+    require(isinstance(prefix, str) and re.fullmatch(r"__t10_upgrade_[a-f0-9]{32}", prefix),
+            "Untrusted owned fixture prefix")
+    fixed = set(cache_paths(prefix)) | {
+        prefix + ".dict.yaml", prefix + "_full.schema.yaml", prefix + "_t9.schema.yaml",
+        "build/" + prefix + ".table.bin", "build/" + prefix + ".reverse.bin",
+    }
+    require(isinstance(tree, dict) and fixed.issubset(tree), "Required owned fixture files missing")
+    database = set()
+    for path, digest in tree.items():
+        require(isinstance(path, str) and isinstance(digest, str) and
+                re.fullmatch(r"[a-f0-9]{64}", digest), "Invalid owned path or SHA-256")
+        if path in fixed:
+            continue
+        stem = prefix + ".userdb/"
+        require(path.startswith(stem), "File is outside the owned fixture")
+        name = path[len(stem):]
+        if name not in ("CURRENT", "LOCK", "LOG", "LOG.old"):
+            match = re.fullmatch(r"(?:MANIFEST-([0-9]+)|([0-9]+)\.(?:log|sst|ldb|dbtmp))", name)
+            require(match is not None, "Unknown or nested LevelDB filename")
+            number = (match[1] or match[2]).lstrip("0") or "0"
+            require(len(number) < 20 or (len(number) == 20 and number <= "18446744073709551615"),
+                    "LevelDB file number exceeds uint64")
+        database.add(name)
+    require({"CURRENT", "LOCK", "LOG"}.issubset(database) and
+            any(re.fullmatch(r"MANIFEST-[0-9]+", name) for name in database) and
+            any(re.fullmatch(r"[0-9]+\.(?:ldb|sst)", name) for name in database) and
+            any(re.fullmatch(r"[0-9]+\.log", name) for name in database),
+            "Required stopped LevelDB structure missing")
+    return tree
+
+
+def require_stopped_install_tree(state, boundary, actual):
+    expected = dict(require_owned_tree(state["prefix"], state["owned_tree"]))
+    require(set(boundary["cache_files"]) == set(cache_paths(state["prefix"])),
+            "Exactly four cache boundary paths required")
+    expected.update({path: item["after_sha256"] for path, item in boundary["cache_files"].items()})
+    require(actual == expected, "Native verified complete stopped install tree differs")
+
+
 def schema_timestamp_mask(raw):
     """Preserve every original byte except canonical root build timestamp digits."""
     require(isinstance(raw, bytes) and 0 < len(raw) <= MAX_CACHE_BYTES and b"\r" not in raw,
@@ -118,8 +159,8 @@ def cache_boundary(state, state_raw, before, after):
     """Create independently verifiable metadata-only handoff; never edit state."""
     require(json.loads(state_raw) == state, "Native state bytes differ")
     paths = cache_paths(state["prefix"])
-    require(set(before) == set(after) == set(paths) and len(state["owned_tree"]) == 17 and
-            set(paths).issubset(state["owned_tree"]), "Exactly four registered caches and seventeen owned files required")
+    require_owned_tree(state["prefix"], state["owned_tree"])
+    require(set(before) == set(after) == set(paths), "Exactly four registered caches required")
     rows = {}
     for suffix in ("full", "t9"):
         schema = "build/" + state["prefix"] + "_" + suffix + ".schema.yaml"
@@ -529,11 +570,9 @@ def run(args):
                     len(registration.get("actual_ids", [])) >= 3,
                     "Native fixture was not registered through ordinary schema maintenance")
             if phase == "verify":
-                expected_install_tree = dict(state["owned_tree"])
-                expected_install_tree.update({path: item["after_sha256"] for path, item in boundary["cache_files"].items()})
-                require(receipt.get("cache_boundary_sha256") == boundary_binding["sha256"] and
-                        receipt.get("expected_stopped_install_tree") == expected_install_tree,
-                        "Native verified cache boundary/complete stopped install tree differs")
+                require(receipt.get("cache_boundary_sha256") == boundary_binding["sha256"],
+                        "Native verified cache boundary differs")
+                require_stopped_install_tree(state, boundary, receipt.get("expected_stopped_install_tree"))
                 require(registration == state["enabled_schema_registration"] and
                         receipt.get("schema_registration_restored") is True and
                         receipt.get("restored_enabled_schema_ids") == state["original_enabled_schema_ids"],
@@ -703,6 +742,7 @@ def run(args):
         report["checks"]["actual_old_native_learning_and_stopped_fixture"] = True
         state_raw, state_binding = read_remote(EXTERNAL + "t10-upgrade-state.json", "old-native-state.json")
         state = json.loads(state_raw)
+        require_owned_tree(state["prefix"], state["owned_tree"])
         require(state["package"] == PACKAGE and state["uid"] == baseline["uid"] and
                 state["owned_tree"] and state["logical_entries"] and
                 state["application_data_dir"] == baseline["data_dir"], "Actual old native learning state incomplete")
