@@ -274,7 +274,7 @@ def main():
                     busy.setdefault(int(entry.name), dict(pid=int(entry.name), kind='jvm', executable=name))
                 elif name in native_names or re.fullmatch(r'(?:.+-)?(?:gcc|g\+\+|clang|clang\+\+)(?:-[0-9.]+)?', name):
                     busy.setdefault(int(entry.name), dict(pid=int(entry.name), kind='native', executable=name))
-            except OSError:
+            except (FileNotFoundError, ProcessLookupError):
                 continue
         return list(busy.values())
 
@@ -289,7 +289,7 @@ def main():
                 continue
             try:
                 actual = g.identity(row['pid'])
-            except FileNotFoundError:
+            except (FileNotFoundError, ProcessLookupError):
                 continue
             if not (allow_owned and tracker.key(actual) in tracker.owned):
                 tracker.foreign_busy.append(dict(kind='native', identity=actual,
@@ -333,7 +333,7 @@ def main():
        assert time.monotonic()<command_deadline
        child=subprocess.Popen(row['argv'],cwd=project,env=env,stdout=so,stderr=se,start_new_session=True);row['pid']=child.pid
        try:token=g.identity(child.pid);tracker.seed(token);row['owned']=token
-       except FileNotFoundError:assert child.poll() is not None
+       except (FileNotFoundError, ProcessLookupError):assert child.poll() is not None
        while child.poll() is None:
         mem=available();samples.append(dict(epoch=time.time(),available_kib=mem));assert mem>=1048576,'1GiB memory floor'
         assert time.monotonic()<command_deadline,'Observed command/global deadline';check_external(True);time.sleep(.25)

@@ -108,7 +108,7 @@ def main():
             try:
                 row = process(int(directory.name))
                 table[row["pid"]] = row
-            except (OSError, ValueError, IndexError):
+            except (FileNotFoundError, ProcessLookupError, ValueError, IndexError):
                 continue
         changed = True
         while changed:
@@ -121,7 +121,7 @@ def main():
                 if parent and (parent["pid"], parent["start"]) in owned:
                     try:
                         current, live_parent = process(pid), process(parent["pid"])
-                    except FileNotFoundError:
+                    except (FileNotFoundError, ProcessLookupError):
                         continue
                     if (current == row and live_parent["start"] == parent["start"] and
                             current["ppid"] == live_parent["pid"]):
@@ -137,7 +137,7 @@ def main():
                 current = process(pid)
                 if current["start"] == start:
                     result.append(current)
-            except FileNotFoundError:
+            except (FileNotFoundError, ProcessLookupError):
                 pass
         return result
 
@@ -312,7 +312,7 @@ cmake_language(DEFER CALL trime_add_lookup_control)
                         if current["start"] == row["start"]:
                             os.kill(row["pid"], sig)
                             signals.append(dict(row, signal=sig.name))
-                    except ProcessLookupError:
+                    except (FileNotFoundError, ProcessLookupError):
                         pass
                 until = time.monotonic() + 5
                 while live_owned() and time.monotonic() < until:

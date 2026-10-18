@@ -35,7 +35,7 @@ def busy_processes(allowed_pid=None):
                 b'org.gradle.', b'GradleDaemon', b'GradleWrapperMain', b'org.jetbrains.kotlin.daemon'))
             if (vm and int(path.name) != allowed_pid) or gradle:
                 busy.append(dict(pid=int(path.name), executable=executable, kind='emulator' if vm else 'gradle'))
-        except (OSError, ProcessLookupError):
+        except (FileNotFoundError, ProcessLookupError):
             continue
     return busy
 
@@ -65,7 +65,7 @@ class OwnedProcessTracker:
             try:
                 row = self.identity(int(entry.name))
                 result[row['pid']] = row
-            except (OSError, ValueError, IndexError):
+            except (FileNotFoundError, ProcessLookupError, ValueError, IndexError):
                 continue
         return result
 
@@ -91,7 +91,7 @@ class OwnedProcessTracker:
     def live(self, token):
         try:
             return self.key(self.identity(token['pid'])) == self.key(token)
-        except FileNotFoundError:
+        except (FileNotFoundError, ProcessLookupError):
             return False
 
     def _proven_child(self, candidate):
@@ -112,7 +112,7 @@ class OwnedProcessTracker:
             if self.key(after) != self.key(before) or after['ppid'] != parent['pid'] or self.key(parent_after) != parent_key:
                 return None
             return after, dict(kind='live_parent_ancestry', parent_pid=parent['pid'], parent_starttime=parent['starttime'])
-        except FileNotFoundError:
+        except (FileNotFoundError, ProcessLookupError):
             return None
 
     def discover(self):
@@ -125,7 +125,7 @@ class OwnedProcessTracker:
         for token in list(self.owned.values()):
             try:
                 actual = self.identity(token['initial']['pid'])
-            except FileNotFoundError:
+            except (FileNotFoundError, ProcessLookupError):
                 continue
             if self.key(actual) == self.key(token['initial']):
                 self._record(actual, token['proof'])
@@ -144,7 +144,7 @@ class OwnedProcessTracker:
         for record in list(self.owned.values()):
             try:
                 actual = self.identity(record['initial']['pid'])
-            except FileNotFoundError:
+            except (FileNotFoundError, ProcessLookupError):
                 continue
             if self.key(actual) == self.key(record['initial']):
                 self._record(actual, record['proof'])
@@ -158,7 +158,7 @@ class OwnedProcessTracker:
                 continue
             try:
                 current = self.identity(candidate['pid'])
-            except FileNotFoundError:
+            except (FileNotFoundError, ProcessLookupError):
                 continue
             if self.key(current) != self.key(candidate) or current['pgid'] not in self.observed_groups:
                 continue
@@ -172,7 +172,7 @@ class OwnedProcessTracker:
         for row in busy:
             try:
                 actual = self.identity(row['pid'])
-            except FileNotFoundError:
+            except (FileNotFoundError, ProcessLookupError):
                 continue
             permitted = allow_owned and row['kind'] in ('gradle', 'jvm') and self.key(actual) in self.owned
             if not permitted:
@@ -186,7 +186,7 @@ class OwnedProcessTracker:
         for record in list(self.owned.values()):
             try:
                 current = self.identity(record['initial']['pid'])
-            except FileNotFoundError:
+            except (FileNotFoundError, ProcessLookupError):
                 continue
             if self.key(current) == self.key(record['initial']):
                 self._record(current, record['proof'])
@@ -198,7 +198,7 @@ class OwnedProcessTracker:
             raise RuntimeError('Refuse signal to an unproved process')
         try:
             current = self.identity(token['pid'])
-        except FileNotFoundError:
+        except (FileNotFoundError, ProcessLookupError):
             return False
         if self.key(current) != self.key(token):
             return False
