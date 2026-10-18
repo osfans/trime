@@ -156,6 +156,7 @@ androidComponents {
 }
 
 aboutLibraries {
+    offlineMode.set(true)
     collect {
         configPath.set(file("licenses").takeIf { it.exists() })
         fetchRemoteLicense.set(false)
