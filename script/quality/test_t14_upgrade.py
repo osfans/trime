@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Synthetic gate inputs only; these tests do not install or verify Android APKs."""
 
+import base64
+import copy
+import hashlib
 import json
 from pathlib import Path
 import tempfile
@@ -146,6 +149,56 @@ class UpgradeGateTest(unittest.TestCase):
                     b'<map><unknown name="x" value="1"/></map>'):
             with self.subTest(raw=raw), self.assertRaises(RuntimeError):
                 gate.preference_values(raw)
+
+    def registered_fixture(self, original=b"patch: {old_user_setting: true}\n"):
+        prefix = "__t10_upgrade_" + "a" * 32
+        ids = ["luna_pinyin", prefix + "_full", prefix + "_t9"]
+        registered = b"synthetic configuration bytes from owned old-APK registration\n"
+        state = dict(format_version=3, prefix=prefix, original_enabled_schema_ids=ids[:1],
+                     registered_enabled_schema_ids=ids, original_default_custom_existed=original is not None,
+                     original_default_custom=base64.b64encode(original).decode() if original is not None else None,
+                     registered_default_custom=base64.b64encode(registered).decode(),
+                     enabled_schema_registration=dict(expected_ids=ids, actual_ids=ids,
+                         default_custom_sha256=hashlib.sha256(registered).hexdigest(),
+                         ordinary_maintenance_readback=True, normal_startup_full_check=False))
+        return state, registered
+
+    def test_registration_retains_install_bytes_and_separate_exact_cleanup_baseline(self):
+        original = b"# user comment\r\npatch: {old_user_setting: true}\r\n"
+        state, registered = self.registered_fixture(original)
+        self.assertEqual(original, gate.require_registered_fixture(state, registered))
+        self.assertNotEqual(original, registered)
+        with self.assertRaisesRegex(RuntimeError, "actual old-APK bytes"):
+            gate.require_registered_fixture(state, registered + b"# a host must not append a marker\n")
+
+    def test_absent_original_configuration_is_preserved_as_absent_not_empty(self):
+        state, registered = self.registered_fixture(None)
+        self.assertIsNone(gate.require_registered_fixture(state, registered))
+        state["original_default_custom"] = ""
+        with self.assertRaisesRegex(RuntimeError, "existence"):
+            gate.require_registered_fixture(state, registered)
+
+    def test_unregistered_missing_or_different_native_readback_is_rejected(self):
+        state, registered = self.registered_fixture()
+        for field, value in (("actual_ids", ["luna_pinyin"]), ("ordinary_maintenance_readback", False),
+                             ("normal_startup_full_check", True), ("default_custom_sha256", "0" * 64)):
+            changed = copy.deepcopy(state)
+            changed["enabled_schema_registration"][field] = value
+            with self.subTest(field=field), self.assertRaises(RuntimeError):
+                gate.require_registered_fixture(changed, registered)
+        state.pop("enabled_schema_registration")
+        with self.assertRaises(RuntimeError):
+            gate.require_registered_fixture(state, registered)
+
+    def test_failed_old_state_or_corrupt_saved_configuration_cannot_be_accepted(self):
+        state, registered = self.registered_fixture()
+        for field, value in (("diagnostic_only", True), ("format_version", 2),
+                             ("registered_default_custom", "not-base64!"),
+                             ("original_default_custom", "not-base64!")):
+            changed = copy.deepcopy(state)
+            changed[field] = value
+            with self.subTest(field=field), self.assertRaises(RuntimeError):
+                gate.require_registered_fixture(changed, registered)
 
     def artifact_case(self, mutate=lambda rows: None, old_kind="release", package=gate.PACKAGE):
         # The files are explicitly synthetic byte fixtures, never called real APKs.

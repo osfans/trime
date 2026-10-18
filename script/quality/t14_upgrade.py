@@ -15,6 +15,7 @@ does not assert keyboard UI, SAF grants, physical devices or release approval.
 """
 
 import argparse
+import base64
 import datetime
 import hashlib
 import importlib.util
@@ -158,6 +159,43 @@ def require_preserved_preferences(before, after):
     left = {key: value for key, value in before.items() if key != VOLATILE_PREFERENCE}
     right = {key: value for key, value in after.items() if key != VOLATILE_PREFERENCE}
     require(left == right, "A nonvolatile preference changed across upgrade/restart")
+
+
+def require_registered_fixture(state, registered_config):
+    """Bind normal schema registration and return the separate cleanup baseline."""
+    require(state.get("format_version") == 3 and state.get("diagnostic_only") is not True,
+            "A completed enabled-schema preparation is required")
+    prefix = state.get("prefix")
+    require(isinstance(prefix, str) and re.fullmatch(r"__t10_upgrade_[a-f0-9]{32}", prefix),
+            "Untrusted owned schema prefix")
+    original = state.get("original_enabled_schema_ids")
+    require(isinstance(original, list) and original and all(isinstance(x, str) and x for x in original) and
+            len(set(original)) == len(original) and not any(x.startswith(prefix) for x in original),
+            "Original enabled schema list is invalid")
+    expected = original + [prefix + "_full", prefix + "_t9"]
+    registration = state.get("enabled_schema_registration", {})
+    require(state.get("registered_enabled_schema_ids") == expected and
+            registration.get("expected_ids") == registration.get("actual_ids") == expected and
+            registration.get("ordinary_maintenance_readback") is True and
+            registration.get("normal_startup_full_check") is False,
+            "Owned full/T9 schemas were not read back after normal old-APK maintenance")
+
+    def decode(value):
+        require(isinstance(value, str) and len(value) <= 2 * 1024 * 1024, "Invalid saved configuration bytes")
+        try:
+            data = base64.b64decode(value, validate=True)
+        except ValueError as error:
+            raise RuntimeError("Invalid saved configuration encoding") from error
+        require(len(data) <= 1024 * 1024, "Saved configuration exceeds fixture bound")
+        return data
+
+    require(registered_config and decode(state.get("registered_default_custom")) == registered_config and
+            registration.get("default_custom_sha256") == hashlib.sha256(registered_config).hexdigest(),
+            "Registered default customization differs from actual old-APK bytes")
+    existed = state.get("original_default_custom_existed")
+    require(type(existed) is bool and (existed or state.get("original_default_custom") is None),
+            "Original configuration existence is ambiguous")
+    return decode(state.get("original_default_custom")) if existed else None
 
 
 def focused_window(raw):
@@ -407,7 +445,17 @@ def run(args):
                     (receipt["tested_version_name"], receipt["tested_version_code"]) ==
                     (tested["version_name"], tested["version_code"]), "Native receipt/installed identity differs")
             require(receipt["checks"] == (2 if phase == "prepare" else 3), "Native upgrade coverage changed")
+            registration = receipt.get("enabled_schema_registration", {})
+            require(registration.get("ordinary_maintenance_readback") is True and
+                    registration.get("normal_startup_full_check") is False and
+                    registration.get("actual_ids") == registration.get("expected_ids") and
+                    len(registration.get("actual_ids", [])) >= 3,
+                    "Native fixture was not registered through ordinary schema maintenance")
             if phase == "verify":
+                require(registration == state["enabled_schema_registration"] and
+                        receipt.get("schema_registration_restored") is True and
+                        receipt.get("restored_enabled_schema_ids") == state["original_enabled_schema_ids"],
+                        "Native successful cleanup did not restore the original schema registration")
                 backup = receipt["release_backup"]
                 require(backup["calls"] == 3 and backup["logical_entries"] == state["logical_entries"] and
                         backup["full_t9_lookup_preserved"] is True and len(backup["iterations"]) == 3 and
@@ -429,7 +477,8 @@ def run(args):
                 "Non-default preference lost: " + label)
         config_rows = {}
         for index, (remote, expected) in enumerate(configs.items()):
-            data, item = read_remote(remote, label + "-config-" + str(index) + ".bin")
+            reader = optional_remote if expected is None else read_remote
+            data, item = reader(remote, label + "-config-" + str(index) + ".bin")
             require(data == expected, "Retained user configuration changed: " + remote)
             config_rows[remote] = item
         state = dict(preferences=binding, values=values, configs=config_rows)
@@ -592,17 +641,20 @@ def run(args):
                          "/storage/sdcard/Android/data/" + PACKAGE + "/files/rime"),
                 "Unexpected user dictionary path")
         config_path = user + "/default.custom.yaml"
-        before_config, report["old_original_config"] = optional_remote(config_path, "old-original-default.custom.yaml")
-        # Retain the original YAML exactly and append only a safe comment marker.
-        # Non-default functional configuration is the bounded custom phrase file.
-        config_bytes = (before_config if before_config is not None else b"patch: {}\n") + b"\n# " + marker.encode() + b"\n"
+        config_bytes, report["old_registered_config"] = read_remote(config_path, "old-registered-default.custom.yaml")
+        original_config = require_registered_fixture(state, config_bytes)
+        report["enabled_schema_registration"] = state["enabled_schema_registration"]
+        report["cleanup_original_config"] = (
+            write("cleanup-original-default.custom.yaml", original_config) if original_config is not None
+            else dict(path=config_path, previously_present=False))
+        # The real registered full/T9 list is already non-default functional
+        # configuration. Keep its exact production bytes; do not append markers.
         phrase_path = user + "/custom_phrase.txt"
         control.shell("test", "!", "-e", phrase_path)
         control.shell("test", "!", "-L", phrase_path)
         configs = {config_path: config_bytes, phrase_path: "霁月青舟\tji yue qing zhou\t9\n".encode()}
-        for index, (remote, data) in enumerate(configs.items()):
-            item = write("seed-config-" + str(index) + ".bin", data)
-            control.command(["push", item["path"], remote])
+        item = write("seed-custom_phrase.txt", configs[phrase_path])
+        control.command(["push", item["path"], phrase_path])
         # The target is selected during installation. It is never switched away
         # until the post-install selection and retained-data assertions finish.
         control.shell("ime", "enable", IME)
@@ -641,12 +693,18 @@ def run(args):
         native("verify")
         report["checks"]["new_native_stopped_bytes_full_t9_learning_counters_and_three_backups"] = True
         control.shell("test", "!", "-e", EXTERNAL + "t10-upgrade-state.json")
+        # Normal installation was already checked against registered production
+        # bytes above. Successful native fixture cleanup intentionally restores
+        # only its saved default customization; the independent phrase stays.
+        final_configs = {config_path: original_config, phrase_path: configs[phrase_path]}
+        restored, report["restored_default_config"] = optional_remote(config_path, "restored-default.custom.yaml")
+        require(restored == original_config, "Owned fixture cleanup changed the original configuration baseline")
         control.shell("ime", "set", IME)
         start_empty_editor("final-ime")
         await_activation("final-ime", before["values"])
         final_ime = ime_state("final")
         require(final_ime == ime_before, "Final upgraded Trime selection differs")
-        final_data = snapshot("final", preference_path, configs)
+        final_data = snapshot("final", preference_path, final_configs)
         same_preferences(before, final_data)
         final_identity = installed("final-release", "new")
         require((final_identity["uid"], final_identity["data_dir"]) == (baseline["uid"], baseline["data_dir"]),

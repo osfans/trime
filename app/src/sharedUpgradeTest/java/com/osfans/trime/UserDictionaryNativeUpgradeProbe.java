@@ -13,6 +13,7 @@ import android.util.Base64;
 import com.osfans.trime.core.CandidateProto;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.core.RimeLifecycle;
+import com.osfans.trime.core.SchemaItem;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -25,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -205,6 +207,102 @@ public final class UserDictionaryNativeUpgradeProbe {
                     "  enable_user_dict: true\n  enable_sentence: true\n  enable_completion: false\nmenu:\n  page_size: 5\n");
             check(Rime.deployRimeSchemaFile(file.getAbsolutePath()), "Actual APK engine could not deploy owned schema");
         }
+    }
+
+    private static String[] enabledSchemas() {
+        LinkedHashSet<String> ids = new LinkedHashSet<>();
+        for (SchemaItem item : Rime.getRimeSchemaList()) {
+            check(item.getId() != null && !item.getId().isEmpty() && ids.add(item.getId()),
+                    "Native enabled schema list is empty or duplicated");
+        }
+        check(!ids.isEmpty(), "Native enabled schema list is absent");
+        return ids.toArray(new String[0]);
+    }
+
+    private static String[] strings(JSONArray values) throws Exception {
+        String[] result = new String[values.length()];
+        for (int index = 0; index < result.length; index++) result[index] = values.getString(index);
+        return result;
+    }
+
+    private File defaultCustom() throws Exception {
+        File file = new File(user, "default.custom.yaml");
+        check(file.getCanonicalFile().equals(file.getAbsoluteFile()) && (!file.exists() || file.isFile()),
+                "Default customization is not a regular owned-tree file");
+        check(!file.exists() || file.length() <= 1024 * 1024, "Default customization exceeds fixture bound");
+        return file;
+    }
+
+    private void startNative(File shared, String version) {
+        nativeStopped = false;
+        nativeStarted = true;
+        Rime.startupRime(shared.getAbsolutePath(), user.getAbsolutePath(), version, false);
+        Rime.setRimePrivacyMode(false);
+        check(!Rime.isRimePrivacyGuardEnabledForTesting(), "Native normal-learning privacy guard unexpectedly active");
+    }
+
+    private static void awaitNewConfigTimestamp() throws Exception {
+        // Rime's modification/build timestamps have one-second resolution. The
+        // fixture must actually change in a later second, as an ordinary saved
+        // configuration would; never force deployment in the upgrade verifier.
+        long previousSecond = System.currentTimeMillis() / 1000L;
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+        while (System.currentTimeMillis() / 1000L <= previousSecond) {
+            check(System.nanoTime() < deadline, "Clock did not advance for normal configuration maintenance");
+            Thread.sleep(20L);
+        }
+    }
+
+    private void registerFixture(File shared, String version) throws Exception {
+        String[] original = strings(state.getJSONArray("original_enabled_schema_ids"));
+        String[] expected = Arrays.copyOf(original, original.length + 2);
+        expected[original.length] = prefix + "_full";
+        expected[original.length + 1] = prefix + "_t9";
+        awaitNewConfigTimestamp();
+        check(Rime.selectRimeSchemas(expected), "Production schema selection could not register owned full/T9");
+        File custom = defaultCustom();
+        check(custom.isFile(), "Production schema selection did not persist default customization");
+        String registered = Base64.encodeToString(bytes(custom), Base64.NO_WRAP);
+        finalizeNative();
+        startNative(shared, version);
+        String[] actual = enabledSchemas();
+        check(Arrays.equals(actual, expected), "Normal old-APK maintenance did not enable both owned schemas");
+        check(registered.equals(Base64.encodeToString(bytes(custom), Base64.NO_WRAP)),
+                "Normal registration maintenance changed default customization bytes");
+        state.put("registered_enabled_schema_ids", new JSONArray(Arrays.asList(actual)))
+                .put("registered_default_custom", registered)
+                .put("enabled_schema_registration", new JSONObject()
+                        .put("expected_ids", new JSONArray(Arrays.asList(expected)))
+                        .put("actual_ids", new JSONArray(Arrays.asList(actual)))
+                        .put("default_custom_sha256", hash(custom))
+                        .put("normal_startup_full_check", false)
+                        .put("ordinary_maintenance_readback", true));
+    }
+
+    private void restoreFixtureSelection(File shared, String version) throws Exception {
+        File custom = defaultCustom();
+        check(custom.isFile() && state.getString("registered_default_custom").equals(
+                        Base64.encodeToString(bytes(custom), Base64.NO_WRAP)),
+                "Only the registered fixture customization may be restored");
+        check(Arrays.equals(enabledSchemas(), strings(state.getJSONArray("registered_enabled_schema_ids"))),
+                "Upgraded enabled schema registration changed");
+        String[] original = strings(state.getJSONArray("original_enabled_schema_ids"));
+        awaitNewConfigTimestamp();
+        check(Rime.selectRimeSchemas(original), "Production schema selection could not restore the original list");
+        if (state.getBoolean("original_default_custom_existed")) {
+            write(custom, Base64.decode(state.getString("original_default_custom"), Base64.NO_WRAP));
+        } else {
+            check(!custom.exists() || custom.delete(), "Original absent default customization could not be restored");
+        }
+        finalizeNative();
+        startNative(shared, version);
+        check(Arrays.equals(enabledSchemas(), original), "Normal cleanup did not restore original enabled schemas");
+        check(state.getBoolean("original_default_custom_existed") == custom.exists() &&
+                        (!custom.exists() || state.getString("original_default_custom").equals(
+                                Base64.encodeToString(bytes(custom), Base64.NO_WRAP))),
+                "Original default customization bytes/existence were not restored");
+        receipt.put("schema_registration_restored", true)
+                .put("restored_enabled_schema_ids", new JSONArray(Arrays.asList(original)));
     }
 
     private void input(String schema, String spelling) {
@@ -424,7 +522,7 @@ public final class UserDictionaryNativeUpgradeProbe {
                 check(!stateFile.exists(), "Old owned upgrade fixture already exists");
                 prefix = "__t10_upgrade_" + UUID.randomUUID().toString().replace("-", "");
                 state = new JSONObject();
-                state.put("format_version", 2).put("native_context", "independent_serial_JNI_worker_not_Daemon_lifecycle")
+                state.put("format_version", 3).put("native_context", "independent_serial_JNI_worker_not_Daemon_lifecycle")
                         .put("prefix", prefix).put("package", context.getPackageName()).put("uid", context.getApplicationInfo().uid)
                         .put("application_data_dir", context.getApplicationInfo().dataDir).put("user_data_dir", user.getAbsolutePath())
                         .put("old_version_code", info.versionCode).put("old_version_name", info.versionName)
@@ -432,7 +530,7 @@ public final class UserDictionaryNativeUpgradeProbe {
             } else {
                 check(stateFile.isFile(), "Published old APK did not leave its owned learning state");
                 state = new JSONObject(text(stateFile));
-                check(state.getInt("format_version") == 2, "Wrong actual native upgrade state format");
+                check(state.getInt("format_version") == 3, "Wrong actual native upgrade state format");
                 prefix = state.getString("prefix");
                 check(prefix.matches("__t10_upgrade_[a-f0-9]{32}"), "Untrusted owned fixture prefix");
                 check(context.getPackageName().equals(state.getString("package")) && context.getApplicationInfo().uid == state.getInt("uid"), "Normal APK upgrade changed package/UID");
@@ -449,14 +547,20 @@ public final class UserDictionaryNativeUpgradeProbe {
             check(shared.isDirectory() && user.isDirectory(), "Production resource deployment failed");
             System.loadLibrary("rime_jni");
             idleDaemon();
-            nativeStarted = true;
-            Rime.startupRime(shared.getAbsolutePath(), user.getAbsolutePath(), info.versionName, false);
-            Rime.setRimePrivacyMode(false);
-            check(!Rime.isRimePrivacyGuardEnabledForTesting(), "Native normal-learning privacy guard unexpectedly active");
+            startNative(shared, info.versionName);
             if ("prepare".equals(phase)) {
                 state.put("original_schema", Rime.getCurrentRimeSchema());
                 state.put("original_ascii", Rime.getRimeOption("ascii_mode"));
+                File custom = defaultCustom();
+                String[] original = enabledSchemas();
+                check(Arrays.asList(original).contains(state.getString("original_schema")),
+                        "Original current schema is not actually enabled");
+                state.put("original_default_custom_existed", custom.exists())
+                        .put("original_default_custom", custom.exists()
+                                ? Base64.encodeToString(bytes(custom), Base64.NO_WRAP) : JSONObject.NULL)
+                        .put("original_enabled_schema_ids", new JSONArray(Arrays.asList(original)));
                 writeFixture();
+                registerFixture(shared, info.versionName);
                 learn();
                 Map<String, Integer> entries = export();
                 for (int phrase = 0; phrase < TEXTS.length; phrase++) {
@@ -464,13 +568,14 @@ public final class UserDictionaryNativeUpgradeProbe {
                     check(count != null && count >= 3, "Old native engine did not persist three positive learning commits");
                 }
                 state.put("logical_entries", new JSONObject(entries));
-                mark("published old APK commits six fictional phrases through real JNI and exports positive learning counters");
+                mark("published old APK learns two fictional phrases through six JNI commits and exports positive learning counters");
             } else {
                 verifyLearned();
                 Map<String, Integer> entries = integerMap(state.getJSONObject("logical_entries"));
                 check(export().equals(entries), "New APK read-only queries changed or lost old learning counters");
                 mark("new normal Release reads old learned phrases first in both full/T9 and exports unchanged positive counters");
                 verifyPortableBackups(entries);
+                restoreFixtureSelection(shared, info.versionName);
             }
             Rime.clearRimeComposition();
             check(Rime.selectRimeSchema(state.getString("original_schema")), "Could not restore native original schema");
@@ -488,7 +593,8 @@ public final class UserDictionaryNativeUpgradeProbe {
             receipt.put("old_version_code", state.getInt("old_version_code")).put("old_version_name", state.getString("old_version_name"))
                     .put("tested_version_code", info.versionCode).put("tested_version_name", info.versionName)
                     .put("package", context.getPackageName()).put("uid", context.getApplicationInfo().uid)
-                    .put("prefix", prefix).put("state_sha256", hash(stateFile));
+                    .put("prefix", prefix).put("state_sha256", hash(stateFile))
+                    .put("enabled_schema_registration", state.getJSONObject("enabled_schema_registration"));
         } catch (Throwable error) {
             failure = error;
         } finally {
@@ -497,7 +603,7 @@ public final class UserDictionaryNativeUpgradeProbe {
             } catch (Throwable error) {
                 if (failure == null) failure = error; else failure.addSuppressed(error);
             }
-            if (nativeStopped && stateValidated && !fixtureRetained) {
+            if (nativeStopped && stateValidated && failure == null && !fixtureRetained) {
                 try {
                     removeOwned(user, false);
                     File config = new File(user, "user.yaml");
@@ -506,6 +612,21 @@ public final class UserDictionaryNativeUpgradeProbe {
                     if ("verify".equals(phase) && failure == null) check(stateFile.delete(), "Verified owned upgrade state cleanup failed");
                 } catch (Throwable error) {
                     if (failure == null) failure = error; else failure.addSuppressed(error);
+                }
+            }
+            if (failure != null && stateValidated) {
+                // Preserve failed fixtures for inspection after native finalize.
+                // In particular, never destroy the evidence of a failed lookup.
+                fixtureRetained = true;
+                try {
+                    if (!stateFile.exists()) {
+                        state.put("diagnostic_only", true);
+                        if (nativeStopped) state.put("owned_tree", new JSONObject(ownedTree()));
+                        check(stateFile.createNewFile(), "Failed state must not replace earlier evidence");
+                        write(stateFile, state.toString(2));
+                    }
+                } catch (Throwable error) {
+                    failure.addSuppressed(error);
                 }
             }
             try {
