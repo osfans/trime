@@ -435,16 +435,73 @@ public final class UserDictionaryNativeUpgradeProbe {
         check(!Rime.isRimePrivacyGuardEnabledForTesting(), "Native normal-learning privacy guard unexpectedly active");
     }
 
-    private static void awaitNewConfigTimestamp() throws Exception {
-        // Rime's modification/build timestamps have one-second resolution. The
-        // fixture must actually change in a later second, as an ordinary saved
-        // configuration would; never force deployment in the upgrade verifier.
-        long previousSecond = System.currentTimeMillis() / 1000L;
-        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
-        while (System.currentTimeMillis() / 1000L <= previousSecond) {
-            check(System.nanoTime() < deadline, "Clock did not advance for normal configuration maintenance");
-            Thread.sleep(20L);
+    private JSONObject awaitNewConfigTimestamp(String operation, String[] expected) throws Exception {
+        // Observe this device filesystem rather than assume wall-clock second
+        // changes survive native file-clock conversion. Never set timestamps or
+        // force deployment: the following selection is still the production API.
+        check(prefix.matches("__t10_upgrade_[a-f0-9]{32}"), "Untrusted timestamp fixture prefix");
+        check(operation.equals("register") || operation.equals("restore"), "Unknown timestamp operation");
+        File probe = new File(user, prefix + ".config-timestamp.tmp");
+        check(probe.getCanonicalFile().equals(probe.getAbsoluteFile()), "Timestamp probe is not canonical");
+        long entered = System.currentTimeMillis() / 1000L;
+        long minimum = entered + 2L;
+        JSONObject timing = new JSONObject().put("operation", operation)
+                .put("entry_wall_epoch_second", entered).put("minimum_epoch_second", minimum)
+                .put("original_user_directory_mtime_ms", user.lastModified())
+                .put("probe_path", probe.getAbsolutePath()).put("probe_deleted", false)
+                .put("expected_ids", new JSONArray(Arrays.asList(expected)))
+                .put("actual_ids", JSONObject.NULL);
+        JSONArray observations = receipt.optJSONArray("config_timestamp_observations");
+        if (observations == null) {
+            observations = new JSONArray();
+            receipt.put("config_timestamp_observations", observations);
         }
+        observations.put(timing);
+        if ("prepare".equals(phase) && state != null && !stateFile.exists()) {
+            state.put("config_timestamp_observations", observations);
+        }
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(6);
+        boolean created = false;
+        Exception probeFailure = null;
+        try {
+            created = probe.createNewFile();
+            check(created, "Timestamp probe must not overwrite an existing file");
+            while (true) {
+                check(System.nanoTime() < deadline, "Actual configuration filesystem tick timed out");
+                write(probe, "owned configuration timestamp probe\n");
+                long observed = probe.lastModified();
+                timing.put("observed_probe_mtime_ms", observed);
+                check(observed > 0 && System.nanoTime() < deadline,
+                        "Actual configuration filesystem tick was unavailable or late");
+                if (observed / 1000L >= minimum) break;
+                Thread.sleep(20L);
+            }
+        } catch (Exception error) {
+            probeFailure = error;
+            throw error;
+        } finally {
+            try {
+                if (created) {
+                    check(probe.delete(), "Owned timestamp probe cleanup failed");
+                    timing.put("probe_deleted", true);
+                }
+                timing.put("post_delete_user_directory_mtime_ms", user.lastModified());
+            } catch (Exception cleanup) {
+                if (probeFailure == null) throw cleanup;
+                probeFailure.addSuppressed(cleanup);
+            }
+        }
+        check(timing.getLong("post_delete_user_directory_mtime_ms") / 1000L >= minimum,
+                "Actual user directory did not reach the configuration timestamp boundary");
+        return timing;
+    }
+
+    private void requireConfigTimestamp(JSONObject timing, File custom) throws Exception {
+        long modified = custom.lastModified(), directory = user.lastModified();
+        timing.put("selected_custom_mtime_ms", modified).put("selected_user_directory_mtime_ms", directory);
+        long minimum = timing.getLong("minimum_epoch_second");
+        check(custom.isFile() && modified / 1000L >= minimum && directory / 1000L >= minimum,
+                "Production customization did not reach the observed filesystem timestamp boundary");
     }
 
     private void registerFixture(File shared, String version) throws Exception {
@@ -452,14 +509,16 @@ public final class UserDictionaryNativeUpgradeProbe {
         String[] expected = Arrays.copyOf(original, original.length + 2);
         expected[original.length] = prefix + "_full";
         expected[original.length + 1] = prefix + "_t9";
-        awaitNewConfigTimestamp();
+        JSONObject timing = awaitNewConfigTimestamp("register", expected);
         check(Rime.selectRimeSchemas(expected), "Production schema selection could not register owned full/T9");
         File custom = defaultCustom();
         check(custom.isFile(), "Production schema selection did not persist default customization");
+        requireConfigTimestamp(timing, custom);
         String registered = Base64.encodeToString(bytes(custom), Base64.NO_WRAP);
         finalizeNative();
         startNative(shared, version);
         String[] actual = enabledSchemas();
+        timing.put("actual_ids", new JSONArray(Arrays.asList(actual)));
         check(Arrays.equals(actual, expected), "Normal old-APK maintenance did not enable both owned schemas");
         check(registered.equals(Base64.encodeToString(bytes(custom), Base64.NO_WRAP)),
                 "Normal registration maintenance changed default customization bytes");
@@ -481,16 +540,25 @@ public final class UserDictionaryNativeUpgradeProbe {
         check(Arrays.equals(enabledSchemas(), strings(state.getJSONArray("registered_enabled_schema_ids"))),
                 "Upgraded enabled schema registration changed");
         String[] original = strings(state.getJSONArray("original_enabled_schema_ids"));
-        awaitNewConfigTimestamp();
+        JSONObject timing = awaitNewConfigTimestamp("restore", original);
         check(Rime.selectRimeSchemas(original), "Production schema selection could not restore the original list");
+        requireConfigTimestamp(timing, custom);
         if (state.getBoolean("original_default_custom_existed")) {
             write(custom, Base64.decode(state.getString("original_default_custom"), Base64.NO_WRAP));
         } else {
             check(!custom.exists() || custom.delete(), "Original absent default customization could not be restored");
         }
+        timing.put("restored_custom_exists", custom.exists())
+                .put("restored_custom_mtime_ms", custom.exists() ? custom.lastModified() : JSONObject.NULL)
+                .put("restored_user_directory_mtime_ms", user.lastModified());
+        check((!custom.exists() || custom.lastModified() / 1000L >= timing.getLong("minimum_epoch_second")) &&
+                        user.lastModified() / 1000L >= timing.getLong("minimum_epoch_second"),
+                "Restored configuration did not preserve the observed filesystem timestamp boundary");
         finalizeNative();
         startNative(shared, version);
-        check(Arrays.equals(enabledSchemas(), original), "Normal cleanup did not restore original enabled schemas");
+        String[] actual = enabledSchemas();
+        timing.put("actual_ids", new JSONArray(Arrays.asList(actual)));
+        check(Arrays.equals(actual, original), "Normal cleanup did not restore original enabled schemas");
         check(state.getBoolean("original_default_custom_existed") == custom.exists() &&
                         (!custom.exists() || state.getString("original_default_custom").equals(
                                 Base64.encodeToString(bytes(custom), Base64.NO_WRAP))),
