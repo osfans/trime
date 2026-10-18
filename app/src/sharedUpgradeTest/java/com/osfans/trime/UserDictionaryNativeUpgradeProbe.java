@@ -32,6 +32,8 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -50,6 +52,7 @@ public final class UserDictionaryNativeUpgradeProbe {
     private final String phase;
     private final File external;
     private final File stateFile;
+    private final File cacheBoundaryFile;
     private final File receiptFile;
     private final JSONObject receipt = new JSONObject();
     private JSONObject state;
@@ -68,6 +71,7 @@ public final class UserDictionaryNativeUpgradeProbe {
         this.phase = phase;
         this.external = context.getExternalFilesDir(null);
         this.stateFile = new File(external, "t10-upgrade-state.json");
+        this.cacheBoundaryFile = new File(external, "t10-upgrade-cache-boundary.json");
         this.receiptFile = new File(external, "t10-upgrade-" + phase + "-receipt.json");
     }
 
@@ -113,6 +117,142 @@ public final class UserDictionaryNativeUpgradeProbe {
 
     private static String text(File file) throws Exception {
         return new String(bytes(file), StandardCharsets.UTF_8);
+    }
+
+    private static String byteHash(byte[] raw) throws Exception {
+        byte[] digest = MessageDigest.getInstance("SHA-256").digest(raw);
+        StringBuilder result = new StringBuilder();
+        for (byte value : digest) result.append(String.format(java.util.Locale.ROOT, "%02x", value & 255));
+        return result.toString();
+    }
+
+    private static void exactKeys(JSONObject object, String... expected) throws Exception {
+        LinkedHashSet<String> actual = new LinkedHashSet<>();
+        Iterator<String> keys = object.keys();
+        while (keys.hasNext()) actual.add(keys.next());
+        check(actual.equals(new LinkedHashSet<>(Arrays.asList(expected))), "Unexpected cache boundary fields/paths");
+    }
+
+    private static byte[] cacheBytes(JSONObject row, String side) throws Exception {
+        String encoded = row.getString(side + "_base64");
+        check(encoded.length() <= 87384, "Cache byte encoding exceeds limit");
+        byte[] raw = Base64.decode(encoded, Base64.NO_WRAP);
+        check(raw.length > 0 && raw.length <= 65536 &&
+                        encoded.equals(Base64.encodeToString(raw, Base64.NO_WRAP)) &&
+                        byteHash(raw).equals(row.getString(side + "_sha256")),
+                "Cache original bytes/hash differ");
+        return raw;
+    }
+
+    private static byte[] schemaTimestampMask(byte[] raw) throws Exception {
+        String value = new String(raw, StandardCharsets.UTF_8);
+        check(raw.length > 0 && raw.length <= 65536 &&
+                        value.indexOf('\r') < 0 && Arrays.equals(raw, value.getBytes(StandardCharsets.UTF_8)),
+                "Unexpected compiled schema bytes");
+        String[] lines = value.split("\n", -1);
+        StringBuilder masked = new StringBuilder();
+        LinkedHashSet<String> keys = new LinkedHashSet<>();
+        Pattern timestamp = Pattern.compile("    ([A-Za-z0-9_.-]+): (0|[1-9][0-9]*)");
+        boolean inBuild = false, inTimestamps = false, seenBuild = false, seenTimestamps = false;
+        for (int index = 0; index < lines.length; index++) {
+            String line = lines[index];
+            if (line.equals("__build_info:")) {
+                check(!seenBuild, "Duplicate root build metadata");
+                inBuild = seenBuild = true;
+            } else if (!line.isEmpty() && line.charAt(0) != ' ' && line.charAt(0) != '\t') {
+                inBuild = inTimestamps = false;
+            }
+            if (inBuild && line.equals("  timestamps:")) {
+                check(!seenTimestamps, "Duplicate build timestamps");
+                inTimestamps = seenTimestamps = true;
+            } else if (inTimestamps) {
+                if (line.startsWith("    ")) {
+                    Matcher match = timestamp.matcher(line);
+                    check(match.matches() && keys.add(match.group(1)) && match.group(2).length() <= 19,
+                            "Noncanonical build timestamp");
+                    check(Long.parseLong(match.group(2)) >= 0, "Build timestamp exceeds range");
+                    line = "    " + match.group(1) + ": <timestamp>";
+                } else {
+                    inTimestamps = false;
+                }
+            }
+            masked.append(line);
+            if (index < lines.length - 1) masked.append('\n');
+        }
+        check(seenBuild && seenTimestamps && !keys.isEmpty(), "Root build timestamps missing");
+        return masked.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    private static long schemaChecksum(byte[] raw) {
+        // librime ChecksumComputer uses reflected CRC32 with initial remainder0.
+        long crc = 0;
+        for (byte value : raw) {
+            crc ^= value & 255;
+            for (int bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ ((crc & 1) != 0 ? 0xedb88320L : 0);
+        }
+        return crc ^ 0xffffffffL;
+    }
+
+    private static long prismSchemaChecksum(byte[] raw) {
+        long value = 0;
+        for (int index = 0; index < 4; index++) value |= (long) (raw[36 + index] & 255) << (index * 8);
+        return value;
+    }
+
+    private Map<String, String> installationBoundaryTree() throws Exception {
+        check(cacheBoundaryFile.isFile() && cacheBoundaryFile.length() <= 1024 * 1024 &&
+                        cacheBoundaryFile.getCanonicalFile().equals(cacheBoundaryFile.getAbsoluteFile()),
+                "Cache boundary handoff is missing/invalid");
+        JSONObject boundary = new JSONObject(text(cacheBoundaryFile));
+        exactKeys(boundary, "format_version", "prefix", "package", "uid", "old_version_code",
+                "old_version_name", "state_sha256", "cache_files");
+        check(boundary.getInt("format_version") == 1 && prefix.equals(boundary.getString("prefix")) &&
+                        state.getString("package").equals(boundary.getString("package")) &&
+                        state.getInt("uid") == boundary.getInt("uid") &&
+                        state.getInt("old_version_code") == boundary.getInt("old_version_code") &&
+                        state.getString("old_version_name").equals(boundary.getString("old_version_name")) &&
+                        hash(stateFile).equals(boundary.getString("state_sha256")),
+                "Cache boundary does not identify immutable old native state");
+        Map<String, String> expected = stringMap(state.getJSONObject("owned_tree"));
+        check(expected.size() == 17, "Exactly seventeen old owned files required");
+        JSONObject caches = boundary.getJSONObject("cache_files");
+        String stem = "build/" + prefix;
+        exactKeys(caches, stem + "_full.schema.yaml", stem + "_full.prism.bin",
+                stem + "_t9.schema.yaml", stem + "_t9.prism.bin");
+        for (String suffix : new String[]{"full", "t9"}) {
+            String schemaPath = stem + "_" + suffix + ".schema.yaml";
+            String prismPath = stem + "_" + suffix + ".prism.bin";
+            JSONObject schema = caches.getJSONObject(schemaPath), prism = caches.getJSONObject(prismPath);
+            for (JSONObject row : new JSONObject[]{schema, prism}) {
+                exactKeys(row, "before_sha256", "after_sha256", "before_base64", "after_base64");
+            }
+            byte[] oldSchema = cacheBytes(schema, "before"), newSchema = cacheBytes(schema, "after");
+            check(Arrays.equals(schemaTimestampMask(oldSchema), schemaTimestampMask(newSchema)),
+                    "Compiled schema changed outside root numeric build timestamps");
+            byte[] oldPrism = cacheBytes(prism, "before"), newPrism = cacheBytes(prism, "after");
+            byte[] format = Arrays.copyOf("Rime::Prism/4.0".getBytes(StandardCharsets.US_ASCII), 32);
+            check(oldPrism.length >= 40 && oldPrism.length == newPrism.length &&
+                            Arrays.equals(Arrays.copyOf(oldPrism, 32), format) &&
+                            Arrays.equals(Arrays.copyOf(newPrism, 32), format) &&
+                            Arrays.equals(Arrays.copyOf(oldPrism, 36), Arrays.copyOf(newPrism, 36)) &&
+                            Arrays.equals(Arrays.copyOfRange(oldPrism, 40, oldPrism.length),
+                                    Arrays.copyOfRange(newPrism, 40, newPrism.length)),
+                    "Prism format, dictionary checksum or payload changed");
+            check(Arrays.equals(Arrays.copyOfRange(oldPrism, 36, 40), Arrays.copyOfRange(newPrism, 36, 40)) ||
+                            !Arrays.equals(oldSchema, newSchema),
+                    "Prism schema checksum changed without paired timestamp-only schema change");
+            check(prismSchemaChecksum(oldPrism) == schemaChecksum(oldSchema) &&
+                            prismSchemaChecksum(newPrism) == schemaChecksum(newSchema),
+                    "Prism schema checksum does not match its exact paired schema bytes");
+            check(schema.getString("before_sha256").equals(expected.get(schemaPath)) &&
+                            prism.getString("before_sha256").equals(expected.get(prismPath)),
+                    "Cache bytes differ from immutable learning-origin state");
+            expected.put(schemaPath, schema.getString("after_sha256"));
+            expected.put(prismPath, prism.getString("after_sha256"));
+        }
+        receipt.put("cache_boundary_sha256", hash(cacheBoundaryFile))
+                .put("expected_stopped_install_tree", new JSONObject(expected));
+        return expected;
     }
 
     private static void write(File file, byte[] data) throws Exception {
@@ -520,6 +660,7 @@ public final class UserDictionaryNativeUpgradeProbe {
             PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             if ("prepare".equals(phase)) {
                 check(!stateFile.exists(), "Old owned upgrade fixture already exists");
+                check(!cacheBoundaryFile.exists(), "Old cache boundary handoff already exists");
                 prefix = "__t10_upgrade_" + UUID.randomUUID().toString().replace("-", "");
                 state = new JSONObject();
                 state.put("format_version", 3).put("native_context", "independent_serial_JNI_worker_not_Daemon_lifecycle")
@@ -536,7 +677,7 @@ public final class UserDictionaryNativeUpgradeProbe {
                 check(context.getPackageName().equals(state.getString("package")) && context.getApplicationInfo().uid == state.getInt("uid"), "Normal APK upgrade changed package/UID");
                 check(context.getApplicationInfo().dataDir.equals(state.getString("application_data_dir")) && user.getAbsolutePath().equals(state.getString("user_data_dir")), "Normal APK upgrade changed retained data paths");
                 check(info.versionCode >= state.getInt("old_version_code") && (info.versionCode != state.getInt("old_version_code") || !info.versionName.equals(state.getString("old_version_name"))), "Not an actual new APK upgrade");
-                check(ownedTree().equals(stringMap(state.getJSONObject("owned_tree"))), "APK install changed stopped owned dictionary bytes before native startup");
+                check(ownedTree().equals(installationBoundaryTree()), "APK install changed stopped owned dictionary bytes before native startup");
                 mark("normal install preserves real UID, paths, schema and learned LevelDB bytes before native startup");
             }
             stateValidated = true;
@@ -609,7 +750,10 @@ public final class UserDictionaryNativeUpgradeProbe {
                     File config = new File(user, "user.yaml");
                     if (state.isNull("original_user_yaml")) check(!config.exists() || config.delete(), "Original absent user.yaml could not be restored");
                     else write(config, Base64.decode(state.getString("original_user_yaml"), Base64.NO_WRAP));
-                    if ("verify".equals(phase) && failure == null) check(stateFile.delete(), "Verified owned upgrade state cleanup failed");
+                    if ("verify".equals(phase) && failure == null) {
+                        check(stateFile.delete(), "Verified owned upgrade state cleanup failed");
+                        check(cacheBoundaryFile.delete(), "Verified cache boundary handoff cleanup failed");
+                    }
                 } catch (Throwable error) {
                     if (failure == null) failure = error; else failure.addSuppressed(error);
                 }

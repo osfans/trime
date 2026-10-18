@@ -9,6 +9,7 @@ from pathlib import Path
 import tempfile
 from types import SimpleNamespace
 import unittest
+import zlib
 
 import t14_upgrade as gate
 
@@ -286,6 +287,91 @@ class UpgradeGateTest(unittest.TestCase):
         args.new_apk.write_bytes(b"changed after inspection")
         with self.assertRaises(RuntimeError):
             gate.validate_artifacts(args)
+
+
+class CacheBoundaryTest(unittest.TestCase):
+    """Metadata protocol fixtures only; these bytes are not native dictionaries."""
+
+    def fixture(self):
+        prefix = "__t10_upgrade_" + "a" * 32
+        before, after = {}, {}
+
+        def prism(schema):
+            # Only the verified fixed metadata/payload layout is under test.
+            return (b"Rime::Prism/4.0".ljust(32, b"\0") + b"DICT" +
+                    zlib.crc32(schema, 0xffffffff).to_bytes(4, "little") + b"synthetic-payload")
+
+        for suffix in ("full", "t9"):
+            name = "build/" + prefix + "_" + suffix
+            raw = (b"__build_info:\n  rime_version: 1.17.0\n  timestamps:\n"
+                   b"    default: 10\n    key_bindings: 11\nmenu:\n  page_size: 5")
+            before[name + ".schema.yaml"] = raw
+            before[name + ".prism.bin"] = prism(raw)
+            changed = raw.replace(b"default: 10", b"default: 12") if suffix == "t9" else raw
+            after[name + ".schema.yaml"] = changed
+            after[name + ".prism.bin"] = prism(changed)
+        tree = {path: hashlib.sha256(raw).hexdigest() for path, raw in before.items()}
+        tree.update({prefix + ".userdb/file" + str(i): "b" * 64 for i in range(8)})
+        tree.update({prefix + name: "c" * 64 for name in (".dict.yaml", "_full.schema.yaml", "_t9.schema.yaml")})
+        tree.update({"build/" + prefix + name: "d" * 64 for name in (".table.bin", ".reverse.bin")})
+        state = dict(prefix=prefix, package=gate.PACKAGE, uid=10053, old_version_code=10,
+                     old_version_name="synthetic-old", owned_tree=tree)
+        return state, json.dumps(state).encode(), before, after
+
+    def test_metadata_only_handoff_retains_all_thirteen_original_hashes(self):
+        state, raw, before, after = self.fixture()
+        boundary = gate.cache_boundary(state, raw, before, after)
+        self.assertEqual(hashlib.sha256(raw).hexdigest(), boundary["state_sha256"])
+        expected = dict(state["owned_tree"])
+        for path, row in boundary["cache_files"].items():
+            expected[path] = row["after_sha256"]
+        persistent = set(expected) - set(boundary["cache_files"])
+        self.assertEqual(13, len(persistent))
+        self.assertEqual(17, len(expected))
+        for path in persistent:
+            self.assertEqual(state["owned_tree"][path], expected[path])
+            observed = dict(expected); observed[path] = "0" * 64
+            self.assertNotEqual(expected, observed)
+        gate.cache_boundary(state, raw, before, before)
+
+    def test_schema_semantic_and_nonnumeric_changes_rejected_with_correct_crc(self):
+        state, raw, before, after = self.fixture()
+        schema = "build/" + state["prefix"] + "_t9.schema.yaml"
+        prism = schema.replace(".schema.yaml", ".prism.bin")
+        for old, new in ((b"page_size: 5", b"page_size: 6"), (b"default: 12", b'default: "12"')):
+            altered = dict(after)
+            altered[schema] = altered[schema].replace(old, new)
+            altered[prism] = (altered[prism][:36] +
+                              zlib.crc32(altered[schema], 0xffffffff).to_bytes(4, "little") + altered[prism][40:])
+            with self.subTest(new=new), self.assertRaises(RuntimeError):
+                gate.cache_boundary(state, raw, before, altered)
+
+    def test_prism_format_dictionary_payload_unpaired_or_wrong_crc_rejected(self):
+        state, raw, before, after = self.fixture()
+        prism = "build/" + state["prefix"] + "_t9.prism.bin"
+        for template, offset in ((after, 0), (after, 32), (after, 40), (after, 36), (before, 36)):
+            altered = dict(template)
+            data = bytearray(altered[prism]); data[offset] ^= 1; altered[prism] = bytes(data)
+            with self.subTest(offset=offset, unchanged_schema=template is before), self.assertRaises(RuntimeError):
+                gate.cache_boundary(state, raw, before, altered)
+
+    def test_missing_extra_or_rewritten_learning_origin_rejected(self):
+        state, raw, before, after = self.fixture()
+        for mode in ("missing", "extra", "before"):
+            first, last = dict(before), dict(after)
+            if mode == "missing":
+                del last[next(iter(last))]
+            elif mode == "extra":
+                last["build/unowned.prism.bin"] = b"extra"
+            else:
+                path = "build/" + state["prefix"] + "_t9.prism.bin"
+                changed_state = copy.deepcopy(state)
+                changed_state["owned_tree"][path] = "0" * 64
+                with self.assertRaisesRegex(RuntimeError, "immutable learning-origin"):
+                    gate.cache_boundary(changed_state, json.dumps(changed_state).encode(), first, last)
+                continue
+            with self.subTest(mode=mode), self.assertRaises(RuntimeError):
+                gate.cache_boundary(state, raw, first, last)
 
 
 if __name__ == "__main__":

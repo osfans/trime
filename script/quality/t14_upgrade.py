@@ -28,6 +28,7 @@ import time
 import traceback
 from types import SimpleNamespace
 import uuid
+import zlib
 import xml.etree.ElementTree as ET
 
 PACKAGE = "com.osfans.trime"
@@ -35,6 +36,8 @@ IME = PACKAGE + "/com.osfans.trime.ime.core.TrimeInputMethodService"
 EDITOR = PACKAGE + "/com.osfans.trime.ui.main.ClipEditActivity"
 NATIVE_ENTRY = PACKAGE + ".test/com.osfans.trime.UserDictionaryUpgradeInstrumentation"
 EXTERNAL = "/sdcard/Android/data/" + PACKAGE + "/files/"
+CACHE_BOUNDARY_FILE = "t10-upgrade-cache-boundary.json"
+MAX_CACHE_BYTES = 64 * 1024
 PREFERENCE_FIXTURE = {
     "candidate_text_size_override": ("int", "30"),
     "keyboard_height_override": ("int", "300"),
@@ -70,6 +73,80 @@ def package_components(package):
 def require(value, message):
     if not value:
         raise RuntimeError(message)
+
+
+def cache_paths(prefix):
+    require(isinstance(prefix, str) and re.fullmatch(r"__t10_upgrade_[a-f0-9]{32}", prefix),
+            "Untrusted cache fixture prefix")
+    return ["build/" + prefix + "_" + suffix + "." + extension
+            for suffix in ("full", "t9") for extension in ("schema.yaml", "prism.bin")]
+
+
+def schema_timestamp_mask(raw):
+    """Preserve every original byte except canonical root build timestamp digits."""
+    require(isinstance(raw, bytes) and 0 < len(raw) <= MAX_CACHE_BYTES and b"\r" not in raw,
+            "Unexpected compiled schema bytes")
+    raw.decode("utf-8")
+    result, keys = [], set()
+    in_build = in_timestamps = seen_build = seen_timestamps = False
+    pieces = raw.split(b"\n")
+    for index, body in enumerate(pieces):
+        line = body + (b"\n" if index < len(pieces) - 1 else b"")
+        if line == b"__build_info:\n":
+            require(not seen_build, "Duplicate root build metadata")
+            in_build = seen_build = True
+        elif line and line[:1] not in (b" ", b"\t", b"\n"):
+            in_build = in_timestamps = False
+        if in_build and line == b"  timestamps:\n":
+            require(not seen_timestamps, "Duplicate build timestamps")
+            in_timestamps = seen_timestamps = True
+        elif in_timestamps:
+            if line.startswith(b"    "):
+                match = re.fullmatch(rb"    ([A-Za-z0-9_.-]+): (0|[1-9][0-9]*)(\n?)", line)
+                require(match is not None and match[1] not in keys and len(match[2]) <= 19 and
+                        int(match[2]) <= 9223372036854775807, "Noncanonical build timestamp")
+                keys.add(match[1])
+                line = b"    " + match[1] + b": <timestamp>" + match[3]
+            else:
+                in_timestamps = False
+        result.append(line)
+    require(seen_build and seen_timestamps and keys, "Root build timestamps missing")
+    return b"".join(result)
+
+
+def cache_boundary(state, state_raw, before, after):
+    """Create independently verifiable metadata-only handoff; never edit state."""
+    require(json.loads(state_raw) == state, "Native state bytes differ")
+    paths = cache_paths(state["prefix"])
+    require(set(before) == set(after) == set(paths) and len(state["owned_tree"]) == 17 and
+            set(paths).issubset(state["owned_tree"]), "Exactly four registered caches and seventeen owned files required")
+    rows = {}
+    for suffix in ("full", "t9"):
+        schema = "build/" + state["prefix"] + "_" + suffix + ".schema.yaml"
+        prism = "build/" + state["prefix"] + "_" + suffix + ".prism.bin"
+        require(schema_timestamp_mask(before[schema]) == schema_timestamp_mask(after[schema]),
+                "Compiled schema changed outside root numeric build timestamps")
+        left, right = before[prism], after[prism]
+        header = b"Rime::Prism/4.0".ljust(32, b"\0")
+        require(isinstance(left, bytes) and isinstance(right, bytes) and 40 <= len(left) <= MAX_CACHE_BYTES and
+                len(left) == len(right) and left[:32] == right[:32] == header and
+                left[:36] == right[:36] and left[40:] == right[40:],
+                "Prism format, dictionary checksum or payload changed")
+        require(left[36:40] == right[36:40] or before[schema] != after[schema],
+                "Prism schema checksum changed without paired timestamp-only schema change")
+        require(int.from_bytes(left[36:40], "little") == zlib.crc32(before[schema], 0xffffffff) and
+                int.from_bytes(right[36:40], "little") == zlib.crc32(after[schema], 0xffffffff),
+                "Prism schema checksum does not match its exact paired schema bytes")
+        for path in (schema, prism):
+            first, last = before[path], after[path]
+            first_sha, last_sha = (hashlib.sha256(raw).hexdigest() for raw in (first, last))
+            require(first_sha == state["owned_tree"][path], "Old cache bytes differ from immutable learning-origin state")
+            rows[path] = dict(before_sha256=first_sha, after_sha256=last_sha,
+                              before_base64=base64.b64encode(first).decode("ascii"),
+                              after_base64=base64.b64encode(last).decode("ascii"))
+    return dict(format_version=1, prefix=state["prefix"], package=state["package"], uid=state["uid"],
+                old_version_code=state["old_version_code"], old_version_name=state["old_version_name"],
+                state_sha256=hashlib.sha256(state_raw).hexdigest(), cache_files=rows)
 
 
 def now():
@@ -452,6 +529,11 @@ def run(args):
                     len(registration.get("actual_ids", [])) >= 3,
                     "Native fixture was not registered through ordinary schema maintenance")
             if phase == "verify":
+                expected_install_tree = dict(state["owned_tree"])
+                expected_install_tree.update({path: item["after_sha256"] for path, item in boundary["cache_files"].items()})
+                require(receipt.get("cache_boundary_sha256") == boundary_binding["sha256"] and
+                        receipt.get("expected_stopped_install_tree") == expected_install_tree,
+                        "Native verified cache boundary/complete stopped install tree differs")
                 require(registration == state["enabled_schema_registration"] and
                         receipt.get("schema_registration_restored") is True and
                         receipt.get("restored_enabled_schema_ids") == state["original_enabled_schema_ids"],
@@ -615,7 +697,7 @@ def run(args):
         dedicated = output / "runtime-audit-dedicated"
         dedicated.write_text(marker + "\n", encoding="utf-8")
         control.command(["push", dedicated, EXTERNAL + dedicated.name])
-        for name in ("t10-upgrade-state.json", "t10-upgrade-prepare-receipt.json", "t10-upgrade-verify-receipt.json"):
+        for name in ("t10-upgrade-state.json", "t10-upgrade-prepare-receipt.json", "t10-upgrade-verify-receipt.json", CACHE_BOUNDARY_FILE):
             control.shell("test", "!", "-e", EXTERNAL + name)
         native("prepare")
         report["checks"]["actual_old_native_learning_and_stopped_fixture"] = True
@@ -655,12 +737,32 @@ def run(args):
         configs = {config_path: config_bytes, phrase_path: "霁月青舟\tji yue qing zhou\t9\n".encode()}
         item = write("seed-custom_phrase.txt", configs[phrase_path])
         control.command(["push", item["path"], phrase_path])
+        before_cache, after_cache = {}, {}
+        cache_captures = dict(before={}, after={})
+        report["old_reactivation_compiled_cache"] = cache_captures
+        for relative in cache_paths(state["prefix"]):
+            before_cache[relative], cache_captures["before"][relative] = read_remote(
+                user + "/" + relative, "old-ime-before-" + relative[6:])
+            require(hashlib.sha256(before_cache[relative]).hexdigest() == state["owned_tree"][relative],
+                    "Old cache changed before public activation")
         # The target is selected during installation. It is never switched away
         # until the post-install selection and retained-data assertions finish.
         control.shell("ime", "enable", IME)
         control.shell("ime", "set", IME)
         start_empty_editor("old-ime")
         old_activation = await_activation("old-ime")
+        for relative in cache_paths(state["prefix"]):
+            after_cache[relative], cache_captures["after"][relative] = read_remote(
+                user + "/" + relative, "old-ime-after-" + relative[6:])
+        boundary = cache_boundary(state, state_raw, before_cache, after_cache)
+        boundary_raw = (json.dumps(boundary, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+        require(len(boundary_raw) <= 1024 * 1024, "Cache boundary handoff exceeds limit")
+        boundary_binding = write(CACHE_BOUNDARY_FILE, boundary_raw)
+        control.command(["push", boundary_binding["path"], EXTERNAL + CACHE_BOUNDARY_FILE])
+        boundary_readback, report["cache_boundary_before_install"] = read_remote(
+            EXTERNAL + CACHE_BOUNDARY_FILE, "before-install-cache-boundary.json")
+        require(boundary_readback == boundary_raw, "Cache boundary handoff write/readback differs")
+        report["cache_boundary_handoff"] = boundary_binding
         ime_before = ime_state("before-upgrade")
         require(ime_before["default_input_method"] == IME and
                 IME in {entry.split(";")[0] for entry in ime_before["enabled_input_methods"].split(":")},
@@ -681,6 +783,9 @@ def run(args):
         retained, report["after_install_native_state"] = read_remote(
             EXTERNAL + "t10-upgrade-state.json", "after-install-native-state.json")
         require(retained == state_raw, "APK update changed native state metadata")
+        retained_boundary, report["cache_boundary_after_install"] = read_remote(
+            EXTERNAL + CACHE_BOUNDARY_FILE, "after-install-cache-boundary.json")
+        require(retained_boundary == boundary_raw, "APK update changed cache boundary handoff bytes")
         report["ime_before_upgrade"], report["ime_after_upgrade"] = ime_before, ime_after
         report["ordinary_install_preserved_ime_uid_config_preferences"] = True
         report["checks"].update(strictly_newer_normal_release_install=True, retained_uid_and_data_directory=True,
@@ -693,6 +798,7 @@ def run(args):
         native("verify")
         report["checks"]["new_native_stopped_bytes_full_t9_learning_counters_and_three_backups"] = True
         control.shell("test", "!", "-e", EXTERNAL + "t10-upgrade-state.json")
+        control.shell("test", "!", "-e", EXTERNAL + CACHE_BOUNDARY_FILE)
         # Normal installation was already checked against registered production
         # bytes above. Successful native fixture cleanup intentionally restores
         # only its saved default customization; the independent phrase stays.
