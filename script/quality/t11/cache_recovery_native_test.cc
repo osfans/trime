@@ -329,7 +329,8 @@ int main(int argc, char** argv) {
     const auto user_name = user.string();
     // Explicit linked modules avoid loading host-distribution dynamic plugins.
     const char* modules[] = {"default", "deployer", nullptr};
-    RIME_STRUCT(RimeTraits, traits);
+    RimeTraits traits{};
+    RIME_STRUCT_INIT(RimeTraits, traits);
     traits.shared_data_dir = shared_name.c_str();
     traits.user_data_dir = user_name.c_str();
     traits.app_name = "trime.cache_recovery_test";
