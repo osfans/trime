@@ -273,6 +273,50 @@ def require_install_success(raw):
             "Actual package installer did not uniquely report success")
 
 
+def installed_primary_abi(raw, package, uid):
+    """Read one actual installed package, not the emulator's advertised architecture."""
+    require(isinstance(raw, bytes) and 0 < len(raw) <= 2 * 1024 * 1024 and
+            isinstance(package, str) and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+", package) and
+            type(uid) is int and 10000 <= uid < 100000, "Invalid installed ABI identity")
+    text = raw.decode("utf-8")
+    packages = re.findall(r"(?m)^\s*Package \[([^\]\r\n]+)\] \([^\r\n]*\):\r?$", text)
+    uids = re.findall(r"(?m)^\s*(?:userId|appId)=(\d+)\b", text)
+    primary = re.findall(r"(?m)^\s*primaryCpuAbi=(\S+)\s*$", text)
+    secondary = re.findall(r"(?m)^\s*secondaryCpuAbi=(\S+)\s*$", text)
+    require(packages == [package] and len(uids) == 1 and int(uids[0]) == uid and
+            len(primary) == 1 and re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_.-]*", primary[0]) and
+            primary[0] != "null" and secondary == ["null"],
+            "Missing, ambiguous or mismatched installed single-ABI package")
+    return primary[0]
+
+
+def test_install_abi(api, raw, target, expected, test):
+    """Align native-free instrumentation metadata with its verified installed target."""
+    if api < 23:
+        return None  # Keep the original API21 installer path and options.
+    require(isinstance(target, dict) and isinstance(expected, dict) and isinstance(test, dict) and
+            isinstance(expected.get("package"), str) and type(expected.get("bytes")) is int and
+            expected["bytes"] > 0 and isinstance(expected.get("sha256"), str) and
+            re.fullmatch(r"[a-f0-9]{64}", expected["sha256"]), "Missing verified target APK identity")
+    require(test.get("abis") == [] and test.get("package") == expected.get("package") + ".test" and
+            test.get("instrumentation_target") == expected.get("package"),
+            "Only actual native-free same-target instrumentation is supported")
+    require(target.get("version_code") == expected.get("version_code") and
+            target.get("version_name") == expected.get("version_name") and
+            isinstance(target.get("apk"), dict) and
+            (target["apk"].get("bytes"), target["apk"].get("sha256")) ==
+            (expected.get("bytes"), expected.get("sha256")),
+            "Installed target APK binding differs from actual artifact")
+    abi = installed_primary_abi(raw, expected["package"], target.get("uid"))
+    codes = re.findall(rb"(?m)^\s*versionCode=(\d+)\b", raw)
+    versions = re.findall(rb"(?m)^\s*versionName=([^\s]+)", raw)
+    require(codes == [str(expected["version_code"]).encode()] and
+            versions == [expected["version_name"].encode()] and
+            isinstance(expected.get("abis"), list) and abi in expected["abis"],
+            "Installed primary ABI or version differs from verified target APK")
+    return abi
+
+
 def require_preserved_preferences(before, after):
     left = {key: value for key, value in before.items() if key != VOLATILE_PREFERENCE}
     right = {key: value for key, value in after.items() if key != VOLATILE_PREFERENCE}
@@ -508,13 +552,28 @@ def run(args):
 
     def install(kind):
         arguments = ["install", "--no-incremental", "-r"]
+        abi = None
         if kind == "test":
             arguments.append("-t")
+            if args.api >= 23:
+                target_dump = control.shell("dumpsys", "package", record["apks"]["old"]["package"])
+                abi = test_install_abi(args.api, target_dump, baseline, record["apks"]["old"], record["apks"]["test"])
+                report["test_install_abi"] = dict(primary_cpu_abi=abi, native_free_test_apk=True,
+                    target_uid=baseline["uid"], target_apk=baseline["apk"],
+                    target_package_dump=write("test-install-target-package.txt", target_dump))
+                arguments += ["--abi", abi]
         arguments.append(record["apks"][kind]["path"])
         require("-d" not in arguments and "uninstall" not in arguments, "Unsafe install option")
         raw = control.command(arguments, timeout=120)
         require_install_success(raw)
-        return installed(kind + "-installed", kind)
+        row = installed(kind + "-installed", kind)
+        if abi is not None:
+            test_dump = control.shell("dumpsys", "package", record["apks"]["test"]["package"])
+            require(installed_primary_abi(test_dump, record["apks"]["test"]["package"], row["uid"]) == abi,
+                    "Installed instrumentation ABI did not match its actual target")
+            report["test_install_abi"].update(test_uid=row["uid"], test_apk=row["apk"],
+                test_package_dump=write("test-install-result-package.txt", test_dump), actual_installed_match=True)
+        return row
 
     def ime_state(label):
         values = {key: control.shell("settings", "get", "secure", key).decode() for key in

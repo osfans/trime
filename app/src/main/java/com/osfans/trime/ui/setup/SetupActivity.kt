@@ -5,6 +5,7 @@
 
 package com.osfans.trime.ui.setup
 
+import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.Intent
 import android.database.ContentObserver
@@ -70,6 +71,7 @@ class SetupActivity : FragmentActivity() {
     private lateinit var skipButton: Button
     private lateinit var prevButton: Button
     private lateinit var nextButton: Button
+    private var skipConfirmationDialog: AlertDialog? = null
 
     private val storageAccess = StorageAccess(this)
     private var completedPages = emptySet<SetupPage>()
@@ -408,13 +410,18 @@ class SetupActivity : FragmentActivity() {
         skipButton = binding.skipButton.apply {
             text = getString(R.string.setup__skip)
             setOnClickListener {
-                PublicAlertDialogs
+                if (!PublicAlertDialogs.canShow(this@SetupActivity) || skipConfirmationDialog?.isShowing == true) return@setOnClickListener
+                skipConfirmationDialog = PublicAlertDialogs
                     .builder(this@SetupActivity)
                     .setMessage(R.string.setup__skip_hint)
                     .setPositiveButton(R.string.setup__skip_hint_yes) { _, _ ->
                         completeSetup(deferred = true)
                     }.setNegativeButton(R.string.setup__skip_hint_no, null)
-                    .show()
+                    .show().also { dialog ->
+                        dialog.setOnDismissListener {
+                            if (skipConfirmationDialog === dialog) skipConfirmationDialog = null
+                        }
+                    }
             }
         }
         prevButton =
@@ -594,6 +601,9 @@ class SetupActivity : FragmentActivity() {
     }
 
     override fun onDestroy() {
+        val dialog = skipConfirmationDialog
+        skipConfirmationDialog = null
+        dialog?.dismiss()
         trialFocusFrame = null
         inputJob?.cancel()
         if (inputSession != null) RimeDaemon.destroySession(inputSessionName)

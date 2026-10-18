@@ -444,5 +444,77 @@ class CacheBoundaryTest(unittest.TestCase):
                 gate.cache_boundary(state, raw, first, last)
 
 
+
+
+class NativeFreeInstrumentationAbiTest(unittest.TestCase):
+    def abi_fixture(self, abi="x86_64", ending="\n"):
+        package = gate.PACKAGE
+        expected = dict(package=package, version_code=20261123, version_name="3.3.13-t9.18",
+                        bytes=123, sha256="a" * 64, abis=[abi])
+        target = dict(uid=10148, version_code=expected["version_code"], version_name=expected["version_name"],
+                      apk=dict(bytes=123, sha256="a" * 64))
+        test = dict(package=package + ".test", instrumentation_target=package, abis=[])
+        dump = ending.join(("Packages:", "  Package [" + package + "] (abc123):", "    appId=10148",
+                            "    primaryCpuAbi=" + abi, "    secondaryCpuAbi=null",
+                            "    versionCode=20261123 minSdk=21 targetSdk=37", "    versionName=3.3.13-t9.18", "")).encode()
+        return dump, target, expected, test
+
+    def test_actual_installed_primary_abi_is_used_without_hardcoded_architecture(self):
+        for abi in ("x86_64", "arm64-v8a", "armeabi-v7a"):
+            for ending in ("\n", "\r\n"):
+                with self.subTest(abi=abi, ending=ending):
+                    values = self.abi_fixture(abi, ending)
+                    self.assertEqual(abi, gate.test_install_abi(35, *values))
+                    self.assertEqual(abi, gate.test_install_abi(23, *values))
+
+    def test_api21_keeps_original_path_without_reading_or_inventing_target_abi(self):
+        self.assertIsNone(gate.test_install_abi(21, b"not a package dump", None, None, None))
+
+    def test_missing_ambiguous_or_cross_package_dump_identity_is_rejected(self):
+        raw, target, expected, test = self.abi_fixture()
+        cases = [b"", raw.replace(b"    primaryCpuAbi=x86_64\n", b""),
+                 raw.replace(b"primaryCpuAbi=x86_64", b"primaryCpuAbi=null"),
+                 raw + b"    primaryCpuAbi=x86_64\n", raw + b"    appId=10148\n", raw + raw,
+                 raw.replace(gate.PACKAGE.encode(), b"other.app"),
+                 raw.replace(b"appId=10148", b"appId=10149"),
+                 raw.replace(b"secondaryCpuAbi=null", b"secondaryCpuAbi=x86"),
+                 raw.replace(b"primaryCpuAbi=x86_64", b"primaryCpuAbi=--abi"),
+                 raw.replace(b"versionCode=20261123", b"versionCode=20261124"),
+                 raw.replace(b"versionName=3.3.13-t9.18", b"versionName=changed")]
+        for value in cases:
+            with self.subTest(raw=value), self.assertRaises(RuntimeError):
+                gate.test_install_abi(35, value, target, expected, test)
+
+    def test_target_apk_bytes_sha_version_and_native_abi_binding_cannot_be_substituted(self):
+        raw, target, expected, test = self.abi_fixture()
+        for field, value in (("apk", dict(bytes=124, sha256="a" * 64)),
+                             ("apk", dict(bytes=123, sha256="b" * 64)),
+                             ("version_code", 20261124), ("version_name", "changed"), ("uid", 10149)):
+            changed = dict(target, **{field: value})
+            with self.subTest(field=field, value=value), self.assertRaises(RuntimeError):
+                gate.test_install_abi(35, raw, changed, expected, test)
+        for changed in ({}, dict(expected, abis=["arm64-v8a"]), dict(expected, sha256=None)):
+            with self.subTest(expected=changed), self.assertRaises(RuntimeError):
+                gate.test_install_abi(35, raw, target, changed, test)
+
+    def test_nonempty_test_native_abi_or_other_instrumentation_target_is_rejected(self):
+        raw, target, expected, test = self.abi_fixture()
+        for field, value in (("abis", ["x86_64"]), ("package", "other.test"),
+                             ("instrumentation_target", "other.app")):
+            changed = dict(test, **{field: value})
+            with self.subTest(field=field), self.assertRaises(RuntimeError):
+                gate.test_install_abi(35, raw, target, expected, changed)
+
+    def test_installed_test_readback_requires_its_own_exact_package_uid_and_unique_abi(self):
+        raw, _, expected, _ = self.abi_fixture()
+        package = expected["package"] + ".test"
+        raw = raw.replace(expected["package"].encode(), package.encode()).replace(b"appId=10148", b"appId=10149")
+        self.assertEqual("x86_64", gate.installed_primary_abi(raw, package, 10149))
+        for changed, uid in ((raw, 10148), (raw + b"    primaryCpuAbi=null\n", 10149),
+                             (raw.replace(b"primaryCpuAbi=x86_64", b"primaryCpuAbi=null"), 10149)):
+            with self.subTest(uid=uid, changed=changed), self.assertRaises(RuntimeError):
+                gate.installed_primary_abi(changed, package, uid)
+
+
 if __name__ == "__main__":
     unittest.main()

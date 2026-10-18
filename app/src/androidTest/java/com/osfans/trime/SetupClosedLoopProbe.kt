@@ -85,24 +85,90 @@ object SetupClosedLoopProbe {
     }
 
     /** Inspect only the actual active public accessibility window, including on API21. */
-    private fun skipNoBounds(instrumentation: Instrumentation, activity: SetupActivity): Rect? {
+    private fun skipNoBounds(instrumentation: Instrumentation, activity: SetupActivity, diagnostics: Bundle): Rect? {
+        @Suppress("DEPRECATION")
+        fun recycle(node: AccessibilityNodeInfo) {
+            if (Build.VERSION.SDK_INT < 33) node.recycle()
+        }
+        var outcome: Result<Pair<String, Rect>?>? = null
+        instrumentation.runOnMainSync {
+            outcome = runCatching {
+                fun owns(context: Context): Boolean {
+                    var current = context
+                    val visited = mutableSetOf<Context>()
+                    while (visited.add(current)) {
+                        if (current is Activity) return current === activity
+                        current = (current as? ContextWrapper)?.baseContext ?: return false
+                    }
+                    return false
+                }
+                val dialogs = windowRoots().filter { view ->
+                    view.isShown && view.hasWindowFocus() && owns(view.context) &&
+                        descendants(view).filterIsInstance<TextView>().any {
+                            it.isShown && it.text.toString() == activity.getString(R.string.setup__skip_hint)
+                        }
+                }
+                diagnostics.putInt("setup_skip_no_actual_dialog_count", dialogs.size)
+                check(dialogs.size <= 1) { "Actual Skip dialog is ambiguous" }
+                val dialog = dialogs.singleOrNull() ?: return@runCatching null
+                val buttons = descendants(dialog).filterIsInstance<Button>().filter {
+                    it.id == android.R.id.button2 && it.isShown && it.isEnabled && it.isClickable &&
+                        it.text.toString() == activity.getString(R.string.setup__skip_hint_no)
+                }.toList()
+                diagnostics.putInt("setup_skip_no_actual_button_count", buttons.size)
+                check(buttons.size <= 1) { "Actual Skip negative action is ambiguous" }
+                val button = buttons.singleOrNull() ?: return@runCatching null
+                val visible = Rect()
+                if (!button.isLaidOut || button.isLayoutRequested || !button.getLocalVisibleRect(visible) ||
+                    visible != Rect(0, 0, button.width, button.height)
+                ) {
+                    return@runCatching null
+                }
+                val position = IntArray(2)
+                button.getLocationOnScreen(position)
+                val bounds = Rect(position[0], position[1], position[0] + button.width, position[1] + button.height)
+                // API21 exposes original text, while newer TextView versions expose
+                // transformed text. Read this verified negative Button's real node,
+                // rather than assuming case or accepting another action's label.
+                val node = button.createAccessibilityNodeInfo()
+                val label = try {
+                    checkNotNull(node.text) { "Actual Skip negative action has no accessibility text" }.toString()
+                } finally {
+                    recycle(node)
+                }
+                diagnostics.putString("setup_skip_no_actual_raw_label", button.text.toString())
+                diagnostics.putString("setup_skip_no_actual_accessibility_label", label)
+                diagnostics.putString(
+                    "setup_skip_no_actual_display_label",
+                    (button.transformationMethod?.getTransformation(button.text, button) ?: button.text).toString(),
+                )
+                diagnostics.putString("setup_skip_no_actual_negative_rect", bounds.flattenToString())
+                label to bounds
+            }
+        }
+        val expected = checkNotNull(outcome).getOrThrow() ?: return null
         val root = instrumentation.uiAutomation.rootInActiveWindow ?: return null
         val owned = mutableListOf(root)
         try {
+            diagnostics.putString("setup_skip_no_public_package", root.packageName?.toString().orEmpty())
+            diagnostics.putInt("setup_skip_no_public_window_id", root.windowId)
             if (root.packageName?.toString() != activity.packageName) return null
             val prompts = root.findAccessibilityNodeInfosByText(activity.getString(R.string.setup__skip_hint))
             owned.addAll(prompts)
             val matchingPrompts = prompts.filter {
                 it.isVisibleToUser && it.text?.toString() == activity.getString(R.string.setup__skip_hint)
             }
+            diagnostics.putInt("setup_skip_no_public_prompt_count", matchingPrompts.size)
             check(matchingPrompts.size <= 1) { "Actual Skip prompt is ambiguous" }
             if (matchingPrompts.isEmpty()) return null
             val buttons = root.findAccessibilityNodeInfosByText(activity.getString(R.string.setup__skip_hint_no))
             owned.addAll(buttons)
             val matchingButtons = buttons.filter {
                 it.isVisibleToUser && it.isEnabled && it.isClickable && it.windowId == root.windowId &&
-                    it.text?.toString() == activity.getString(R.string.setup__skip_hint_no)
+                    it.packageName?.toString() == activity.packageName && it.className?.toString() == Button::class.java.name &&
+                    it.text?.toString() == expected.first && Rect().also(it::getBoundsInScreen) == expected.second
             }
+            diagnostics.putInt("setup_skip_no_public_button_count", matchingButtons.size)
             check(matchingButtons.size <= 1) { "Actual Skip No button is ambiguous" }
             val button = matchingButtons.singleOrNull() ?: return null
             return Rect().also { bounds ->
@@ -112,10 +178,6 @@ object SetupClosedLoopProbe {
             }
         } finally {
             // API21-32 return these public nodes to the platform pool; API33+ no longer pools them.
-            @Suppress("DEPRECATION")
-            fun recycle(node: AccessibilityNodeInfo) {
-                if (Build.VERSION.SDK_INT < 33) node.recycle()
-            }
             owned.forEach(::recycle)
         }
     }
@@ -454,11 +516,25 @@ object SetupClosedLoopProbe {
         val beforeSkipPage = main { activity.currentSetupPage }
         val beforeSkipPreferences = AppPrefs.defaultInstance().profile.freshInputSetupPending.sharedPreferences.all.toMap()
         val skipDeadline = SystemClock.uptimeMillis() + 30_000
+        await("The real Skip target did not settle in the same focused unfinished Setup window", skipDeadline) {
+            main {
+                val skip = activity.findViewById<Button>(R.id.skip_button)
+                !activity.isFinishing && !activity.isDestroyed && activity.hasWindowFocus() &&
+                    activity.window.decorView.hasWindowFocus() && !activity.window.decorView.isLayoutRequested &&
+                    activity.currentSetupPage == beforeSkipPage && skip.isShown && skip.isEnabled && skip.isClickable &&
+                    skip.isLaidOut && !skip.isLayoutRequested && isFullyVisible(skip)
+            }
+        }
         instrumentation.sendStatus(0, Bundle().apply { putString("setup_skip_no_stage", "before-real-skip-touch") })
         touch(main { activity.findViewById<Button>(R.id.skip_button) }, "actual-skip-centre-down-up")
         var noBounds: Rect? = null
-        await("The actual Skip confirmation and unique No action did not appear", skipDeadline) {
-            skipNoBounds(instrumentation, activity).also { noBounds = it } != null
+        val skipDiagnostics = Bundle()
+        try {
+            await("The actual Skip confirmation and unique No action did not appear", skipDeadline) {
+                skipNoBounds(instrumentation, activity, skipDiagnostics).also { noBounds = it } != null
+            }
+        } finally {
+            instrumentation.sendStatus(0, skipDiagnostics)
         }
         val actualNoBounds = checkNotNull(noBounds)
         instrumentation.sendStatus(
@@ -740,6 +816,167 @@ object SetupClosedLoopProbe {
         }
     }
 
+    /** Required owner-destruction boundary; it does not persist private trial text. */
+    private fun verifySkipDialogOwnerRecreation(
+        instrumentation: Instrumentation,
+        activity: SetupActivity,
+        trial: SetupTrialEditText,
+        session: RimeSession,
+        result: Bundle,
+        onReplacement: (SetupActivity) -> Unit,
+    ): Pair<SetupActivity, SetupTrialEditText> {
+        fun <T> main(block: () -> T): T {
+            var outcome: Result<T>? = null
+            instrumentation.runOnMainSync { outcome = runCatching(block) }
+            return checkNotNull(outcome).getOrThrow()
+        }
+        val deadline = SystemClock.uptimeMillis() + 60_000
+        fun await(message: String, condition: () -> Boolean) {
+            while (!condition()) {
+                check(SystemClock.uptimeMillis() < deadline) { message }
+                SystemClock.sleep(50)
+            }
+        }
+        fun owns(view: View): Boolean {
+            var context = view.context
+            val visited = mutableSetOf<Context>()
+            while (visited.add(context)) {
+                if (context is Activity) return context === activity
+                context = (context as? ContextWrapper)?.baseContext ?: return false
+            }
+            return false
+        }
+        fun dialogs() = windowRoots().filter { root ->
+            owns(root) && root.isShown && descendants(root).filterIsInstance<TextView>().any {
+                it.isShown && it.text.toString() == activity.getString(R.string.setup__skip_hint)
+            }
+        }
+        fun bounds(view: View): Rect {
+            val position = IntArray(2)
+            view.getLocationOnScreen(position)
+            return Rect(position[0], position[1], position[0] + view.width, position[1] + view.height)
+        }
+        fun record(stage: String) {
+            result.putString("setup_skip_recreation_stage", stage)
+            instrumentation.sendStatus(0, Bundle(result).apply { remove("stream") })
+        }
+        result.putBoolean("setup_skip_recreation_mandatory", true)
+        result.putBoolean("setup_skip_recreation_completed", false)
+        result.putInt("setup_skip_recreation_checks", 0)
+        val preferences = AppPrefs.defaultInstance().profile.freshInputSetupPending.sharedPreferences
+        val checkpoints = instrumentation.targetContext.getSharedPreferences("trime_setup", Context.MODE_PRIVATE)
+        val beforePreferences = preferences.all.toMap()
+        val beforeCheckpoints = checkpoints.all.toMap()
+        val beforeInput = runBlocking { session.runOnReady { inspectInputSetup() } }
+        val choice = main { activity.inputChoice }
+        val keepCurrent = main { activity.keepCurrentInput }
+        main {
+            check(activity.currentSetupPage == SetupPage.Try && !activity.isPageDone(SetupPage.Try))
+            check(trial.text.isNullOrEmpty())
+            trial.setText("t12 private recreation draft")
+            check(!activity.isPageDone(SetupPage.Try))
+        }
+        val monitor = instrumentation.addMonitor(SetupActivity::class.java.name, null, false)
+        try {
+            var skipBounds: Rect? = null
+            await("The unfinished Skip target did not settle before owner recreation") {
+                main {
+                    val skip = activity.findViewById<Button>(R.id.skip_button)
+                    val local = Rect()
+                    val ready = activity.hasWindowFocus() && activity.window.decorView.hasWindowFocus() &&
+                        !activity.window.decorView.isLayoutRequested && !activity.isFinishing && !activity.isDestroyed &&
+                        skip.isShown && skip.isEnabled && skip.isClickable && skip.isLaidOut && !skip.isLayoutRequested &&
+                        skip.getLocalVisibleRect(local) && local == Rect(0, 0, skip.width, skip.height)
+                    if (ready) skipBounds = bounds(skip)
+                    ready
+                }
+            }
+            val target = checkNotNull(skipBounds)
+            result.putString("setup_skip_recreation_actual_skip_rect", target.flattenToString())
+            record("before-real-skip-touch")
+            val down = SystemClock.uptimeMillis()
+            fun motion(action: Int) {
+                val event = MotionEvent.obtain(down, SystemClock.uptimeMillis(), action, target.exactCenterX(), target.exactCenterY(), 0)
+                event.source = InputDevice.SOURCE_TOUCHSCREEN
+                try {
+                    instrumentation.sendPointerSync(event)
+                } finally {
+                    event.recycle()
+                }
+            }
+            motion(MotionEvent.ACTION_DOWN)
+            SystemClock.sleep(60)
+            motion(MotionEvent.ACTION_UP)
+            instrumentation.waitForIdleSync()
+            val diagnostics = Bundle()
+            try {
+                await("The unique owned Skip dialog was not publicly visible before recreation") {
+                    skipNoBounds(instrumentation, activity, diagnostics) != null
+                }
+            } finally {
+                instrumentation.sendStatus(0, diagnostics)
+            }
+            val oldDialog = main {
+                val matches = dialogs()
+                check(matches.size == 1 && matches.single().hasWindowFocus())
+                matches.single()
+            }
+            main {
+                check(activity.findViewById<Button>(R.id.skip_button).performClick())
+                val afterDuplicate = dialogs()
+                check(afterDuplicate.size == 1 && afterDuplicate.single() === oldDialog) { "Repeated Skip created another dialog window" }
+                result.putInt("setup_skip_recreation_old_owner_identity", System.identityHashCode(activity))
+                result.putInt("setup_skip_recreation_old_root_identity", System.identityHashCode(oldDialog))
+                result.putString("setup_skip_recreation_old_root_class", oldDialog.javaClass.name)
+                result.putString("setup_skip_recreation_old_root_rect", bounds(oldDialog).flattenToString())
+                result.putInt("setup_skip_recreation_old_public_window_id", diagnostics.getInt("setup_skip_no_public_window_id"))
+                result.putBoolean("setup_skip_recreation_duplicate_single_window", true)
+                // The duplicate dispatch exercises re-entry directly; only the
+                // preceding original Skip activation is a real injected touch.
+                result.putString("setup_skip_recreation_duplicate_dispatch", "same actual Skip View.performClick")
+            }
+            record("unique-owned-dialog-before-recreate")
+            main { activity.recreate() }
+            var replacement: SetupActivity? = null
+            await("Open Skip dialog recreation did not create a replacement Setup Activity") {
+                val seen = monitor.waitForActivityWithTimeout(50) as? SetupActivity
+                if (seen != null && seen !== activity && main { !seen.isDestroyed && !seen.isFinishing }) replacement = seen
+                replacement != null
+            }
+            val recreated = checkNotNull(replacement)
+            onReplacement(recreated)
+            await("Recreation retained an old owned dialog/window or lost the unfinished Try page") {
+                main {
+                    activity.isDestroyed && !oldDialog.isAttachedToWindow && windowRoots().none(::owns) &&
+                        recreated.hasWindowFocus() && recreated.currentSetupPage == SetupPage.Try && !recreated.isPageDone(SetupPage.Try) &&
+                        recreated.supportFragmentManager.fragments.filterIsInstance<SetupFragment>()
+                            .firstOrNull { it.setupPage == SetupPage.Try }?.trialInput()?.isShown == true
+                }
+            }
+            val newTrial = main {
+                check(recreated.inputChoice == choice && recreated.keepCurrentInput == keepCurrent)
+                val input = checkNotNull(
+                    recreated.supportFragmentManager.fragments.filterIsInstance<SetupFragment>()
+                        .first { it.setupPage == SetupPage.Try }.trialInput(),
+                )
+                check(input.text.isNullOrEmpty()) { "Recreation restored private trial text despite its no-save policy" }
+                input
+            }
+            check(preferences.all == beforePreferences && checkpoints.all == beforeCheckpoints) { "Open-dialog recreation changed input preferences or setup checkpoints" }
+            check(runBlocking { session.runOnReady { inspectInputSetup() } } == beforeInput) { "Open-dialog recreation changed active input configuration" }
+            result.putBoolean("setup_skip_recreation_old_owner_windows_removed", true)
+            result.putBoolean("setup_skip_recreation_trial_text_cleared", true)
+            result.putBoolean("setup_skip_recreation_choice_checkpoints_input_preserved", true)
+            result.putBoolean("setup_skip_recreation_completed", true)
+            result.putInt("setup_skip_recreation_checks", 1)
+            record("old-owned-dialog-dismissed-new-try-restored")
+            return recreated to newTrial
+        } finally {
+            instrumentation.removeMonitor(monitor)
+            record(if (result.getBoolean("setup_skip_recreation_completed")) "completed" else "failed")
+        }
+    }
+
     private fun restore(preferences: SharedPreferences, values: Map<String, *>) {
         val editor = preferences.edit().clear()
         values.forEach { (key, value) ->
@@ -887,7 +1124,8 @@ object SetupClosedLoopProbe {
                 return fresh
             }
             val fresh = verifyFreshWizardRecommendation()
-            fun verifyFreshTrialAndRecreation(fresh: SetupActivity) {
+            fun verifyFreshTrialAndRecreation(initialFresh: SetupActivity) {
+                var fresh = initialFresh
                 confirmInput(fresh)
                 val applied = runBlocking { session.runOnReady { inspectInputSetup() } }
                 check(applied.schemaId == "luna_pinyin_simp")
@@ -898,8 +1136,15 @@ object SetupClosedLoopProbe {
                 await("The actual trial editor was not shown") {
                     main { fresh.currentSetupPage == SetupPage.Try && fragment(fresh, SetupPage.Try).trialInput()?.isShown == true }
                 }
-                val trial = main { fragment(fresh, SetupPage.Try).requireView().findViewById<SetupTrialEditText>(R.id.trial_input) }
+                var trial = main { fragment(fresh, SetupPage.Try).requireView().findViewById<SetupTrialEditText>(R.id.trial_input) }
                 result.putAll(verifyUnfinishedTrialFooterTouch(instrumentation, fresh, trial, session, ::passed))
+                val restored = verifySkipDialogOwnerRecreation(instrumentation, fresh, trial, session, result) { activities += it }
+                fresh = restored.first
+                trial = restored.second
+                check(
+                    result.getBoolean("setup_skip_recreation_mandatory") && result.getBoolean("setup_skip_recreation_completed") &&
+                        result.getInt("setup_skip_recreation_checks") == 1,
+                )
                 val (service, trialToken) = verifyAppearanceDuringComposition(instrumentation, fresh, trial, session, deployments, ::passed)
                 fun checkTrialEditor() {
                     check(trial.hasFocus() && service.editorToken == trialToken && service.isCurrentEditor(trialToken))
