@@ -80,6 +80,36 @@ class RimeMappedFileCmakeTest(unittest.TestCase):
         self.assertEqual(before, {f: (self.source / f).read_bytes() for f in before})
         self.assertEqual(set(p.name for p in overlay.iterdir()), {"rime"})
 
+    def test_actual_jni_target_prioritizes_the_mapped_header(self):
+        jni = self.root / "librime_jni"
+        jni.mkdir()
+        shutil.copyfile(NATIVE / "librime_jni/CMakeLists.txt", jni / "CMakeLists.txt")
+        for source in ("config.cc", "frontend.cc", "key.cc", "levers.cc", "opencc.cc",
+                       "rime_jni.cc", "t9.cc", "t9_assist.cc"):
+            (jni / source).write_text("\n")
+        modules = self.root / "cmake"
+        modules.mkdir()
+        (modules / "FindOpencc.cmake").write_text(
+            "add_library(probe-opencc INTERFACE)\n"
+            "set(Opencc_FOUND TRUE)\n"
+            "set(Opencc_LIBRARY probe-opencc)\n"
+            'set(Opencc_INCLUDE_PATH "${CMAKE_CURRENT_LIST_DIR}")\n')
+        with (self.root / "CMakeLists.txt").open("a") as top:
+            top.write(
+                'list(PREPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")\n'
+                "add_subdirectory(librime_jni)\n"
+                "get_target_property(jni_headers rime_jni INCLUDE_DIRECTORIES)\n"
+                'file(WRITE "${CMAKE_BINARY_DIR}/jni-headers.txt" "${jni_headers}")\n')
+        result = self.configure()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("Warning", result.stdout + result.stderr)
+        headers = (self.root / "build/jni-headers.txt").read_text().split(";")
+        overlay = str(self.root / "build/trime-rime-mapped-file")
+        self.assertEqual(headers[0], overlay)
+        for original in (self.root / "build/librime/src", self.source):
+            self.assertIn(str(original), headers)
+            self.assertLess(headers.index(overlay), headers.index(str(original)))
+
     def test_each_pinned_anchor_requires_review_after_upstream_drift(self):
         changes = {
             FILES[0]: ("bool MappedFile::OpenReadOnly() {", "bool MappedFile::OpenReadOnly() noexcept {"),

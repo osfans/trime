@@ -36,6 +36,11 @@ if not __debug__:
     raise RuntimeError('Optimized Python would disable acceptance assertions')
 
 
+def native_warning_line(line):
+    """Recognize diagnostics while preserving C++ scope-qualified symbol names."""
+    return bool(re.search(r'(?mi)(?:^\s*(?:CMake (?:Deprecation )?Warning\b|warning:|w:|WARNING\b)|(?<!:):\s*warning\b)', line))
+
+
 def bind(path):
     path = Path(path).absolute()
     before = path.stat()
@@ -383,14 +388,13 @@ def main():
     def warn_free():
         bounded_logs()
         found = []
-        pattern = re.compile(r'(?mi)(?:^\s*(?:CMake (?:Deprecation )?Warning\b|warning:|w:|WARNING\b)|:\s*warning\b)')
         for row in commands:
             for stream in ('stdout', 'stderr'):
                 value = row.get(stream)
                 if value:
                     text = Path(value['path']).read_text(errors='strict')
                     for line in text.splitlines():
-                        if pattern.search(line):
+                        if native_warning_line(line):
                             found.append(dict(command=row['argv'], stream=stream, line=line))
         save(out / 'warnings.json', found)
         assert not found, 'Original command warnings present; no filtering or downgrade'

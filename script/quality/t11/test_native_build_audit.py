@@ -30,6 +30,30 @@ class NativeBuildAuditTest(unittest.TestCase):
         argv += ['-o', str(output), '-c', str(source)]
         return dict(directory=str(self.binary), file=str(source), arguments=argv)
 
+    def test_real_native_warning_diagnostics_are_detected(self):
+        for line in (
+            "warning: unused value",
+            "w: deprecated Kotlin API",
+            "WARNING: configuration problem",
+            "CMake Warning at CMakeLists.txt:4 (message):",
+            "CMake Deprecation Warning at CMakeLists.txt:4 (message):",
+            "source.cc:4:7: warning: unused value",
+            "source.cc:4:7:warning: unused value",
+            "C:\\project\\source.cc:4: warning: conversion",
+        ):
+            with self.subTest(line=line):
+                self.assertTrue(native.native_warning_line(line))
+
+    def test_readelf_cpp_warning_members_are_not_diagnostics(self):
+        # Actual readelf symbol rows that previously aborted cache acceptance.
+        for line in (
+            '  2306: 00000000003226d0    12 FUNC    LOCAL  DEFAULT   13 LuaWrapper<void (*)(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&), &(anonymous namespace)::LogReg::warning>::wrap(lua_State*)',
+            '  2307: 000000000033adf0   599 FUNC    LOCAL  DEFAULT   13 LuaWrapper<void (*)(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&), &(anonymous namespace)::LogReg::warning>::wrap_helper(lua_State*)',
+            '  2433: 0000000000074f58   210 FUNC    LOCAL  DEFAULT   13 LuaWrapper<void (*)(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&), &(anonymous namespace)::LogReg::warning>::wrap_helper(lua_State*) [clone .cold]',
+        ):
+            with self.subTest(line=line):
+                self.assertFalse(native.native_warning_line(line))
+
     def test_optional_unbuilt_tools_need_no_private_library_macro(self):
         tools = [self.row(target, 'tools/' + name, macro=False, built=False)
                  for target, name in [('opencc', 'CommandLine.cpp'),
