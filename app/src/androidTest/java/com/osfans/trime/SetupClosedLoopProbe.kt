@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 package com.osfans.trime
 
+import android.accessibilityservice.AccessibilityServiceInfo
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
@@ -10,11 +11,14 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Rect
+import android.graphics.Region
+import android.graphics.RegionIterator
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.SystemClock
 import android.util.TypedValue
+import android.view.Display
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
@@ -22,6 +26,7 @@ import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
+import android.view.accessibility.AccessibilityWindowInfo
 import android.view.inputmethod.BaseInputConnection
 import android.view.inspector.WindowInspector
 import android.widget.Button
@@ -84,6 +89,136 @@ object SetupClosedLoopProbe {
         return (type.getDeclaredField("mViews").apply { isAccessible = true }.get(instance) as List<View>).toList()
     }
 
+    private data class PublicTouchTarget(val windowId: Int, val displayId: Int, val bounds: Rect, val x: Float, val y: Float)
+
+    /** Called on main; the real View supplies its own node window, display and screen point. */
+    private fun publicTouchTarget(view: View, x: Float? = null, y: Float? = null): PublicTouchTarget? {
+        val visible = Rect()
+        if (!view.isAttachedToWindow || !view.isShown || !view.isEnabled || !view.isLaidOut || view.isLayoutRequested ||
+            !view.hasWindowFocus() || !view.getLocalVisibleRect(visible)
+        ) {
+            return null
+        }
+        val position = IntArray(2)
+        view.getLocationOnScreen(position)
+        val bounds = Rect(position[0], position[1], position[0] + view.width, position[1] + view.height)
+        val screenX = x ?: bounds.exactCenterX()
+        val screenY = y ?: bounds.exactCenterY()
+        if (!bounds.contains(screenX.toInt(), screenY.toInt()) ||
+            !visible.contains((screenX - position[0]).toInt(), (screenY - position[1]).toInt())
+        ) {
+            return null
+        }
+        val node = view.createAccessibilityNodeInfo()
+        try {
+            check(node.packageName?.toString() == view.context.packageName) { "Touch node belongs to another package" }
+            check(node.windowId >= 0) { "The real touch View has no public window ID" }
+            return PublicTouchTarget(node.windowId, checkNotNull(view.display).displayId, bounds, screenX, screenY)
+        } finally {
+            @Suppress("DEPRECATION")
+            if (Build.VERSION.SDK_INT < 33) node.recycle()
+        }
+    }
+
+    /** Public accessibility snapshots are a precondition, not an atomic InputDispatcher hit-test. */
+    private fun awaitPublicTouchTarget(
+        instrumentation: Instrumentation,
+        deadline: Long,
+        diagnostics: Bundle,
+        stage: String,
+        target: () -> PublicTouchTarget?,
+    ): PublicTouchTarget {
+        val automation = instrumentation.uiAutomation
+        val serviceInfo = automation.serviceInfo
+        val originalFlags = serviceInfo.flags
+        var stable = 0
+        var previous: String? = null
+        try {
+            serviceInfo.flags = originalFlags or AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
+            automation.serviceInfo = serviceInfo
+            while (true) {
+                check(SystemClock.uptimeMillis() < deadline) { "The public touch window did not settle before the original deadline: $stage" }
+                val current = target()
+                if (current == null) {
+                    stable = 0
+                    previous = null
+                } else {
+                    check(Build.VERSION.SDK_INT >= 30 || current.displayId == Display.DEFAULT_DISPLAY) {
+                        "API21-29 public windows cannot verify a non-default touch display"
+                    }
+                    val windows = if (Build.VERSION.SDK_INT >= 30) {
+                        val displays = automation.windowsOnAllDisplays
+                        (0 until displays.size()).flatMap { displays.valueAt(it) }
+                    } else {
+                        automation.windows
+                    }
+                    try {
+                        val sameDisplay = windows.filter { Build.VERSION.SDK_INT < 30 || it.displayId == current.displayId }
+                        fun region(window: AccessibilityWindowInfo): Region = if (Build.VERSION.SDK_INT >= 30) {
+                            Region().also(window::getRegionInScreen)
+                        } else {
+                            Region(Rect().also(window::getBoundsInScreen))
+                        }
+                        fun regionText(region: Region): String {
+                            val iterator = RegionIterator(region)
+                            val rect = Rect()
+                            val parts = mutableListOf<String>()
+                            while (iterator.next(rect)) parts += rect.flattenToString()
+                            return parts.joinToString(";")
+                        }
+                        val own = sameDisplay.filter { it.id == current.windowId }
+                        check(own.size <= 1) { "The actual touch window ID is ambiguous" }
+                        val window = own.singleOrNull()
+                        val x = current.x.toInt()
+                        val y = current.y.toInt()
+                        val blockers = if (window == null) {
+                            emptyList()
+                        } else {
+                            sameDisplay.filter {
+                                it.id != current.windowId && it.layer >= window.layer && region(it).contains(x, y)
+                            }
+                        }
+                        val rows = sameDisplay.sortedWith(compareBy<AccessibilityWindowInfo> { it.layer }.thenBy { it.id }).joinToString("|") {
+                            "${it.id},${it.type},${it.layer},${it.isActive},${it.isFocused},${regionText(region(it))}"
+                        }
+                        val ready = window != null && window.type == AccessibilityWindowInfo.TYPE_APPLICATION &&
+                            window.isActive && window.isFocused && region(window).contains(x, y) && blockers.isEmpty()
+                        val identity = "${current.windowId},${current.displayId},${current.bounds.flattenToString()},${current.x},${current.y}|$rows"
+                        stable = if (ready) {
+                            if (identity == previous) stable + 1 else 1
+                        } else {
+                            0
+                        }
+                        previous = if (ready) identity else null
+                        diagnostics.putString("setup_touch_window_stage", stage)
+                        diagnostics.putLong("setup_touch_window_observed_uptime_ms", SystemClock.uptimeMillis())
+                        diagnostics.putInt("setup_touch_window_target_id", current.windowId)
+                        diagnostics.putInt("setup_touch_window_target_display", current.displayId)
+                        diagnostics.putString("setup_touch_window_target_rect", current.bounds.flattenToString())
+                        diagnostics.putFloat("setup_touch_window_x", current.x)
+                        diagnostics.putFloat("setup_touch_window_y", current.y)
+                        diagnostics.putString("setup_touch_window_public_region_kind", if (Build.VERSION.SDK_INT >= 30) "cached-touchable-intersect-frame" else "cached-touchable-bounding-rectangle")
+                        diagnostics.putString("setup_touch_window_snapshot", rows)
+                        diagnostics.putString("setup_touch_window_blocker_ids", blockers.joinToString(",") { it.id.toString() })
+                        diagnostics.putInt("setup_touch_window_stable_samples", stable)
+                        diagnostics.putBoolean("setup_touch_window_is_atomic_input_hit_test", false)
+                        if (stable >= 3) return current
+                    } finally {
+                        @Suppress("DEPRECATION")
+                        if (Build.VERSION.SDK_INT < 33) windows.forEach { it.recycle() }
+                    }
+                }
+                // Poll the original bounded condition; no fixed startup/notification delay.
+                SystemClock.sleep(50)
+            }
+        } finally {
+            serviceInfo.flags = originalFlags
+            automation.serviceInfo = serviceInfo
+            diagnostics.putBoolean("setup_touch_window_service_flags_restored", automation.serviceInfo.flags == originalFlags)
+            instrumentation.sendStatus(0, Bundle(diagnostics))
+        }
+    }
+
     /** Inspect only the actual active public accessibility window, including on API21. */
     private fun skipNoBounds(instrumentation: Instrumentation, activity: SetupActivity, diagnostics: Bundle): Rect? {
         @Suppress("DEPRECATION")
@@ -132,6 +267,8 @@ object SetupClosedLoopProbe {
                 // rather than assuming case or accepting another action's label.
                 val node = button.createAccessibilityNodeInfo()
                 val label = try {
+                    diagnostics.putInt("setup_skip_no_actual_window_id", node.windowId)
+                    diagnostics.putInt("setup_skip_no_actual_display_id", checkNotNull(button.display).displayId)
                     checkNotNull(node.text) { "Actual Skip negative action has no accessibility text" }.toString()
                 } finally {
                     recycle(node)
@@ -152,7 +289,7 @@ object SetupClosedLoopProbe {
         try {
             diagnostics.putString("setup_skip_no_public_package", root.packageName?.toString().orEmpty())
             diagnostics.putInt("setup_skip_no_public_window_id", root.windowId)
-            if (root.packageName?.toString() != activity.packageName) return null
+            if (root.packageName?.toString() != activity.packageName || root.windowId != diagnostics.getInt("setup_skip_no_actual_window_id")) return null
             val prompts = root.findAccessibilityNodeInfosByText(activity.getString(R.string.setup__skip_hint))
             owned.addAll(prompts)
             val matchingPrompts = prompts.filter {
@@ -409,6 +546,7 @@ object SetupClosedLoopProbe {
         var lastPager = Rect()
         var lastFooterTop = 0
         var lastAdvanced = Rect()
+        val touchDiagnostics = Bundle()
         var lastTapX = 0
         var lastTapY = 0
         var lastScrollY = 0
@@ -482,7 +620,7 @@ object SetupClosedLoopProbe {
                 event.recycle()
             }
         }
-        fun touch(view: View, stage: String) {
+        fun touch(view: View, stage: String, deadline: Long) {
             val position = main {
                 check(view.isShown && view.isEnabled && view.isClickable)
                 val full = bounds(view)
@@ -492,10 +630,16 @@ object SetupClosedLoopProbe {
             lastTapX = position.first.toInt()
             lastTapY = position.second.toInt()
             record(stage)
+            val target = awaitPublicTouchTarget(instrumentation, deadline, touchDiagnostics, stage) {
+                main {
+                    publicTouchTarget(view)?.takeIf { it.x == position.first && it.y == position.second && view.isClickable && isFullyVisible(view) }
+                }
+            }
+            check(SystemClock.uptimeMillis() < deadline) { "Touch preparation exceeded its original deadline" }
             val down = SystemClock.uptimeMillis()
-            motion(down, MotionEvent.ACTION_DOWN, position.first, position.second)
+            motion(down, MotionEvent.ACTION_DOWN, target.x, target.y)
             SystemClock.sleep(60)
-            motion(down, MotionEvent.ACTION_UP, position.first, position.second)
+            motion(down, MotionEvent.ACTION_UP, target.x, target.y)
             instrumentation.waitForIdleSync()
         }
         val checkpoints = instrumentation.targetContext.getSharedPreferences("trime_setup", Context.MODE_PRIVATE)
@@ -526,7 +670,7 @@ object SetupClosedLoopProbe {
             }
         }
         instrumentation.sendStatus(0, Bundle().apply { putString("setup_skip_no_stage", "before-real-skip-touch") })
-        touch(main { activity.findViewById<Button>(R.id.skip_button) }, "actual-skip-centre-down-up")
+        touch(main { activity.findViewById<Button>(R.id.skip_button) }, "actual-skip-centre-down-up", skipDeadline)
         var noBounds: Rect? = null
         val skipDiagnostics = Bundle()
         try {
@@ -544,10 +688,25 @@ object SetupClosedLoopProbe {
                 putString("setup_skip_no_actual_button_rect", actualNoBounds.flattenToString())
             },
         )
+        val noTarget = awaitPublicTouchTarget(instrumentation, skipDeadline, touchDiagnostics, "actual-no-centre-down-up") {
+            val current = skipNoBounds(instrumentation, activity, skipDiagnostics) ?: return@awaitPublicTouchTarget null
+            if (current != actualNoBounds) {
+                null
+            } else {
+                PublicTouchTarget(
+                    skipDiagnostics.getInt("setup_skip_no_actual_window_id"),
+                    skipDiagnostics.getInt("setup_skip_no_actual_display_id"),
+                    current,
+                    current.exactCenterX(),
+                    current.exactCenterY(),
+                )
+            }
+        }
+        check(SystemClock.uptimeMillis() < skipDeadline) { "Skip No preparation exceeded its original deadline" }
         val skipDown = SystemClock.uptimeMillis()
-        motion(skipDown, MotionEvent.ACTION_DOWN, actualNoBounds.exactCenterX(), actualNoBounds.exactCenterY())
+        motion(skipDown, MotionEvent.ACTION_DOWN, noTarget.x, noTarget.y)
         SystemClock.sleep(60)
-        motion(skipDown, MotionEvent.ACTION_UP, actualNoBounds.exactCenterX(), actualNoBounds.exactCenterY())
+        motion(skipDown, MotionEvent.ACTION_UP, noTarget.x, noTarget.y)
         instrumentation.waitForIdleSync()
         await("Skip No did not return the same unfinished Setup window", skipDeadline) {
             main { !activity.isFinishing && !activity.isDestroyed && activity.hasWindowFocus() }
@@ -643,6 +802,10 @@ object SetupClosedLoopProbe {
             val x = viewport.exactCenterX()
             val start = viewport.top + viewport.height() * 0.8f
             val end = start - lastGestureDistance
+            awaitPublicTouchTarget(instrumentation, advancedDeadline, touchDiagnostics, "actual-scroll-start-$attempt") {
+                main { publicTouchTarget(scroll, x, start) }
+            }
+            check(SystemClock.uptimeMillis() < advancedDeadline) { "Scroll preparation exceeded its original deadline" }
             val down = SystemClock.uptimeMillis()
             settledSamples = 0
             motion(down, MotionEvent.ACTION_DOWN, x, start)
@@ -672,7 +835,7 @@ object SetupClosedLoopProbe {
         var host: SetupAdvancedSettingsActivity? = null
         var returnedThroughBack = false
         try {
-            touch(advanced, "actual-advanced-centre-down-up")
+            touch(advanced, "actual-advanced-centre-down-up", advancedDeadline)
             await("Advanced touch did not open the standard schema settings host and its real toolbar", advancedDeadline) {
                 (monitor.waitForActivityWithTimeout(50) as? SetupAdvancedSettingsActivity)?.let { host = it }
                 main {
@@ -744,7 +907,7 @@ object SetupClosedLoopProbe {
                     }
                     instrumentation.sendStatus(0, geometry)
                 }
-                touch(cancel, "actual-notification-permission-cancel-centre-down-up")
+                touch(cancel, "actual-notification-permission-cancel-centre-down-up", promptAndFocusDeadline)
                 notificationCancels++
             }
             await("Schema settings did not own a focused window after settling the notification prompt", promptAndFocusDeadline) {
@@ -894,6 +1057,12 @@ object SetupClosedLoopProbe {
             val target = checkNotNull(skipBounds)
             result.putString("setup_skip_recreation_actual_skip_rect", target.flattenToString())
             record("before-real-skip-touch")
+            awaitPublicTouchTarget(instrumentation, deadline, result, "owner-recreation-skip") {
+                main {
+                    publicTouchTarget(activity.findViewById<Button>(R.id.skip_button))?.takeIf { it.bounds == target }
+                }
+            }
+            check(SystemClock.uptimeMillis() < deadline) { "Owner recreation touch preparation exceeded its original deadline" }
             val down = SystemClock.uptimeMillis()
             fun motion(action: Int) {
                 val event = MotionEvent.obtain(down, SystemClock.uptimeMillis(), action, target.exactCenterX(), target.exactCenterY(), 0)
