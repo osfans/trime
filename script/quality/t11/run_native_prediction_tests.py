@@ -202,6 +202,8 @@ def main():
     parser.add_argument('--compiler', '--cxx-compiler', dest='cxx_compiler', default='c++')
     parser.add_argument('--ninja', default='ninja')
     parser.add_argument('--readelf', default='readelf')
+    parser.add_argument('--workers', type=int, choices=(1, 2), default=1)
+    parser.add_argument('--cache-recovery', action='store_true', help='After the unchanged384 checks, build/audit/run the separate generated-cache recovery regression')
     parser.add_argument('--build-model-tool', action='store_true', help='Also build/audit the same-source model builder; never write assets')
     parser.add_argument('--allow-model-source-change', action='store_true', help='Only with --build-model-tool: admit an unstaged prediction.tsv edit, bound before/after')
     parser.add_argument('--expected-head', help='Optional explicit clean source commit binding')
@@ -236,6 +238,7 @@ def main():
     preparation = None
     elf_audit = None
     actual_test_checks = None
+    cache_recovery = None
     stage = out / 'stage'
     project = out
     env = dict(os.environ)
@@ -247,7 +250,7 @@ def main():
         if key in env:
             removed_environment.append(key)
             del env[key]
-    env['CMAKE_BUILD_PARALLEL_LEVEL'] = '1'
+    env['CMAKE_BUILD_PARALLEL_LEVEL'] = str(args.workers)
     # Copied native submodules have no .git. Direct git calls must not describe
     # the enclosing checkout; retain each dependency's official archive fallback.
     env['GIT_CEILING_DIRECTORIES'] = str(stage / 'source')
@@ -394,8 +397,10 @@ def main():
 
     def header_consumers(binary, stage_source, compile_commands):
         header_root = binary / 'trime-rime-headers'
+        mapped_header_root = binary / 'trime-rime-mapped-file'
         targets = {name: 0 for name in ('rime-static', 'rime-lua-objs',
-            'rime-octagram-objs', 'rime-predict-objs', 'prediction-native-test')}
+            'rime-octagram-objs', 'rime-predict-objs', 'prediction-native-test',
+            'cache-recovery-native-test')}
         if args.build_model_tool:
             targets['prediction-model-native'] = 0
         for row in compile_commands:
@@ -406,10 +411,12 @@ def main():
                 continue
             includes = [Path(arg[2:]).resolve() for arg in argv if arg.startswith('-I')]
             assert header_root in includes, 'Owned Rime header fixes are missing from a native target'
+            assert mapped_header_root in includes, 'Owned mapped-file header is missing from a native target'
             for directory in ('src', 'include'):
                 original = stage_source / 'app/src/main/jni/librime' / directory
                 if original in includes:
                     assert includes.index(header_root) < includes.index(original), 'Original Rime header wins include lookup'
+                    assert includes.index(mapped_header_root) < includes.index(original), 'Original mapped-file header wins include lookup'
             targets[owner[1]] += 1
         assert all(targets.values()), 'Missing compile command for a Rime header consumer'
         return targets
@@ -418,7 +425,8 @@ def main():
         # Bind committed entry/helper/assertion sources without a local ignored
         # manifest. prepare.py additionally snapshots every copied native input.
         source_files = [source / 'run_native_prediction_tests.py',
-                        source / 'prediction_native_test.cc', source / 'ranking_boundary_test.h',
+                        source / 'prediction_native_test.cc', source / 'cache_recovery_native_test.cc',
+                        source / 'ranking_boundary_test.h',
                         source / 'build_predict_db.cc',
                         *(source / 'host_native' / name for name in
                           ('prepare.py', 'processes.py', 'options.cmake', 'probe.cmake'))]
@@ -442,12 +450,13 @@ def main():
         tool_before = {key: (bind_tool(path) if key in EXECUTABLE_TOOL_KEYS else bind(path))
                        for key, path in tool_paths.items()}
         save(out / 'tools-before.json', tool_before)
-        save(out / 'environment.json', dict(explicit={'CMAKE_BUILD_PARALLEL_LEVEL': '1',
+        save(out / 'environment.json', dict(explicit={'CMAKE_BUILD_PARALLEL_LEVEL': str(args.workers),
                                            'GIT_CEILING_DIRECTORIES': str(stage / 'source')},
                                            removed_inherited_keys=removed_environment))
         prepare_argv = [sys.executable, '-B', str(source / 'host_native/prepare.py'), '--repo', str(ROOT), '--out', str(stage)]
         for key in ('boost_archive', 'cmake', 'c_compiler', 'cxx_compiler', 'ninja'):
             prepare_argv += ['--' + key.replace('_', '-'), str(tool_paths[key])]
+        prepare_argv += ['--workers', str(args.workers)]
         if args.build_model_tool:
             prepare_argv.append('--build-model-tool')
         if args.allow_model_source_change:
@@ -458,13 +467,15 @@ def main():
         assert preparation['prepared'] is True and preparation['assertion_sources_unchanged'] is True
         assert preparation['build_started'] is preparation['test_started'] is False
         assert preparation['source_head'] == args.expected_head
+        assert preparation['workers'] == args.workers
         plan_path = stage / 'commands.json'
         assert bind(plan_path)['sha256'] == preparation['commands']['sha256']
         plan = json.loads(plan_path.read_bytes())
         assert [row['stage'] for row in plan] == ['configure', 'build-original-384-fixture',
             'ELF-and-link-input-audit-before-execution', 'run-original-384-fixture']
-        expected_env = {'CMAKE_BUILD_PARALLEL_LEVEL': '1', 'GIT_CEILING_DIRECTORIES': str(stage / 'source')}
+        expected_env = {'CMAKE_BUILD_PARALLEL_LEVEL': str(args.workers), 'GIT_CEILING_DIRECTORIES': str(stage / 'source')}
         assert all(row.get('environment') == expected_env for row in plan[:2])
+        assert plan[1]['argv'][-3:] == ['--parallel', str(args.workers), '--verbose']
         assert not any('CMAKE_BUILD_PARALLEL_LEVEL=' in arg for row in plan[:2] for arg in row['argv'])
         binary = Path(preparation['binary'])
         project = binary
@@ -495,6 +506,14 @@ def main():
                 fixture_rows.append(row)
         assert len(fixture_rows) == 1 and opencc_definitions
         rime_headers = {name: bind(header_root / name) for name in ('darts.h', 'rime/dict/vocabulary.h')}
+        mapped_root = binary / 'trime-rime-mapped-file'
+        rime_headers['rime/dict/mapped_file.h'] = bind(mapped_root / 'rime/dict/mapped_file.h')
+        mapped_source = bind(mapped_root / 'rime/dict/mapped_file.cc')
+        mapped_rows = [row for row in compile_commands
+                       if Path(row['file']).resolve() == Path(mapped_source['path'])]
+        assert len(mapped_rows) == 1 and not any(
+            Path(row['file']).resolve() == stage_source / 'app/src/main/jni/librime/src/rime/dict/mapped_file.cc'
+            for row in compile_commands), 'Expected only the owned mapped-file implementation'
         configured = binary / 'librime/src/rime/build_config.h'
         assert re.search(r'(?m)^#define RIME_ENABLE_LOGGING(?:\s|$)', configured.read_text())
         target_info = (binary / 'host-targets.txt').read_text()
@@ -530,6 +549,7 @@ def main():
                          actual_opencc_version_definitions=opencc_definitions,
                          opencc_private_darts_symbol_count=len(private_darts),
                          rime_headers=rime_headers, rime_header_target_compilations=header_targets,
+                         mapped_file_source=mapped_source, mapped_file_compile_command=mapped_rows[0],
                          fixture_compile_command=fixture_rows[0], source_only_no_android_claim=True)
         if args.build_model_tool:
             model_sources = preparation['generic_model_sources']
@@ -580,6 +600,44 @@ def main():
         actual_test_checks = int(counts[0])
         warn_free()
         checkpoint()
+        if args.cache_recovery:
+            recovery_binary = binary / 'host-bin/cache-recovery-native-test'
+            run([tool_paths['cmake'], '--build', binary, '--target',
+                 'cache-recovery-native-test', '--parallel', str(args.workers), '--verbose'], 120)
+            warn_free()
+            recovery_rows = [row for row in compile_commands
+                             if Path(row['file']).resolve() == stage_source / 'script/quality/t11/cache_recovery_native_test.cc']
+            assert len(recovery_rows) == 1, 'Expected one real cache-regression compile command'
+            recovery_dynamic, _ = run([tool_paths['readelf'], '-d', recovery_binary], 30)
+            recovery_symbols, _ = run([tool_paths['readelf'], '-Ws', '--demangle', recovery_binary], 30)
+            recovery_needed = re.findall(r'\(NEEDED\).*\[([^]]+)\]', recovery_dynamic)
+            assert recovery_needed and not any(re.match(r'lib(?:rime|opencc|marisa|glog|yaml-cpp|leveldb|snappy|lua|boost)', n) for n in recovery_needed)
+            for symbol in ('rime::Prism::Load()', 'rime::Table::Load()', 'rime::ReverseDb::Load()',
+                           'rime::DictCompiler::Compile(', 'rime::WorkspaceUpdate::Run('):
+                assert symbol in recovery_symbols, 'Real cache/deployment reader is absent: ' + symbol
+            recovery_map = binary / 'cache-recovery-native.map'
+            recovery_loads = []
+            for raw in re.findall(r'(?m)^LOAD (.+\.a)$', recovery_map.read_text()):
+                path = Path(raw)
+                recovery_loads.append((path if path.is_absolute() else binary / path).resolve(strict=True))
+            assert all(Path(row['path']) in recovery_loads for row in archives.values()), 'Cache regression did not link the owned archives'
+            assert not any(re.search(r'/usr/(?:local/)?lib[^/]*/lib(?:rime|opencc|marisa|glog|yaml-cpp|leveldb|snappy|lua|boost)', str(path))
+                           for path in recovery_loads)
+            cache_recovery = dict(passed=False, binary=bind(recovery_binary), needed=recovery_needed,
+                link_map=bind(recovery_map), fixture_source=bind(stage_source / 'script/quality/t11/cache_recovery_native_test.cc'),
+                fixture_compile_command=recovery_rows[0], archives=archives,
+                actual_prediction_checks_unchanged=actual_test_checks)
+            save(out / 'cache-recovery-audit.json', cache_recovery)
+            recovery_stdout, _ = run([recovery_binary, stage / 'cache-recovery-runtime'], 60)
+            assert all(Path(commands[-1][key]['path']).stat().st_size <= 8 * 1024 * 1024
+                       for key in ('stdout', 'stderr')), 'Cache regression runtime log exceeds8MiB'
+            recovery_counts = re.findall(r'(?m)^PASS 3 actual mapped-cache regression groups \(([0-9]+) checks\)$', recovery_stdout)
+            assert len(recovery_counts) == 1 and int(recovery_counts[0]) > 0, 'Cache regression groups did not complete'
+            warn_free()
+            cache_recovery.update(passed=True, actual_groups=3, actual_checks=int(recovery_counts[0]),
+                negative_loader_errors_expected=True, runtime_zero_warning_claim=False)
+            save(out / 'cache-recovery-audit.json', cache_recovery)
+            checkpoint()
         passed = True
     except BaseException:
         error = traceback.format_exc()
@@ -624,7 +682,7 @@ def main():
                 for relative, expected in preparation['inputs_before'].items():
                     observed = bind(ROOT / relative)
                     assert {key: observed[key] for key in ('bytes', 'sha256')} == expected
-                for name in ('prediction_native_test.cc', 'ranking_boundary_test.h'):
+                for name in ('prediction_native_test.cc', 'cache_recovery_native_test.cc', 'ranking_boundary_test.h'):
                     expected = preparation['inputs_before']['script/quality/t11/' + name]
                     observed = bind(Path(preparation['source_root']) / 'script/quality/t11' / name)
                     assert {key: observed[key] for key in ('bytes', 'sha256')} == expected
@@ -633,6 +691,11 @@ def main():
                         assert bind(row['path']) == row
                     for row in elf_audit['rime_headers'].values():
                         assert bind(row['path']) == row
+                    assert bind(elf_audit['mapped_file_source']['path']) == elf_audit['mapped_file_source']
+                    if cache_recovery:
+                        for key in ('binary', 'link_map', 'fixture_source'):
+                            row = cache_recovery[key]
+                            assert bind(row['path']) == row
                     if elf_audit.get('model_builder'):
                         for key in ('binary', 'link_map', 'actual_build_config'):
                             row = elf_audit['model_builder'][key]
@@ -659,10 +722,12 @@ def main():
                       unresolved=unresolved, source_freeze=freeze_binding,
                       source_before=source_before, tools_before=tool_before,
                       preparation=preparation, elf_audit=elf_audit, actual_test_checks=actual_test_checks, model_builder_requested=args.build_model_tool,
+                      cache_recovery_requested=args.cache_recovery, cache_recovery=cache_recovery,
                       allow_model_source_change=args.allow_model_source_change,
                       tracked_status_before=status_before.decode() if status_before is not None else None,
-                      commands=commands, workers=1, global_timeout_seconds=5400,
-                      stage_timeout_seconds=dict(prepare=900, configure=300, build=3600, test=60),
+                      commands=commands, workers=args.workers, global_timeout_seconds=5400,
+                      stage_timeout_seconds=dict(prepare=900, configure=300, build=3600, test=60,
+                                                 cache_recovery_build=120, cache_recovery_test=60),
                       global_deadline_respected=time.monotonic() < deadline,
                       minimum_available_kib=min((v['available_kib'] for v in samples), default=None),
                       requested_start_kib=args.minimum_start_available_kib, running_floor_kib=FLOOR_KIB,

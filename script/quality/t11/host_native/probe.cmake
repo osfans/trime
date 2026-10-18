@@ -48,6 +48,7 @@ target_link_options(prediction-native-test PRIVATE
 # No fabricated build_config.h. Core, plugin objects and fixture all consume the
 # same real configured build header and the same privacy/config Context types.
 target_include_directories(prediction-native-test BEFORE PRIVATE
+  "${CMAKE_BINARY_DIR}/trime-rime-mapped-file"
   "${CMAKE_BINARY_DIR}/trime-rime-headers"
   "${CMAKE_BINARY_DIR}/trime-rime-privacy"
   "${CMAKE_BINARY_DIR}/trime-rime-config"
@@ -58,6 +59,24 @@ target_include_directories(prediction-native-test BEFORE PRIVATE
   "${CMAKE_SOURCE_DIR}/librime_jni"
   "${CMAKE_SOURCE_DIR}/librime/deps/opencc/deps/darts-clone-0.32h/include"
   "${test_dir}")
+
+# A separate executable keeps the original exact384 prediction suite intact.
+# It uses the same production archive, dependencies and generated headers.
+add_executable(cache-recovery-native-test "${test_dir}/cache_recovery_native_test.cc")
+set_target_properties(cache-recovery-native-test PROPERTIES
+  CXX_STANDARD 17
+  CXX_STANDARD_REQUIRED YES
+  CXX_EXTENSIONS NO
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/host-bin")
+target_link_libraries(cache-recovery-native-test PRIVATE rime-static ${CMAKE_DL_LIBS})
+target_compile_definitions(cache-recovery-native-test PRIVATE NDEBUG)
+target_compile_options(cache-recovery-native-test PRIVATE
+  -O0 -g0 -Wall -Wextra -Werror -Wno-unused-parameter)
+target_link_options(cache-recovery-native-test PRIVATE
+  "-Wl,-Map=${CMAKE_BINARY_DIR}/cache-recovery-native.map"
+  "-Wl,--build-id=none")
+get_target_property(cache_fixture_includes prediction-native-test INCLUDE_DIRECTORIES)
+target_include_directories(cache-recovery-native-test BEFORE PRIVATE ${cache_fixture_includes})
 
 # Generic model generation must accept a newly generated SHA, unlike the
 # production bundled-model reader. Only namespace/guard references change in
@@ -81,6 +100,7 @@ if(TRIME_HOST_BUILD_MODEL_TOOL)
     "-Wl,-Map=${CMAKE_BINARY_DIR}/prediction-model.map"
     "-Wl,--build-id=none")
   target_include_directories(prediction-model-native BEFORE PRIVATE
+    "${CMAKE_BINARY_DIR}/trime-rime-mapped-file"
     "${model_dir}"
     "${CMAKE_BINARY_DIR}/trime-rime-headers"
     "${CMAKE_BINARY_DIR}/trime-rime-privacy"
@@ -102,6 +122,7 @@ leveldb_archive=$<TARGET_FILE:leveldb>
 marisa_archive=$<TARGET_FILE:marisa>
 opencc_archive=$<TARGET_FILE:libopencc>
 prediction_binary=$<TARGET_FILE:prediction-native-test>
+cache_recovery_binary=$<TARGET_FILE:cache-recovery-native-test>
 ${host_model_info}rime_sources=$<JOIN:$<TARGET_PROPERTY:rime-static,SOURCES>,\n>
 rime_includes=$<JOIN:$<TARGET_PROPERTY:rime-static,INCLUDE_DIRECTORIES>,\n>
 rime_compile_definitions=$<JOIN:$<TARGET_PROPERTY:rime-static,COMPILE_DEFINITIONS>,\n>

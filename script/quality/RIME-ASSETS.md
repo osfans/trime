@@ -54,3 +54,19 @@ Run `test_rime_config_cmake.py` for source isolation/drift guards, then the real
 `engine`, `shutdown` and `startupFailure` instrumentation probes on both APIs.
 The injected-failure runs must retain their expected error logs; they are not
 warning-free runs.
+
+## Incomplete Native Dictionary Caches
+
+`RimeMappedFileCompat.cmake` adapts only the pinned `mapped_file.cc/.h` in
+the build tree. A zero-length generated cache is rejected before mapping it;
+the existing dictionary compiler can then rebuild it. Typed metadata reads must
+fit entirely inside the mapped file, including truncated-cache and end-offset
+cases. Other filesystem exceptions and the existing loader diagnostics remain.
+The overlay does not delete user dictionaries/configuration or change log levels.
+
+Each source replacement and source registration must match exactly once, and
+unchanged overlay bytes keep their timestamps. Run `test_rime_mapped_file_cmake.py`
+for those build integration guards and the real native interrupted-cache recovery
+regression before accepting a changed overlay. Deliberately damaged test caches
+retain their expected loader errors; they are not warning-free inputs. These
+checks do not establish integrity of every possible malformed binary payload.

@@ -23,6 +23,14 @@ python3 -B script/quality/t11/run_native_prediction_tests.py \
 
 原有 384 项真实原生检查保持不变。默认要求已提交且干净的源码；生成模型时，只有显式 `--allow-model-source-change` 才允许 `prediction.tsv` 这一项未暂存变动，其真实字节仍在编译前后核对。其它源码、模型资产或暂存变更均不放行。
 
+`--workers` 只接受 1 或 2，默认 1；它同时绑定实际构建的并行参数、环境变量和报告值，内存、进程所有权、时限及警告检查保持不变。`--cache-recovery` 会在原 384 项通过后，使用同一生产静态图另行编译、审计和运行缓存恢复回归，单列结果，不计入 384。它直接检查零字节和短头部的 Prism／Table／ReverseDb、正常工作区部署重建依赖词典并继续后续方案、真实字典查询、用户词条和配置保留，以及有效二进制缓存不重复写入。封闭数据库期间还比较其实际目录和文件字节；最后重新打开 LevelDB 后只检查真实词条，避免把正常 LOG／LOCK 更新误报为词库损坏。这些检查不证明任意损坏偏移都安全，也不代替 Android 验收。
+
+```sh
+python3 -B script/quality/t11/run_native_prediction_tests.py \
+  --out build/t11/native-cache-check --boost-archive /path/to/boost-1.92.0.tar.xz \
+  --workers 2 --cache-recovery
+```
+
 ```sh
 python3 -B script/quality/t11/build_predict_db.py \
   --compile-native --native-build-out build/t11/predict-data \

@@ -134,6 +134,7 @@ def main() -> None:
     parser.add_argument("--c-compiler", required=True, type=Path)
     parser.add_argument("--cxx-compiler", required=True, type=Path)
     parser.add_argument("--ninja", required=True, type=Path)
+    parser.add_argument("--workers", type=int, choices=(1, 2), default=1)
     parser.add_argument("--build-model-tool", action="store_true")
     parser.add_argument("--allow-model-source-change", action="store_true")
     args = parser.parse_args()
@@ -166,7 +167,7 @@ def main() -> None:
         Path("app/src/main/assets/shared/trime_predict.db"),
         Path("app/src/main/assets/shared/trime_predict.db.json"),
         *(Path("script/quality/t11") / p for p in (
-            "run_native_prediction_tests.py", "prediction_native_test.cc",
+            "run_native_prediction_tests.py", "prediction_native_test.cc", "cache_recovery_native_test.cc",
             "ranking_boundary_test.h", "build_predict_db.py", "build_predict_db.cc",
             "prediction.tsv")),
     ]
@@ -260,12 +261,12 @@ def main() -> None:
              "-DCMAKE_CXX_COMPILER=" + str(args.cxx_compiler.resolve()),
              "-Werror=dev", "-Werror=deprecated",
              "-DTRIME_HOST_BUILD_MODEL_TOOL=" + ("ON" if args.build_model_tool else "OFF")],
-             "environment": {"CMAKE_BUILD_PARALLEL_LEVEL": "1",
+             "environment": {"CMAKE_BUILD_PARALLEL_LEVEL": str(args.workers),
                              "GIT_CEILING_DIRECTORIES": str(source_root)}},
             {"stage": "build-original-384-fixture", "argv": [str(args.cmake.resolve()), "--build",
              str(binary), "--target", "prediction-native-test",
-             *(["prediction-model-native"] if args.build_model_tool else []), "--parallel", "1", "--verbose"],
-             "environment": {"CMAKE_BUILD_PARALLEL_LEVEL": "1",
+             *(["prediction-model-native"] if args.build_model_tool else []), "--parallel", str(args.workers), "--verbose"],
+             "environment": {"CMAKE_BUILD_PARALLEL_LEVEL": str(args.workers),
                              "GIT_CEILING_DIRECTORIES": str(source_root)}},
             {"stage": "ELF-and-link-input-audit-before-execution", "required": True,
              "details": "Verify map/compile_commands/generated build_config/static rime provenance; reject system rime/OpenCC/marisa/glog/yaml/leveldb or external plugins. Do not execute if any check fails."},
@@ -275,6 +276,7 @@ def main() -> None:
         ]
         (out / "commands.json").write_text(json.dumps(commands, indent=2) + "\n")
         report.update({"source_root": str(source_root), "native": str(native), "binary": str(binary),
+                       "workers": args.workers,
                        "generic_model_sources": model_sources,
                        "git_discovery_ceiling": str(source_root),
                        "generated_bridge": digest(bridge), "generated_top": digest(native / "CMakeLists.txt"),
