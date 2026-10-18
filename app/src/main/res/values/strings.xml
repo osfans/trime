@@ -14,7 +14,6 @@
     <string name="ime_existing_resources">Deployment failed. Using an available dictionary; retry from the deployment log.</string>
     <!-- Input Method Platform Tittle  -->
     <string name="app_name_release">Trime</string>
-    <string name="app_name_debug">Trime (Debug)</string>
     <!-- Preference settings -->
     <string name="qq_group_1">Trime QQ group 1</string>
     <string name="qq_group_2">Trime QQ group 2</string>

@@ -3,4 +3,5 @@
 <resources>
     <!-- Keep the Debug package visibly distinct while retaining localized labels. -->
     <string name="trime_app_name" translatable="false">@string/app_name_debug</string>
+    <string name="app_name_debug">Trime (Debug)</string>
 </resources>

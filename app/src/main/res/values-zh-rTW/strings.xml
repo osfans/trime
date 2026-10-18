@@ -17,7 +17,6 @@
     <string name="clipboard_entry_removed">這筆記錄已被刪除。</string>
     <!-- 輸入法平臺名稱  -->
     <string name="app_name_release">同文輸入法</string>
-    <string name="app_name_debug">同文輸入法（除錯模式）</string>
     <!-- Preference settings -->
     <string name="qq_group_1">同文 QQ 羣 1</string>
     <string name="qq_group_2">同文 QQ 羣 2</string>

@@ -17,7 +17,6 @@
     <string name="clipboard_entry_removed">这条记录已被删除。</string>
     <!-- 输入法平台名称  -->
     <string name="app_name_release">同文输入法</string>
-    <string name="app_name_debug">同文输入法（调试）</string>
     <string name="qq_group_1">同文 QQ 群 1</string>
     <string name="qq_group_2">同文 QQ 群 2</string>
     <string name="rime_qq_group">中州韵 QQ 群</string>
