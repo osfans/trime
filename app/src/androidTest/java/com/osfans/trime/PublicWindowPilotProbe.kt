@@ -243,17 +243,30 @@ internal object PublicWindowPilotProbe {
         fun window(activity: ThemeDiagnosticsActivity, label: String): JSONObject = main {
             val toolbar = activity.findViewById<Toolbar>(R.id.toolbar)
             val root = activity.findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
-            val bars = checkNotNull(ViewCompat.getRootWindowInsets(root)).getInsets(WindowInsetsCompat.Type.systemBars())
+            val observedBars = ViewCompat.getRootWindowInsets(root)?.getInsets(WindowInsetsCompat.Type.systemBars())
             val margins = root.layoutParams as ViewGroup.MarginLayoutParams
             val toolbarMargins = toolbar.layoutParams as ViewGroup.MarginLayoutParams
+            val observation = JSONObject().put("label", label).put("configuration", configuration(activity.resources.configuration))
+                .put("root_left_margin", margins.leftMargin).put("root_right_margin", margins.rightMargin)
+                .put("root_bottom_margin", margins.bottomMargin).put("toolbar_top_margin", toolbarMargins.topMargin)
+                .put("system_bars", observedBars?.let { JSONArray(listOf(it.left, it.top, it.right, it.bottom)) } ?: JSONObject.NULL)
+                .put("root_width", root.width).put("root_height", root.height)
+                .put("toolbar_width", toolbar.width).put("toolbar_height", toolbar.height)
+                .put("root_layout_requested", root.isLayoutRequested).put("toolbar_layout_requested", toolbar.isLayoutRequested)
+                .put("root_attached", root.isAttachedToWindow).put("toolbar_attached", toolbar.isAttachedToWindow)
+                .put("activity_window_focus", activity.hasWindowFocus())
+            windows.put(observation)
+            val bars = checkNotNull(observedBars)
             for (id in intArrayOf(R.id.copyButton, R.id.shareButton)) {
                 val button = activity.findViewById<View>(id)
                 val visible = Rect()
                 check(button.isShown && button.width > 0 && button.height > 0 && button.getLocalVisibleRect(visible))
                 check(visible == Rect(0, 0, button.width, button.height)) { "A diagnostics action is clipped" }
             }
-            check(margins.leftMargin == bars.left && margins.rightMargin == bars.right && margins.bottomMargin == bars.bottom)
-            check(toolbarMargins.topMargin == bars.top)
+            check(margins.leftMargin == bars.left && margins.rightMargin == bars.right && margins.bottomMargin == bars.bottom) {
+                "$label root margins [left,right,bottom]=[${margins.leftMargin},${margins.rightMargin},${margins.bottomMargin}], system bars=[${bars.left},${bars.right},${bars.bottom}]"
+            }
+            check(toolbarMargins.topMargin == bars.top) { "$label toolbar top margin=${toolbarMargins.topMargin}, system bar top=${bars.top}" }
             check(activity.actionBar == null && activity.window.hasFeature(Window.FEATURE_NO_TITLE))
             check(!WindowCompat.getInsetsController(activity.window, activity.window.decorView).isAppearanceLightStatusBars)
             val expectedContext = PublicWindowPilotConfiguration.wrap(context, AppPrefs.defaultInstance().advanced.uiMode.getValue())
@@ -263,14 +276,11 @@ internal object PublicWindowPilotProbe {
             check(toolbar.subtitle.toString() == ThemeManager.activeTheme.name)
             check(toolbar.navigationIcon != null && toolbar.navigationContentDescription.toString() == activity.getString(R.string.public_window_navigate_up))
             check(root.width > 0 && root.height > 0 && toolbar.width > 0 && toolbar.height > 0)
-            JSONObject().put("label", label).put("configuration", configuration(activity.resources.configuration))
-                .put("root_left_margin", margins.leftMargin).put("root_right_margin", margins.rightMargin)
-                .put("root_bottom_margin", margins.bottomMargin).put("toolbar_top_margin", toolbarMargins.topMargin)
-                .put("system_bars", JSONArray(listOf(bars.left, bars.top, bars.right, bars.bottom)))
+            observation
                 .put("color_primary", ContextCompat.getColor(activity, R.color.colorPrimary))
                 .put("toolbar_foreground", ContextCompat.getColor(activity, R.color.toolbarForegroundColor))
                 .put("title_ok", true).put("subtitle_ok", true).put("navigation_name_ok", true)
-        }.also { windows.put(it) }
+        }
         fun touch(view: View) {
             val point = main {
                 val visible = Rect()
@@ -536,8 +546,8 @@ internal object PublicWindowPilotProbe {
             val firstLease = lease(activity)
             val originalReport = main { ownField(activity, "report") as String }
             check(originalReport.endsWith(ThemeDiagnostics.format(ThemeManager.prefs.selectedTheme.getValue(), ThemeManager.activeTheme.name, ThemeManager.activeFindings)))
-            window(activity, "direct-initial")
             capture(activity, "direct-initial")
+            window(activity, "direct-initial")
             passed("direct public window keeps toolbar title subtitle Up name native insets and live diagnostics session")
 
             val beforeConfiguration = main { Configuration(activity.resources.configuration) }
@@ -552,8 +562,8 @@ internal object PublicWindowPilotProbe {
                 check(actual.screenWidthDp == beforeConfiguration.screenWidthDp && actual.screenHeightDp == beforeConfiguration.screenHeightDp)
                 check(actual.smallestScreenWidthDp == beforeConfiguration.smallestScreenWidthDp && actual.orientation == beforeConfiguration.orientation)
                 check((actual.uiMode and Configuration.UI_MODE_TYPE_MASK) == (beforeConfiguration.uiMode and Configuration.UI_MODE_TYPE_MASK))
-                window(activity, "mode-${mode.name}")
                 capture(activity, "mode-${mode.name}")
+                window(activity, "mode-${mode.name}")
             }
             check(main { firstLease !in sessions() })
             passed("Light Dark and Auto each recreate actual windows preserve non-night configuration and release previous leases")
