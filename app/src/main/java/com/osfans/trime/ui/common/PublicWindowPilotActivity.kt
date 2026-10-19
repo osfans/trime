@@ -2,6 +2,7 @@
 package com.osfans.trime.ui.common
 
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.view.Window
@@ -42,6 +43,17 @@ abstract class PublicWindowPilotActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         AppPrefs.defaultInstance().advanced.uiMode.registerOnChangeListener(uiModeChanged)
         listenerRegistered = true
+    }
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= 35) {
+            // Reused decor can retain the previous View resources. Use this Activity's
+            // resolved mode after child edge-to-edge setup and saved-state restoration.
+            val night = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+            WindowCompat.getInsetsController(window, window.decorView)
+                .isAppearanceLightNavigationBars = night != Configuration.UI_MODE_NIGHT_YES
+        }
     }
 
     override fun onStart() {

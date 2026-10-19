@@ -246,7 +246,12 @@ internal object PublicWindowPilotProbe {
             val observedBars = ViewCompat.getRootWindowInsets(root)?.getInsets(WindowInsetsCompat.Type.systemBars())
             val margins = root.layoutParams as ViewGroup.MarginLayoutParams
             val toolbarMargins = toolbar.layoutParams as ViewGroup.MarginLayoutParams
+            val controller = WindowCompat.getInsetsController(activity.window, activity.window.decorView)
+            val lightNavigationBars = if (Build.VERSION.SDK_INT >= 35) controller.isAppearanceLightNavigationBars else null
             val observation = JSONObject().put("label", label).put("configuration", configuration(activity.resources.configuration))
+                .put("activity_ui_mode", activity.resources.configuration.uiMode)
+                .put("decor_ui_mode", activity.window.decorView.resources.configuration.uiMode)
+                .put("navigation_bar_light_appearance", lightNavigationBars ?: JSONObject.NULL)
                 .put("root_left_margin", margins.leftMargin).put("root_right_margin", margins.rightMargin)
                 .put("root_bottom_margin", margins.bottomMargin).put("toolbar_top_margin", toolbarMargins.topMargin)
                 .put("system_bars", observedBars?.let { JSONArray(listOf(it.left, it.top, it.right, it.bottom)) } ?: JSONObject.NULL)
@@ -268,7 +273,13 @@ internal object PublicWindowPilotProbe {
             }
             check(toolbarMargins.topMargin == bars.top) { "$label toolbar top margin=${toolbarMargins.topMargin}, system bar top=${bars.top}" }
             check(activity.actionBar == null && activity.window.hasFeature(Window.FEATURE_NO_TITLE))
-            check(!WindowCompat.getInsetsController(activity.window, activity.window.decorView).isAppearanceLightStatusBars)
+            check(!controller.isAppearanceLightStatusBars)
+            if (Build.VERSION.SDK_INT >= 35) {
+                val night = activity.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+                check(lightNavigationBars == (night != Configuration.UI_MODE_NIGHT_YES)) {
+                    "$label navigation appearance=$lightNavigationBars, Activity night mode=$night"
+                }
+            }
             val expectedContext = PublicWindowPilotConfiguration.wrap(context, AppPrefs.defaultInstance().advanced.uiMode.getValue())
             check(ContextCompat.getColor(activity, R.color.colorPrimary) == ContextCompat.getColor(expectedContext, R.color.colorPrimary))
             check(ContextCompat.getColor(activity, R.color.toolbarForegroundColor) == ContextCompat.getColor(expectedContext, R.color.toolbarForegroundColor))
