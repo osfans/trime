@@ -2,12 +2,14 @@
 package com.osfans.trime.ui.common
 
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.view.Window
 import androidx.annotation.Keep
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NavUtils
 import androidx.core.app.TaskStackBuilder
+import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.prefs.PreferenceDelegate
@@ -31,6 +33,12 @@ abstract class PublicWindowPilotActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // The manifest theme also sets the framework attributes for the starting Window.
         requestWindowFeature(Window.FEATURE_NO_TITLE)
+        if (Build.VERSION.SDK_INT >= 35) {
+            // A recreated Window can reuse attached decor with the previous content-insets
+            // applier. Clear it before decor installation enables enforced edge-to-edge,
+            // after which Android 15 ignores setDecorFitsSystemWindows calls.
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+        }
         super.onCreate(savedInstanceState)
         AppPrefs.defaultInstance().advanced.uiMode.registerOnChangeListener(uiModeChanged)
         listenerRegistered = true
