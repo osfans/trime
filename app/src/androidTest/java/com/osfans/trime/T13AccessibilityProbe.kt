@@ -28,12 +28,14 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.children
 import androidx.recyclerview.widget.RecyclerView
+import com.mikepenz.iconics.typeface.IconicsHolder
 import com.osfans.trime.core.RimeApi
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.data.theme.ThemeScope
+import com.osfans.trime.data.theme.icons.CompactCommunityMaterial
 import com.osfans.trime.ime.bar.ui.ToolButton
 import com.osfans.trime.ime.candidates.CandidateViewHolder
 import com.osfans.trime.ime.candidates.compact.CompactCandidateDelegate
@@ -55,6 +57,7 @@ import org.kodein.di.instance
 import java.io.File
 import java.security.MessageDigest
 import kotlin.coroutines.resume
+import com.mikepenz.iconics.typeface.library.community.R as CommunityMaterialR
 
 /** Dedicated emulator only. Actual nodes/actions and editor output; not a TalkBack substitute. */
 object T13AccessibilityProbe {
@@ -258,6 +261,31 @@ object T13AccessibilityProbe {
                             put("scrolling_keys", JSONArray(keyboardChecks.scrollingKeys.map { JSONObject(it) }))
                         },
                     )
+                    // Observe the normal registry only after actual keyboard creation/actions.
+                    // Do not register or look up a glyph before the cold input path has run.
+                    main {
+                        val active = IconicsHolder.FONTS["cmd"]
+                        val font = JSONObject()
+                            .put("after_keyboard_action_helper", true)
+                            .put("provider_class", active?.javaClass?.name ?: JSONObject.NULL)
+                            .put("provider_is_compact", active === CompactCommunityMaterial)
+                        report.put("icon_font", font)
+                        check(active === CompactCommunityMaterial) { "cmd font registry is not the compact provider: $font" }
+                        val provider = checkNotNull(active)
+                        val expectedFont = CommunityMaterialR.font.community_material_design_icons_font_v7_0_96
+                        val glyph = provider.getIcon("cmd_undo")
+                        font.put("font_resource", provider.fontRes)
+                            .put("expected_font_resource", expectedFont)
+                            .put("glyph_class", glyph.javaClass.name)
+                            .put("glyph_is_enum", glyph is Enum<*>)
+                            .put("glyph_name", glyph.name)
+                            .put("glyph_code_unit", glyph.character.code)
+                            .put("glyph_uses_active_provider", glyph.typeface === provider)
+                        check(provider.fontRes == expectedFont) { "cmd font resource changed: $font" }
+                        check(glyph !is Enum<*> && glyph.name == "cmd_undo" && glyph.character.code == 0xBA2A && glyph.typeface === provider) {
+                            "cmd glyph identity changed or still loads an enum: $font"
+                        }
+                    }
                     phase("keyboard action helper completed")
                     val configurations = JSONArray()
                     report.put("configurations", configurations)

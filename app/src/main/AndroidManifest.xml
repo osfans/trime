@@ -71,6 +71,13 @@ SPDX-License-Identifier: GPL-3.0-or-later
             android:directBootAware="true"
             android:exported="false"
             tools:node="merge">
+            <!-- Keep the original font resource but replace its large enum provider. -->
+            <meta-data
+                android:name="com.mikepenz.iconics.typeface.library.community.material.Initializer"
+                tools:node="remove" />
+            <meta-data
+                android:name="com.osfans.trime.data.theme.icons.CompactCommunityMaterialInitializer"
+                android:value="androidx.startup" />
             <!-- remove WorkManager default initializer -->
             <meta-data
                 android:name="androidx.work.WorkManagerInitializer"

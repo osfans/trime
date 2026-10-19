@@ -5,3 +5,6 @@
 # Handle line endings automatically for files detected as text
 # and leave all files detected as binary untouched.
 *	text=auto
+
+# Keep the pinned glyph table identical in APKs built on every host.
+app/src/main/res/raw/community_material_glyphs.tsv text eol=lf

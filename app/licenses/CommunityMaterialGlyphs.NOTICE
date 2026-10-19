@@ -1,0 +1,44 @@
+Community Material icon mapping and original font
+
+This mapping is derived from com.mikepenz:community-material-typeface:7.0.96.1-kotlin.
+It contains all 7,134 original cmd names/code units, in original order. The original
+font remains supplied by that same AAR dependency; the lightweight provider does
+not replace or modify the font.
+
+Original code attribution: Copyright 2020 Mike Penz.
+The original CommunityMaterial.kt header, lines 1-15, states Apache License 2.0
+and links to http://www.apache.org/licenses/LICENSE-2.0 . The published POM also
+names Apache-2.0 and https://www.apache.org/licenses/LICENSE-2.0.txt .
+
+Upstream font metadata is retained as published, including its differing wording:
+- AAR res/values/values.xml: library_MaterialDesignIcons_licenseId = sil_ofl_1_1;
+  author Austin Andrews, library Material Design Icons, year 2022.
+- CommunityMaterial.kt provider properties: author Templarian / Community / Google;
+  license Pictogrammers Free License;
+  licenseUrl https://github.com/Templarian/MaterialDesign/blob/master/LICENSE .
+These are the original artifact's separate code/font/provider declarations. This
+notice records them without relabeling the font or replacing existing attribution.
+No standalone font license text is embedded in the inspected AAR; the locations
+above identify the supplied metadata and original license-reference text.
+
+Official source package:
+https://repo.maven.apache.org/maven2/com/mikepenz/community-material-typeface/7.0.96.1-kotlin/community-material-typeface-7.0.96.1-kotlin-sources.jar
+SHA-256 bf57c0be4b22c1a7ccad2314789fb13db445ecd6e4b18848e10398d64e91f598
+Entry main/com/mikepenz/iconics/typeface/library/community/material/CommunityMaterial.kt
+SHA-256 3084addcb731bb75cc666036875e6f34c967ace0a5ba9a23833d4c5fc9cae3f4
+The archive includes this entry twice, with identical bytes.
+
+Original AAR:
+https://repo.maven.apache.org/maven2/com/mikepenz/community-material-typeface/7.0.96.1-kotlin/community-material-typeface-7.0.96.1-kotlin.aar
+SHA-256 b363d060c4f7e173f9fba3af76c82df6bca2bdd2be3c6a9edeb41a724f294c21
+Original TTF entry res/font/community_material_design_icons_font_v7_0_96.ttf
+SHA-256 cbfb8ffc5961513f8c93f84674751d2dcbbc560c2d844d142ab6de1ca64a88e0
+
+Derived resource community_material_glyphs.tsv (178,712 bytes):
+SHA-256 d060a97a02f3639794fb847a43b7d9b6a773e021900659507fe0a0f3f561709f
+All current glyphs are BMP U+A001..U+BBDE, without surrogate code units. A future
+supplementary-plane mapping requires a string-capable API, not Char truncation.
+The offline generator accepts only the source-jar SHA above and performs no download.
+
+To verify the checked-in mapping without changing it:
+python3 script/quality/generate_community_material_glyphs.py --source-jar SOURCE_JAR --output app/src/main/res/raw/community_material_glyphs.tsv --check
