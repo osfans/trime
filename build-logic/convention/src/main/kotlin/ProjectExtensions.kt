@@ -16,6 +16,9 @@ fun Project.runCmd(
 ): String {
     val output = providers.exec {
         commandLine = cmd.split(" ")
+        // A failing command must not break the configuration, the default value
+        // is used instead.
+        setIgnoreExitValue(true)
     }
     return if (output.result.get().exitValue == 0) {
         output.standardOutput.asText.get().trim()
