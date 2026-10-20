@@ -25,7 +25,7 @@ open class PreeditUi(
     final override val ctx: Context,
     private val scope: ThemeScope,
     private val setupPreeditView: (TextView.() -> Unit)? = null,
-    private val onMoveCursor: ((Int) -> Unit)? = null,
+    private val onMoveCursor: ((Int, String) -> Unit)? = null,
 ) : Ui {
     private val theme: Theme
         get() = scope.theme

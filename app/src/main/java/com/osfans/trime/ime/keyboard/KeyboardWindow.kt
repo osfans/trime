@@ -203,11 +203,15 @@ class KeyboardWindow(di: DI) :
 
     private fun smartMatchKeyboard(): String {
         // 主题的布局中包含方案id，直接采用
+        val schema = rime.run { schemaCached }
+        val requested = schema.keyboard
+        if (requested.isNotEmpty() && requested in presetKeyboardIds) return requested
         val currentSchema = rime.run { statusCached }.schemaId
         if (presetKeyboardIds.contains(currentSchema)) {
             return currentSchema
         }
-        val alphabet = rime.run { schemaCached }.alphabet
+        if (schema.isPinyinT9 && "luna_pinyin_t9" in presetKeyboardIds) return "luna_pinyin_t9"
+        val alphabet = schema.alphabet
         val layout =
             when {
                 alphabet.all { it.isLetter() } -> "qwerty"

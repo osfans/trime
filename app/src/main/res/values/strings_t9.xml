@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<resources>
+    <string name="t9_unlock">Unlock syllable</string>
+    <string name="t9_cancel">Cancel composition</string>
+    <string name="t9_current_segment">Current: %1$s</string>
+    <string name="t9_locked_syllable">Locked syllable: %1$s</string>
+    <string name="t9_input_segment">Input segment: %1$s</string>
+    <string name="t9_completion">%1$s (complete)</string>
+</resources>

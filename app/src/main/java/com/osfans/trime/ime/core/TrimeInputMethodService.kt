@@ -48,6 +48,8 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.composition.CandidatesView
+import com.osfans.trime.ime.composition.preeditByteOffset
+import com.osfans.trime.ime.composition.preeditCharacterBoundary
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.receiver.RimeIntentReceiver
 import com.osfans.trime.util.any
@@ -93,7 +95,25 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private var lastCommittedText: String = ""
 
     private var composingText: String = ""
+    private var composingCursor: Int? = null
+    private var composingStart: Int? = null
+    private var composingSelectionMatches = true
+    private var selectionAfterCancel: Pair<Int, Int>? = null
 
+    private var pendingCursorJob: Job? = null
+
+    private fun resetComposingTracking() {
+        pendingCursorJob?.cancel()
+        pendingCursorJob = null
+        cursorUpdateIndex += 1
+        composingText = ""
+        composingCursor = null
+        composingStart = null
+        composingSelectionMatches = true
+        selectionAfterCancel = null
+    }
+
+    @Volatile
     private var cursorUpdateIndex = 0
 
     private val recreateInputViewPrefs: Array<PreferenceDelegate<*>> = arrayOf(
@@ -220,7 +240,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             }
 
             is RimeMessage.InlinePreeditMessage -> {
-                updateComposingText(it.data)
+                updateComposingText(it.data.text, it.data.cursor)
             }
 
             is RimeMessage.KeyMessage ->
@@ -455,20 +475,40 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         candidatesEnd: Int,
         updateIndex: Int,
     ) {
-        if (newSelStart != newSelEnd) return
-        if (candidatesStart == candidatesEnd) return
-        if (newSelStart in candidatesStart..candidatesEnd) {
-            val position = newSelStart - candidatesStart
-            if (position != composingText.length) {
-                postRimeJob {
+        if (composingText.isEmpty()) return
+        if (newSelStart < 0 || newSelEnd < 0) return
+        if (candidatesStart < 0 || candidatesEnd - candidatesStart != composingText.length) return
+        composingStart = candidatesStart
+        if (newSelStart in candidatesStart..candidatesEnd && newSelEnd in candidatesStart..candidatesEnd) {
+            selectionAfterCancel = null
+            if (composingCursor == null) return
+            val position = preeditCharacterBoundary(composingText, newSelEnd - candidatesStart)
+            composingSelectionMatches = newSelStart == newSelEnd && position == composingCursor
+            if (newSelStart != newSelEnd || position != newSelEnd - candidatesStart) {
+                // Rime has one editing caret, not a range. Keep the active end.
+                currentInputConnection?.setSelection(candidatesStart + position, candidatesStart + position)
+            }
+            if (position != composingCursor) {
+                val expectedPreedit = composingText
+                val bytes = preeditByteOffset(expectedPreedit, position)
+                pendingCursorJob?.cancel()
+                pendingCursorJob = postRimeJob {
                     if (updateIndex != cursorUpdateIndex) return@postRimeJob
                     Timber.d("handleCursorUpdate: move rime cursor to $position")
-                    moveCursorPos(position)
+                    moveCursorPos(bytes, expectedPreedit)
                 }
             }
         } else {
+            fun afterRemoval(position: Int) = when {
+                position <= candidatesStart -> position
+                position >= candidatesEnd -> position - composingText.length
+                else -> candidatesStart
+            }
+            selectionAfterCancel = afterRemoval(newSelStart) to afterRemoval(newSelEnd)
             Timber.d("handleCursorUpdate: clear composition")
-            postRimeJob {
+            pendingCursorJob?.cancel()
+            pendingCursorJob = postRimeJob {
+                if (updateIndex != cursorUpdateIndex) return@postRimeJob
                 clearComposition()
             }
         }
@@ -536,15 +576,16 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         attribute: EditorInfo,
         restarting: Boolean,
     ) {
-        composingText = ""
+        // A restart closes the old composing span while preserving its visible text,
+        // just as onFinishInputView does; the new native session must not edit it.
+        if (restarting) currentInputConnection?.finishComposingText()
+        resetComposingTracking()
         Timber.d("onStartInput: restarting=$restarting")
         val isNullType = attribute.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL
         postRimeJob {
-            if (restarting) {
-                // when input restarts in the same editor, clear previous composition
-                clearComposition()
-            }
             setNullInputType(isNullType)
+            // A spelling lock belongs to one editor, including restart in that editor.
+            clearComposition()
         }
     }
 
@@ -599,7 +640,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             finishComposingText()
             monitorCursorAnchor(false)
         }
-        composingText = ""
+        resetComposingTracking()
         postRimeJob {
             clearComposition()
         }
@@ -610,13 +651,15 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         val ic = currentInputConnection ?: return
 
         // when composing text equals commit content, finish composing text as-is
-        if (composingText.isNotEmpty() && composingText == text) {
+        if (composingText.isNotEmpty() && composingText == text &&
+            composingCursor == text.length && composingSelectionMatches
+        ) {
             ic.finishComposingText()
         } else {
             ic.commitText(text, 1)
         }
         lastCommittedText = text
-        composingText = ""
+        resetComposingTracking()
         InputFeedbackManager.textCommitSpeak(text)
     }
 
@@ -944,16 +987,33 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    internal fun updateComposingText(text: String) {
+    internal fun updateComposingText(text: String, cursor: Int? = null) {
         val ic = currentInputConnection ?: return
+        val position = cursor?.let { preeditCharacterBoundary(text, it) }
+        if (text == composingText && position == composingCursor && (position == null || composingSelectionMatches)) return
+        cursorUpdateIndex += 1
+        if (composingText.isEmpty()) {
+            composingStart = ic.getExtractedText(ExtractedTextRequest(), 0)?.let {
+                it.startOffset + minOf(it.selectionStart, it.selectionEnd)
+            }
+        }
+        composingCursor = position
+        composingSelectionMatches = true
+        if (text.isNotEmpty()) selectionAfterCancel = null
         ic.beginBatchEdit()
         if (composingText.isNotEmpty() || text.isNotEmpty()) {
-            if (!ic.getSelectedText(0).isNullOrEmpty()) {
-                ic.deleteSurroundingText(1, 0)
-            }
-            ic.setComposingText(text, 1)
             if (text.isEmpty()) {
+                // Replace the composing range without attaching spans to empty text.
+                ic.commitText("", 1)
                 ic.finishComposingText()
+                composingStart = null
+                selectionAfterCancel?.let { ic.setSelection(it.first, it.second) }
+                selectionAfterCancel = null
+            } else {
+                ic.setComposingText(text, 1)
+                if (position != null) {
+                    composingStart?.let { start -> ic.setSelection(start + position, start + position) }
+                }
             }
         }
         composingText = text
