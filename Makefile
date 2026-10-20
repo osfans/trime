@@ -15,7 +15,7 @@ else
 endif
 
 
-.PHONY: all clean build debug spotlessCheck spotlessApply clang-format-lint clang-format style-lint \
+.PHONY: all clean build debug check spotlessCheck spotlessApply clang-format-lint clang-format style-lint \
 style-apply patch-apply release install translate ndk android
 
 all: release
@@ -26,6 +26,10 @@ clean:
 
 build: style-lint
 	$(GRADLEW) build
+
+# Run unit tests and lint
+check:
+	$(GRADLEW) :app:check
 
 spotlessCheck:
 	$(GRADLEW) spotlessCheck
