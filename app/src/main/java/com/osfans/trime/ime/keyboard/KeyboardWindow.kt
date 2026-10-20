@@ -291,6 +291,10 @@ class KeyboardWindow(di: DI) :
         currentKeyboardView?.invalidateAllKeys()
     }
 
+    override fun onEnterKeyLabelUpdate(label: String) {
+        cachedKeyboards.values.forEach { (_, view) -> view.invalidateAllKeys() }
+    }
+
     override fun onStartInput(info: EditorInfo) {
         val targetKeyboard =
             when (info.imeOptions and EditorInfo.IME_FLAG_FORCE_ASCII) {
