@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: 2015 - 2026 Rime community
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: Code Checks
+
+on:
+  workflow_call:
+
+env:
+  CI_NAME: Code Checks
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Fetch source code
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: "temurin"
+          java-version: 25
+          # will restore cache of dependencies and wrappers
+          cache: 'gradle'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
+
+      - name: Check code style
+        run: make style-lint
+
+      - name: Run unit tests and lint
+        run: make check

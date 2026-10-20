@@ -11,7 +11,11 @@ on:
 env:
   CI_NAME: Release CI
 jobs:
+  check:
+    uses: ./.github/workflows/check-ci.yml
+
   build:
+    needs: check
     runs-on: ubuntu-26.04
     steps:
       - name: Checkout

@@ -15,7 +15,11 @@ on:
 env:
   CI_NAME: Pull Request CI
 jobs:
+  check:
+    uses: ./.github/workflows/check-ci.yml
+
   build:
+    needs: check
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -57,11 +61,6 @@ jobs:
       - name: Install Android NDK
         run: |
           sdkmanager --install "cmake;3.31.6"
-
-      - name: Check code style
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        run: |
-          make style-lint
 
       - name: Calculate JNI cache hash
         id: cache-hash
