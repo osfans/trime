@@ -15,6 +15,8 @@ class RimeSchema(val schemaId: String) {
 
     val switches: List<Switch>
     val alphabet: String
+    val keyboard: String
+    val isPinyinT9: Boolean
 
     init {
         val schemaConfig = when {
@@ -35,6 +37,8 @@ class RimeSchema(val schemaId: String) {
                 )
             }
             alphabet = it.getString("speller/alphabet") ?: ""
+            keyboard = it.getString("trime/keyboard") ?: ""
+            isPinyinT9 = it.getString("trime/t9") == "true"
         }
     }
 }

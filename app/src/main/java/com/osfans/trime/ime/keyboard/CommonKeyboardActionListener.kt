@@ -179,21 +179,40 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
                 val arg = expandActiveText(action.option)
 
                 when (action.command) {
+                    "t9_digit" -> arg.singleOrNull()?.takeIf { it in '0'..'9' }?.let { digit ->
+                        service.postRimeJob { commitT9Digit(digit) }
+                    }
+
                     "liquid_keyboard" -> handleLiquidKeyboard(arg)
+
                     "menu_keyboard" -> windowManager.attachWindow(SwitchOptionWindow(di))
+
                     "clipboard_window" -> handleClipboardWindow(arg)
+
                     "set_color_scheme" -> handleColorScheme(arg)
+
                     "set_theme" -> handleTheme(arg)
+
                     "broadcast" -> service.sendBroadcast(Intent(arg))
+
                     "clipboard" -> handleClipboard()
+
                     "commit" -> service.commitText(arg)
+
                     "date" -> service.commitText(customFormatDateTime(arg))
+
                     "run" -> handleRunCommand(arg)
+
                     "apply" -> handleApplyCommand(arg)
+
                     "share_text" -> service.shareText()
+
                     "select_candidate" -> handleSelectCandidate(arg)
+
                     "switch_hide_key_symbol" -> switchHideKeySymbol()
+
                     "switch_hide_key_hint" -> switchHideKeyHint()
+
                     else -> handleIntentAction(action.command, arg)
                 }
             }
@@ -395,6 +414,12 @@ class CommonKeyboardActionListener(override val di: DI) : DIAware {
                 }
                 val modifiers = KeyModifiers.fromMetaState(m).modifiers
                 service.postRimeJob {
+                    if (t9Cached.enabled && m == KeyEvent.META_CTRL_ON &&
+                        (keyEventCode == KeyEvent.KEYCODE_Z || keyEventCode == KeyEvent.KEYCODE_Y)
+                    ) {
+                        processKey(value, modifiers)
+                        return@postRimeJob
+                    }
                     if (service.hookKeyboard(keyEventCode, m)) {
                         Timber.d("handleKey: hook")
                         return@postRimeJob

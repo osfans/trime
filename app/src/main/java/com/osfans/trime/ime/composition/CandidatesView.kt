@@ -91,7 +91,7 @@ class CandidatesView(
             ctx,
             scope,
             setupPreeditView = { setPaddingDp(3, 1, 3, 1) },
-            onMoveCursor = { pos -> rime.launchOnReady { it.moveCursorPos(pos) } },
+            onMoveCursor = { bytes, expected -> rime.launchOnReady { it.moveCursorPos(bytes, expected) } },
         )
 
     private val candidatesUi =

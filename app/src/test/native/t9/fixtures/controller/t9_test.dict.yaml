@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+---
+name: t9_test
+version: '1'
+sort: by_weight
+use_preset_vocabulary: false
+...
+你	ni	1000
+米	mi	900
+好	hao	1000
+高	gao	900
+吗	ma	1000
+你好	ni hao	10000
+米高	mi gao	9000
+你好吗	ni hao ma	8000
+你高吗	ni gao ma	7000
+米好吗	mi hao ma	6000
+泥稿	ni gao	100
+宁	ning	100
+明	ming	100
+西	xi	100
+安	an	100
+先	xian	100
+西安	xi an	200
+行	xing	100
+行	hang	100
+银行	yin hang	100
+行吗	xing ma	100
+女	nv	100
+绿	lv	100
+略	lve	100
+虐	nve	100
+绝	jue	100

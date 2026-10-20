@@ -9,22 +9,30 @@
 extern "C" JNIEXPORT jobject JNICALL
 Java_com_osfans_trime_core_RimeKeyEvent_parse(JNIEnv* env, jclass clazz,
                                               jstring repr) {
+  CString text(env, repr);
+  if (env->ExceptionCheck()) return nullptr;
   rime::KeyEvent ke;
-  ke.Parse(*CString(env, repr));
+  ke.Parse(*text);
+  JString description(env, ke.repr());
+  if (!*description) return nullptr;
   return env->NewObject(GlobalRef->KeyEvent, GlobalRef->KeyEventInit,
-                        ke.keycode(), ke.modifier(), *JString(env, ke.repr()));
+                        ke.keycode(), ke.modifier(), *description);
 }
 
 extern "C" JNIEXPORT jint JNICALL
 Java_com_osfans_trime_core_RimeKeyEvent_getModifierByName(JNIEnv* env,
                                                           jclass /* thiz */,
                                                           jstring name) {
-  return RimeGetModifierByName(CString(env, name));
+  CString text(env, name);
+  if (env->ExceptionCheck()) return 0;
+  return RimeGetModifierByName(text);
 }
 
 extern "C" JNIEXPORT jint JNICALL
 Java_com_osfans_trime_core_RimeKeyEvent_getKeycodeByName(JNIEnv* env,
                                                          jclass /* thiz */,
                                                          jstring name) {
-  return RimeGetKeycodeByName(CString(env, name));
+  CString text(env, name);
+  if (env->ExceptionCheck()) return 0;
+  return RimeGetKeycodeByName(text);
 }

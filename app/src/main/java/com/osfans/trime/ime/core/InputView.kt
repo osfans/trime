@@ -20,7 +20,9 @@ import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.core.CompositionProto
 import com.osfans.trime.core.RimeMessage
+import com.osfans.trime.core.T9StateProto
 import com.osfans.trime.daemon.RimeSession
+import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
@@ -31,11 +33,13 @@ import com.osfans.trime.ime.broadcast.InputBroadcaster
 import com.osfans.trime.ime.candidates.compact.CompactCandidateDelegate
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.composition.PreeditDelegate
+import com.osfans.trime.ime.composition.T9DisambiguationView
 import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.popup.PopupDelegate
 import com.osfans.trime.ime.symbol.LiquidWindow
+import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.BoardWindowManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -129,6 +133,18 @@ class InputView(
     private val keyboardWindow: KeyboardWindow by instance()
     private val liquidWindow: LiquidWindow by instance()
 
+    private val t9View = T9DisambiguationView(themedContext, scope) { revision, action, start, end, spelling ->
+        rime.launchOnReady { it.t9Action(revision, action, start, end, spelling) }
+    }.apply {
+        id = View.generateViewId()
+        visibility = View.GONE
+    }
+
+    private fun updateT9View(state: T9StateProto = rime.run { t9Cached }) {
+        t9View.update(if (windowManager.isAttached(keyboardWindow)) state else T9StateProto())
+        if (t9View.managesComposition) broadcaster.onCompositionUpdate(CompositionProto())
+    }
+
     private val candidatesMode by AppPrefs.defaultInstance().candidates.mode
 
     private val keyboardSidePadding = theme.style.keyboardPadding
@@ -172,6 +188,7 @@ class InputView(
         keyboardWindow.refreshColors()
         inputBar.refreshColors()
         preedit.refreshColors()
+        t9View.refreshColors()
         windowManager.refreshColors()
     }
 
@@ -179,6 +196,11 @@ class InputView(
         // MUST call before any operation
         val receivers: List<InputBroadcastReceiver> by allInstances()
         receivers.forEach { broadcaster.addReceiver(it) }
+        broadcaster.addReceiver(object : InputBroadcastReceiver {
+            override fun onWindowAttached(window: BoardWindow) {
+                updateT9View()
+            }
+        })
 
         windowManager.cacheResidentWindow(keyboardWindow, createView = true)
         windowManager.cacheResidentWindow(liquidWindow)
@@ -204,6 +226,13 @@ class InputView(
                     },
                 )
                 add(
+                    t9View,
+                    lParams(matchParent, wrapContent) {
+                        below(inputBar.view)
+                        centerHorizontally()
+                    },
+                )
+                add(
                     leftPaddingSpace,
                     lParams {
                         below(inputBar.view)
@@ -222,7 +251,7 @@ class InputView(
                 add(
                     windowManager.view,
                     lParams {
-                        below(inputBar.view)
+                        below(t9View)
                         above(bottomPaddingSpace)
                     },
                 )
@@ -305,6 +334,7 @@ class InputView(
         }
         preedit.ui.root.setPadding(sidePadding, 0, sidePadding, 0)
         inputBar.view.setPadding(sidePadding, 0, sidePadding, 0)
+        t9View.setPadding(sidePadding, 0, sidePadding, 0)
     }
 
     override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {
@@ -332,6 +362,7 @@ class InputView(
     override fun handleRimeMessage(it: RimeMessage<*>) {
         when (it) {
             is RimeMessage.SchemaMessage -> {
+                t9View.update(T9StateProto())
                 broadcaster.onRimeSchemaUpdated(it.data)
 
                 windowManager.attachWindow(KeyboardWindow)
@@ -348,8 +379,12 @@ class InputView(
                 }
             }
 
+            is RimeMessage.T9Message -> updateT9View(it.data)
+
             is RimeMessage.CompositionMessage -> {
-                val data = if (candidatesMode == PopupCandidatesMode.ALWAYS_SHOW) {
+                val data = if (candidatesMode == PopupCandidatesMode.ALWAYS_SHOW ||
+                    t9View.managesComposition || rime.run { t9Cached.enabled }
+                ) {
                     CompositionProto()
                 } else {
                     it.data
