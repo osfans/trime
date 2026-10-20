@@ -254,7 +254,11 @@ object ThemeLoader {
 
     /** Whether this file really lives in [root]: `..` and absolute ids are escapes. */
     private fun File.isInside(root: File): Boolean = runCatching {
-        canonicalFile.toPath().startsWith(root.canonicalFile.toPath())
+        // java.nio.file is unavailable before API 26, so compare canonical
+        // paths with an explicit separator to keep the boundary check.
+        val rootPath = root.canonicalFile.path.trimEnd(File.separatorChar)
+        val filePath = canonicalFile.path
+        filePath == rootPath || filePath.startsWith(rootPath + File.separator)
     }.getOrDefault(false)
 
     /**
