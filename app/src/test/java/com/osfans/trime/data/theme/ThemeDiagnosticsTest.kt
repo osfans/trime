@@ -22,6 +22,7 @@ class ThemeDiagnosticsTest :
         // The Android key-name lookup is a platform call that throws when not
         // mocked; the bare letters used by the fixtures resolve without it.
         beforeTest { KeyCode.androidKeyNameToCode = { 0 } }
+        afterSpec { KeyCode.androidKeyNameToCode = KeyCode.defaultAndroidKeyNameToCode }
 
         /** Hex-only color parser; enough to tell colors from typos. */
         fun parseHex(value: String): Int? {

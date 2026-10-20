@@ -20,6 +20,7 @@ class KeyActionTest :
         // The Android key-name lookup is a platform call that throws when not
         // mocked; the Rime key table is the path under test.
         beforeTest { KeyCode.androidKeyNameToCode = { 0 } }
+        afterSpec { KeyCode.androidKeyNameToCode = KeyCode.defaultAndroidKeyNameToCode }
 
         val presetKeys = ThemeTestSupport.decodeBuiltinTheme("trime.yaml").presetKeys
 

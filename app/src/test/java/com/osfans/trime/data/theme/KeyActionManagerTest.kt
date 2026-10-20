@@ -15,6 +15,7 @@ class KeyActionManagerTest :
         // The Android key-name lookup is a platform call that throws when not
         // mocked; the Rime key table is the path under test.
         beforeTest { KeyCode.androidKeyNameToCode = { 0 } }
+        afterSpec { KeyCode.androidKeyNameToCode = KeyCode.defaultAndroidKeyNameToCode }
 
         fun diagnostics(vararg presets: Pair<String, PresetKey>) = ThemeDiagnostics.presetDiagnostics(mapOf(*presets))
 

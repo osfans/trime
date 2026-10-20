@@ -13,7 +13,9 @@ import timber.log.Timber
 object KeyCode {
     // Last-resort Android key-name lookup. It is a platform call that throws
     // when not mocked, so tests stub it out via the injected function.
-    internal var androidKeyNameToCode: (String) -> Int = { KeyEvent.keyCodeFromString("KEYCODE_$it") }
+    internal val defaultAndroidKeyNameToCode: (String) -> Int = { KeyEvent.keyCodeFromString("KEYCODE_$it") }
+
+    internal var androidKeyNameToCode: (String) -> Int = defaultAndroidKeyNameToCode
 
     fun isStandardKey(code: Int): Boolean = code in 1 until RimeKeyMapping.SYMBOL_CODE_OFFSET
 
