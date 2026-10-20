@@ -15,8 +15,10 @@ import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.util.Logcat
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import splitties.resources.styledColor
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
@@ -39,6 +41,7 @@ constructor(
     attributeSet: AttributeSet? = null,
 ) : HorizontalScrollView(context, attributeSet) {
     private var logcat: Logcat? = null
+    private var collectionJob: Job? = null
 
     private val logAdapter = LogAdapter()
 
@@ -56,8 +59,24 @@ constructor(
     }
 
     override fun onDetachedFromWindow() {
-        logcat?.shutdownLogFlow()
+        stopLogCollection()
         super.onDetachedFromWindow()
+    }
+
+    private fun stopLogCollection() {
+        logcat?.shutdownLogFlow()
+        collectionJob?.cancel()
+        collectionJob = null
+    }
+
+    private fun startLogCollection() {
+        if (collectionJob?.isActive == true) return
+        val source = logcat ?: return
+        val scope = findViewTreeLifecycleOwner()?.lifecycleScope ?: return
+        if (!scope.isActive) return
+        collectionJob = scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            source.collectLines(::buildColoredString)
+        }
     }
 
     fun append(content: String) {
@@ -69,18 +88,16 @@ constructor(
     }
 
     fun setLogcat(logcat: Logcat) {
+        stopLogCollection()
         this.logcat = logcat
-        logcat.initLogFlow()
-        logcat.logFlow
-            .onEach(::buildColoredString)
-            .launchIn(findViewTreeLifecycleOwner()!!.lifecycleScope)
+        startLogCollection()
     }
 
     private fun buildColoredString(str: String) {
         val color =
             ContextCompat.getColor(
                 context,
-                when (str.codePointAt(19).toChar()) {
+                when (Logcat.priorityOf(str)) {
                     'V' -> R.color.grey_700
                     'D' -> R.color.grey_700
                     'I' -> R.color.blue_500
