@@ -8,6 +8,7 @@ package com.osfans.trime.data.theme
 
 import com.charleskorn.kaml.YamlMap
 import com.osfans.trime.data.theme.model.GeneralStyle
+import com.osfans.trime.data.theme.model.KeyRole
 import com.osfans.trime.data.theme.model.PresetKey
 import com.osfans.trime.ime.keyboard.KeyCode
 import com.osfans.trime.util.ColorUtils
@@ -42,8 +43,10 @@ object ThemeDiagnostics {
         MISSING_DEFAULT_SCHEME,
         MISSING_SCHEME_LINK,
         INVALID_COLOR_VALUE,
+        CONFLICTING_COLOR_KEY,
         BROKEN_FALLBACK_TARGET,
         UNRESOLVABLE_PRESET_SEND,
+        UNKNOWN_KEY_ROLE,
         MISSING_KEYBOARD_REFERENCE,
         CYCLIC_KEYBOARD_REFERENCE,
     }
@@ -84,7 +87,9 @@ object ThemeDiagnostics {
         lintStyleKeys(node)
         lintConfigVersion(node)
         lintColorSchemes(theme, parseColor)
+        lintLegacyColorKeys(theme)
         lintPresetSends(theme)
+        lintKeyRoles(theme)
         lintKeyboardReferences(theme)
     }
 
@@ -313,6 +318,34 @@ object ThemeDiagnostics {
     }
 
     /**
+     * A theme may still spell a canonical color key under its pre-rename name,
+     * but defining both leaves the legacy value dead: resolution reads the
+     * canonical key first. Reported where the shadowed spelling sits so the
+     * author removes the one that has no effect.
+     */
+    private fun MutableList<Finding>.lintLegacyColorKeys(theme: Theme) {
+        fun check(colors: Map<String, String>, path: (String) -> String) {
+            colors.keys.forEach { key ->
+                val canonical = LegacyColorAliases.resolve(key) ?: return@forEach
+                if (canonical !in colors) return@forEach
+                add(
+                    Finding(
+                        Severity.WARNING,
+                        Code.CONFLICTING_COLOR_KEY,
+                        "'$key' is the pre-rename spelling of '$canonical', which is also defined; " +
+                            "the legacy value is ignored",
+                        path(key),
+                    ),
+                )
+            }
+        }
+        theme.presetColorSchemes.forEach { (id, colors) ->
+            check(colors) { "preset_color_schemes/$id/$it" }
+        }
+        check(theme.fallbackColors) { "fallback_colors/$it" }
+    }
+
+    /**
      * A `fallback_colors` entry whose target no scheme defines is dead: the key
      * it feeds stays unresolved even though the theme asked for something.
      */
@@ -368,6 +401,22 @@ object ThemeDiagnostics {
                     "preset_keys/${message.substringAfter('\'').substringBefore('\'')}",
                 ),
             )
+        }
+    }
+
+    /** Warns when a preset spells a `role:` no [KeyRole] provides (doc/Theme.md §2). */
+    private fun MutableList<Finding>.lintKeyRoles(theme: Theme) {
+        theme.presetKeys.forEach { (name, key) ->
+            if (key.role.isNotEmpty() && KeyRole.of(key.role) == null) {
+                add(
+                    Finding(
+                        Severity.WARNING,
+                        Code.UNKNOWN_KEY_ROLE,
+                        "'$name' has an unknown role '${key.role}'",
+                        "preset_keys/$name/role",
+                    ),
+                )
+            }
         }
     }
 

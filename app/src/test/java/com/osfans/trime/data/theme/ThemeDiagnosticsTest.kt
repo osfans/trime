@@ -203,6 +203,24 @@ class ThemeDiagnosticsTest :
                 }
             }
 
+            Then("a legacy color key shadowed by its canonical spelling is reported") {
+                val findings = lint(
+                    """
+                    config_version: "3.0"
+                    name: t
+                    style: {}
+                    preset_color_schemes:
+                      default: {keyboard_normal_back_color: "#000000", back_color: "#111111"}
+                    fallback_colors: {key_normal_text_color: x, key_text_color: x}
+                    """.trimIndent(),
+                )
+                findings.filter { it.code == Code.CONFLICTING_COLOR_KEY }.map { it.path } shouldBe
+                    listOf(
+                        "preset_color_schemes/default/back_color",
+                        "fallback_colors/key_text_color",
+                    )
+            }
+
             Then("a fallback_colors entry pointing at nothing is reported") {
                 val findings = lint(
                     """
