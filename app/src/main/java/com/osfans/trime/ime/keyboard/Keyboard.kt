@@ -344,6 +344,22 @@ class Keyboard(
         }
     }
 
+    /**
+     * Applies a Rime option's new value to the keys that toggle it, so a switch
+     * key repaints with its `on` colors and its `states` label.
+     *
+     * This mirrors the option value directly instead of toggling, because the
+     * same option may be flipped by multiple keys or by Rime itself.
+     */
+    fun updateToggle(
+        option: String,
+        enabled: Boolean,
+    ) {
+        keys.forEach { key ->
+            if (key.toggle == option) key.isOn = enabled
+        }
+    }
+
     val keys: List<Key>
         get() = mKeys
 

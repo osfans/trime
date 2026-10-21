@@ -5,6 +5,7 @@
 
 package com.osfans.trime.data.theme.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -31,7 +32,9 @@ data class ToolBar(
             val type: Type = Type.RECTANGLE,
             val cornerRadius: Float = 10f,
             val normal: String = "",
-            val highlight: String = "",
+            val pressed: String = "",
+            /** Legacy alias of [pressed]; kept so pre-rename themes still load. */
+            @SerialName("highlight") val highlight: String = "",
             val verticalInset: Int = 4,
             val horizontalInset: Int = 4,
         ) {
@@ -39,6 +42,9 @@ data class ToolBar(
                 RECTANGLE,
                 CIRCLE,
             }
+
+            /** Resolved pressed-state color key, preferring [pressed] over legacy [highlight]. */
+            val pressedColor: String get() = pressed.ifEmpty { highlight }
         }
 
         @Serializable
@@ -47,9 +53,14 @@ data class ToolBar(
             @Serializable(with = LenientStringListSerializer::class)
             val optionStyles: List<String> = emptyList(),
             val normal: String = "",
-            val highlight: String = "",
+            val pressed: String = "",
+            /** Legacy alias of [pressed]; kept so pre-rename themes still load. */
+            @SerialName("highlight") val highlight: String = "",
             val fontSize: Float = 18f,
             val padding: Int = 4,
-        )
+        ) {
+            /** Resolved pressed-state color key, preferring [pressed] over legacy [highlight]. */
+            val pressedColor: String get() = pressed.ifEmpty { highlight }
+        }
     }
 }

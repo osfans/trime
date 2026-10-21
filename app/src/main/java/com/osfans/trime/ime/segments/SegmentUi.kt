@@ -42,8 +42,8 @@ class SegmentUi(override val ctx: Context, private val scope: ThemeScope) : Ui {
             intArrayOf(android.R.attr.state_selected),
         ),
         intArrayOf(
-            scope.colors.keyTextColor,
-            scope.colors.hilitedKeyTextColor,
+            scope.colors.keyNormalTextColor,
+            scope.colors.keyPressedTextColor,
         ),
     )
 
@@ -51,14 +51,14 @@ class SegmentUi(override val ctx: Context, private val scope: ThemeScope) : Ui {
         addState(
             intArrayOf(-android.R.attr.state_selected),
             scope.decorDrawable(
-                "key_back_color",
+                "key_normal_back_color",
                 cornerRadius = ctx.dp(theme.style.roundCorner),
             ),
         )
         addState(
             intArrayOf(android.R.attr.state_selected),
             scope.decorDrawable(
-                "hilited_key_back_color",
+                "key_pressed_back_color",
                 cornerRadius = ctx.dp(theme.style.roundCorner),
             ),
         )

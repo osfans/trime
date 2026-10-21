@@ -35,13 +35,13 @@ class LiquidItemUi(
         textSize = theme.style.keyTextSize
         typeface = theme.fonts.key
         setPaddingDp(8, 4, 8, 4)
-        setTextColor(scope.colors.keyTextColor)
+        setTextColor(scope.colors.keyNormalTextColor)
     }
 
     private val content = constraintLayout {
         background = scope.decorDrawable(
-            "key_back_color",
-            "key_border_color",
+            "key_normal_back_color",
+            "key_normal_border_color",
             dp(theme.style.keyBorder),
             dp(theme.style.roundCorner),
         )
@@ -59,10 +59,10 @@ class LiquidItemUi(
 
     /** Restyles the item after a scheme switch. */
     fun refreshColors() {
-        mainText.setTextColor(scope.colors.keyTextColor)
+        mainText.setTextColor(scope.colors.keyNormalTextColor)
         content.background = scope.decorDrawable(
-            "key_back_color",
-            "key_border_color",
+            "key_normal_back_color",
+            "key_normal_border_color",
             ctx.dp(theme.style.keyBorder),
             ctx.dp(theme.style.roundCorner),
         )

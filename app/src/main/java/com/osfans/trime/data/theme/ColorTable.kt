@@ -62,9 +62,20 @@ internal class ColorTable private constructor(
             var current = key
             val visited = HashSet<String>()
             while (visited.add(current)) {
-                val value = schemeColors[current]
-                if (!value.isNullOrEmpty()) return current to value
+                val direct = schemeColors[current]
+                if (!direct.isNullOrEmpty()) return current to direct
+                // A theme may still spell the key under its pre-rename name;
+                // resolve it so the canonical table slot picks up the value and
+                // diagnostics can report the original key path.
+                val aliasHit =
+                    LegacyColorAliases.aliasesOf(current)
+                        .firstNotNullOfOrNull { alias ->
+                            schemeColors[alias]?.takeIf(String::isNotEmpty)?.let { alias to it }
+                        }
+                if (aliasHit != null) return aliasHit
                 val fallback = fallbackColors[current]
+                    ?: LegacyColorAliases.aliasesOf(current)
+                        .firstNotNullOfOrNull { alias -> fallbackColors[alias]?.takeIf(String::isNotEmpty) }
                 if (!fallback.isNullOrEmpty()) {
                     current = fallback
                     continue

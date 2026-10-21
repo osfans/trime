@@ -90,7 +90,7 @@ class ClipboardSuggestionUi(
 
     val suggestionView = GestureFrame(ctx).apply {
         add(layout, lParams(matchParent, matchParent))
-        background = rippleDrawable(scope.colors.hilitedCandidateBackColor)
+        background = rippleDrawable(scope.colors.candidateSelectedBackColor)
     }
 
     override val root =
@@ -113,6 +113,6 @@ class ClipboardSuggestionUi(
         text.setTextColor(scope.colors.candidateTextColor)
         dismiss.imageDrawable?.setTint(scope.colors.candidateTextColor)
         suggestionView.background =
-            rippleDrawable(scope.colors.hilitedCandidateBackColor)
+            rippleDrawable(scope.colors.candidateSelectedBackColor)
     }
 }

@@ -30,7 +30,7 @@ object ThemeTestSupport {
         val expanded = ThemeDslExpander.expand(file.nameWithoutExtension, node) { null }
         val mapping = expanded.mapping
             ?: error("$relativePath: YAML root is not a mapping")
-        return yaml.decodeFromYamlNode<Theme>(mapping) to mapping
+        return yaml.decodeFromYamlNode<Theme>(mapping).withRoles() to mapping
     }
 
     /** Decodes a built-in theme source file (app/src/main/assets/shared/). */

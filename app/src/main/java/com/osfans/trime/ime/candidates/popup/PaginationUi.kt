@@ -32,7 +32,7 @@ class PaginationUi(
     private fun createIcon(
         @DrawableRes icon: Int,
     ) = imageView {
-        imageTintList = ColorStateList.valueOf(scope.colors.keyTextColor)
+        imageTintList = ColorStateList.valueOf(scope.colors.keyNormalTextColor)
         imageDrawable = drawable(icon)
         scaleType = ImageView.ScaleType.CENTER_CROP
     }
@@ -65,7 +65,7 @@ class PaginationUi(
     fun update(paged: Candidates.Paged) {
         // Re-apply the tint as well: a scheme switch rebinds the pagination holder
         // (see PagedCandidatesUi.refreshColors), which only calls update().
-        val tint = ColorStateList.valueOf(scope.colors.keyTextColor)
+        val tint = ColorStateList.valueOf(scope.colors.keyNormalTextColor)
         prevIcon.imageTintList = tint
         nextIcon.imageTintList = tint
         prevIcon.alpha = if (paged.hasPrevPage) 1f else disabledAlpha

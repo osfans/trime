@@ -122,8 +122,8 @@ class ToolButton(context: Context, private val scope: ThemeScope) : GestureFrame
         colorStateList = ColorStateList(
             arrayOf(intArrayOf(android.R.attr.state_pressed), intArrayOf()),
             intArrayOf(
-                scope.color(fg.highlight.ifEmpty { "hilited_candidate_text_color" }),
-                scope.color(fg.normal.ifEmpty { "candidate_text_color" }),
+                scope.color(fg.pressedColor.ifEmpty { "candidate_button_pressed_text_color" }),
+                scope.color(fg.normal.ifEmpty { "candidate_button_normal_text_color" }),
             ),
         )
         label.setTextColor(colorStateList)
@@ -133,11 +133,11 @@ class ToolButton(context: Context, private val scope: ThemeScope) : GestureFrame
         background = StateListDrawable().apply {
             addState(
                 intArrayOf(android.R.attr.state_pressed),
-                backgroundStateDrawable(bg, highlight = true),
+                backgroundStateDrawable(bg, pressed = true),
             )
             addState(
                 intArrayOf(),
-                backgroundStateDrawable(bg, highlight = false),
+                backgroundStateDrawable(bg, pressed = false),
             )
         }
     }
@@ -179,11 +179,12 @@ class ToolButton(context: Context, private val scope: ThemeScope) : GestureFrame
         }
     }
 
-    private fun backgroundStateDrawable(bg: ToolBar.Button.Background, highlight: Boolean): Drawable {
-        val color = if (highlight) {
-            scope.color(bg.highlight.ifEmpty { "hilited_candidate_button_color" })
+    private fun backgroundStateDrawable(bg: ToolBar.Button.Background, pressed: Boolean): Drawable {
+        val color = if (pressed) {
+            scope.color(bg.pressedColor.ifEmpty { "candidate_button_pressed_back_color" })
         } else {
-            bg.normal.takeIf { it.isNotEmpty() }?.let(scope::color) ?: 0
+            bg.normal.takeIf { it.isNotEmpty() }?.let(scope::color)
+                ?: scope.color("candidate_button_normal_back_color")
         }
         return when (bg.type) {
             ToolBar.Button.Background.Type.RECTANGLE -> GradientDrawable().apply {

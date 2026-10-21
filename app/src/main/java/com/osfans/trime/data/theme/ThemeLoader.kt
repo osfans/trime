@@ -144,7 +144,7 @@ object ThemeLoader {
         themeId: String,
         mapping: YamlMap,
     ): ThemeLoadResult {
-        val theme = ThemeYaml.parser.decodeFromYamlNode<Theme>(mapping)
+        val theme = ThemeYaml.parser.decodeFromYamlNode<Theme>(mapping).withRoles()
         if (theme.presetColorSchemes.isEmpty()) {
             return ThemeLoadResult.Failure(themeId, ThemeLoadError.NoColorScheme(themeId))
         }
@@ -164,7 +164,7 @@ object ThemeLoader {
         themeId: String,
         node: YamlNode,
         loadResource: (String) -> YamlNode?,
-    ): Theme = ThemeYaml.parser.decodeFromYamlNode(expandSource(themeId, node, loadResource))
+    ): Theme = ThemeYaml.parser.decodeFromYamlNode<Theme>(expandSource(themeId, node, loadResource)).withRoles()
 
     /** Applies the supported DSL subset to [node] and returns its root mapping. */
     private fun expandSource(
@@ -321,3 +321,11 @@ object ThemeLoader {
         }
     }
 }
+
+/**
+ * Fills each preset's missing behavior fields from its `role:` (doc/Theme.md §4).
+ *
+ * Top-level (instead of a [ThemeLoader] member) so JVM unit tests, which decode
+ * themes directly without going through [ThemeLoader], can apply the same defaults.
+ */
+internal fun Theme.withRoles(): Theme = copy(presetKeys = presetKeys.mapValues { (_, key) -> key.withRoleDefaults() })

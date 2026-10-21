@@ -39,10 +39,10 @@ class LabeledCandidateItemUi(
     private val labelColor: Int get() = scope.colors.labelColor
     private val textColor: Int get() = scope.colors.candidateTextColor
     private val commentColor: Int get() = scope.colors.commentTextColor
-    private val highlightLabelColor: Int get() = scope.colors.hilitedLabelColor
-    private val highlightCommentTextColor: Int get() = scope.colors.hilitedCommentTextColor
-    private val highlightCandidateTextColor: Int get() = scope.colors.hilitedCandidateTextColor
-    private val highlightCandidateBackColor: Int get() = scope.colors.hilitedCandidateBackColor
+    private val highlightLabelColor: Int get() = scope.colors.labelSelectedTextColor
+    private val highlightCommentTextColor: Int get() = scope.colors.commentSelectedTextColor
+    private val highlightCandidateTextColor: Int get() = scope.colors.candidateSelectedTextColor
+    private val highlightCandidateBackColor: Int get() = scope.colors.candidateSelectedBackColor
 
     override val root =
         textView {

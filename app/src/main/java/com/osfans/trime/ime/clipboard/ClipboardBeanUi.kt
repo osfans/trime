@@ -43,14 +43,14 @@ class ClipboardBeanUi(
             typeface = theme.fonts.key
             setPaddingDp(8, 4, 8, 4)
             ellipsize = TextUtils.TruncateAt.END
-            setTextColor(scope.colors.keyTextColor)
+            setTextColor(scope.colors.keyNormalTextColor)
         }
 
     val pin =
         imageView {
             imageDrawable =
                 drawable(R.drawable.ic_baseline_push_pin_24)!!.apply {
-                    setTint(scope.colors.keySymbolColor)
+                    setTint(scope.colors.keyNormalSymbolColor)
                     setAlpha(0.3f)
                 }
         }
@@ -78,8 +78,8 @@ class ClipboardBeanUi(
             minimumHeight = dp(30)
             background =
                 scope.decorDrawable(
-                    "key_back_color",
-                    "key_border_color",
+                    "key_normal_back_color",
+                    "key_normal_border_color",
                     dp(theme.style.keyBorder),
                     dp(theme.style.roundCorner),
                 )
@@ -97,12 +97,12 @@ class ClipboardBeanUi(
 
     /** Restyles the row after a scheme switch. */
     fun refreshColors() {
-        textView.setTextColor(scope.colors.keyTextColor)
-        pin.drawable?.setTint(scope.colors.keySymbolColor)
+        textView.setTextColor(scope.colors.keyNormalTextColor)
+        pin.drawable?.setTint(scope.colors.keyNormalSymbolColor)
         root.background =
             scope.decorDrawable(
-                "key_back_color",
-                "key_border_color",
+                "key_normal_back_color",
+                "key_normal_border_color",
                 ctx.dp(theme.style.keyBorder),
                 ctx.dp(theme.style.roundCorner),
             )

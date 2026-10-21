@@ -46,8 +46,8 @@ class SwitchOptionEntryUi(
         frameLayout {
             background =
                 scope.decorDrawable(
-                    "key_back_color",
-                    "key_border_color",
+                    "key_normal_back_color",
+                    "key_normal_border_color",
                     dp(theme.style.keyBorder),
                     dp(theme.style.roundCorner),
                 )
@@ -74,7 +74,7 @@ class SwitchOptionEntryUi(
         textView {
             textSize = 12f
             gravity = gravityCenter
-            setTextColor(scope.colors.keyTextColor)
+            setTextColor(scope.colors.keyNormalTextColor)
         }
 
     override val root =
@@ -120,12 +120,12 @@ class SwitchOptionEntryUi(
     fun refreshColors() {
         bkg.background =
             scope.decorDrawable(
-                "key_back_color",
-                "key_border_color",
+                "key_normal_back_color",
+                "key_normal_border_color",
                 ctx.dp(theme.style.keyBorder),
                 ctx.dp(theme.style.roundCorner),
             )
-        label.setTextColor(scope.colors.keyTextColor)
+        label.setTextColor(scope.colors.keyNormalTextColor)
     }
 
     fun setEntry(entry: SwitchOptionEntry) {
@@ -134,13 +134,13 @@ class SwitchOptionEntryUi(
             textIcon.visibility = View.GONE
             icon.imageDrawable = ctx.drawable(entry.icon)!!.apply {
                 mutate()
-                setTint(scope.colors.keyTextColor)
+                setTint(scope.colors.keyNormalTextColor)
             }
         } else {
             icon.visibility = View.GONE
             textIcon.visibility = View.VISIBLE
             textIcon.text = getFirstCharacter(entry.label)
-            textIcon.setTextColor(scope.colors.keyTextColor)
+            textIcon.setTextColor(scope.colors.keyNormalTextColor)
         }
         label.text = entry.label
     }

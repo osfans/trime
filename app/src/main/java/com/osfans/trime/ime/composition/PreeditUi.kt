@@ -31,8 +31,8 @@ open class PreeditUi(
         get() = scope.theme
 
     // Read at use time so a scheme switch re-renders with the new colors.
-    private val textColor: Int get() = scope.colors.textColor
-    private val highlightTextColor: Int get() = scope.colors.hilitedTextColor
+    private val textColor: Int get() = scope.colors.preeditTextColor
+    private val highlightTextColor: Int get() = scope.colors.preeditSelectedTextColor
 
     val preedit =
         view(::PreeditTextView) {

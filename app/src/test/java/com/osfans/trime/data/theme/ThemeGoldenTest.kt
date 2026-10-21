@@ -77,8 +77,8 @@ class ThemeGoldenTest :
                     val firstKey = keyboard.keys.first()
                     firstKey.click shouldBe KeyActionToken.Plain("q")
                     firstKey.longClick shouldBe KeyActionToken.Plain("1")
-                    firstKey.keyBackColor shouldBe "bh1"
-                    firstKey.keyTextColor shouldBe "th1"
+                    firstKey.keyNormalBackColor shouldBe "row1_back_color"
+                    firstKey.keyNormalTextColor shouldBe "row1_text_color"
                 }
 
                 Then("all 46 color schemes are decoded, with the default scheme intact") {
@@ -89,12 +89,12 @@ class ThemeGoldenTest :
                 }
 
                 Then("fallback colors override table is decoded") {
-                    theme.fallbackColors shouldBe mapOf("candidate_text_color" to "text_color")
+                    theme.fallbackColors shouldBe mapOf("candidate_normal_text_color" to "preedit_normal_text_color")
                 }
 
                 Then("preset keys with inline maps are decoded") {
-                    theme.presetKeys shouldContainKey "BRIGHTNESS_DOWN"
-                    val brightnessDown = theme.presetKeys.getValue("BRIGHTNESS_DOWN")
+                    theme.presetKeys shouldContainKey "BrightnessDownKey"
+                    val brightnessDown = theme.presetKeys.getValue("BrightnessDownKey")
                     brightnessDown.label shouldBe "亮度-"
                     brightnessDown.send shouldBe "BRIGHTNESS_DOWN"
                 }
@@ -115,8 +115,8 @@ class ThemeGoldenTest :
 
                 Then("color schemes and preset keys are decoded") {
                     theme.presetColorSchemes.size shouldBe 37
-                    theme.presetKeys.size shouldBe 106
-                    val brightnessDown = theme.presetKeys.getValue("BRIGHTNESS_DOWN")
+                    theme.presetKeys.size shouldBe 103
+                    val brightnessDown = theme.presetKeys.getValue("BrightnessDownKey")
                     brightnessDown.label shouldBe "亮度-"
                     brightnessDown.send shouldBe "BRIGHTNESS_DOWN"
                 }

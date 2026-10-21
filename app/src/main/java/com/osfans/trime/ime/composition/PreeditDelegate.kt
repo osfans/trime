@@ -43,7 +43,7 @@ class PreeditDelegate(override val di: DI) :
             floatArrayOf(endRadius, endRadius, startRadius, startRadius, 0f, 0f, 0f, 0f)
         }
         view.background = GradientDrawable().apply {
-            setColor(scope.colors.textBackColor)
+            setColor(scope.colors.preeditBackColor)
             shape = GradientDrawable.RECTANGLE
             cornerRadii = radii
         }

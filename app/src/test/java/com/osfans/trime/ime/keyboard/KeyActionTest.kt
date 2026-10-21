@@ -28,7 +28,7 @@ class KeyActionTest :
         given("a token naming a preset key") {
             `when`("the preset sends a plain key") {
                 then("the key code and the preset flags are applied") {
-                    val action = plain("BackSpace")
+                    val action = plain("BackspaceKey")
                     action.code shouldBe KeyEvent.KEYCODE_DEL
                     action.modifier shouldBe 0
                     action.isRepeatable shouldBe true
@@ -38,14 +38,14 @@ class KeyActionTest :
             }
             `when`("the preset carries modifier send") {
                 then("the key code carries the modifier mask") {
-                    val action = plain("select_all")
+                    val action = plain("SelectAllKey")
                     action.code shouldBe KeyEvent.KEYCODE_A
                     action.modifier shouldBe KeyEvent.META_CTRL_ON
                 }
             }
             `when`("the preset sends Shift+Return") {
                 then("enter keeps the shift mask and carries no text or command") {
-                    val action = plain("CommitScriptText")
+                    val action = plain("CommitScriptTextKey")
                     action.code shouldBe KeyEvent.KEYCODE_ENTER
                     action.modifier shouldBe KeyEvent.META_SHIFT_ON
                     action.text shouldBe ""
@@ -54,7 +54,7 @@ class KeyActionTest :
             }
             `when`("the preset is a modifier key itself") {
                 then("the shift-lock mode is applied and the mask reported") {
-                    val action = plain("Shift_L")
+                    val action = plain("ShiftKey")
                     action.code shouldBe KeyEvent.KEYCODE_SHIFT_LEFT
                     action.shiftLock shouldBe "ascii_long"
                     action.modifierKeyOnMask shouldBe KeyEvent.META_SHIFT_ON
@@ -62,16 +62,49 @@ class KeyActionTest :
             }
             `when`("the preset has no send but a command") {
                 then("the action degrades to a function key") {
-                    val action = plain("Return")
+                    val action = plain("EnterKey")
                     action.code shouldBe KeyEvent.KEYCODE_ENTER
                 }
             }
             `when`("the preset only simulates a key sequence") {
                 then("no key code is set but the text is kept") {
-                    val action = plain("Clear")
+                    val action = plain("ClearKey")
                     action.code shouldBe 0
                     action.command shouldBe ""
                     action.text shouldBe "{Control+a}{BackSpace}"
+                }
+            }
+        }
+
+        given("a preset that names a role instead of a send") {
+            `when`("the role supplies the behavior") {
+                then("it resolves exactly like the explicit send would") {
+                    val enter = KeyAction(KeyActionToken.Plain("k"), mapOf("k" to PresetKey(role = "enter")))
+                    enter.code shouldBe KeyEvent.KEYCODE_ENTER
+                    val space = KeyAction(KeyActionToken.Plain("k"), mapOf("k" to PresetKey(role = "space")))
+                    space.code shouldBe KeyEvent.KEYCODE_SPACE
+                }
+            }
+            `when`("the entry spells the field itself") {
+                then("the explicit field wins over the role") {
+                    val action =
+                        KeyAction(KeyActionToken.Plain("k"), mapOf("k" to PresetKey(role = "enter", send = "space")))
+                    action.code shouldBe KeyEvent.KEYCODE_SPACE
+                }
+            }
+            `when`("the role only names data-driven behavior") {
+                then("the toggle and select defaults are applied") {
+                    val keyboard = KeyAction(KeyActionToken.Plain("k"), mapOf("k" to PresetKey(role = "keyboard")))
+                    keyboard.select shouldBe ".next"
+                    val language = KeyAction(KeyActionToken.Plain("k"), mapOf("k" to PresetKey(role = "language")))
+                    language.toggle shouldBe "ascii_mode"
+                }
+            }
+            `when`("the role is unknown") {
+                then("the entry keeps its own fields instead of failing") {
+                    val action =
+                        KeyAction(KeyActionToken.Plain("k"), mapOf("k" to PresetKey(role = "no_such_role", send = "space")))
+                    action.code shouldBe KeyEvent.KEYCODE_SPACE
                 }
             }
         }

@@ -167,7 +167,7 @@ class InputView(
 
     /** Restyles colors after a scheme switch without rebuilding the view tree. */
     fun refreshColors() {
-        keyboardBackground.imageDrawable = scope.drawable("keyboard_background")
+        keyboardBackground.imageDrawable = scope.drawable("keyboard_normal_back_color")
         popup.refreshColors()
         keyboardWindow.refreshColors()
         inputBar.refreshColors()
@@ -185,7 +185,7 @@ class InputView(
         // show KeyboardWindow by default
         windowManager.attachWindow(KeyboardWindow)
 
-        keyboardBackground.imageDrawable = scope.drawable("keyboard_background")
+        keyboardBackground.imageDrawable = scope.drawable("keyboard_normal_back_color")
 
         keyboardView =
             constraintLayout {
@@ -339,6 +339,10 @@ class InputView(
 
             is RimeMessage.OptionMessage -> {
                 broadcaster.onRimeOptionUpdated(it.data)
+
+                ContextCompat.getMainExecutor(service).execute {
+                    keyboardWindow.onOptionUpdated(it.data.option, it.data.value)
+                }
 
                 if (it.data.option == "_liquid_keyboard") {
                     ContextCompat.getMainExecutor(service).execute {
