@@ -66,6 +66,7 @@ data class Theme(
                 "preset_keyboards",
                 "preset_color_schemes",
                 "fallback_colors",
+                "key_styles",
             )
     }
 }

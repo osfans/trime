@@ -20,7 +20,7 @@ liquid_keyboard:
     keys:  # 按键（显示名称为对应的label，不能放太多）
       - liquid_keyboard_exit  # 返回键（在preset_keys内定义，同下）
       - space1  # 空格键
-      - BackspaceKey  # 退格键
+      - BackSpace  # 退格键
       - Return2  # 回车键
       - liquid_keyboard_clipboard  # “剪贴板”跳转按键
       - liquid_keyboard_switch  # “更多”跳转按键

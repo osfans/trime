@@ -345,11 +345,11 @@ class Keyboard(
     }
 
     /**
-     * Applies a Rime option's new value to the keys that toggle it, so a switch
-     * key repaints with its `on` colors and its `states` label.
+     * Mirrors a Rime option's new value onto the keys that toggle it, so a switch
+     * key paints with its `on` colors.
      *
-     * This mirrors the option value directly instead of toggling, because the
-     * same option may be flipped by multiple keys or by Rime itself.
+     * The value is assigned directly instead of toggled, because the same option
+     * may be flipped by multiple keys or by Rime itself.
      */
     fun updateToggle(
         option: String,

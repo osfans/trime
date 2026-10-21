@@ -30,8 +30,8 @@ class ThemeScopeTest :
             digits?.let { runCatching { java.lang.Long.parseLong(it, 16).toInt() }.getOrNull() }
         }
 
-        val schemeA = mapOf("candidate_normal_text_color" to "#112233")
-        val schemeB = mapOf("candidate_normal_text_color" to "#445566")
+        val schemeA = mapOf("candidate_text_color" to "#112233")
+        val schemeB = mapOf("candidate_text_color" to "#445566")
 
         Given("a fresh scope before any activation") {
             val fresh = scope()
@@ -61,7 +61,7 @@ class ThemeScopeTest :
         }
         Given("a scope with an unresolvable scheme key") {
             val s = scope()
-            s.updateScheme(mapOf("candidate_normal_text_color" to "not-a-color"))
+            s.updateScheme(mapOf("candidate_text_color" to "not-a-color"))
             Then("activation succeeds and the key throws when read") {
                 shouldThrow<IllegalArgumentException> { s.colors.candidateTextColor }
             }

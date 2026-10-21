@@ -10,7 +10,6 @@ import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.prefs.LazyPreferenceDelegate
 import com.osfans.trime.data.theme.model.KeyActionToken
 import com.osfans.trime.data.theme.model.PresetKey
-import com.osfans.trime.data.theme.model.PresetKeyAliases
 import com.osfans.trime.util.virtualKeyCharacterMap
 import timber.log.Timber
 
@@ -178,10 +177,7 @@ class KeyAction(
             is KeyActionToken.Plain -> {
                 val label: String
                 // match like: { x: BackSpace } -> preset_keys/BackSpace: {..., send: BackSpace }
-                // A legacy preset id falls back through the alias table (D 方案).
-                val preset =
-                    (presetKeys[token.token] ?: PresetKeyAliases.resolve(token.token)?.let(presetKeys::get))
-                        ?.withRoleDefaults()
+                val preset = presetKeys[token.token]?.withRoleDefaults()
                 if (preset != null) {
                     command = preset.command
                     option = preset.option

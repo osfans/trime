@@ -123,7 +123,7 @@ class ToolButton(context: Context, private val scope: ThemeScope) : GestureFrame
             arrayOf(intArrayOf(android.R.attr.state_pressed), intArrayOf()),
             intArrayOf(
                 scope.color(fg.pressedColor.ifEmpty { "candidate_button_pressed_text_color" }),
-                scope.color(fg.normal.ifEmpty { "candidate_button_normal_text_color" }),
+                scope.color(fg.normal.ifEmpty { "candidate_button_text_color" }),
             ),
         )
         label.setTextColor(colorStateList)
@@ -184,7 +184,7 @@ class ToolButton(context: Context, private val scope: ThemeScope) : GestureFrame
             scope.color(bg.pressedColor.ifEmpty { "candidate_button_pressed_back_color" })
         } else {
             bg.normal.takeIf { it.isNotEmpty() }?.let(scope::color)
-                ?: scope.color("candidate_button_normal_back_color")
+                ?: scope.color("candidate_button_back_color")
         }
         return when (bg.type) {
             ToolBar.Button.Background.Type.RECTANGLE -> GradientDrawable().apply {

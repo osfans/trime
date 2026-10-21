@@ -484,40 +484,68 @@
         }
       }
     },
+    "key_styles": {
+      "type": "object",
+      "description": "按键命名样式；按键以 __include: /key_styles/<name> 引用",
+      "patternProperties": {
+        "\\w+": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "fallback_colors": {
       "type": "object",
       "properties": {
-        "candidate_normal_text_color": {
+        "candidate_text_color": {
           "type": "string",
-          "default": "text_normal_text_color"
+          "default": "preedit_text_color"
         },
-        "comment_normal_text_color": {
+        "comment_text_color": {
           "type": "string",
-          "default": "candidate_normal_text_color"
+          "default": "candidate_text_color"
         },
-        "keyboard_normal_border_color": {
+        "keyboard_border_color": {
           "type": "string",
-          "default": "keyboard_normal_back_color"
+          "default": "keyboard_back_color"
         },
-        "candidate_normal_separator_color": {
+        "candidate_separator_color": {
           "type": "string",
-          "default": "keyboard_normal_border_color"
+          "default": "keyboard_border_color"
         },
-        "text_selected_text_color": {
+        "preedit_selected_text_color": {
           "type": "string",
-          "default": "text_normal_text_color"
+          "default": "preedit_text_color"
         },
-        "text_selected_back_color": {
+        "preedit_selected_back_color": {
           "type": "string",
-          "default": "keyboard_normal_back_color"
+          "default": "keyboard_back_color"
         },
         "candidate_selected_text_color": {
           "type": "string",
-          "default": "text_selected_text_color"
+          "default": "preedit_selected_text_color"
         },
         "candidate_selected_back_color": {
           "type": "string",
-          "default": "text_selected_back_color"
+          "default": "preedit_selected_back_color"
+        },
+        "candidate_button_back_color": {
+          "type": "string",
+          "default": "candidate_back_color"
+        },
+        "candidate_button_text_color": {
+          "type": "string",
+          "default": "candidate_text_color"
+        },
+        "candidate_button_pressed_back_color": {
+          "type": "string",
+          "default": "candidate_selected_back_color"
+        },
+        "candidate_button_pressed_text_color": {
+          "type": "string",
+          "default": "candidate_selected_text_color"
         },
         "label_selected_text_color": {
           "type": "string",
@@ -526,7 +554,7 @@
         },
         "comment_selected_text_color": {
           "type": "string",
-          "default": "comment_normal_text_color"
+          "default": "comment_text_color"
         },
         "key_pressed_back_color": {
           "type": "string",
@@ -534,7 +562,7 @@
         },
         "key_pressed_border_color": {
           "type": "string",
-          "default": "key_normal_border_color"
+          "default": "key_border_color"
         },
         "key_pressed_text_color": {
           "type": "string",
@@ -576,41 +604,41 @@
           "type": "string",
           "default": "key_pressed_symbol_color"
         },
-        "key_normal_back_color": {
+        "key_back_color": {
           "type": "string",
-          "default": "keyboard_normal_back_color"
+          "default": "candidate_back_color"
         },
-        "key_normal_border_color": {
+        "key_border_color": {
           "type": "string",
-          "default": "keyboard_normal_border_color"
+          "default": "keyboard_border_color"
         },
-        "key_normal_text_color": {
+        "key_text_color": {
           "type": "string",
-          "default": "candidate_normal_text_color"
+          "default": "candidate_text_color"
         },
-        "key_normal_symbol_color": {
+        "key_symbol_color": {
           "type": "string",
-          "default": "comment_normal_text_color"
+          "default": "comment_text_color"
         },
-        "label_normal_text_color": {
+        "label_color": {
           "type": "string",
-          "default": "candidate_normal_text_color"
+          "default": "candidate_text_color"
         },
-        "function_key_normal_back_color": {
+        "function_key_back_color": {
           "type": "string",
-          "default": "key_normal_back_color"
+          "default": "key_back_color"
         },
-        "function_key_normal_border_color": {
+        "function_key_border_color": {
           "type": "string",
-          "default": "key_normal_border_color"
+          "default": "key_border_color"
         },
-        "function_key_normal_text_color": {
+        "function_key_text_color": {
           "type": "string",
-          "default": "key_normal_text_color"
+          "default": "key_text_color"
         },
-        "function_key_normal_symbol_color": {
+        "function_key_symbol_color": {
           "type": "string",
-          "default": "key_normal_symbol_color"
+          "default": "key_symbol_color"
         },
         "function_key_on_back_color": {
           "type": "string",
@@ -628,46 +656,46 @@
           "type": "string",
           "default": "key_pressed_symbol_color"
         },
-        "preview_normal_back_color": {
+        "preview_back_color": {
           "type": "string",
-          "default": "key_normal_back_color"
+          "default": "key_back_color"
         },
-        "preview_normal_text_color": {
+        "preview_text_color": {
           "type": "string",
-          "default": "key_normal_text_color"
+          "default": "key_text_color"
         },
-        "key_normal_shadow_color": {
+        "key_shadow_color": {
           "type": "string",
-          "default": "keyboard_normal_border_color"
+          "default": "keyboard_border_color"
         },
-        "root_normal_back_color": {
+        "root_back_color": {
           "type": "string",
-          "default": "keyboard_normal_back_color",
+          "default": "keyboard_back_color",
           "description": "整个键盘区+候选栏的背景图/色"
         },
-        "candidate_normal_back_color": {
+        "candidate_back_color": {
           "type": "string",
-          "default": "keyboard_normal_back_color",
+          "default": "keyboard_back_color",
           "description": "候选栏的整体背景图/色"
         },
-        "keyboard_normal_back_color": {
+        "keyboard_back_color": {
           "type": "string",
-          "default": "keyboard_normal_border_color",
+          "default": "keyboard_border_color",
           "description": "键盘区的背景图/色"
         },
-        "panel_normal_back_color": {
+        "liquid_keyboard_back_color": {
           "type": "string",
-          "default": "keyboard_normal_back_color",
+          "default": "keyboard_back_color",
           "description": "liquidKeyboard 的背景图/色"
         },
-        "text_normal_back_color": {
+        "preedit_back_color": {
           "type": "string",
-          "default": "keyboard_normal_back_color",
+          "default": "keyboard_back_color",
           "description": "编码区背景，即悬浮窗背景"
         },
-        "long_text_normal_back_color": {
+        "long_preedit_back_color": {
           "type": "string",
-          "default": "key_normal_back_color",
+          "default": "key_back_color",
           "description": "长文本按键的背景(剪贴板）"
         }
       }
@@ -684,42 +712,42 @@
             "type": "string",
             "description": "作者資訊"
           },
-          "keyboard_normal_back_color": {
+          "keyboard_back_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "default": "0xffffff",
             "description": "鍵盤背景"
           },
-          "keyboard_normal_border_color": {
+          "keyboard_border_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "default": "0xc1c7ca",
             "description": "邊框"
           },
-          "candidate_normal_separator_color": {
+          "candidate_separator_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "default": "0xc1c7ca",
             "description": "候選分割背景"
           },
-          "candidate_normal_text_color": {
+          "candidate_text_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "default": "0x5a676e",
             "description": "候選文字"
           },
-          "comment_normal_text_color": {
+          "comment_text_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "default": "0x7b868c",
             "description": "提示"
           },
-          "text_selected_back_color": {
+          "preedit_selected_back_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
@@ -820,67 +848,67 @@
             "maximum": 16777215,
             "description": "標明按鍵打開狀態符號"
           },
-          "text_selected_text_color": {
+          "preedit_selected_text_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "default": "0x23948e",
             "description": "標明編碼"
           },
-          "key_normal_back_color": {
+          "key_back_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "default": "0xeceff1",
             "description": "按鍵背景"
           },
-          "key_normal_border_color": {
+          "key_border_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "default": "0xeceff1",
             "description": "按鍵邊框"
           },
-          "key_normal_symbol_color": {
+          "key_symbol_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "default": "0x5f6b73",
             "description": "按鍵符號"
           },
-          "key_normal_text_color": {
+          "key_text_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "default": "0x37474f",
             "description": "按鍵文字"
           },
-          "label_normal_text_color": {
+          "label_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "description": "標籤"
           },
-          "function_key_normal_back_color": {
+          "function_key_back_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "default": "0xd3d7da",
             "description": "按鍵關閉狀態背景"
           },
-          "function_key_normal_border_color": {
+          "function_key_border_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "description": "按鍵關閉狀態邊框"
           },
-          "function_key_normal_text_color": {
+          "function_key_text_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "description": "按鍵關閉狀態文字"
           },
-          "function_key_normal_symbol_color": {
+          "function_key_symbol_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
@@ -912,34 +940,34 @@
             "maximum": 16777215,
             "description": "按鍵打開狀態符號"
           },
-          "preview_normal_back_color": {
+          "preview_back_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "default": "0x55bfbfbf",
             "description": "按鍵提示背景"
           },
-          "preview_normal_text_color": {
+          "preview_text_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "default": "0x23948e",
             "description": "按鍵提示文字"
           },
-          "key_normal_shadow_color": {
+          "key_shadow_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "description": "按鍵文字陰影"
           },
-          "text_normal_text_color": {
+          "preedit_text_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
             "default": "0x5a676e",
             "description": "編碼"
           },
-          "text_normal_back_color": {
+          "preedit_back_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,

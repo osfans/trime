@@ -144,8 +144,8 @@ class CandidatesView(
     fun refreshColors() {
         background =
             scope.decorDrawable(
-                colorKey = "preedit_normal_back_color",
-                borderColorKey = "candidate_normal_border_color",
+                colorKey = "preedit_back_color",
+                borderColorKey = "candidate_border_color",
                 borderPx = dp(theme.window.border),
                 cornerRadius = dp(theme.window.cornerRadius),
             )
@@ -262,8 +262,8 @@ class CandidatesView(
         alpha = theme.window.alpha
         background =
             scope.decorDrawable(
-                colorKey = "preedit_normal_back_color",
-                borderColorKey = "candidate_normal_border_color",
+                colorKey = "preedit_back_color",
+                borderColorKey = "candidate_border_color",
                 borderPx = dp(theme.window.border),
                 cornerRadius = dp(theme.window.cornerRadius),
             )

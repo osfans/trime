@@ -162,18 +162,6 @@ class KeyboardWindow(di: DI) :
         return config
     }
 
-    /**
-     * Applies a Rime option change to the keys that toggle it (doc/Theme.md §4).
-     */
-    fun onOptionUpdated(
-        option: String,
-        enabled: Boolean,
-    ) {
-        val keyboard = activeKeyboard ?: return
-        keyboard.updateToggle(option, enabled)
-        currentKeyboardView?.invalidateAllKeys()
-    }
-
     private fun attachKeyboard(target: String) {
         currentKeyboardId = target
         lastKeyboardId = target
@@ -182,7 +170,7 @@ class KeyboardWindow(di: DI) :
         val keyboard = activeKeyboard ?: Keyboard(context, theme, computeAllowedWidth(), config)
         val view = currentKeyboardView ?: KeyboardView(context, theme, keyboard, popup, service, keyboardActionListener, enterKeyDisplay)
         keyboard.keys.forEach { key ->
-            if (key.toggle.isNotEmpty()) key.setOn(rime.run { getRuntimeOption(key.toggle) })
+            if (key.toggle.isNotEmpty()) key.isOn = rime.run { getRuntimeOption(key.toggle) }
         }
 
         if (activeKeyboard == null) {
@@ -392,6 +380,7 @@ class KeyboardWindow(di: DI) :
 
     override fun onRimeOptionUpdated(value: RimeMessage.OptionMessage.Data) {
         val option = value.option
+        activeKeyboard?.updateToggle(option, value.value)
         when {
             option.startsWith("_keyboard_") -> {
                 val target = option.removePrefix("_keyboard_")

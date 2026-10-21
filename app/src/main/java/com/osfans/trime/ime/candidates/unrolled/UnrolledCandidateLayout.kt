@@ -33,8 +33,8 @@ class UnrolledCandidateLayout(
         id = R.id.unrolled_candidate_view
         background =
             scope.decorDrawable(
-                "candidate_normal_back_color",
-                "candidate_normal_border_color",
+                "candidate_back_color",
+                "candidate_border_color",
                 dp(theme.style.candidateBorder),
                 dp(theme.style.candidateBorderRound),
             )
@@ -55,8 +55,8 @@ class UnrolledCandidateLayout(
     fun refreshColors() {
         background =
             scope.decorDrawable(
-                "candidate_normal_back_color",
-                "candidate_normal_border_color",
+                "candidate_back_color",
+                "candidate_border_color",
                 dp(theme.style.candidateBorder),
                 dp(theme.style.candidateBorderRound),
             )

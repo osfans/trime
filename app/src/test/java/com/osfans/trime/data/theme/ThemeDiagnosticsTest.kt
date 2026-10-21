@@ -210,14 +210,14 @@ class ThemeDiagnosticsTest :
                     name: t
                     style: {}
                     preset_color_schemes:
-                      default: {keyboard_normal_back_color: "#000000", back_color: "#111111"}
-                    fallback_colors: {key_normal_text_color: x, key_text_color: x}
+                      default: {candidate_back_color: "#000000", back_color: "#111111"}
+                    fallback_colors: {preedit_text_color: x, text_color: x}
                     """.trimIndent(),
                 )
                 findings.filter { it.code == Code.CONFLICTING_COLOR_KEY }.map { it.path } shouldBe
                     listOf(
                         "preset_color_schemes/default/back_color",
-                        "fallback_colors/key_text_color",
+                        "fallback_colors/text_color",
                     )
             }
 

@@ -53,7 +53,7 @@ class TabUi(
         typeface = Typeface.defaultFromStyle(Typeface.BOLD)
         gravity = gravityVerticalCenter
         textSize = theme.style.candidateTextSize
-        setTextColor(scope.colors.keyNormalTextColor)
+        setTextColor(scope.colors.keyTextColor)
     }
 
     private var external: View? = null
@@ -124,6 +124,6 @@ class TabUi(
     /** Restyles the tab bar after a scheme switch. */
     fun refreshColors() {
         backButton.refreshColors()
-        titleText.setTextColor(scope.colors.keyNormalTextColor)
+        titleText.setTextColor(scope.colors.keyTextColor)
     }
 }

@@ -251,8 +251,8 @@ class InputBarDelegate(override val di: DI) :
                 }
             background =
                 scope.decorDrawable(
-                    "candidate_normal_back_color",
-                    "candidate_normal_border_color",
+                    "candidate_back_color",
+                    "candidate_border_color",
                     dp(theme.style.candidateBorder),
                     dp(theme.style.candidateBorderRound),
                 )
@@ -270,8 +270,8 @@ class InputBarDelegate(override val di: DI) :
     fun refreshColors() {
         view.background =
             scope.decorDrawable(
-                "candidate_normal_back_color",
-                "candidate_normal_border_color",
+                "candidate_back_color",
+                "candidate_border_color",
                 context.dp(theme.style.candidateBorder),
                 context.dp(theme.style.candidateBorderRound),
             )

@@ -28,7 +28,7 @@ class KeyActionTest :
         given("a token naming a preset key") {
             `when`("the preset sends a plain key") {
                 then("the key code and the preset flags are applied") {
-                    val action = plain("BackspaceKey")
+                    val action = plain("BackSpace")
                     action.code shouldBe KeyEvent.KEYCODE_DEL
                     action.modifier shouldBe 0
                     action.isRepeatable shouldBe true
@@ -38,14 +38,14 @@ class KeyActionTest :
             }
             `when`("the preset carries modifier send") {
                 then("the key code carries the modifier mask") {
-                    val action = plain("SelectAllKey")
+                    val action = plain("select_all")
                     action.code shouldBe KeyEvent.KEYCODE_A
                     action.modifier shouldBe KeyEvent.META_CTRL_ON
                 }
             }
             `when`("the preset sends Shift+Return") {
                 then("enter keeps the shift mask and carries no text or command") {
-                    val action = plain("CommitScriptTextKey")
+                    val action = plain("CommitScriptText")
                     action.code shouldBe KeyEvent.KEYCODE_ENTER
                     action.modifier shouldBe KeyEvent.META_SHIFT_ON
                     action.text shouldBe ""
@@ -54,7 +54,7 @@ class KeyActionTest :
             }
             `when`("the preset is a modifier key itself") {
                 then("the shift-lock mode is applied and the mask reported") {
-                    val action = plain("ShiftKey")
+                    val action = plain("Shift_L")
                     action.code shouldBe KeyEvent.KEYCODE_SHIFT_LEFT
                     action.shiftLock shouldBe "ascii_long"
                     action.modifierKeyOnMask shouldBe KeyEvent.META_SHIFT_ON
@@ -62,13 +62,13 @@ class KeyActionTest :
             }
             `when`("the preset has no send but a command") {
                 then("the action degrades to a function key") {
-                    val action = plain("EnterKey")
+                    val action = plain("Return")
                     action.code shouldBe KeyEvent.KEYCODE_ENTER
                 }
             }
             `when`("the preset only simulates a key sequence") {
                 then("no key code is set but the text is kept") {
-                    val action = plain("ClearKey")
+                    val action = plain("Clear")
                     action.code shouldBe 0
                     action.command shouldBe ""
                     action.text shouldBe "{Control+a}{BackSpace}"
