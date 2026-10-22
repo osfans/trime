@@ -380,6 +380,8 @@ class KeyboardWindow(di: DI) :
     }
 
     override fun onRimeSchemaUpdated(schema: SchemaItem) {
+        // Restore this scheme's layout after temporary keyboards, not the previous scheme's.
+        lastLockKeyboardId = smartMatchKeyboard()
         switchKeyboard(".default")
     }
 

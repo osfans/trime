@@ -22,6 +22,10 @@ clears native spelling locks, matching the existing finish-input behavior.
 Custom themes need to provide the `luna_pinyin_t9` keyboard or an
 appropriate `trime/keyboard` mapping.
 
+Selecting another input scheme resets the remembered locked layout. For example,
+switching from nine-key to full Pinyin keeps the full-Pinyin layout when another
+editor is opened; it must not restore the previous scheme's nine-key keyboard.
+
 The existing batched candidate response is retained. One additional bounded T9
 state snapshot is read on the same Rime dispatcher; candidate rows do not perform
 individual syllable queries. This module does not enable next-word prediction,
