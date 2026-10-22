@@ -5,134 +5,142 @@
   ~ SPDX-License-Identifier: GPL-3.0-or-later
   -->
 
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/setup_scroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp"
     tools:context=".ui.setup.SetupFragment">
 
-    <ImageView
-        android:id="@+id/app_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
-        android:src="@mipmap/ic_app_icon"
-        app:layout_constraintBottom_toTopOf="@id/step_text"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed" />
-
-    <TextView
-        android:id="@+id/step_text"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
-        android:layout_marginHorizontal="20dp"
-        android:gravity="center"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@id/hint_text"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/app_icon"
-        tools:text="Step text here ..." />
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/hint_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:gravity="center"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@id/storage_mode_options"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/step_text"
-        tools:text="Hint text here ..." />
-
-    <RadioGroup
-        android:id="@+id/storage_mode_options"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintBottom_toTopOf="@id/action_button"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/hint_text">
-
-        <RadioButton
-            android:id="@+id/sync_from_external_option"
-            android:layout_width="match_parent"
+        <ImageView
+            android:id="@+id/app_icon"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sync_from_external" />
+            android:layout_marginBottom="20dp"
+            android:src="@mipmap/ic_app_icon"
+            app:layout_constraintBottom_toTopOf="@id/step_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed" />
 
         <TextView
-            android:id="@+id/sync_from_external_desc"
+            android:id="@+id/step_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginBottom="12dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:text="@string/sync_from_external_desc"
-            android:textSize="14sp" />
-
-        <RadioButton
-            android:id="@+id/app_specific_storage_option"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/use_app_specific_storage" />
+            android:layout_marginBottom="20dp"
+            android:layout_marginHorizontal="20dp"
+            android:gravity="center"
+            android:textSize="24sp"
+            app:layout_constraintBottom_toTopOf="@id/hint_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/app_icon"
+            tools:text="Step text here ..." />
 
         <TextView
-            android:id="@+id/app_specific_storage_desc"
+            android:id="@+id/hint_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:text="@string/use_app_specific_storage_desc"
-            android:textSize="14sp" />
-    </RadioGroup>
+            android:layout_marginHorizontal="24dp"
+            android:gravity="center"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@id/storage_mode_options"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/step_text"
+            tools:text="Hint text here ..." />
 
-    <Button
-        android:id="@+id/action_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/storage_mode_options"
-        tools:text="Action" />
+        <RadioGroup
+            android:id="@+id/storage_mode_options"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintBottom_toTopOf="@id/action_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/hint_text">
 
-    <ImageView
-        android:id="@+id/done_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="8dp"
-        android:src="@drawable/ic_baseline_check_circle_24"
-        android:tint="?android:attr/colorAccent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/done_text"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/storage_mode_options"
-        tools:ignore="UseAppTint" />
+            <RadioButton
+                android:id="@+id/sync_from_external_option"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/sync_from_external" />
 
-    <TextView
-        android:id="@+id/done_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/done"
-        android:textColor="?android:attr/colorAccent"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/done_icon"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/done_icon"
-        app:layout_constraintTop_toTopOf="@id/done_icon" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/sync_from_external_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginBottom="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:text="@string/sync_from_external_desc"
+                android:textSize="14sp" />
+
+            <RadioButton
+                android:id="@+id/app_specific_storage_option"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/use_app_specific_storage" />
+
+            <TextView
+                android:id="@+id/app_specific_storage_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:text="@string/use_app_specific_storage_desc"
+                android:textSize="14sp" />
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/action_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/storage_mode_options"
+            tools:text="Action" />
+
+        <ImageView
+            android:id="@+id/done_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_baseline_check_circle_24"
+            android:tint="?android:attr/colorAccent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/done_text"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/storage_mode_options"
+            tools:ignore="UseAppTint" />
+
+        <TextView
+            android:id="@+id/done_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/done"
+            android:textColor="?android:attr/colorAccent"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@id/done_icon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/done_icon"
+            app:layout_constraintTop_toTopOf="@id/done_icon" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
