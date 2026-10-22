@@ -8,9 +8,6 @@ package com.osfans.trime.ui.main.log
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.HorizontalScrollView
-import androidx.core.content.ContextCompat
-import androidx.core.text.buildSpannedString
-import androidx.core.text.color
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
@@ -19,7 +16,6 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import splitties.resources.styledColor
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
@@ -49,6 +45,7 @@ constructor(
         recyclerView {
             adapter = logAdapter
             layoutManager = verticalLayoutManager()
+            itemAnimator = null
         }
 
     init {
@@ -60,6 +57,7 @@ constructor(
 
     override fun onDetachedFromWindow() {
         stopLogCollection()
+        logAdapter.flushPending()
         super.onDetachedFromWindow()
     }
 
@@ -75,16 +73,12 @@ constructor(
         val scope = findViewTreeLifecycleOwner()?.lifecycleScope ?: return
         if (!scope.isActive) return
         collectionJob = scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            source.collectLines(::buildColoredString)
+            source.collectLines(::appendLogcatLine)
         }
     }
 
     fun append(content: String) {
-        logAdapter.append(
-            buildSpannedString {
-                color(styledColor(android.R.attr.colorForeground)) { append(content) }
-            },
-        )
+        logAdapter.append(content)
     }
 
     fun setLogcat(logcat: Logcat) {
@@ -93,35 +87,19 @@ constructor(
         startLogCollection()
     }
 
-    private fun buildColoredString(str: String) {
-        val color =
-            ContextCompat.getColor(
-                context,
-                when (Logcat.priorityOf(str)) {
-                    'V' -> R.color.grey_700
-                    'D' -> R.color.grey_700
-                    'I' -> R.color.blue_500
-                    'W' -> R.color.yellow_800
-                    'E' -> R.color.red_400
-                    'F' -> R.color.red_A700
-                    else -> R.color.colorPrimary
-                },
-            )
-        logAdapter.append(
-            buildSpannedString {
-                color(color) { append(str) }
-            },
-        )
+    private fun appendLogcatLine(line: String) {
+        logAdapter.append(line, isLogcat = true, priority = Logcat.priorityOf(line))
     }
 
     val currentLog: String
-        get() = logAdapter.fullLogString()
+        get() = logAdapter.logString(context.getString(R.string.log_content_omitted))
 
     fun clear() {
         logAdapter.clear()
     }
 
     fun scrollToBottom() {
-        recyclerView.scrollToPosition(logAdapter.itemCount - 1)
+        logAdapter.flushPending()
+        if (logAdapter.itemCount != 0) recyclerView.scrollToPosition(logAdapter.itemCount - 1)
     }
 }

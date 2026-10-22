@@ -106,10 +106,13 @@ class LogActivity : AppCompatActivity() {
                             filename = "$packageName-${iso8601UTCDateTime().replace(':', '-')}.txt",
                             mimeType = "text/plain",
                         ) ?: return@launch
+                        // Capture UI-owned state before the writer may move to IO.
+                        val deviceInfo = DeviceInfo.get(this@LogActivity)
+                        val currentLog = logView.currentLog
                         StorageAccess.writeFile(log.uri) { outs ->
                             outs.bufferedWriter().use {
-                                it.write(DeviceInfo.get(this@LogActivity))
-                                it.write(logView.currentLog)
+                                it.write(deviceInfo)
+                                it.write(currentLog)
                             }
                         }
                     }.let { toast(it) }

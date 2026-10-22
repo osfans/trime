@@ -108,6 +108,7 @@
     <string name="app_crash">Application crashed</string>
     <string name="app_crash_message">Sorry, but we bring you some logs to investigate.</string>
     <string name="real_time_logs">Real-time logs</string>
+    <string name="log_content_omitted">Earlier logs omitted. Copy/export includes recent content only.</string>
     <string name="real_time_logs_clear">Clear All Logs</string>
     <string name="real_time_logs_confirm">Do you want to clear all Logs? (This action cannot be undo)</string>
     <string name="crash_logs">Crash logs</string>
