@@ -19,7 +19,7 @@ plugins {
 android {
     namespace = "com.osfans.trime"
     compileSdk = 37
-    buildToolsVersion = "36.0.0"
+    buildToolsVersion = "37.0.0"
 
     defaultConfig {
         applicationId = "com.osfans.trime"
