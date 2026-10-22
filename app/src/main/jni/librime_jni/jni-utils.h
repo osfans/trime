@@ -72,14 +72,25 @@ class JString {
 class JEnv {
  private:
   JNIEnv* env = nullptr;
+  JavaVM* jvm_;
+  bool attached_ = false;
 
  public:
-  explicit JEnv(JavaVM* jvm) {
+  explicit JEnv(JavaVM* jvm) : jvm_(jvm) {
     if (jvm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) ==
         JNI_EDETACHED) {
-      jvm->AttachCurrentThread(&env, nullptr);
+      attached_ = jvm->AttachCurrentThread(&env, nullptr) == JNI_OK;
     }
   }
+
+  ~JEnv() {
+    if (attached_) jvm_->DetachCurrentThread();
+  }
+
+  JEnv(const JEnv&) = delete;
+  JEnv& operator=(const JEnv&) = delete;
+  JEnv(JEnv&&) = delete;
+  JEnv& operator=(JEnv&&) = delete;
 
   operator JNIEnv*() { return env; }
 
