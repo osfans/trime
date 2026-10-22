@@ -83,6 +83,7 @@ class KeyboardWindow(di: DI) :
     private var lastKeyboardId = ""
     private var lastLockKeyboardId = ""
     private var tempAsciiMode: Boolean? = null
+    private var editorForcesAsciiMode = false
     private val cachedKeyboards = mutableMapOf<String, Pair<Keyboard, KeyboardView>>()
     private val activeKeyboard: Keyboard? get() = cachedKeyboards[currentKeyboardId]?.first
     private val currentKeyboardView: KeyboardView? get() = cachedKeyboards[currentKeyboardId]?.second
@@ -181,7 +182,12 @@ class KeyboardWindow(di: DI) :
             dispatchCapsState(it::setShifted)
 
             val currentMode = rime.run { statusCached }.isAsciiMode
-            val targetMode = if (it.resetAsciiMode) it.asciiMode else it.lastAsciiMode
+            val targetMode =
+                when {
+                    editorForcesAsciiMode -> true
+                    it.resetAsciiMode -> it.asciiMode
+                    else -> it.lastAsciiMode
+                }
 
             if (currentMode != targetMode) {
                 service.postRimeJob {
@@ -328,9 +334,10 @@ class KeyboardWindow(di: DI) :
                     }
                 }
             }
+        editorForcesAsciiMode = targetKeyboard == ".ascii" || targetKeyboard == "number"
         switchKeyboard(targetKeyboard)
         val isAsciiMode = rime.run { statusCached }.isAsciiMode
-        if (targetKeyboard == ".ascii" || targetKeyboard == "number") {
+        if (editorForcesAsciiMode) {
             if (tempAsciiMode == null) {
                 tempAsciiMode = isAsciiMode
             }
