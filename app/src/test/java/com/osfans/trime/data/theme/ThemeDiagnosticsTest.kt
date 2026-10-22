@@ -372,7 +372,7 @@ class ThemeDiagnosticsTest :
                         config_version: "3.0"
                         name: t
                         style: {candidate_texts_size: 12}
-                        preset_color_schemes: {default: {back_color: "#000000", hilited_back_color: "nope"}}
+                        preset_color_schemes: {default: {back_color: "#000000", preedit_selected_back_color: "nope"}}
                         height: 5
                         """.trimIndent(),
                     )
@@ -383,7 +383,7 @@ class ThemeDiagnosticsTest :
                     listOf(
                         "I Theme 'fixture': unknown key 'height' in ''; the runtime ignores it",
                         "W Theme 'fixture': unknown key 'candidate_texts_size' in 'style'; the runtime ignores it",
-                        "W Theme 'fixture': scheme 'default': 'hilited_back_color' cannot be parsed as a color (value 'nope')",
+                        "W Theme 'fixture': scheme 'default': 'preedit_selected_back_color' cannot be parsed as a color (value 'nope')",
                     )
             }
 

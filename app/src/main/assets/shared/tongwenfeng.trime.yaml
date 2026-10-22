@@ -107,25 +107,25 @@ fallback_colors:
 #  comment_text_color: candidate_text_color
 #  border_color: back_color
 #  candidate_separator_color: border_color
-#  hilited_text_color: text_color
-#  hilited_back_color: back_color
-#  hilited_candidate_text_color: hilited_text_color
-#  hilited_candidate_back_color: hilited_back_color
-#  hilited_candidate_button_color: hilited_candidate_back_color # 候选栏工具按钮高亮背景色
-#  hilited_label_color: hilited_candidate_text_color # 高亮候选序号 颜色
-#  hilited_comment_text_color: comment_text_color
-#  hilited_key_back_color: hilited_candidate_back_color
-#  hilited_key_border_color: key_border_color
-#  hilited_key_text_color: hilited_candidate_text_color
-#  hilited_key_symbol_color: hilited_comment_text_color
-#  hilited_off_key_back_color: hilited_key_back_color
-#  hilited_off_key_border_color: hilited_key_border_color
-#  hilited_on_key_back_color: hilited_key_back_color
-#  hilited_on_key_border_color: hilited_key_border_color
-#  hilited_off_key_text_color: hilited_key_text_color
-#  hilited_on_key_text_color: hilited_key_text_color
-#  hilited_off_key_symbol_color: hilited_key_symbol_color
-#  hilited_on_key_symbol_color: hilited_key_symbol_color
+#  preedit_selected_text_color: text_color
+#  preedit_selected_back_color: back_color
+#  candidate_selected_text_color: preedit_selected_text_color
+#  candidate_selected_back_color: preedit_selected_back_color
+#  candidate_button_selected_back_color: candidate_selected_back_color # 候选栏工具按钮高亮背景色
+#  label_selected_text_color: candidate_selected_text_color # 高亮候选序号 颜色
+#  comment_selected_text_color: comment_text_color
+#  key_pressed_back_color: candidate_selected_back_color
+#  key_pressed_border_color: key_border_color
+#  key_pressed_text_color: candidate_selected_text_color
+#  key_pressed_symbol_color: comment_selected_text_color
+#  function_key_pressed_back_color: key_pressed_back_color
+#  function_key_pressed_border_color: key_pressed_border_color
+#  function_key_on_pressed_back_color: key_pressed_back_color
+#  function_key_on_pressed_border_color: key_pressed_border_color
+#  function_key_pressed_text_color: key_pressed_text_color
+#  function_key_on_pressed_text_color: key_pressed_text_color
+#  function_key_pressed_symbol_color: key_pressed_symbol_color
+#  function_key_on_pressed_symbol_color: key_pressed_symbol_color
 #  key_back_color: back_color
 #  key_border_color: border_color
 #  key_text_color: candidate_text_color
@@ -135,10 +135,10 @@ fallback_colors:
 #  off_key_border_color: key_border_color
 #  off_key_text_color: key_text_color
 #  off_key_symbol_color: key_symbol_color
-#  on_key_back_color: hilited_key_back_color
-#  on_key_border_color: hilited_key_border_color
-#  on_key_text_color: hilited_key_text_color
-#  on_key_symbol_color: hilited_key_symbol_color
+#  on_key_back_color: key_pressed_back_color
+#  on_key_border_color: key_pressed_border_color
+#  on_key_text_color: key_pressed_text_color
+#  on_key_symbol_color: key_pressed_symbol_color
 #  preview_back_color: key_back_color
 #  preview_text_color: key_text_color
 #  shadow_color: border_color
@@ -170,16 +170,16 @@ preset_color_schemes:
     candidate_separator_color: *color2 #候选分割背景
     candidate_text_color: *color1 #候选文本
     comment_text_color: *color3 #提示
-    hilited_back_color: *color2 #高亮编码背景
-    hilited_candidate_back_color: *color6 #高亮候选背景
-    hilited_candidate_text_color: *color2 #高亮候选文本
-    hilited_comment_text_color: *color1 #高亮提示
-    hilited_key_back_color: *color6 #高亮按键背景
-    hilited_key_symbol_color: *color2 #高亮按键符号
-    hilited_key_text_color: *color1 #高亮按键文本
-    hilited_off_key_back_color: *color2 #高亮按键关闭状态背景
-    hilited_off_key_text_color: *color1 #高亮按键关闭状态文本
-    hilited_text_color: *color1 #高亮编码
+    preedit_selected_back_color: *color2 #高亮编码背景
+    candidate_selected_back_color: *color6 #高亮候选背景
+    candidate_selected_text_color: *color2 #高亮候选文本
+    comment_selected_text_color: *color1 #高亮提示
+    key_pressed_back_color: *color6 #高亮按键背景
+    key_pressed_symbol_color: *color2 #高亮按键符号
+    key_pressed_text_color: *color1 #高亮按键文本
+    function_key_pressed_back_color: *color2 #高亮按键关闭状态背景
+    function_key_pressed_text_color: *color1 #高亮按键关闭状态文本
+    preedit_selected_text_color: *color1 #高亮编码
     key_back_color: *color2 #按键背景
     key_symbol_color: *color8 #按键符号
     key_text_color: *color1 #按键文本
@@ -219,21 +219,21 @@ preset_color_schemes:
     candidate_separator_color: 0xffc1c7ca #候選分割背景
     candidate_text_color: 0xff5a676e #候選文字
     comment_text_color: 0xff7b868c #提示
-    hilited_back_color: 0xccd3d7da #標明編碼背景
-    hilited_candidate_back_color: 0xffd3d7da #標明候選背景
-    hilited_candidate_text_color: 0xff000000 #標明候選文字
-    hilited_comment_text_color: 0xff000000 #標明提示
-    hilited_key_back_color: 0xffd3d7da #標明按鍵背景
-    hilited_key_border_color: 0xffeceff1 #標明按鍵邊框
-    hilited_key_symbol_color: 0xff000000 #標明按鍵符號
-    hilited_key_text_color: 0xff000000 #標明按鍵文字
-    hilited_off_key_back_color: 0xffd3d7da #標明按鍵關閉狀態背景
-    hilited_off_key_border_color: 0xffeceff1 #標明按鍵關閉狀態邊框
-    hilited_off_key_text_color: 0xff000000 #標明按鍵關閉狀態文字
-    hilited_on_key_back_color: 0xffd3d7da #標明按鍵打開狀態背景
-    hilited_on_key_border_color: 0xffeceff1 #標明按鍵打開狀態邊框
-    hilited_on_key_text_color: 0xff000000 #標明按鍵打開狀態文字
-    hilited_text_color: 0xff23948e #標明編碼
+    preedit_selected_back_color: 0xccd3d7da #標明編碼背景
+    candidate_selected_back_color: 0xffd3d7da #標明候選背景
+    candidate_selected_text_color: 0xff000000 #標明候選文字
+    comment_selected_text_color: 0xff000000 #標明提示
+    key_pressed_back_color: 0xffd3d7da #標明按鍵背景
+    key_pressed_border_color: 0xffeceff1 #標明按鍵邊框
+    key_pressed_symbol_color: 0xff000000 #標明按鍵符號
+    key_pressed_text_color: 0xff000000 #標明按鍵文字
+    function_key_pressed_back_color: 0xffd3d7da #標明按鍵關閉狀態背景
+    function_key_pressed_border_color: 0xffeceff1 #標明按鍵關閉狀態邊框
+    function_key_pressed_text_color: 0xff000000 #標明按鍵關閉狀態文字
+    function_key_on_pressed_back_color: 0xffd3d7da #標明按鍵打開狀態背景
+    function_key_on_pressed_border_color: 0xffeceff1 #標明按鍵打開狀態邊框
+    function_key_on_pressed_text_color: 0xff000000 #標明按鍵打開狀態文字
+    preedit_selected_text_color: 0xff23948e #標明編碼
     key_back_color: 0xffeceff1 #按鍵背景
     key_border_color: 0xffeceff1 #按鍵邊框
     key_symbol_color: 0xff5f6b73 #按鍵符號
@@ -258,10 +258,10 @@ preset_color_schemes:
     text_color: 0xff000000
     back_color: 0xffeeeeec
     border_color: 0xffe0e0e0
-    hilited_text_color: 0xff000000
-    hilited_back_color: 0xffd4d4d4
-    hilited_candidate_text_color: 0xffffffff
-    hilited_candidate_back_color: 0xff0a3afa
+    preedit_selected_text_color: 0xff000000
+    preedit_selected_back_color: 0xffd4d4d4
+    candidate_selected_text_color: 0xffffffff
+    candidate_selected_back_color: 0xff0a3afa
 
   azure:
     name: 青天／Azure
@@ -270,10 +270,10 @@ preset_color_schemes:
     candidate_text_color: 0xffeef8ff
     back_color: 0xff014e8b
     border_color: 0xff014e8b
-    hilited_text_color: 0xffeef8ff
-    hilited_back_color: 0xff014e8b
-    hilited_candidate_text_color: 0xfffffe7f
-    hilited_candidate_back_color: 0xff015ea9
+    preedit_selected_text_color: 0xffeef8ff
+    preedit_selected_back_color: 0xff014e8b
+    candidate_selected_text_color: 0xfffffe7f
+    candidate_selected_back_color: 0xff015ea9
     comment_text_color: 0xff6496c6
 
   luna:
@@ -282,10 +282,10 @@ preset_color_schemes:
     text_color: 0xff000000
     back_color: 0xffffffff
     border_color: 0xffcccccc
-    hilited_text_color: 0xff000000
-    hilited_back_color: 0xffffff7f
-    hilited_candidate_text_color: 0xffffffff
-    hilited_candidate_back_color: 0xff000000
+    preedit_selected_text_color: 0xff000000
+    preedit_selected_back_color: 0xffffff7f
+    candidate_selected_text_color: 0xffffffff
+    candidate_selected_back_color: 0xff000000
 
   ink:
     name: 墨池／Ink
@@ -293,10 +293,10 @@ preset_color_schemes:
     text_color: 0xff000000
     back_color: 0xffffffff
     border_color: 0xff000000
-    hilited_text_color: 0xff000000
-    hilited_back_color: 0xffdddddd
-    hilited_candidate_text_color: 0xffffffff
-    hilited_candidate_back_color: 0xff000000
+    preedit_selected_text_color: 0xff000000
+    preedit_selected_back_color: 0xffdddddd
+    candidate_selected_text_color: 0xffffffff
+    candidate_selected_back_color: 0xff000000
 
   lost_temple:
     name: 孤寺／Lost Temple
@@ -304,10 +304,10 @@ preset_color_schemes:
     text_color: 0xfff6f3e8
     back_color: 0xff444444
     border_color: 0xff444444
-    hilited_text_color: 0xffcae682
-    hilited_back_color: 0xff222222
-    hilited_candidate_text_color: 0xff000000
-    hilited_candidate_back_color: 0xffcae682
+    preedit_selected_text_color: 0xffcae682
+    preedit_selected_back_color: 0xff222222
+    candidate_selected_text_color: 0xff000000
+    candidate_selected_back_color: 0xffcae682
 
   dark_temple:
     name: 暗堂／Dark Temple
@@ -316,10 +316,10 @@ preset_color_schemes:
     candidate_text_color: 0xffe6e3d8
     back_color: 0xff222222
     border_color: 0xff222222
-    hilited_text_color: 0xff9acfff
-    hilited_back_color: 0xff222222
-    hilited_candidate_text_color: 0xffdaf692
-    hilited_candidate_back_color: 0xff333333
+    preedit_selected_text_color: 0xff9acfff
+    preedit_selected_back_color: 0xff222222
+    candidate_selected_text_color: 0xffdaf692
+    candidate_selected_back_color: 0xff333333
     comment_text_color: 0xffff6c60
 
   starcraft:
@@ -329,10 +329,10 @@ preset_color_schemes:
     candidate_text_color: 0xff55bb30
     back_color: 0xff000000
     border_color: 0xffa01010
-    hilited_text_color: 0xff96cbfe
-    hilited_back_color: 0xff000000
-    hilited_candidate_text_color: 0xffa8ff60
-    hilited_candidate_back_color: 0xff000000
+    preedit_selected_text_color: 0xff96cbfe
+    preedit_selected_back_color: 0xff000000
+    candidate_selected_text_color: 0xffa8ff60
+    candidate_selected_back_color: 0xff000000
 
   google:
     name: 谷歌／Google
@@ -341,10 +341,10 @@ preset_color_schemes:
     candidate_text_color: 0xff000000
     back_color: 0xffFFFFFF
     border_color: 0xffE2E2E2
-    hilited_text_color: 0xff000000
-    hilited_back_color: 0xffFFFFFF
-    hilited_candidate_text_color: 0xffFFFFFF
-    hilited_candidate_back_color: 0xff3975CE
+    preedit_selected_text_color: 0xff000000
+    preedit_selected_back_color: 0xffFFFFFF
+    candidate_selected_text_color: 0xffFFFFFF
+    candidate_selected_back_color: 0xff3975CE
 
   solarized_rock:
     name: 曬經石／Solarized Rock
@@ -352,10 +352,10 @@ preset_color_schemes:
     back_color: 0xff002b36
     border_color: 0xff002b36
     text_color: 0xff859900
-    hilited_text_color: 0xff2aa198
+    preedit_selected_text_color: 0xff2aa198
     candidate_text_color: 0xff839496
-    hilited_candidate_text_color: 0xffffffff
-    hilited_candidate_back_color: 0xffd33682
+    candidate_selected_text_color: 0xffffffff
+    candidate_selected_back_color: 0xffd33682
 
   tintin:
     name: "丁丁／ Tintin"
@@ -366,11 +366,11 @@ preset_color_schemes:
     label_color: 0xffffffff
     candidate_text_color: 0xffffffff
     comment_text_color: 0xffffffff
-    hilited_text_color: 0xff91d8f7
-    hilited_back_color: 0xff0095d9
-    hilited_candidate_text_color: 0xffffffff
-    hilited_comment_text_color: 0xffffffff
-    hilited_candidate_back_color: 0xfff16421
+    preedit_selected_text_color: 0xff91d8f7
+    preedit_selected_back_color: 0xff0095d9
+    candidate_selected_text_color: 0xffffffff
+    comment_selected_text_color: 0xffffffff
+    candidate_selected_back_color: 0xfff16421
 
   dota_2:
     name: "DOTA 2"
@@ -379,13 +379,13 @@ preset_color_schemes:
     back_color: 0xff100f12
     border_color: 0xff100f12
     label_color: 0xff8f755c
-    hilited_text_color: 0xffdd4118
-    hilited_back_color: 0xff100f12
+    preedit_selected_text_color: 0xffdd4118
+    preedit_selected_back_color: 0xff100f12
     candidate_text_color: 0xff8f755c
     comment_text_color: 0xff8f755c
-    hilited_candidate_text_color: 0xffffffff
-    hilited_comment_text_color: 0xffffffff
-    hilited_candidate_back_color: 0xffdd4118
+    candidate_selected_text_color: 0xffffffff
+    comment_selected_text_color: 0xffffffff
+    candidate_selected_back_color: 0xffdd4118
 
   brasil:
     name: "笆悉／Brasil"
@@ -394,13 +394,13 @@ preset_color_schemes:
     back_color: 0xff119355
     border_color: 0xff119355
     label_color: 0xffffffff
-    hilited_text_color: 0xffffffff
-    hilited_back_color: 0xff17367d
+    preedit_selected_text_color: 0xffffffff
+    preedit_selected_back_color: 0xff17367d
     candidate_text_color: 0xffffffff
     comment_text_color: 0xffffffff
-    hilited_candidate_text_color: 0xffffffff
-    hilited_comment_text_color: 0xffffffff
-    hilited_candidate_back_color: 0xfff7c716
+    candidate_selected_text_color: 0xffffffff
+    comment_selected_text_color: 0xffffffff
+    candidate_selected_back_color: 0xfff7c716
 
   doraemon:
     name: "銅鑼衛門／Doraemon"
@@ -409,13 +409,13 @@ preset_color_schemes:
     back_color: 0xffffffff
     border_color: 0xff009fe8
     label_color: 0xff009fe8
-    hilited_text_color: 0xffffffff
-    hilited_back_color: 0xffe50012
+    preedit_selected_text_color: 0xffffffff
+    preedit_selected_back_color: 0xffe50012
     candidate_text_color: 0xff009fe8
     comment_text_color: 0xff009fe8
-    hilited_candidate_text_color: 0xffffffff
-    hilited_comment_text_color: 0xffffffff
-    hilited_candidate_back_color: 0xff009fe8
+    candidate_selected_text_color: 0xffffffff
+    comment_selected_text_color: 0xffffffff
+    candidate_selected_back_color: 0xff009fe8
 
   espagna:
     name: "埃斯巴尼亞／España"
@@ -424,13 +424,13 @@ preset_color_schemes:
     back_color: 0xffc30d23
     border_color: 0xffc30d23
     label_color: 0xffffffff
-    hilited_text_color: 0xffffffff
-    hilited_back_color: 0xfff7b52c
+    preedit_selected_text_color: 0xffffffff
+    preedit_selected_back_color: 0xfff7b52c
     candidate_text_color: 0xffffffff
     comment_text_color: 0xffffffff
-    hilited_candidate_text_color: 0xffffffff
-    hilited_comment_text_color: 0xffffffff
-    hilited_candidate_back_color: 0xfff7b52c
+    candidate_selected_text_color: 0xffffffff
+    comment_selected_text_color: 0xffffffff
+    candidate_selected_back_color: 0xfff7b52c
 
   gholabok:
     name: "胡蘿菔／Gholabok"
@@ -439,13 +439,13 @@ preset_color_schemes:
     back_color: 0xffe83929
     border_color: 0xffe83929
     label_color: 0xffffffff
-    hilited_text_color: 0xffffffff
-    hilited_back_color: 0xff007b43
+    preedit_selected_text_color: 0xffffffff
+    preedit_selected_back_color: 0xff007b43
     candidate_text_color: 0xffffffff
     comment_text_color: 0xffffffff
-    hilited_candidate_text_color: 0xffffffff
-    hilited_comment_text_color: 0xffffffff
-    hilited_candidate_back_color: 0xffed6d3d
+    candidate_selected_text_color: 0xffffffff
+    comment_selected_text_color: 0xffffffff
+    candidate_selected_back_color: 0xffed6d3d
 
   kuma_shuzboz:
     name: "熊出沒／Kuma Shuzboz"
@@ -454,13 +454,13 @@ preset_color_schemes:
     back_color: 0xfff8b62d
     border_color: 0xfff8b62d
     label_color: 0xffffffff
-    hilited_text_color: 0xfff8b62d
-    hilited_back_color: 0xffffffff
+    preedit_selected_text_color: 0xfff8b62d
+    preedit_selected_back_color: 0xffffffff
     candidate_text_color: 0xffffffff
     comment_text_color: 0xffffffff
-    hilited_candidate_text_color: 0xffffffff
-    hilited_comment_text_color: 0xffffffff
-    hilited_candidate_back_color: 0xff000000
+    candidate_selected_text_color: 0xffffffff
+    comment_selected_text_color: 0xffffffff
+    candidate_selected_back_color: 0xff000000
 
   kuon:
     name: "琨／Kuon"
@@ -469,13 +469,13 @@ preset_color_schemes:
     back_color: 0xff3eb370
     border_color: 0xff3eb370
     label_color: 0xffffffff
-    hilited_text_color: 0xff3eb370
-    hilited_back_color: 0xffffffff
+    preedit_selected_text_color: 0xff3eb370
+    preedit_selected_back_color: 0xffffffff
     candidate_text_color: 0xffffffff
     comment_text_color: 0xffffffff
-    hilited_candidate_text_color: 0xff3eb370
-    hilited_comment_text_color: 0xff3eb370
-    hilited_candidate_back_color: 0xffffffff
+    candidate_selected_text_color: 0xff3eb370
+    comment_selected_text_color: 0xff3eb370
+    candidate_selected_back_color: 0xffffffff
 
   macau:
     name: "澳門／Macau"
@@ -484,13 +484,13 @@ preset_color_schemes:
     back_color: 0xff00a381
     border_color: 0xff00a381
     label_color: 0xffffffff
-    hilited_text_color: 0xffffffff
-    hilited_back_color: 0xffffd900
+    preedit_selected_text_color: 0xffffffff
+    preedit_selected_back_color: 0xffffd900
     candidate_text_color: 0xffffffff
     comment_text_color: 0xffffffff
-    hilited_candidate_text_color: 0xffffd900
-    hilited_comment_text_color: 0xffffd900
-    hilited_candidate_back_color: 0xffffffff
+    candidate_selected_text_color: 0xffffd900
+    comment_selected_text_color: 0xffffd900
+    candidate_selected_back_color: 0xffffffff
 
   nba:
     name: "NBA"
@@ -499,13 +499,13 @@ preset_color_schemes:
     back_color: 0xff006ab7
     border_color: 0xff006ab7
     label_color: 0xffffffff
-    hilited_text_color: 0xffd71e54
-    hilited_back_color: 0xffffffff
+    preedit_selected_text_color: 0xffd71e54
+    preedit_selected_back_color: 0xffffffff
     candidate_text_color: 0xffffffff
     comment_text_color: 0xffffffff
-    hilited_candidate_text_color: 0xffffffff
-    hilited_comment_text_color: 0xffffffff
-    hilited_candidate_back_color: 0xffd71e54
+    candidate_selected_text_color: 0xffffffff
+    comment_selected_text_color: 0xffffffff
+    candidate_selected_back_color: 0xffd71e54
 
   ps4:
     name: "遊驛四／PS4"
@@ -514,13 +514,13 @@ preset_color_schemes:
     back_color: 0xff000000
     border_color: 0xff000000
     label_color: 0xffffffff
-    hilited_text_color: 0xffffffff
-    hilited_back_color: 0xff595757
+    preedit_selected_text_color: 0xffffffff
+    preedit_selected_back_color: 0xff595757
     candidate_text_color: 0xffffffff
     comment_text_color: 0xffffffff
-    hilited_candidate_text_color: 0xffffffff
-    hilited_comment_text_color: 0xffffffff
-    hilited_candidate_back_color: 0xff009fe8
+    candidate_selected_text_color: 0xffffffff
+    comment_selected_text_color: 0xffffffff
+    candidate_selected_back_color: 0xff009fe8
 
   skype:
     name: "斯蓋普／Skype"
@@ -529,13 +529,13 @@ preset_color_schemes:
     back_color: 0xff00adef
     border_color: 0xff00adef
     label_color: 0xffffffff
-    hilited_text_color: 0xff00adef
-    hilited_back_color: 0xffffffff
+    preedit_selected_text_color: 0xff00adef
+    preedit_selected_back_color: 0xffffffff
     candidate_text_color: 0xffffffff
     comment_text_color: 0xffffffff
-    hilited_candidate_text_color: 0xff00adef
-    hilited_comment_text_color: 0xff00adef
-    hilited_candidate_back_color: 0xffffffff
+    candidate_selected_text_color: 0xff00adef
+    comment_selected_text_color: 0xff00adef
+    candidate_selected_back_color: 0xffffffff
 
   xbox_silver:
     name: "銀色叉盒／Xbox Silver"
@@ -544,13 +544,13 @@ preset_color_schemes:
     back_color: 0xffeeeeef
     border_color: 0xffeeeeef
     label_color: 0xffb5f05b
-    hilited_text_color: 0xffffffff
-    hilited_back_color: 0xffb5f05b
+    preedit_selected_text_color: 0xffffffff
+    preedit_selected_back_color: 0xffb5f05b
     candidate_text_color: 0xff8dc21f
     comment_text_color: 0xff8dc21f
-    hilited_candidate_text_color: 0xffffffff
-    hilited_comment_text_color: 0xffffffff
-    hilited_candidate_back_color: 0xff288c44
+    candidate_selected_text_color: 0xffffffff
+    comment_selected_text_color: 0xffffffff
+    candidate_selected_back_color: 0xff288c44
 
   youtube:
     name: "YouTube"
@@ -559,13 +559,13 @@ preset_color_schemes:
     back_color: 0xffdedede
     border_color: 0xffdedede
     label_color: 0xff000000
-    hilited_text_color: 0xffc30d23
-    hilited_back_color: 0xffffffff
+    preedit_selected_text_color: 0xffc30d23
+    preedit_selected_back_color: 0xffffffff
     candidate_text_color: 0xff000000
     comment_text_color: 0xff000000
-    hilited_candidate_text_color: 0xffffffff
-    hilited_comment_text_color: 0xffffffff
-    hilited_candidate_back_color: 0xffc30d23
+    candidate_selected_text_color: 0xffffffff
+    comment_selected_text_color: 0xffffffff
+    candidate_selected_back_color: 0xffc30d23
 
   so_young:
     name: "致青春／So Young"
@@ -576,11 +576,11 @@ preset_color_schemes:
     label_color: 0xff93a1a1
     candidate_text_color: 0xff657b83
     comment_text_color: 0xff268bd2
-    hilited_text_color: 0xff839496
-    hilited_back_color: 0xffeee8d5
-    hilited_candidate_text_color: 0xffeee8d5
-    hilited_comment_text_color: 0xffeee8d5
-    hilited_candidate_back_color: 0xff2aa198
+    preedit_selected_text_color: 0xff839496
+    preedit_selected_back_color: 0xffeee8d5
+    candidate_selected_text_color: 0xffeee8d5
+    comment_selected_text_color: 0xffeee8d5
+    candidate_selected_back_color: 0xff2aa198
 
   smurfs:
     name: "藍精靈／Smurfs"
@@ -589,13 +589,13 @@ preset_color_schemes:
     back_color: 0xff1778bf
     border_color: 0xffe0edf5
     label_color: 0xff1778bf
-    hilited_text_color: 0xff6dbcdb
-    hilited_back_color: 0xff1778bf
+    preedit_selected_text_color: 0xff6dbcdb
+    preedit_selected_back_color: 0xff1778bf
     candidate_text_color: 0xfff6f6f6
     comment_text_color: 0xfff6f6f6
-    hilited_candidate_text_color: 0xfff6f6f6
-    hilited_comment_text_color: 0xfff6f6f6
-    hilited_candidate_back_color: 0xff6dbcdb
+    candidate_selected_text_color: 0xfff6f6f6
+    comment_selected_text_color: 0xfff6f6f6
+    candidate_selected_back_color: 0xff6dbcdb
 
   wii:
     name: "Wii"
@@ -604,13 +604,13 @@ preset_color_schemes:
     back_color: 0xffefefef
     border_color: 0xffefefef
     label_color: 0xffc8c9ca
-    hilited_text_color: 0xff33ccff
-    hilited_back_color: 0xffefefef
+    preedit_selected_text_color: 0xff33ccff
+    preedit_selected_back_color: 0xffefefef
     candidate_text_color: 0xff595757
     comment_text_color: 0xffc8c9ca
-    hilited_candidate_text_color: 0xffffffff
-    hilited_comment_text_color: 0xffffffff
-    hilited_candidate_back_color: 0xff33ccff
+    candidate_selected_text_color: 0xffffffff
+    comment_selected_text_color: 0xffffffff
+    candidate_selected_back_color: 0xff33ccff
 
   android:
     name: "安卓／Android"
@@ -619,13 +619,13 @@ preset_color_schemes:
     back_color: 0xff1c7399
     border_color: 0xff1c7399
     label_color: 0xff3588c1
-    hilited_text_color: 0xffa8c450
-    hilited_back_color: 0xff1c7399
+    preedit_selected_text_color: 0xffa8c450
+    preedit_selected_back_color: 0xff1c7399
     candidate_text_color: 0xffffffff
     comment_text_color: 0xffffffff
-    hilited_candidate_text_color: 0xffffffff
-    hilited_comment_text_color: 0xffffffff
-    hilited_candidate_back_color: 0xffa8c450
+    candidate_selected_text_color: 0xffffffff
+    comment_selected_text_color: 0xffffffff
+    candidate_selected_back_color: 0xffa8c450
 
   cool_breeze:
     name: "清風／Cool Breeze"
@@ -633,11 +633,11 @@ preset_color_schemes:
     text_color: 0xffFF0000
     back_color: 0xffFBFBFF
     border_color: 0xffAAAAFF
-    hilited_text_color: 0xffCE0000
-    hilited_back_color: 0xffFBFBFF
+    preedit_selected_text_color: 0xffCE0000
+    preedit_selected_back_color: 0xffFBFBFF
     candidate_text_color: 0xff009100
-    hilited_candidate_text_color: 0xff3A006F
-    hilited_candidate_back_color: 0xffACD6FF
+    candidate_selected_text_color: 0xff3A006F
+    candidate_selected_back_color: 0xffACD6FF
 
   google_plus:
     name: "Google+"
@@ -646,13 +646,13 @@ preset_color_schemes:
     back_color: 0xffffffff
     border_color: 0xffdd4b39
     label_color: 0xffc8c9ca
-    hilited_text_color: 0xffdd4b39
-    hilited_back_color: 0xffffffff
+    preedit_selected_text_color: 0xffdd4b39
+    preedit_selected_back_color: 0xffffffff
     candidate_text_color: 0xffdd4b39
     comment_text_color: 0xffc8c9ca
-    hilited_candidate_text_color: 0xffffffff
-    hilited_comment_text_color: 0xffffffff
-    hilited_candidate_back_color: 0xffdd4b39
+    candidate_selected_text_color: 0xffffffff
+    comment_selected_text_color: 0xffffffff
+    candidate_selected_back_color: 0xffdd4b39
 
   modern_warfare:
     name: "現代戰爭／Modern Warfare"
@@ -660,12 +660,12 @@ preset_color_schemes:
     text_color: 0xff70bc14
     back_color: 0xff0d1b0a
     border_color: 0xff83ad4b
-    hilited_text_color: 0xfffcfdfb
-    hilited_back_color: 0xff060e03
+    preedit_selected_text_color: 0xfffcfdfb
+    preedit_selected_back_color: 0xff060e03
     candidate_text_color: 0xffdcfeab
     comment_text_color: 0xfffbfdfc
-    hilited_candidate_text_color: 0xffdcfeab
-    hilited_candidate_back_color: 0xff636f67
+    candidate_selected_text_color: 0xffdcfeab
+    candidate_selected_back_color: 0xff636f67
 
   brisk:
     name: "輕盈／Brisk"
@@ -673,11 +673,11 @@ preset_color_schemes:
     text_color: 0xffdc3822
     back_color: 0xffffffff
     border_color: 0xff333333
-    hilited_text_color: 0xffdc3822
-    hilited_back_color: 0xffffffff
+    preedit_selected_text_color: 0xffdc3822
+    preedit_selected_back_color: 0xffffffff
     candidate_text_color: 0xff575757
-    hilited_candidate_text_color: 0xffdc3822
-    hilited_candidate_back_color: 0xffffffff
+    candidate_selected_text_color: 0xffdc3822
+    candidate_selected_back_color: 0xffffffff
 
   starcraft_ii:
     name: "星際爭霸Ⅱ／StarCraft Ⅱ"
@@ -686,13 +686,13 @@ preset_color_schemes:
     back_color: 0xff0a1929
     border_color: 0xff464b53
     label_color: 0xffffffff
-    hilited_text_color: 0xffffffff
-    hilited_back_color: 0xff0a1017
+    preedit_selected_text_color: 0xffffffff
+    preedit_selected_back_color: 0xff0a1017
     candidate_text_color: 0xffffffff
     comment_text_color: 0xffffffff
-    hilited_candidate_text_color: 0xffffffff
-    hilited_comment_text_color: 0xffffffff
-    hilited_candidate_back_color: 0xff1eadef
+    candidate_selected_text_color: 0xffffffff
+    comment_selected_text_color: 0xffffffff
+    candidate_selected_back_color: 0xff1eadef
 
   steam:
     name: "Steam"
@@ -702,13 +702,13 @@ preset_color_schemes:
     back_color: 0xff171614
     border_color: 0xff383635
     label_color: 0xffffffff
-    hilited_text_color: 0xffd1cfc9
-    hilited_back_color: 0xff171614
+    preedit_selected_text_color: 0xffd1cfc9
+    preedit_selected_back_color: 0xff171614
     candidate_text_color: 0xffffffff
     comment_text_color: 0xffa9a7a7
-    hilited_candidate_text_color: 0xffffffff
-    hilited_comment_text_color: 0xffa9a7a7
-    hilited_candidate_back_color: 0xff314259
+    candidate_selected_text_color: 0xffffffff
+    comment_selected_text_color: 0xffa9a7a7
+    candidate_selected_back_color: 0xff314259
 
   flypy:
     # description: |
@@ -721,23 +721,23 @@ preset_color_schemes:
     back_color: 0xffffffff
     border_color: 0xffc6c6c6
     label_color: 0xff0080ff
-    hilited_text_color: 0xff0080ff
-    hilited_back_color: 0xffffffff
+    preedit_selected_text_color: 0xff0080ff
+    preedit_selected_back_color: 0xffffffff
     candidate_text_color: 0xff0080ff
     comment_text_color: 0xff0080ff
-    hilited_candidate_text_color: 0xffb00000
-    hilited_comment_text_color: 0xffb00000
-    hilited_candidate_back_color: 0xffffffff
+    candidate_selected_text_color: 0xffb00000
+    comment_selected_text_color: 0xffb00000
+    candidate_selected_back_color: 0xffffffff
   tantsing:
     name: 丹青
     author: Mijiag
     back_color: 0xffe3e3e3
     border_color: 0xff000000
     text_color: 0xff000000
-    hilited_text_color: 0xffe3e3e3
-    hilited_back_color: 0xff91071a
-    hilited_candidate_text_color: 0xffe3e3e3
-    hilited_candidate_back_color: 0xff730b6f
+    preedit_selected_text_color: 0xffe3e3e3
+    preedit_selected_back_color: 0xff91071a
+    candidate_selected_text_color: 0xffe3e3e3
+    candidate_selected_back_color: 0xff730b6f
     candidate_text_color: 0xff000000
     comment_text_color: 0xff474747
   yygc:
@@ -746,16 +746,16 @@ preset_color_schemes:
     border_color: 0xffffffff
     candidate_text_color: 0xff7f7f7f
     comment_text_color: 0xff7f7f7f
-    hilited_back_color: 0xffffffff
-    hilited_candidate_back_color: 0xffffffff
-    hilited_candidate_text_color: 0xff7f7f7f
-    hilited_comment_text_color: 0xff7f7f7f
-    hilited_key_text_color: 0xff7f7f7f
-    hilited_off_key_back_color: 0xffffffff
-    hilited_off_key_text_color: 0xff7f7f7f
-    hilited_on_key_back_color: 0xffffffff
-    hilited_on_key_text_color: 0xff7f7f7f
-    hilited_text_color: 0xff7f7f7f
+    preedit_selected_back_color: 0xffffffff
+    candidate_selected_back_color: 0xffffffff
+    candidate_selected_text_color: 0xff7f7f7f
+    comment_selected_text_color: 0xff7f7f7f
+    key_pressed_text_color: 0xff7f7f7f
+    function_key_pressed_back_color: 0xffffffff
+    function_key_pressed_text_color: 0xff7f7f7f
+    function_key_on_pressed_back_color: 0xffffffff
+    function_key_on_pressed_text_color: 0xff7f7f7f
+    preedit_selected_text_color: 0xff7f7f7f
     key_text_color: 0xff7f7f7f
     label_color: 0xff7f7f7f
     name: "一葉孤城"
@@ -767,10 +767,10 @@ preset_color_schemes:
     border_color: 0xffF8EDD1
     candidate_text_color: 0xffA48464
     comment_text_color: 0xffFFFFFF
-    hilited_back_color: 0xffF4E6C2
-    hilited_candidate_back_color: 0xffF4E6C2
-    hilited_candidate_text_color: 0xffBA6D65
-    hilited_text_color: 0xff969696
+    preedit_selected_back_color: 0xffF4E6C2
+    candidate_selected_back_color: 0xffF4E6C2
+    candidate_selected_text_color: 0xffBA6D65
+    preedit_selected_text_color: 0xff969696
     name: "奈々"
     off_key_text_color: 0xffBA6D65
     text_color: 0xffA48464
@@ -780,10 +780,10 @@ preset_color_schemes:
     border_color: 0xFF537F92
     candidate_text_color: 0xffFAFAFF
     comment_text_color: 0xffFFFFFF
-    hilited_back_color: 0xff537F92
-    hilited_candidate_back_color: 0xff969696
-    hilited_candidate_text_color: 0xffFFFAFA
-    hilited_text_color: 0xff969696
+    preedit_selected_back_color: 0xff537F92
+    candidate_selected_back_color: 0xff969696
+    candidate_selected_text_color: 0xffFFFAFA
+    preedit_selected_text_color: 0xff969696
     name: "独立日"
     text_color: 0xffFFFAFA
   feng03:
@@ -792,10 +792,10 @@ preset_color_schemes:
     border_color: 0xff599852
     candidate_text_color: 0xffffffff
     comment_text_color: 0xff969696
-    hilited_back_color: 0xff599852
-    hilited_candidate_back_color: 0xff599852
-    hilited_candidate_text_color: 0xfff5a54b
-    hilited_text_color: 0xffffffff
+    preedit_selected_back_color: 0xff599852
+    candidate_selected_back_color: 0xff599852
+    candidate_selected_text_color: 0xfff5a54b
+    preedit_selected_text_color: 0xffffffff
     key_back_color: 0xffffffff
     name: "一叶清荷"
     off_key_text_color: 0xfff5a54b
@@ -807,10 +807,10 @@ preset_color_schemes:
     border_color: 0xff7896AA
     candidate_text_color: 0xffFFFFFF
     comment_text_color: 0xff969696
-    hilited_back_color: 0xff5289A7
-    hilited_candidate_back_color: 0xff7896AA
-    hilited_candidate_text_color: 0xffFFFF80
-    hilited_text_color: 0xff969696
+    preedit_selected_back_color: 0xff5289A7
+    candidate_selected_back_color: 0xff7896AA
+    candidate_selected_text_color: 0xffFFFF80
+    preedit_selected_text_color: 0xff969696
     key_back_color: 0xff5289A7
     name: "往事回忆"
     text_color: 0xffFFFFFF
@@ -820,10 +820,10 @@ preset_color_schemes:
     border_color: 0xff000000
     candidate_text_color: 0xffFFFFFF
     comment_text_color: 0xffFFFFFF
-    hilited_back_color: 0xff000000
-    hilited_candidate_back_color: 0xff000000
-    hilited_candidate_text_color: 0xffFEF94D
-    hilited_text_color: 0xffFFFFFF
+    preedit_selected_back_color: 0xff000000
+    candidate_selected_back_color: 0xff000000
+    candidate_selected_text_color: 0xffFEF94D
+    preedit_selected_text_color: 0xffFFFFFF
     key_back_color: 0xffFEF94D
     name: "黄黑"
     text_color: 0xff000000
@@ -835,10 +835,10 @@ preset_color_schemes:
     border_color: 0xff789c80
     candidate_text_color: 0xffFFFFBC
     comment_text_color: 0xffFFFFBC
-    hilited_back_color: 0xff789c80
-    hilited_candidate_back_color: 0xff789c80
-    hilited_candidate_text_color: 0xffFE8F23
-    hilited_text_color: 0xffFFFFFF
+    preedit_selected_back_color: 0xff789c80
+    candidate_selected_back_color: 0xff789c80
+    candidate_selected_text_color: 0xffFE8F23
+    preedit_selected_text_color: 0xffFFFFFF
     key_back_color: 0xff367272
     name: "花香流转"
     text_color: 0xffFFFFFF
@@ -848,10 +848,10 @@ preset_color_schemes:
     border_color: 0xffdaa14a
     candidate_text_color: 0xffF5E1B4
     comment_text_color: 0xff828282
-    hilited_back_color: 0xffdaa14a
-    hilited_candidate_back_color: 0xffdaa14a
-    hilited_candidate_text_color: 0xff2E1707
-    hilited_text_color: 0xffFFFFFF
+    preedit_selected_back_color: 0xffdaa14a
+    candidate_selected_back_color: 0xffdaa14a
+    candidate_selected_text_color: 0xff2E1707
+    preedit_selected_text_color: 0xffFFFFFF
     key_back_color: 0xff2E1707
     name: "巴黎遗梦"
     off_key_text_color: 0xffD89C46
@@ -862,10 +862,10 @@ preset_color_schemes:
     back_color: 0xff353638
     border_color: 0xff353638
     candidate_text_color: 0xffffffff
-    hilited_back_color: 0x00141617
-    hilited_candidate_back_color: 0x30594231
-    hilited_candidate_text_color: 0xffffffff
-    hilited_text_color: 0xffc9cfd1
+    preedit_selected_back_color: 0x00141617
+    candidate_selected_back_color: 0x30594231
+    candidate_selected_text_color: 0xffffffff
+    preedit_selected_text_color: 0xffc9cfd1
     key_back_color: 0xff141617
     label_color: 0xffffffff
     name: "黑橙／hong"
@@ -1022,7 +1022,7 @@ tool_bar:
       type: circle           # 高亮形状 (可选值: circle|rectangle)
       corner_radius: 10      # 圆角半径
       normal: 0x00        # 正常状态背景颜色
-      highlight: hilited_candidate_button_color  # 高亮状态背景色
+      highlight: candidate_button_selected_back_color  # 高亮状态背景色
       vertical_inset: 4      # 垂直方向内缩量
       horizontal_inset: 4    # 水平方向内缩量
     # 前景内容设置
@@ -1104,7 +1104,7 @@ preset_keyboards:
       - {click: l, long_click: '(){Left}', swipe_down: "=", key_back_color: bh2, key_text_color: th2}
       - {width: 5, key_back_color: bh2, key_text_color: th2}
 
-      - {click: Shift_L, label_symbol: " ", long_click: Shift_L, double_click: Shift_L3, composing: delimiter, width: 15, hilited_key_back_color: benter, key_back_color: bbs, key_text_color: tbs}
+      - {click: Shift_L, label_symbol: " ", long_click: Shift_L, double_click: Shift_L3, composing: delimiter, width: 15, key_pressed_back_color: benter, key_back_color: bbs, key_text_color: tbs}
       - {click: z, long_click: '`', swipe_down: '[]{Left}', key_back_color: bh3, key_text_color: th3}
       - {click: x, long_click: cut, swipe_down: '{}{Left}', key_back_color: bh3, key_text_color: th3}
       - {click: c, long_click: copy, swipe_down: ' ', key_back_color: bh3, key_text_color: th3}
@@ -1153,7 +1153,7 @@ preset_keyboards:
       - {click: l, long_click: '(){Left}', swipe_down: "=", key_back_color: bh2, key_text_color: th2}
       - {width: 5, key_back_color: bh2, key_text_color: th2}
 
-      - {click: Shift_L, composing: delimiter, width: 15, hilited_key_back_color: benter, key_back_color: bbs, key_text_color: tbs}
+      - {click: Shift_L, composing: delimiter, width: 15, key_pressed_back_color: benter, key_back_color: bbs, key_text_color: tbs}
       - {click: z, long_click: '`', swipe_down: '[]{Left}', key_back_color: bh3, key_text_color: th3}
       - {click: x, long_click: cut, swipe_down: '{}{Left}', key_back_color: bh3, key_text_color: th3}
       - {click: c, long_click: copy, swipe_down: ' ', key_back_color: bh3, key_text_color: th3}

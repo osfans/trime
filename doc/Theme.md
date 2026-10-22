@@ -7,7 +7,7 @@
 格式为 `<role>_[state_]<part>_color`：
 
 ```
-role  = keyboard | root | key | function_key | candidate | candidate_button
+role  = keyboard | border | root | key | function_key | candidate | candidate_button
         | comment | popup | label | preedit | long_text | liquid_keyboard
         | preview
 state = pressed | on | on_pressed | selected（on_pressed = 「开」状态下按下）
@@ -19,7 +19,7 @@ part  = back | text | border | symbol | shadow | separator
 | 颜色键 | 含义 |
 | --- | --- |
 | `keyboard_back_color` | 键盘底色 |
-| `keyboard_border_color` | 键盘描边 |
+| `border_back_color` | 键盘描边（border 是独立于 keyboard 的对象） |
 | `key_back_color` | 普通键常态底色 |
 | `key_pressed_back_color` | 普通键按下底色 |
 | `function_key_back_color` | 功能键常态底色 |
@@ -28,7 +28,7 @@ part  = back | text | border | symbol | shadow | separator
 | `candidate_text_color` | 候选常态文字 |
 | `candidate_selected_text_color` | 选中候选文字 |
 | `candidate_button_back_color` | 候选栏按钮常态底色 |
-| `candidate_button_pressed_back_color` | 候选栏按钮按下底色 |
+| `candidate_button_selected_back_color` | 候选栏按钮选中底色 |
 | `popup_back_color` | 长按弹层底色 |
 | `key_shadow_color` | 普通键阴影 |
 
@@ -37,10 +37,11 @@ part  = back | text | border | symbol | shadow | separator
 1. 键名匹配 `^(role)_[state_](part)_color$`；不写冗余的 `normal`，例如键盘底色是
    `keyboard_back_color`，不是 `keyboard_normal_back_color`；
 2. 每个 `role` 只定义实际存在的状态组合，不做笛卡尔积填充；
-3. 旧名（`hilited_key_back_color`、`off_key_back_color`、`candidate_background`、
-   `shadow_color`、`text_color`、`border_color` 等）由 `LegacyColorAliases` 映射到上表名称，
-   旧主题无需修改；
-4. 内置主题 `trime.yaml`、`tongwenfeng.trime.yaml` 仍使用旧名，新主题请使用上表名称。
+3. 旧名（`off_key_back_color`、`candidate_background`、`shadow_color`、`text_color`、
+   `border_color` 等）由 `LegacyColorAliases` 映射到上表名称，旧主题无需修改；
+   `hilited_*` 一族不再提供别名，一律使用上表的 `pressed`/`selected` 拼写；
+4. 内置主题 `trime.yaml`、`tongwenfeng.trime.yaml` 仍保留部分旧名（如 `back_color`、
+   `border_color`、`off_key_*`），由别名解析；`hilited_*` 已统一改为上表名称。
 
 ## 2. 按键 role：行为默认值
 
@@ -64,7 +65,7 @@ preset_keys:
 | `space` / `enter` / `backspace` / `tab` / `escape` / `delete` / `insert` | 对应 keysym |
 | `home` / `end` / `page_up` / `page_down` | 对应 keysym |
 | `cursor_left` / `cursor_right` / `cursor_up` / `cursor_down` | 方向键 |
-| `shift` / `control` / `alt` / `meta` | 修饰键（Shift_L 等，区分左右请直接写 `send`） |
+| `shift` / `control` / `alt` / `meta` | 修饰键，不产生文本输入（Shift_L 等，区分左右请直接写 `send`） |
 | `language` | `send: SWITCH_CHARSET` + `toggle: ascii_mode` |
 | `keyboard` | `send: Eisu_toggle` + `select: .next` |
 | `symbol` | `command: liquid_keyboard` |

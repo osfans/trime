@@ -507,13 +507,13 @@
           "type": "string",
           "default": "candidate_text_color"
         },
-        "keyboard_border_color": {
+        "border_back_color": {
           "type": "string",
           "default": "keyboard_back_color"
         },
         "candidate_separator_color": {
           "type": "string",
-          "default": "keyboard_border_color"
+          "default": "border_back_color"
         },
         "preedit_selected_text_color": {
           "type": "string",
@@ -539,11 +539,11 @@
           "type": "string",
           "default": "candidate_text_color"
         },
-        "candidate_button_pressed_back_color": {
+        "candidate_button_selected_back_color": {
           "type": "string",
           "default": "candidate_selected_back_color"
         },
-        "candidate_button_pressed_text_color": {
+        "candidate_button_selected_text_color": {
           "type": "string",
           "default": "candidate_selected_text_color"
         },
@@ -610,7 +610,7 @@
         },
         "key_border_color": {
           "type": "string",
-          "default": "keyboard_border_color"
+          "default": "border_back_color"
         },
         "key_text_color": {
           "type": "string",
@@ -666,7 +666,7 @@
         },
         "key_shadow_color": {
           "type": "string",
-          "default": "keyboard_border_color"
+          "default": "border_back_color"
         },
         "root_back_color": {
           "type": "string",
@@ -680,7 +680,6 @@
         },
         "keyboard_back_color": {
           "type": "string",
-          "default": "keyboard_border_color",
           "description": "键盘区的背景图/色"
         },
         "liquid_keyboard_back_color": {
@@ -719,7 +718,7 @@
             "default": "0xffffff",
             "description": "鍵盤背景"
           },
-          "keyboard_border_color": {
+          "border_back_color": {
             "type": "number",
             "minimum": 0,
             "maximum": 16777215,
@@ -1065,6 +1064,7 @@
             },
             "role": {
               "type": "string",
+              "description": "按键行为；shift / control / alt / meta 为修饰键",
               "enum": [
                 "space",
                 "enter",

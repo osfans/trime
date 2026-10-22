@@ -24,7 +24,7 @@ class ThemeColors internal constructor(
     private val table: ColorTable,
 ) {
     val backColor: Int get() = color(ColorKey.KEYBOARD_BACK_COLOR)
-    val borderColor: Int get() = color(ColorKey.KEYBOARD_BORDER_COLOR)
+    val borderColor: Int get() = color(ColorKey.BORDER_BACK_COLOR)
     val candidateBackground: Int get() = color(ColorKey.CANDIDATE_BACK_COLOR)
     val candidateBorderColor: Int get() = color(ColorKey.CANDIDATE_BORDER_COLOR)
     val candidateSeparatorColor: Int get() = color(ColorKey.CANDIDATE_SEPARATOR_COLOR)
@@ -37,8 +37,8 @@ class ThemeColors internal constructor(
     val preeditTextColor: Int get() = color(ColorKey.PREEDIT_TEXT_COLOR)
     val preeditSelectedBackColor: Int get() = color(ColorKey.PREEDIT_SELECTED_BACK_COLOR)
     val preeditSelectedTextColor: Int get() = color(ColorKey.PREEDIT_SELECTED_TEXT_COLOR)
-    val candidateButtonPressedBackColor: Int get() = color(ColorKey.CANDIDATE_BUTTON_PRESSED_BACK_COLOR)
-    val candidateButtonPressedTextColor: Int get() = color(ColorKey.CANDIDATE_BUTTON_PRESSED_TEXT_COLOR)
+    val candidateButtonSelectedBackColor: Int get() = color(ColorKey.CANDIDATE_BUTTON_SELECTED_BACK_COLOR)
+    val candidateButtonSelectedTextColor: Int get() = color(ColorKey.CANDIDATE_BUTTON_SELECTED_TEXT_COLOR)
     val keyBackColor: Int get() = color(ColorKey.KEY_BACK_COLOR)
     val keyBorderColor: Int get() = color(ColorKey.KEY_BORDER_COLOR)
     val keyTextColor: Int get() = color(ColorKey.KEY_TEXT_COLOR)
