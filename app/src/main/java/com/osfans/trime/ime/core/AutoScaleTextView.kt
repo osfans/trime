@@ -62,12 +62,14 @@ constructor(
     ) {
         // TextView also calls this from its constructor. Keep its text, layout and
         // accessibility state in sync without touching our not-yet-created paint caches.
-        val value = charSequence ?: ""
-        val changed = !super.getText().contentEquals(value)
-        super.setText(value, bufferType)
+        val changed = charSequence == null || !text.contentEquals(charSequence)
         if (changed) {
             needsMeasureText = true
             needsCalculateTransform = true
+        }
+        // Accessibility can request a different buffer type for the same text.
+        super.setText(charSequence, bufferType)
+        if (changed) {
             requestLayout()
             invalidate()
         }
@@ -77,7 +79,7 @@ constructor(
         widthMeasureSpec: Int,
         heightMeasureSpec: Int,
     ) {
-        // TextView needs its Layout even though our own paint decides the final size.
+        // Update the framework Layout for accessibility before our custom measurement.
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val widthMode = MeasureSpec.getMode(widthMeasureSpec)
         val widthSize = MeasureSpec.getSize(widthMeasureSpec)
@@ -150,7 +152,6 @@ constructor(
         right: Int,
         bottom: Int,
     ) {
-        super.onLayout(changed, left, top, right, bottom)
         if (needsCalculateTransform) {
             calculateTransform(right - left, bottom - top)
             needsCalculateTransform = false
