@@ -79,6 +79,8 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private lateinit var lastKnownConfig: Configuration
     private var inputView: InputView? = null
     private var candidatesView: CandidatesView? = null
+    private var inputViewCreationDeferred = false
+    private var inputViewStartPending = false
     private val navBarManager = NavigationBarManager()
     private val inputDeviceManager = InputDeviceManager { useVirtualKeyboard, useCandidatesView ->
         postRimeJob {
@@ -220,6 +222,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 ThemeManager.init(resources.configuration)
                 ThemeManager.addOnChangedListener(onThemeChangeListener)
                 ColorManager.addOnChangedListener(onColorChangeListener)
+                if (inputViewCreationDeferred) {
+                    themeScope?.let { replaceInputViews(it, replaceExisting = false) }
+                }
             }
         }
         InputFeedbackManager.init(this)
@@ -326,6 +331,11 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         setInputView(newInputView)
         inputDeviceManager.setInputView(newInputView)
         inputView = newInputView
+        if (inputViewStartPending && inputDeviceManager.useVirtualKeyboard) {
+            // A new tree needs the latest editor, even if its start callback arrived earlier.
+            newInputView.startInput(currentInputEditorInfo)
+        }
+        inputViewStartPending = false
         return newInputView
     }
 
@@ -343,11 +353,15 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         return newCandidatesView
     }
 
-    private fun replaceInputViews(scope: ThemeScope) {
+    private fun replaceInputViews(
+        scope: ThemeScope,
+        replaceExisting: Boolean = true,
+    ) {
         navBarManager.evaluate(window.window!!, inputDeviceManager.useVirtualKeyboard, scope.colors)
-        replaceInputView(scope)
-        replaceCandidateView(scope)
+        if (replaceExisting || inputView == null) replaceInputView(scope)
+        if (replaceExisting || candidatesView == null) replaceCandidateView(scope)
         inputView?.updateEnterKeyLabel(currentInputEditorInfo)
+        inputViewCreationDeferred = false
     }
 
     override fun onDestroy() {
@@ -545,6 +559,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         Timber.d("onCreateInputView")
         val scope = themeScope
         if (scope == null) {
+            inputViewCreationDeferred = true
             Timber.w("ThemeScope is not ready yet; deferring input view creation")
             return null
         }
@@ -615,6 +630,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
         val (useVirtualKeyboard, useCandidatesView) =
             inputDeviceManager.evaluateOnStartInputView(attribute, this)
+        inputViewStartPending = inputView == null
         if (useVirtualKeyboard) {
             inputView?.startInput(attribute, restarting)
         }
@@ -632,6 +648,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     override fun onFinishInputView(finishingInput: Boolean) {
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
+        inputViewStartPending = false
         decorLocationUpdated = false
         inputView?.dismissCandidateActionMenu()
         candidatesView?.dismissCandidateActionMenu()
