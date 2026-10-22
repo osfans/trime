@@ -6,32 +6,102 @@
 #pragma once
 
 #include <jni.h>
+#include <utf8.h>
 
+#include <iterator>
 #include <string>
+#include <string_view>
+
+// Rime strings are standard UTF-8; JNI's *StringUTF functions use Modified
+// UTF-8, which cannot carry supplementary characters as four-byte sequences.
+static inline jstring makeJavaString(JNIEnv* env, std::string_view text) {
+  if (env->ExceptionCheck()) return nullptr;
+  std::u16string result;
+  if (utf8::is_valid(text.begin(), text.end())) {
+    utf8::utf8to16(text.begin(), text.end(), std::back_inserter(result));
+  } else {
+    std::string normalized;
+    utf8::replace_invalid(text.begin(), text.end(),
+                          std::back_inserter(normalized));
+    utf8::utf8to16(normalized.begin(), normalized.end(),
+                   std::back_inserter(result));
+  }
+  return env->NewString(reinterpret_cast<const jchar*>(result.data()),
+                        static_cast<jsize>(result.size()));
+}
 
 static inline void throwJavaException(JNIEnv* env, const char* msg) {
+  if (env->ExceptionCheck()) return;
   jclass c = env->FindClass("java/lang/Exception");
-  env->ThrowNew(c, msg);
+  if (!c) return;
+  auto init = env->GetMethodID(c, "<init>", "(Ljava/lang/String;)V");
+  if (init) {
+    auto message = makeJavaString(env, msg ? msg : "");
+    if (message) {
+      auto exception =
+          static_cast<jthrowable>(env->NewObject(c, init, message));
+      if (exception) {
+        env->Throw(exception);
+        env->DeleteLocalRef(exception);
+      }
+      env->DeleteLocalRef(message);
+    }
+  }
   env->DeleteLocalRef(c);
 }
 
 class CString {
  private:
-  JNIEnv* env_;
-  jstring str_;
-  const char* chr_;
+  std::string value_;
 
  public:
-  CString(JNIEnv* env, jstring str)
-      : env_(env), str_(str), chr_(env->GetStringUTFChars(str, nullptr)) {}
+  CString(JNIEnv* env, jstring str) {
+    if (env->ExceptionCheck()) return;
+    if (!str) {
+      throwJavaException(env, "String must not be null");
+      return;
+    }
+    auto size = env->GetStringLength(str);
+    if (env->ExceptionCheck()) return;
+    auto chars = env->GetStringChars(str, nullptr);
+    if (!chars) {
+      if (!env->ExceptionCheck())
+        throwJavaException(env, "Cannot access Java string");
+      return;
+    }
+    try {
+      try {
+        utf8::utf16to8(chars, chars + size, std::back_inserter(value_));
+      } catch (const utf8::invalid_utf16&) {
+        // Java permits unpaired surrogates. Replace those without losing the
+        // valid prefix already converted before the invalid code unit.
+        std::u16string normalized;
+        for (jsize i = 0; i < size; ++i) {
+          auto c = chars[i];
+          if (c >= 0xd800 && c <= 0xdbff && i + 1 < size &&
+              chars[i + 1] >= 0xdc00 && chars[i + 1] <= 0xdfff) {
+            normalized += c;
+            normalized += chars[++i];
+          } else {
+            normalized += c >= 0xd800 && c <= 0xdfff ? 0xfffd : c;
+          }
+        }
+        value_.clear();
+        utf8::utf16to8(normalized.begin(), normalized.end(),
+                       std::back_inserter(value_));
+      }
+    } catch (...) {
+      env->ReleaseStringChars(str, chars);
+      throw;
+    }
+    env->ReleaseStringChars(str, chars);
+  }
 
-  ~CString() { env_->ReleaseStringUTFChars(str_, chr_); }
+  operator std::string() const { return value_; }
 
-  operator std::string() { return chr_; }
+  operator const char*() const { return value_.c_str(); }
 
-  operator const char*() { return chr_; }
-
-  const char* operator*() { return chr_; }
+  const char* operator*() const { return value_.c_str(); }
 };
 
 template <typename T = jobject>
@@ -57,12 +127,14 @@ class JString {
 
  public:
   JString(JNIEnv* env, const char* chars)
-      : env_(env), jstring_(env->NewStringUTF(chars)) {}
+      : env_(env), jstring_(chars ? makeJavaString(env, chars) : nullptr) {}
 
   JString(JNIEnv* env, const std::string& string)
-      : JString(env, string.c_str()) {}
+      : env_(env), jstring_(makeJavaString(env, string)) {}
 
-  ~JString() { env_->DeleteLocalRef(jstring_); }
+  ~JString() {
+    if (jstring_) env_->DeleteLocalRef(jstring_);
+  }
 
   operator jstring() { return jstring_; }
 

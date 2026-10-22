@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+patch:
+  schema/dependencies: []
+  translator/dictionary: t9_test
+  translator/prism: t9_double_test
+  translator/contextual_suggestions: false
+  engine/translators: [script_translator]
+  engine/filters: []

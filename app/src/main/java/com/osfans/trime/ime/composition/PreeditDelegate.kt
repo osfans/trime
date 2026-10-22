@@ -59,7 +59,9 @@ class PreeditDelegate(override val di: DI) :
                 setupPreeditBackground(this)
                 horizontalPadding = dp(theme.preedit.horizontalPadding)
             },
-            onMoveCursor = { pos -> rime.launchOnReady { it.moveCursorPos(pos) } },
+            onMoveCursor = { bytes, expected ->
+                rime.launchOnReady { it.moveCursorPos(bytes, expected) }
+            },
         ).apply {
             root.alpha = theme.preedit.alpha
             root.visibility = View.INVISIBLE

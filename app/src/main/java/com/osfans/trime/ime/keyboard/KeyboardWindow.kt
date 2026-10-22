@@ -83,6 +83,7 @@ class KeyboardWindow(di: DI) :
     private var lastKeyboardId = ""
     private var lastLockKeyboardId = ""
     private var tempAsciiMode: Boolean? = null
+    private var editorForcesAsciiMode = false
     private val cachedKeyboards = mutableMapOf<String, Pair<Keyboard, KeyboardView>>()
     private val activeKeyboard: Keyboard? get() = cachedKeyboards[currentKeyboardId]?.first
     private val currentKeyboardView: KeyboardView? get() = cachedKeyboards[currentKeyboardId]?.second
@@ -181,7 +182,12 @@ class KeyboardWindow(di: DI) :
             dispatchCapsState(it::setShifted)
 
             val currentMode = rime.run { statusCached }.isAsciiMode
-            val targetMode = if (it.resetAsciiMode) it.asciiMode else it.lastAsciiMode
+            val targetMode =
+                when {
+                    editorForcesAsciiMode -> true
+                    it.resetAsciiMode -> it.asciiMode
+                    else -> it.lastAsciiMode
+                }
 
             if (currentMode != targetMode) {
                 service.postRimeJob {
@@ -203,11 +209,15 @@ class KeyboardWindow(di: DI) :
 
     private fun smartMatchKeyboard(): String {
         // 主题的布局中包含方案id，直接采用
+        val schema = rime.run { schemaCached }
+        val requested = schema.keyboard
+        if (requested.isNotEmpty() && requested in presetKeyboardIds) return requested
         val currentSchema = rime.run { statusCached }.schemaId
         if (presetKeyboardIds.contains(currentSchema)) {
             return currentSchema
         }
-        val alphabet = rime.run { schemaCached }.alphabet
+        if (schema.isPinyinT9 && "luna_pinyin_t9" in presetKeyboardIds) return "luna_pinyin_t9"
+        val alphabet = schema.alphabet
         val layout =
             when {
                 alphabet.all { it.isLetter() } -> "qwerty"
@@ -324,9 +334,10 @@ class KeyboardWindow(di: DI) :
                     }
                 }
             }
+        editorForcesAsciiMode = targetKeyboard == ".ascii" || targetKeyboard == "number"
         switchKeyboard(targetKeyboard)
         val isAsciiMode = rime.run { statusCached }.isAsciiMode
-        if (targetKeyboard == ".ascii" || targetKeyboard == "number") {
+        if (editorForcesAsciiMode) {
             if (tempAsciiMode == null) {
                 tempAsciiMode = isAsciiMode
             }
@@ -376,6 +387,8 @@ class KeyboardWindow(di: DI) :
     }
 
     override fun onRimeSchemaUpdated(schema: SchemaItem) {
+        // Restore this scheme's layout after temporary keyboards, not the previous scheme's.
+        lastLockKeyboardId = smartMatchKeyboard()
         switchKeyboard(".default")
     }
 
