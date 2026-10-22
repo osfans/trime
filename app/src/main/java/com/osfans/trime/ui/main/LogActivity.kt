@@ -103,7 +103,7 @@ class LogActivity : AppCompatActivity() {
                 lifecycleScope.launch {
                     runCatching {
                         val log = storageAccess.createFile(
-                            filename = "$packageName-${iso8601UTCDateTime()}.txt",
+                            filename = "$packageName-${iso8601UTCDateTime().replace(':', '-')}.txt",
                             mimeType = "text/plain",
                         ) ?: return@launch
                         StorageAccess.writeFile(log.uri) { outs ->
