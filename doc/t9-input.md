@@ -25,6 +25,8 @@ appropriate `trime/keyboard` mapping.
 Selecting another input scheme resets the remembered locked layout. For example,
 switching from nine-key to full Pinyin keeps the full-Pinyin layout when another
 editor is opened; it must not restore the previous scheme's nine-key keyboard.
+Editor-required ASCII mode takes priority over a layout's saved mode, including
+when a numeric editor is followed by an email or password editor.
 
 The existing batched candidate response is retained. One additional bounded T9
 state snapshot is read on the same Rime dispatcher; candidate rows do not perform
