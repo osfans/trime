@@ -14,7 +14,6 @@ import com.osfans.trime.R
 import com.osfans.trime.util.Logcat
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
@@ -67,16 +66,6 @@ constructor(
         collectionJob = null
     }
 
-    private fun startLogCollection() {
-        if (collectionJob?.isActive == true) return
-        val source = logcat ?: return
-        val scope = findViewTreeLifecycleOwner()?.lifecycleScope ?: return
-        if (!scope.isActive) return
-        collectionJob = scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            source.collectLines(::appendLogcatLine)
-        }
-    }
-
     fun append(content: String) {
         logAdapter.append(content)
     }
@@ -84,7 +73,10 @@ constructor(
     fun setLogcat(logcat: Logcat) {
         stopLogCollection()
         this.logcat = logcat
-        startLogCollection()
+        val scope = findViewTreeLifecycleOwner()?.lifecycleScope ?: return
+        collectionJob = scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            logcat.collectLines(::appendLogcatLine)
+        }
     }
 
     private fun appendLogcatLine(line: String) {

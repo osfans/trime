@@ -14,16 +14,14 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.BufferedReader
 import java.io.IOException
-import java.util.Collections
-import java.util.IdentityHashMap
-import java.util.concurrent.atomic.AtomicReference
 
 fun subprocess(vararg commands: String): Process = Runtime.getRuntime().exec(commands)
 
@@ -33,20 +31,33 @@ private val processCleanupDispatcher = Dispatchers.IO.limitedParallelism(1)
 /** Consumes this process's output and releases its process and all three streams. */
 internal suspend fun <T> Process.consumeOutput(block: suspend (BufferedReader) -> T): T {
     var failure: Throwable? = null
-    val stopFailure = AtomicReference<Exception?>()
+    var released = false
+    var cleanupFailure: Exception? = null
+
+    // Both cancellation and the outer finally can reach cleanup. Mark ownership
+    // before suspending; withContext waits for its watcher child before finally.
+    suspend fun releaseOnce() = withContext(NonCancellable) {
+        // Returning from the dispatcher switch must also happen while active.
+        withContext(processCleanupDispatcher) {
+            if (!released) {
+                released = true
+                try {
+                    releaseProcess()
+                } catch (error: Exception) {
+                    cleanupFailure = error
+                }
+            }
+        }
+    }
+
     try {
         return withContext(Dispatchers.IO) {
-            // Interrupting a coroutine does not reliably interrupt a pipe read on Android.
-            // Closing its streams must still be attempted when termination fails.
+            // A blocked pipe read cannot check coroutine cancellation itself.
             val stopOnCancellation = launch(processCleanupDispatcher, start = CoroutineStart.UNDISPATCHED) {
                 try {
                     awaitCancellation()
                 } finally {
-                    try {
-                        releaseProcess()
-                    } catch (error: Exception) {
-                        stopFailure.set(error)
-                    }
+                    releaseOnce()
                 }
             }
             try {
@@ -59,37 +70,23 @@ internal suspend fun <T> Process.consumeOutput(block: suspend (BufferedReader) -
         failure = error
         throw error
     } finally {
-        // Also covers cancellation before the IO block starts and failed reader construction.
-        // withContext waits for the cancellation watcher before reaching this cleanup.
-        var cleanupFailure: Exception? = null
-        fun recordCleanup(error: Exception) {
-            val primary = failure ?: cleanupFailure
-            if (primary == null) {
-                cleanupFailure = error
-            } else {
-                // Stack recovery can copy a cancellation exception across withContext. Jobs
-                // retain its original cause, so attach cleanup errors to that stable node.
-                var target = primary
-                val seen = Collections.newSetFromMap(IdentityHashMap<Throwable, Boolean>())
-                while (target is CancellationException && seen.add(target)) {
-                    val cause = target.cause
-                    if (cause !is CancellationException || cause in seen) break
-                    target = cause
-                }
-                if (target !== error) target.addSuppressed(error)
+        // Also owns a process created just before its caller was cancelled,
+        // when withContext never entered the IO reader or installed the watcher.
+        releaseOnce()
+        cleanupFailure?.let { cleanup ->
+            var primary = failure
+            // Stack recovery copies cancellation exceptions. Attach diagnostics
+            // to the original cancellation retained by the caller's Job.
+            while (primary is CancellationException && primary.cause is CancellationException) {
+                primary = primary.cause
             }
+            if (primary == null) throw cleanup
+            if (primary !== cleanup) primary.addSuppressed(cleanup)
         }
-        stopFailure.get()?.let(::recordCleanup)
-        try {
-            releaseProcess()
-        } catch (cleanup: Exception) {
-            recordCleanup(cleanup)
-        }
-        cleanupFailure?.let { throw it }
     }
 }
 
-internal suspend fun Process.releaseProcess() {
+private suspend fun Process.releaseProcess() {
     withContext(NonCancellable + processCleanupDispatcher) {
         var failure: Exception? = null
         fun attempt(action: () -> Unit) {
@@ -129,17 +126,17 @@ internal suspend fun Process.awaitExit(): Int {
     }
 }
 
-/** A single consumer owns the process once collection begins. */
-fun Process.asFlow(): Flow<String> = channelFlow {
-    consumeOutput { reader ->
-        while (true) {
-            currentCoroutineContext().ensureActive()
-            val line = reader.readLine() ?: break
-            send(line)
-        }
-    }
-}.flowOn(Dispatchers.IO)
+fun Process.asFlow(): Flow<String> = inputStream
+    .bufferedReader()
+    .lineSequence()
+    .asFlow()
+    .flowOn(Dispatchers.IO)
+    .cancellable()
 
-suspend fun Process.readText(): String = consumeOutput { it.readText() }
+suspend fun Process.readText() = withContext(Dispatchers.IO) {
+    inputStream.bufferedReader().readText()
+}
 
-suspend fun Process.readLines(): List<String> = consumeOutput { it.readLines() }
+suspend fun Process.readLines() = withContext(Dispatchers.IO) {
+    inputStream.bufferedReader().readLines()
+}

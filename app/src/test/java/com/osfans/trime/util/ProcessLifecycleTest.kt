@@ -9,9 +9,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -83,7 +83,7 @@ internal class PipeProcess(
         outputClosed.get() shouldBe true
         errorClosed.get() shouldBe true
         inputClosed.get() shouldBe true
-        (destructions.get() > 0) shouldBe true
+        destructions.get() shouldBe 1
         exitObserved.get() shouldBe true
     }
 }
@@ -101,29 +101,25 @@ internal open class BlockingPipe : InputStream() {
 
 class ProcessLifecycleTest :
     StringSpec({
-        "text and line readers preserve all output and release all child streams" {
-            runBlocking {
-                val text = PipeProcess()
-                text.readText() shouldBe "one\ntwo\n"
-                text.assertReleased()
-                val lines = PipeProcess()
-                lines.readLines() shouldBe listOf("one", "two")
-                lines.assertReleased()
-            }
-        }
-
-        "flow preserves order and closes the child at EOF" {
+        "owned output preserves all lines and releases the process once" {
             runBlocking {
                 val process = PipeProcess()
-                process.asFlow().toList() shouldBe listOf("one", "two")
+                process.consumeOutput { it.readLines() } shouldBe listOf("one", "two")
                 process.assertReleased()
             }
         }
 
-        "stopping a flow before EOF still releases the process" {
+        "cancellation before the IO reader starts still releases its process" {
             runBlocking {
                 val process = PipeProcess()
-                process.asFlow().take(1).toList() shouldBe listOf("one")
+                var readStarted = false
+                val reading = launch(start = CoroutineStart.UNDISPATCHED) {
+                    currentCoroutineContext().cancel()
+                    process.consumeOutput { readStarted = true }
+                }
+                withTimeout(3_000L) { reading.join() }
+                readStarted shouldBe false
+                reading.isCancelled shouldBe true
                 process.assertReleased()
             }
         }
@@ -134,47 +130,33 @@ class ProcessLifecycleTest :
                 val process = PipeProcess(object : InputStream() {
                     override fun read(): Int = throw expected
                 })
-                shouldThrow<IOException> { process.readText() } shouldBe expected
+                shouldThrow<IOException> { process.consumeOutput { it.readText() } } shouldBe expected
                 process.assertReleased()
             }
         }
 
-        "reader failure stays primary when both destruction attempts fail" {
+        "reader failure stays primary when the single cleanup also fails" {
             runBlocking {
                 val readFailure = IOException("Synthetic read failure")
-                val attempts = AtomicInteger()
+                val cleanupFailure = IOException("Synthetic destruction failure")
                 val process = PipeProcess(
                     output = object : InputStream() {
                         override fun read(): Int = throw readFailure
                     },
-                    onDestroy = { throw IOException("Destroy attempt ${attempts.incrementAndGet()}") },
+                    onDestroy = { throw cleanupFailure },
                 )
-                val failure = shouldThrow<IOException> { process.readText() }
-                failure.message shouldBe readFailure.message
-                // Coroutine stack recovery can copy exceptions, retaining originals as causes.
-                val suppressed = generateSequence<Throwable>(failure) { it.cause }
-                    .flatMap { it.suppressed.asSequence() }
-                    .map { it.message }
-                    .toSet()
-                suppressed shouldBe setOf("Destroy attempt 1", "Destroy attempt 2")
-                attempts.get() shouldBe 2
+                val failure = shouldThrow<IOException> { process.consumeOutput { it.readText() } }
+                failure shouldBe readFailure
+                failure.suppressed.toList() shouldBe listOf(cleanupFailure)
                 process.assertReleased()
             }
         }
 
-        "destruction failure at EOF is reported after closing every stream" {
+        "destruction failure is reported after closing every stream without a retry" {
             runBlocking {
-                val attempts = AtomicInteger()
-                val process = PipeProcess(
-                    onDestroy = { throw IOException("Destroy attempt ${attempts.incrementAndGet()}") },
-                )
-                val failure = shouldThrow<IOException> { process.readText() }
-                failure.message shouldBe "Destroy attempt 1"
-                generateSequence<Throwable>(failure) { it.cause }
-                    .flatMap { it.suppressed.asSequence() }
-                    .map { it.message }
-                    .toSet() shouldBe setOf("Destroy attempt 2")
-                attempts.get() shouldBe 2
+                val expected = IOException("Synthetic destruction failure")
+                val process = PipeProcess(onDestroy = { throw expected })
+                shouldThrow<IOException> { process.consumeOutput { it.readText() } } shouldBe expected
                 process.assertReleased()
             }
         }
@@ -183,19 +165,7 @@ class ProcessLifecycleTest :
             runBlocking {
                 val pipe = BlockingPipe()
                 val process = PipeProcess(pipe, pipe::release, naturalExit = false)
-                val reading = async(Dispatchers.Default) { process.readLines() }
-                check(pipe.entered.await(5, TimeUnit.SECONDS))
-                withTimeout(5_000L) { reading.cancelAndJoin() }
-                reading.isCancelled shouldBe true
-                process.assertReleased()
-            }
-        }
-
-        "cancelling a blocked log stream stops the child without another output line" {
-            runBlocking {
-                val pipe = BlockingPipe()
-                val process = PipeProcess(pipe, pipe::release, naturalExit = false)
-                val reading = launch(Dispatchers.Default) { process.asFlow().toList() }
+                val reading = async(Dispatchers.Default) { process.consumeOutput { it.readLines() } }
                 check(pipe.entered.await(5, TimeUnit.SECONDS))
                 withTimeout(5_000L) { reading.cancelAndJoin() }
                 reading.isCancelled shouldBe true
@@ -210,10 +180,11 @@ class ProcessLifecycleTest :
                 }
                 val destroyFailure = IOException("Synthetic destruction failure")
                 val process = PipeProcess(pipe, { throw destroyFailure })
-                val reading = async(Dispatchers.Default) { process.readLines() }
+                val reading = async(Dispatchers.Default) { process.consumeOutput { it.readLines() } }
                 check(pipe.entered.await(5, TimeUnit.SECONDS))
                 withTimeout(3_000L) { reading.cancelAndJoin() }
                 val failure = shouldThrow<CancellationException> { reading.await() }
+                // Inspect the actual thrown exception, including recovered cleanup copies.
                 val pending = ArrayDeque<Throwable>()
                 val seen = Collections.newSetFromMap(IdentityHashMap<Throwable, Boolean>())
                 pending.add(failure)
@@ -311,7 +282,7 @@ class ProcessLifecycleTest :
                 val process = PipeProcess(object : ByteArrayInputStream(ByteArray(0)) {
                     override fun close() = throw expected
                 })
-                shouldThrow<IOException> { process.readText() } shouldBe expected
+                shouldThrow<IOException> { process.consumeOutput { it.readText() } } shouldBe expected
                 process.assertReleased()
             }
         }
@@ -336,7 +307,7 @@ class ProcessLifecycleTest :
                     override fun exitValue(): Int = 0
                     override fun destroy() = Unit
                 }
-                shouldThrow<IOException> { process.readText() }
+                shouldThrow<IOException> { process.consumeOutput { it.readText() } }
                 errorClosed.get() shouldBe true
                 inputClosed.get() shouldBe true
             }
@@ -357,7 +328,9 @@ class ProcessLifecycleTest :
                 val process = ProcessBuilder(java.path, "-cp", classpath, ProcessTestChild::class.java.name).start()
                 val ready = CountDownLatch(1)
                 val reading = launch(Dispatchers.Default) {
-                    process.asFlow().collect { ready.countDown() }
+                    process.consumeOutput { reader ->
+                        while (reader.readLine() != null) ready.countDown()
+                    }
                 }
                 try {
                     check(ready.await(10, TimeUnit.SECONDS))
@@ -442,7 +415,7 @@ internal object ProcessCancellationTestChild {
         }, 8, TimeUnit.SECONDS)
         try {
             runBlocking {
-                val reading = async(Dispatchers.Default) { process.readLines() }
+                val reading = async(Dispatchers.Default) { process.consumeOutput { it.readLines() } }
                 check(entered.await(5, TimeUnit.SECONDS)) { "Reader did not enter the blocked IO pipe" }
                 withTimeout(5_000L) { reading.cancelAndJoin() }
                 check(reading.isCancelled)

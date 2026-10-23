@@ -21,12 +21,10 @@ import com.osfans.trime.util.Logcat
 import com.osfans.trime.util.appContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import splitties.systemservices.notificationManager
 import timber.log.Timber
 import java.util.concurrent.locks.ReentrantLock
@@ -171,10 +169,7 @@ object RimeDaemon {
                 RimeMessage.DeployMessage.State.Start -> {
                     DeployNotification.showProgress()
                     try {
-                        withTimeout(2_000L) { Logcat.default.clearLogAndWait() }
-                    } catch (timeout: TimeoutCancellationException) {
-                        currentCoroutineContext().ensureActive()
-                        Timber.e(timeout, "Timed out clearing deployment logcat")
+                        Logcat.default.clearLogAndWait()
                     } catch (cancelled: CancellationException) {
                         throw cancelled
                     } catch (error: Exception) {
@@ -192,11 +187,7 @@ object RimeDaemon {
                         Intent(appContext, LogActivity::class.java).apply {
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                             val log = try {
-                                withTimeout(5_000L) { Logcat.default.readDeployLog() }
-                            } catch (timeout: TimeoutCancellationException) {
-                                currentCoroutineContext().ensureActive()
-                                Timber.e(timeout, "Timed out reading deployment logcat")
-                                timeout.stackTraceToString()
+                                Logcat.default.readDeployLog()
                             } catch (cancelled: CancellationException) {
                                 throw cancelled
                             } catch (error: Exception) {
