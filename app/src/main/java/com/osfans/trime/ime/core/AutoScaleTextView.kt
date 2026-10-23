@@ -60,19 +60,12 @@ constructor(
         charSequence: CharSequence?,
         bufferType: BufferType,
     ) {
-        // TextView also calls this from its constructor. Keep its text, layout and
-        // accessibility state in sync without touching our not-yet-created paint caches.
-        val changed = charSequence == null || !text.contentEquals(charSequence)
-        if (changed) {
-            needsMeasureText = true
-            needsCalculateTransform = true
-        }
-        // Accessibility can request a different buffer type for the same text.
         super.setText(charSequence, bufferType)
-        if (changed) {
-            requestLayout()
-            invalidate()
-        }
+        // TextView also calls this from its constructor, before our paint caches exist.
+        needsMeasureText = true
+        needsCalculateTransform = true
+        requestLayout()
+        invalidate()
     }
 
     override fun onMeasure(
