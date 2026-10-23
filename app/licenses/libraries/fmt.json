@@ -1,0 +1,11 @@
+{
+    "uniqueId": "fmtlib/fmt",
+    "artifactVersion": "12.1.0",
+    "description": "A modern formatting library",
+    "name": "fmtlib/fmt",
+    "website": "https://github.com/fmtlib/fmt",
+    "tag": "native",
+    "licenses": [
+        "MIT"
+    ]
+}

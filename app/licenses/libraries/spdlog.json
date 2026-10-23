@@ -1,0 +1,11 @@
+{
+    "uniqueId": "gabime/spdlog",
+    "artifactVersion": "1.17.0",
+    "description": "Fast C++ logging library",
+    "name": "gabime/spdlog",
+    "website": "https://github.com/gabime/spdlog",
+    "tag": "native",
+    "licenses": [
+        "MIT"
+    ]
+}

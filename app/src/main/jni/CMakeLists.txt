@@ -14,18 +14,22 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 # general options
 option(BUILD_SHARED_LIBS "" OFF)
 option(BUILD_TESTING "" OFF)
+option(ENABLE_LOGGING "Enable logging with spdlog library" ON)
 
 include(Boost)
 
-option(WITH_GFLAGS "Use gflags" OFF)
-option(WITH_GTEST "Use googletest" OFF)
-# NDK 30 provides libunwind.h but no target libunwind library. With any value
-# other than none, glog's FindUnwind resolves the host x86_64 libunwind.so and
-# fails when linking for other ABIs, so disable its unwind driver entirely.
-set(WITH_UNWIND none CACHE STRING "unwind driver" FORCE)
-add_subdirectory(librime/deps/glog)
-target_compile_options(
-  glog_internal PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.")
+# spdlog is owned by librime and is linked statically into rime-static.
+if(ENABLE_LOGGING)
+  set(SPDLOG_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+  set(SPDLOG_BUILD_PIC ON CACHE BOOL "" FORCE)
+  set(SPDLOG_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
+  set(SPDLOG_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+  set(SPDLOG_INSTALL OFF CACHE BOOL "" FORCE)
+  set(SPDLOG_FMT_EXTERNAL OFF CACHE BOOL "" FORCE)
+  add_subdirectory(librime/deps/spdlog EXCLUDE_FROM_ALL)
+  target_compile_options(
+    spdlog PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.")
+endif()
 
 option(YAML_CPP_BUILD_TOOLS "" OFF)
 option(YAML_CPP_BUILD_TESTS "" OFF)
