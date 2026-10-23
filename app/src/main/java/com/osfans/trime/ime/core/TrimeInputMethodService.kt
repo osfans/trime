@@ -312,13 +312,11 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         setInputView(newInputView)
         inputDeviceManager.setInputView(newInputView)
         inputView = newInputView
-        if (inputViewStartPending) {
-            if (inputDeviceManager.useVirtualKeyboard) {
-                // A new tree needs the latest editor, even if its start callback arrived earlier.
-                newInputView.startInput(currentInputEditorInfo)
-            }
-            inputViewStartPending = false
+        if (inputViewStartPending && inputDeviceManager.useVirtualKeyboard) {
+            // A new tree needs the latest editor, even if its start callback arrived earlier.
+            newInputView.startInput(currentInputEditorInfo)
         }
+        inputViewStartPending = false
         return newInputView
     }
 
@@ -348,8 +346,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onDestroy() {
-        inputViewCreationDeferred = false
-        inputViewStartPending = false
         InputFeedbackManager.destroy()
         inputView = null
         recreateInputViewPrefs.forEach {
