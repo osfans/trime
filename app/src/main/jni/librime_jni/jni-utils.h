@@ -17,9 +17,10 @@
 static inline jstring makeJavaString(JNIEnv* env, std::string_view text) {
   if (env->ExceptionCheck()) return nullptr;
   std::u16string result;
-  if (utf8::is_valid(text.begin(), text.end())) {
+  try {
     utf8::utf8to16(text.begin(), text.end(), std::back_inserter(result));
-  } else {
+  } catch (const utf8::exception&) {
+    result.clear();
     std::string normalized;
     utf8::replace_invalid(text.begin(), text.end(),
                           std::back_inserter(normalized));
@@ -62,7 +63,6 @@ class CString {
       return;
     }
     auto size = env->GetStringLength(str);
-    if (env->ExceptionCheck()) return;
     auto chars = env->GetStringChars(str, nullptr);
     if (!chars) {
       if (!env->ExceptionCheck())

@@ -36,7 +36,6 @@ inline std::vector<std::string> stringArrayToStringVector(JNIEnv* env,
     return {};
   }
   auto length = env->GetArrayLength(array);
-  if (env->ExceptionCheck()) return {};
   std::vector<std::string> result;
   result.reserve(length);
   for (int i = 0; i < length; ++i) {

@@ -14,7 +14,7 @@ Java_com_osfans_trime_core_RimeKeyEvent_parse(JNIEnv* env, jclass clazz,
   rime::KeyEvent ke;
   ke.Parse(*text);
   JString description(env, ke.repr());
-  if (!*description || env->ExceptionCheck()) return nullptr;
+  if (!*description) return nullptr;
   return env->NewObject(GlobalRef->KeyEvent, GlobalRef->KeyEventInit,
                         ke.keycode(), ke.modifier(), *description);
 }
