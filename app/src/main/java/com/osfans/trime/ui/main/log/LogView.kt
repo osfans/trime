@@ -12,7 +12,6 @@ import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.util.Logcat
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import splitties.views.dsl.core.add
@@ -74,7 +73,7 @@ constructor(
         stopLogCollection()
         this.logcat = logcat
         val scope = findViewTreeLifecycleOwner()?.lifecycleScope ?: return
-        collectionJob = scope.launch(start = CoroutineStart.UNDISPATCHED) {
+        collectionJob = scope.launch {
             logcat.collectLines(::appendLogcatLine)
         }
     }
