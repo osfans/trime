@@ -5,6 +5,7 @@
 
 package com.osfans.trime.ime.keyboard
 
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
@@ -14,6 +15,8 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
 import android.graphics.drawable.GradientDrawable
 import android.view.KeyEvent
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.utils.sizeDp
 import com.osfans.trime.data.theme.Theme
@@ -44,6 +47,10 @@ class KeyView(
 
     private var keyPressed = false
     override fun isPressed(): Boolean = keyPressed
+
+    // 按压缩放动画：按下时整键轻微缩小，松开时带过冲回弹
+    private var pressScale = 1f
+    private var pressAnimator: ValueAnimator? = null
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         textAlign = Paint.Align.CENTER
@@ -185,10 +192,25 @@ class KeyView(
             keyPressed = pressed
             if (pressed) {
                 key.onPressed()
+                animatePressScale(PRESSED_SCALE, PRESS_DURATION, overshoot = false)
             } else {
                 key.onReleased()
+                animatePressScale(1f, RELEASE_DURATION, overshoot = true)
             }
             invalidate()
+        }
+    }
+
+    private fun animatePressScale(target: Float, duration: Long, overshoot: Boolean) {
+        pressAnimator?.cancel()
+        pressAnimator = ValueAnimator.ofFloat(pressScale, target).apply {
+            this.duration = duration
+            interpolator = if (overshoot) OvershootInterpolator(OVERSHOOT_TENSION) else DecelerateInterpolator()
+            addUpdateListener {
+                pressScale = it.animatedValue as Float
+                invalidate()
+            }
+            start()
         }
     }
 
@@ -269,6 +291,16 @@ class KeyView(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
+        // 围绕按键中心缩放绘制内容（背景 + 文字 + 角标），实现按压动效
+        val scaling = pressScale != 1f
+        if (scaling) {
+            canvas.save()
+            // 以可见按键区域的中心为缩放中心，避免 expandKeypressArea 的不对称 padding 造成漂移
+            val pivotX = paddingLeft + (width - paddingLeft - paddingRight) / 2f
+            val pivotY = paddingTop + (height - paddingTop - paddingBottom) / 2f
+            canvas.scale(pressScale, pressScale, pivotX, pivotY)
+        }
+
         drawBackground(canvas, key)
 
         val label = key.getLabel().let {
@@ -287,6 +319,10 @@ class KeyView(
         val hint = key.hint
         if (hint.isNotEmpty()) {
             drawSymbol(canvas, hint, isTop = false)
+        }
+
+        if (scaling) {
+            canvas.restore()
         }
     }
 
@@ -407,5 +443,26 @@ class KeyView(
                 canvas.drawText(lines[i], centerX, lineY, symbolPaint)
             }
         }
+    }
+
+    override fun onDetachedFromWindow() {
+        pressAnimator?.cancel()
+        pressAnimator = null
+        pressScale = 1f
+        super.onDetachedFromWindow()
+    }
+
+    private companion object {
+        /** 按下时整键缩放到该比例 */
+        const val PRESSED_SCALE = 0.94f
+
+        /** 按下缩小的持续时长（毫秒） */
+        const val PRESS_DURATION = 60L
+
+        /** 松开回弹的持续时长（毫秒） */
+        const val RELEASE_DURATION = 140L
+
+        /** 回弹过冲强度，值越大超出 1.0 的幅度越明显 */
+        const val OVERSHOOT_TENSION = 1.8f
     }
 }
