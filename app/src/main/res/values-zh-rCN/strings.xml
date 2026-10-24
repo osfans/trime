@@ -104,6 +104,7 @@
     <string name="clear">清除画面</string>
     <string name="crash_logs">崩溃日志</string>
     <string name="real_time_logs">实时日志</string>
+    <string name="log_content_omitted">较早日志已省略；显示、复制和导出仅包含保留的近期内容。</string>
     <string name="real_time_logs_clear">清除所有日志</string>
     <string name="real_time_logs_confirm">要清除有日志吗？(此动作不能复原)</string>
     <string name="app_crash">应用程序崩溃了</string>

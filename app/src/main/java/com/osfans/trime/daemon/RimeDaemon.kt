@@ -17,14 +17,14 @@ import com.osfans.trime.core.lifecycleScope
 import com.osfans.trime.core.whenReady
 import com.osfans.trime.ui.main.LogActivity
 import com.osfans.trime.util.DeployNotification
+import com.osfans.trime.util.Logcat
 import com.osfans.trime.util.appContext
-import com.osfans.trime.util.readText
-import com.osfans.trime.util.subprocess
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import splitties.systemservices.notificationManager
 import timber.log.Timber
 import java.util.concurrent.locks.ReentrantLock
@@ -168,7 +168,14 @@ object RimeDaemon {
             when (it.data) {
                 RimeMessage.DeployMessage.State.Start -> {
                     DeployNotification.showProgress()
-                    withContext(Dispatchers.IO) { subprocess("logcat", "--clear") }
+                    try {
+                        Logcat.default.clearLogAndWait()
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } catch (error: Exception) {
+                        currentCoroutineContext().ensureActive()
+                        Timber.e(error, "Unable to clear deployment logcat")
+                    }
                 }
 
                 RimeMessage.DeployMessage.State.Success -> {
@@ -179,9 +186,15 @@ object RimeDaemon {
                     val intent =
                         Intent(appContext, LogActivity::class.java).apply {
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            val log =
-                                subprocess("logcat", "-v", "brief", "-s", "rime.trime:W", "-d")
-                                    .readText()
+                            val log = try {
+                                Logcat.default.readDeployLog()
+                            } catch (cancelled: CancellationException) {
+                                throw cancelled
+                            } catch (error: Exception) {
+                                currentCoroutineContext().ensureActive()
+                                Timber.e(error, "Unable to read deployment logcat")
+                                error.stackTraceToString()
+                            }
                             putExtra(LogActivity.FROM_DEPLOY, true)
                             putExtra(LogActivity.DEPLOY_FAILURE_TRACE, log)
                         }

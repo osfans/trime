@@ -108,6 +108,7 @@
     <string name="app_crash">應用程式當機</string>
     <string name="crash_logs">當機紀錄檔</string>
     <string name="real_time_logs">即時紀錄檔</string>
+    <string name="log_content_omitted">較早紀錄已省略；顯示、複製及匯出僅包含保留的近期內容。</string>
     <string name="real_time_logs_clear">清除所有紀錄檔</string>
     <string name="real_time_logs_confirm">要清除有紀錄檔嗎？(此動作不能復原)</string>
     <string name="clear">清除畫面</string>
