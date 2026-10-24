@@ -26,6 +26,8 @@ class ClipboardTitleUi(override val ctx: Context, private val scope: ThemeScope)
 
     val tabLayout = InputTabLayout(ctx)
 
+    val searchButton = ToolButton(ctx, R.drawable.ic_baseline_search_24, scope)
+
     val deleteAllButton = ToolButton(ctx, R.drawable.ic_baseline_delete_sweep_24, scope)
 
     private val size = theme.style.run { candidateViewHeight + commentHeight }
@@ -36,6 +38,13 @@ class ClipboardTitleUi(override val ctx: Context, private val scope: ThemeScope)
             lParams(wrapContent, dp(size)) {
                 startOfParent()
                 centerVertically()
+            },
+        )
+        add(
+            searchButton,
+            lParams(dp(size), dp(size)) {
+                centerVertically()
+                endOfParent(dp(size))
             },
         )
         add(

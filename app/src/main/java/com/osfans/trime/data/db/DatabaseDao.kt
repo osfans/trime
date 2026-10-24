@@ -62,6 +62,12 @@ interface DatabaseDao {
     @Query("SELECT * FROM ${DatabaseBean.TABLE_NAME} ORDER BY pinned DESC, time DESC")
     fun allBeans(): PagingSource<Int, DatabaseBean>
 
+    @Query("SELECT * FROM ${DatabaseBean.TABLE_NAME} WHERE text LIKE '%' || :keyword || '%' ESCAPE '\\' ORDER BY pinned DESC, time DESC LIMIT :limit")
+    suspend fun filterBeans(
+        keyword: String,
+        limit: Int,
+    ): List<DatabaseBean>
+
     @Query("SELECT * FROM ${DatabaseBean.TABLE_NAME} WHERE id=:id LIMIT 1")
     suspend fun get(id: Int): DatabaseBean?
 
