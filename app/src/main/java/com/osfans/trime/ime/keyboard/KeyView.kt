@@ -295,7 +295,10 @@ class KeyView(
         val scaling = pressScale != 1f
         if (scaling) {
             canvas.save()
-            canvas.scale(pressScale, pressScale, width / 2f, height / 2f)
+            // 以可见按键区域的中心为缩放中心，避免 expandKeypressArea 的不对称 padding 造成漂移
+            val pivotX = paddingLeft + (width - paddingLeft - paddingRight) / 2f
+            val pivotY = paddingTop + (height - paddingTop - paddingBottom) / 2f
+            canvas.scale(pressScale, pressScale, pivotX, pivotY)
         }
 
         drawBackground(canvas, key)
