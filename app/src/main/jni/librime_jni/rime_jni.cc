@@ -43,7 +43,8 @@ class Rime {
     const char* sharedDir = getenv("RIME_SHARED_DATA_DIR");
     const char* versionName = getenv("RIME_DISTRIBUTION_VERSION");
 
-    RIME_STRUCT(RimeTraits, trime_traits)
+    RimeTraits trime_traits{};
+    RIME_STRUCT_INIT(RimeTraits, trime_traits);
     trime_traits.shared_data_dir = sharedDir;
     trime_traits.user_data_dir = userDir;
     trime_traits.log_dir = "";  // set empty log_dir to log to logcat only
@@ -80,7 +81,8 @@ class Rime {
   void clearComposition() { rime->clear_composition(session()); }
 
   std::unique_ptr<CommitProto> commit() {
-    RIME_STRUCT(RimeCommit, data)
+    RimeCommit data{};
+    RIME_STRUCT_INIT(RimeCommit, data);
     if (rime->get_commit(session(), &data)) {
       auto p = std::make_unique<CommitProto>(&data);
       rime->free_commit(&data);
@@ -90,7 +92,8 @@ class Rime {
   }
 
   std::unique_ptr<ContextProto> context(bool includeMenu = true) {
-    RIME_STRUCT(RimeContext, data)
+    RimeContext data{};
+    RIME_STRUCT_INIT(RimeContext, data);
     auto s = session();
     if (rime->get_context(s, &data)) {
       auto input = rime->get_input(s);
@@ -104,7 +107,8 @@ class Rime {
   }
 
   std::unique_ptr<StatusProto> status() {
-    RIME_STRUCT(RimeStatus, data)
+    RimeStatus data{};
+    RIME_STRUCT_INIT(RimeStatus, data);
     if (rime->get_status(session(), &data)) {
       auto p = std::make_unique<StatusProto>(&data);
       rime->free_status(&data);
@@ -135,7 +139,7 @@ class Rime {
       result = SchemaItem::fromCList(list);
       rime->free_schema_list(&list);
     }
-    return std::move(result);
+    return result;
   }
 
   bool selectSchema(std::string_view schemaId) {
@@ -186,7 +190,7 @@ class Rime {
       }
       rime->candidate_list_end(&iter);
     }
-    return std::move(result);
+    return result;
   }
 
   std::tuple<int, int, std::vector<CandidateProto>> getBulkCandidates() {
@@ -239,11 +243,17 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* jvm, void* reserved) {
 extern "C" JNIEXPORT void JNICALL Java_com_osfans_trime_core_Rime_startupRime(
     JNIEnv* env, jclass clazz, jstring shared_dir, jstring user_dir,
     jstring version_name, jboolean full_check) {
+  CString sharedDir(env, shared_dir);
+  if (env->ExceptionCheck()) return;
+  CString userDir(env, user_dir);
+  if (env->ExceptionCheck()) return;
+  CString versionName(env, version_name);
+  if (env->ExceptionCheck()) return;
   // for rime shared data dir
-  setenv("RIME_SHARED_DATA_DIR", CString(env, shared_dir), 1);
+  setenv("RIME_SHARED_DATA_DIR", sharedDir, 1);
   // for rime user data dir
-  setenv("RIME_USER_DATA_DIR", CString(env, user_dir), 1);
-  setenv("RIME_DISTRIBUTION_VERSION", CString(env, version_name), 1);
+  setenv("RIME_USER_DATA_DIR", userDir, 1);
+  setenv("RIME_DISTRIBUTION_VERSION", versionName, 1);
 
   auto notificationHandler = [](void* context_object, RimeSessionId session_id,
                                 const char* message_type,
@@ -277,7 +287,9 @@ extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_deployRimeSchemaFile(JNIEnv* env,
                                                      jclass /* thiz */,
                                                      jstring schema_file) {
-  return Rime::Instance().deploySchema(*CString(env, schema_file));
+  CString schemaFile(env, schema_file);
+  if (env->ExceptionCheck()) return JNI_FALSE;
+  return Rime::Instance().deploySchema(*schemaFile);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
@@ -285,8 +297,11 @@ Java_com_osfans_trime_core_Rime_deployRimeConfigFile(JNIEnv* env,
                                                      jclass /* thiz */,
                                                      jstring file_name,
                                                      jstring version_key) {
-  return Rime::Instance().deployConfigFile(*CString(env, file_name),
-                                           *CString(env, version_key));
+  CString fileName(env, file_name);
+  if (env->ExceptionCheck()) return JNI_FALSE;
+  CString versionKey(env, version_key);
+  if (env->ExceptionCheck()) return JNI_FALSE;
+  return Rime::Instance().deployConfigFile(*fileName, *versionKey);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
@@ -336,13 +351,17 @@ Java_com_osfans_trime_core_Rime_getRimeStatus(JNIEnv* env, jclass /* thiz */) {
 // runtime options
 extern "C" JNIEXPORT void JNICALL Java_com_osfans_trime_core_Rime_setRimeOption(
     JNIEnv* env, jclass /* thiz */, jstring option, jboolean value) {
-  Rime::Instance().setOption(*CString(env, option), value);
+  CString optionName(env, option);
+  if (env->ExceptionCheck()) return;
+  Rime::Instance().setOption(*optionName, value);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_getRimeOption(JNIEnv* env, jclass /* thiz */,
                                               jstring option) {
-  return Rime::Instance().getOption(*CString(env, option));
+  CString optionName(env, option);
+  if (env->ExceptionCheck()) return JNI_FALSE;
+  return Rime::Instance().getOption(*optionName);
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL
@@ -354,13 +373,15 @@ Java_com_osfans_trime_core_Rime_getRimeSchemaList(JNIEnv* env,
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_osfans_trime_core_Rime_getCurrentRimeSchema(JNIEnv* env,
                                                      jclass /* thiz */) {
-  return env->NewStringUTF(Rime::Instance().currentSchemaId().c_str());
+  return makeJavaString(env, Rime::Instance().currentSchemaId());
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_selectRimeSchema(JNIEnv* env, jclass /* thiz */,
                                                  jstring schema_id) {
-  return Rime::Instance().selectSchema(*CString(env, schema_id));
+  CString schemaId(env, schema_id);
+  if (env->ExceptionCheck()) return JNI_FALSE;
+  return Rime::Instance().selectSchema(*schemaId);
 }
 
 // testing
@@ -368,13 +389,15 @@ extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_simulateRimeKeySequence(JNIEnv* env,
                                                         jclass /* thiz */,
                                                         jstring key_sequence) {
-  return Rime::Instance().simulateKeySequence(CString(env, key_sequence));
+  CString keySequence(env, key_sequence);
+  if (env->ExceptionCheck()) return JNI_FALSE;
+  return Rime::Instance().simulateKeySequence(keySequence);
 }
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_osfans_trime_core_Rime_getRimeRawInput(JNIEnv* env,
                                                 jclass /* thiz */) {
-  return env->NewStringUTF(Rime::Instance().rawInput().data());
+  return makeJavaString(env, Rime::Instance().rawInput());
 }
 
 extern "C" JNIEXPORT jint JNICALL
