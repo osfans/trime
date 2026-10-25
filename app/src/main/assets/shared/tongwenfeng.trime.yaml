@@ -3515,9 +3515,9 @@ preset_keyboards:
     - {click: '「」{Left}'}
     - {click: '【】{Left}'}
     - {click: '～'}
-    - {click: '@{Return}'}
-    - {click: '*{Return}'}
-    - {click: '&{Return}'}
+    - {click: '@'}
+    - {click: '*'}
+    - {click: '&'}
     - {click: '﹏'}
     - {click: '﹋'}
     - {click: '﹌'}
