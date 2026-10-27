@@ -37,7 +37,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
         with:
-          packages: 'platform-tools cmake;3.31.6'
+          packages: 'platform-tools cmake;4.1.2'
 
       - name: Calculate JNI cache hash
         id: cache-hash
