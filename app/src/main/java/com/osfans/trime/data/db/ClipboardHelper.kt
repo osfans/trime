@@ -123,11 +123,10 @@ object ClipboardHelper :
         limit: Int = FILTER_BEANS_LIMIT,
     ): List<DatabaseBean> = clbDao.filterBeans(escapeLikeKeyword(keyword), limit)
 
-    private fun escapeLikeKeyword(keyword: String): String =
-        keyword
-            .replace("\\", "\\\\")
-            .replace("%", "\\%")
-            .replace("_", "\\_")
+    private fun escapeLikeKeyword(keyword: String): String = keyword
+        .replace("\\", "\\\\")
+        .replace("%", "\\%")
+        .replace("_", "\\_")
 
     suspend fun pin(id: Int) = clbDao.updatePinned(id, true)
 
