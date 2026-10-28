@@ -35,9 +35,9 @@ class SetupFragment : Fragment() {
                     R.id.app_specific_storage_option -> DataStorageMode.APP_STORAGE
                     else -> return@setOnCheckedChangeListener
                 }
-                prefs.dataStorageMode.setValue(newMode)
-                sync()
-                (requireActivity() as SetupActivity).updateButtons()
+                if (newMode != prefs.dataStorageMode.getValue()) {
+                    (requireActivity() as SetupActivity).selectStorageMode(newMode)
+                }
             }
             syncFromExternalDesc.setOnClickListener { syncFromExternalOption.isChecked = true }
             appSpecificStorageDesc.setOnClickListener { appSpecificStorageOption.isChecked = true }

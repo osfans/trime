@@ -128,6 +128,7 @@
     <string name="sync_from_external_desc">每次部署或同步使用者資料前，從指定目錄匯入資料到內部儲存空間，並在同步使用者資料後匯出到該目錄。需要較多儲存空間。建議有經驗的使用者使用。</string>
     <string name="use_app_specific_storage_desc">直接使用應用程式內部私有儲存空間，使用者需要使用支援的檔案管理器管理資料。解除安裝應用程式時，系統可能會詢問是否保留資料，請隨時做好備份。</string>
     <string name="external_sync_select_folder_message">外部同步需要選擇資料資料夾。請選擇存放 Trime 設定檔的位置。</string>
+    <string name="external_sync_confirmation_message">同文的工作設定將與外部資料夾雙向同步。同名檔案可能依修改時間被覆寫，刪除操作也會同步到兩側。請先備份兩個資料夾，再繼續操作。</string>
     <string name="external_sync_fallback_app_storage">資料夾選擇失敗或已取消。儲存模式將還原為使用應用程式專屬儲存空間。</string>
     <string name="maintenance">維護</string>
     <string name="loading">正在載入</string>

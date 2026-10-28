@@ -21,6 +21,7 @@ import com.osfans.trime.core.data.UserDataManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.prefs.PreferenceDelegate
 import com.osfans.trime.ui.common.PaddingPreferenceFragment
+import com.osfans.trime.ui.common.confirmExternalSync
 import com.osfans.trime.ui.common.withLoadingDialog
 import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.util.ResourceUtils
@@ -30,6 +31,7 @@ import com.osfans.trime.util.buildDocumentsProviderIntent
 import com.osfans.trime.util.customFormatTimeInDefault
 import com.osfans.trime.util.toast
 import io.github.whiredplanck.storageaccess.StorageAccess
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -42,9 +44,6 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
     private val backgroundSyncEnable = prefs.periodicBackgroundSync
     private val lastSyncTime by prefs.lastBackgroundSyncTime
     private val lastSyncStatus by prefs.lastBackgroundSyncStatus
-
-    /** Set while the picker runs as part of switching the storage mode to external sync. */
-    private var pendingExternalSyncSetup = false
 
     private val onBackgroundSyncEnable = PreferenceDelegate.OnChangeListener<Boolean> { _, v ->
         editSyncIntervalPreference.isEnabled = v
@@ -106,33 +105,28 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
         dataPathPreference.isEnabled = dataStorageMode == DataStorageMode.EXTERNAL_SYNC
     }
 
-    private fun pickDataPath() {
+    private fun pickDataPath(enableExternalSync: Boolean = false) {
         lifecycleScope.launch {
-            val picked = storageAccess.pickDirectory()
-            if (picked == null) {
-                // Cancelling the picker never nags: the current folder stays as it is, and a
-                // storage mode switch the user did not finish setting up is undone silently.
-                if (pendingExternalSyncSetup) {
-                    pendingExternalSyncSetup = false
-                    cancelExternalSyncSetup()
-                }
-                return@launch
-            }
+            val picked = storageAccess.pickDirectory() ?: return@launch
             val ctx = requireContext()
-            val externalSyncSetup = pendingExternalSyncSetup
-            pendingExternalSyncSetup = false
             lifecycleScope.launch {
                 withLoadingDialog(ctx) {
                     runCatching {
                         withContext(Dispatchers.IO) {
                             UserDataManager.persistTreeUri(picked.uri)
+                        }
+                        if (enableExternalSync) {
+                            prefs.dataStorageMode.setValue(DataStorageMode.EXTERNAL_SYNC)
+                        }
+                        withContext(Dispatchers.IO) {
                             viewModel.rime.runOnReady { deploy() }
                         }
                     }.onSuccess {
                         updateDataPathSummary()
                         ctx.toast(R.string.setup__data_path_imported)
                     }.onFailure {
-                        if (externalSyncSetup) {
+                        if (it is CancellationException) throw it
+                        if (enableExternalSync) {
                             fallbackToAppStorage()
                         } else {
                             // Keep the picked folder: it stays the user's choice, and a folder
@@ -147,35 +141,22 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
     }
 
     private fun promptSelectAnotherDirectory() {
-        AlertDialog
-            .Builder(requireContext())
-            .setMessage(R.string.select_another_directory_to_sync)
-            .setPositiveButton(R.string.select_another_directory) { _, _ ->
-                // The current folder stays in place until the user picks another one.
-                pickDataPath()
-            }.setNegativeButton(android.R.string.cancel, null)
-            .show()
+        requireContext().confirmExternalSync(
+            positiveButton = R.string.select_another_directory,
+            introMessage = R.string.select_another_directory_to_sync,
+        ) {
+            // The current folder stays in place until the user picks another one.
+            pickDataPath()
+        }
     }
 
     private fun promptExternalSyncFolderSelection() {
-        val ctx = requireContext()
-        AlertDialog
-            .Builder(ctx)
-            .setMessage(R.string.external_sync_select_folder_message)
-            .setPositiveButton(R.string.setup__select_data_path) { _, _ ->
-                pendingExternalSyncSetup = true
-                pickDataPath()
-            }.setNegativeButton(android.R.string.cancel) { _, _ ->
-                cancelExternalSyncSetup()
-            }.setOnCancelListener {
-                cancelExternalSyncSetup()
-            }.show()
-    }
-
-    /** Falls back to app-specific storage when the user gives up on choosing a folder. */
-    private fun cancelExternalSyncSetup() {
-        prefs.dataStorageMode.setValue(DataStorageMode.APP_STORAGE)
-        updateStorageModeUi()
+        requireContext().confirmExternalSync(
+            positiveButton = R.string.setup__select_data_path,
+            introMessage = R.string.external_sync_select_folder_message,
+        ) {
+            pickDataPath(enableExternalSync = true)
+        }
     }
 
     private fun fallbackToAppStorage() {
@@ -212,22 +193,23 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                             val oldMode = prefs.dataStorageMode.getValue()
                             val mode =
                                 DataStorageMode.valueOf(newValue as String)
-                            prefs.dataStorageMode.setValue(mode)
                             if (
                                 oldMode == DataStorageMode.APP_STORAGE &&
-                                mode == DataStorageMode.EXTERNAL_SYNC &&
-                                !UserDataManager.hasExternalAccess()
+                                mode == DataStorageMode.EXTERNAL_SYNC
                             ) {
-                                promptExternalSyncFolderSelection()
-                            } else if (
-                                oldMode == DataStorageMode.EXTERNAL_SYNC &&
-                                mode == DataStorageMode.APP_STORAGE
-                            ) {
-                                // The picked folder and its grant are kept, so switching back to
-                                // external sync does not ask the user to pick it again.
-                                updateDataPathSummary()
+                                if (UserDataManager.hasExternalAccess()) {
+                                    ctx.confirmExternalSync {
+                                        prefs.dataStorageMode.setValue(mode)
+                                    }
+                                } else {
+                                    promptExternalSyncFolderSelection()
+                                }
+                            } else {
+                                prefs.dataStorageMode.setValue(mode)
                             }
-                            true
+                            // Mode changes are applied above only after any required confirmation
+                            // and folder selection; ListPreference must not persist them early.
+                            false
                         }
                     },
                 )

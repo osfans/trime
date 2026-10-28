@@ -23,8 +23,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.osfans.trime.R
+import com.osfans.trime.core.data.DataStorageMode
 import com.osfans.trime.core.data.UserDataManager
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.databinding.ActivitySetupBinding
+import com.osfans.trime.ui.common.confirmExternalSync
 import com.osfans.trime.ui.main.MainActivity
 import com.osfans.trime.ui.setup.SetupPage.Companion.firstUndonePage
 import com.osfans.trime.ui.setup.SetupPage.Companion.isLastPage
@@ -33,6 +36,7 @@ import com.osfans.trime.util.createNotificationChannel
 import com.osfans.trime.util.startActivity
 import com.osfans.trime.util.toast
 import io.github.whiredplanck.storageaccess.StorageAccess
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -47,17 +51,48 @@ class SetupActivity : FragmentActivity() {
 
     private val storageAccess = StorageAccess(this)
 
-    fun pickDataPath() {
+    fun selectStorageMode(mode: DataStorageMode) {
+        if (mode == DataStorageMode.APP_STORAGE) {
+            applyStorageMode(mode)
+        } else if (UserDataManager.hasExternalAccess()) {
+            confirmExternalSync {
+                applyStorageMode(mode)
+            }
+        } else {
+            pickDataPath(enableExternalSync = true)
+        }
+        // Restore the current choice while confirmation or the folder picker is pending.
+        refreshCurrentFragment()
+    }
+
+    private fun applyStorageMode(mode: DataStorageMode) {
+        AppPrefs.defaultInstance().profile.dataStorageMode.setValue(mode)
+        refreshCurrentFragment()
+        updateButtons()
+    }
+
+    fun pickDataPath(enableExternalSync: Boolean = false) {
+        confirmExternalSync(
+            positiveButton = R.string.setup__select_data_path,
+            introMessage = R.string.external_sync_select_folder_message,
+        ) {
+            pickDataPathConfirmed(enableExternalSync)
+        }
+    }
+
+    private fun pickDataPathConfirmed(enableExternalSync: Boolean) {
         lifecycleScope.launch {
             val picked = storageAccess.pickDirectory() ?: return@launch
             runCatching {
                 UserDataManager.persistTreeUri(picked.uri)
+                if (enableExternalSync) applyStorageMode(DataStorageMode.EXTERNAL_SYNC)
                 check(UserDataManager.sync())
                 refreshCurrentFragment()
                 updateButtons()
                 toast(R.string.setup__data_path_imported)
                 skipButton.visibility = View.VISIBLE
             }.onFailure {
+                if (it is CancellationException) throw it
                 // Keep the picked folder: the user is not forced to pick again, and a folder that
                 // keeps failing makes the deploy path fall back to app-specific storage on its own.
                 refreshCurrentFragment()
