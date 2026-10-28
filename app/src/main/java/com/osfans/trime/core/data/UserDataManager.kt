@@ -7,7 +7,6 @@ package com.osfans.trime.core.data
 
 import android.annotation.SuppressLint
 import android.net.Uri
-import android.os.Build
 import android.util.Base64
 import androidx.core.util.AtomicFile
 import com.osfans.trime.TrimeApplication
@@ -92,15 +91,9 @@ object UserDataManager {
         StorageAccess.readFile(file.uri) { hashStream(it.buffered(HASH_BUFFER_SIZE)) }
     }.getOrNull()
 
-    // If Android version supports direct boot, we put the hierarchy in device encrypted storage
-    // instead of credential encrypted storage so that data can be accessed before user unlock
-    private val dataDir: File =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Timber.d("Using device protected storage")
-            appContext.createDeviceProtectedStorageContext().dataDir
-        } else {
-            File(appContext.applicationInfo.dataDir)
-        }
+    // We put the hierarchy in device encrypted storage instead of credential encrypted
+    // storage so that data can be accessed before user unlock
+    private val dataDir: File = appContext.createDeviceProtectedStorageContext().dataDir
 
     private val externalFilesDir get() = TrimeApplication.getInstance().externalFilesDir
 

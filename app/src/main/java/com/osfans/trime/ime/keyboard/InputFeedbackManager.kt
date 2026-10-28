@@ -9,7 +9,6 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.SoundPool
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.VibrationEffect
@@ -170,9 +169,7 @@ object InputFeedbackManager {
         cacheSoundId()
     }
 
-    private val hasAmplitudeControl =
-        (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) &&
-            vibrator.hasAmplitudeControl()
+    private val hasAmplitudeControl = vibrator.hasAmplitudeControl()
 
     private val vibrateOnKeyPress by keyboardPrefs.vibrateOnKeyPress
     private val vibrationDuration by keyboardPrefs.vibrationDuration
@@ -197,12 +194,9 @@ object InputFeedbackManager {
         if (duration != 0L) { // use vibrator
             if (hasAmplitudeControl && vibrationAmplitude != 0) {
                 vibrator.vibrate(VibrationEffect.createOneShot(duration, vibrationAmplitude))
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            } else {
                 val ve = VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE)
                 vibrator.vibrate(ve)
-            } else {
-                @Suppress("DEPRECATION")
-                vibrator.vibrate(duration)
             }
         } else {
             @Suppress("DEPRECATION")

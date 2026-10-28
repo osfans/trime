@@ -12,9 +12,7 @@ import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.StateListDrawable
 import android.graphics.drawable.shapes.OvalShape
-import android.os.Build
 import androidx.annotation.ColorInt
-import androidx.annotation.RequiresApi
 
 fun rippleDrawable(
     @ColorInt color: Int,
@@ -38,7 +36,6 @@ fun roundedRippleDrawable(
     return RippleDrawable(ColorStateList.valueOf(color), contentDrawable, maskDrawable)
 }
 
-@RequiresApi(Build.VERSION_CODES.M)
 fun borderlessRippleDrawable(
     @ColorInt color: Int,
     r: Int = RippleDrawable.RADIUS_AUTO,

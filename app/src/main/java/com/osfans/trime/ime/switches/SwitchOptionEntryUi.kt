@@ -147,12 +147,8 @@ class SwitchOptionEntryUi(
 
     private fun getFirstCharacter(s: String): String {
         if (s.isEmpty()) return ""
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val iterator = BreakIterator.getCharacterInstance()
-            iterator.setText(s)
-            s.substring(iterator.first(), iterator.next())
-        } else {
-            s.substring(0, s.offsetByCodePoints(0, 1))
-        }
+        val iterator = BreakIterator.getCharacterInstance()
+        iterator.setText(s)
+        return s.substring(iterator.first(), iterator.next())
     }
 }

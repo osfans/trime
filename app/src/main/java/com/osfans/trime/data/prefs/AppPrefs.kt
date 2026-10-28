@@ -7,9 +7,7 @@ package com.osfans.trime.data.prefs
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.os.Build
 import androidx.annotation.Keep
-import androidx.annotation.RequiresApi
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.osfans.trime.R
@@ -462,7 +460,6 @@ class AppPrefs(
         )
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     fun syncToDeviceEncryptedStorage() {
         val ctx = appContext.createDeviceProtectedStorageContext()
         val sp = PreferenceManager.getDefaultSharedPreferences(ctx)

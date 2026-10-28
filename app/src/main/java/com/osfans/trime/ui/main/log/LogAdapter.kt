@@ -6,8 +6,6 @@
 package com.osfans.trime.ui.main.log
 
 import android.graphics.Typeface
-import android.os.Build
-import android.os.Build.VERSION_CODES
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import android.view.textclassifier.TextClassifier
@@ -51,9 +49,7 @@ class LogAdapter(
         TextView(parent.context).apply {
             textSize = 12f
             typeface = Typeface.MONOSPACE
-            if (Build.VERSION.SDK_INT >= VERSION_CODES.O) {
-                setTextClassifier(TextClassifier.NO_OP)
-            }
+            setTextClassifier(TextClassifier.NO_OP)
             layoutParams =
                 MarginLayoutParams(MarginLayoutParams.WRAP_CONTENT, MarginLayoutParams.WRAP_CONTENT).apply {
                     marginStart = dp(4)

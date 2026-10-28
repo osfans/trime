@@ -11,7 +11,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
-import android.os.Build
 import android.os.Process
 import android.util.Log
 import androidx.core.content.ContextCompat
@@ -80,7 +79,7 @@ class TrimeApplication : Application() {
         private set
 
     val directBootAwareContext: Context
-        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isDirectBootMode) {
+        get() = if (isDirectBootMode) {
             createDeviceProtectedStorageContext()
         } else {
             applicationContext
@@ -93,7 +92,7 @@ class TrimeApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !userManager.isUserUnlocked) {
+        if (!userManager.isUserUnlocked) {
             isDirectBootMode = true
             registerReceiver(unlockReceiver, IntentFilter(Intent.ACTION_USER_UNLOCKED))
         }
@@ -182,7 +181,7 @@ class TrimeApplication : Application() {
             }
             ClipboardHelper.init(ctx)
             CollectionHelper.init(ctx)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !isDirectBootMode) {
+            if (!isDirectBootMode) {
                 AppPrefs.defaultInstance().syncToDeviceEncryptedStorage()
                 ThemeManager.syncToDeviceEncryptedStorage()
             }

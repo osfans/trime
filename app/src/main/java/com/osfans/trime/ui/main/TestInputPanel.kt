@@ -11,7 +11,6 @@ import android.content.Context
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
-import android.os.Build
 import android.text.InputType
 import android.util.AttributeSet
 import android.view.Window
@@ -212,9 +211,7 @@ constructor(
         minimumHeight = dp(48)
         textSize = 16f
         setPadding(dp(14))
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            importantForAutofill = IMPORTANT_FOR_AUTOFILL_NO
-        }
+        importantForAutofill = IMPORTANT_FOR_AUTOFILL_NO
     }.apply {
         doAfterTextChanged {
             clearButton.isVisible = !text.isNullOrEmpty()

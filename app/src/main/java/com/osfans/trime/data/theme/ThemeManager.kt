@@ -6,8 +6,6 @@
 package com.osfans.trime.data.theme
 
 import android.content.res.Configuration
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.osfans.trime.core.data.DataManager
@@ -160,7 +158,6 @@ object ThemeManager {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     fun syncToDeviceEncryptedStorage() {
         val ctx = appContext.createDeviceProtectedStorageContext()
         val sp = PreferenceManager.getDefaultSharedPreferences(ctx)

@@ -7,7 +7,6 @@ package com.osfans.trime.data.db
 
 import android.content.ClipboardManager
 import android.content.Context
-import android.os.Build
 import androidx.annotation.Keep
 import androidx.room.Room
 import androidx.room.withTransaction
@@ -147,7 +146,6 @@ object ClipboardHelper :
     }
 
     private var lastClipTimestamp = -1L
-    private var lastClipHash = 0
 
     /**
      * 此方法设置监听剪贴板变化，如有新的剪贴内容，就启动选定的剪贴板管理器
@@ -159,17 +157,9 @@ object ClipboardHelper :
      */
     override fun onPrimaryClipChanged() {
         val clip = clipboardManager.primaryClip ?: return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val timestamp = clip.description.timestamp
-            if (timestamp == lastClipTimestamp) return
-            lastClipTimestamp = timestamp
-        } else {
-            val timestamp = System.currentTimeMillis()
-            val hash = clip.hashCode()
-            if (timestamp - lastClipTimestamp < 100L && hash == lastClipHash) return
-            lastClipTimestamp = timestamp
-            lastClipHash = hash
-        }
+        val timestamp = clip.description.timestamp
+        if (timestamp == lastClipTimestamp) return
+        lastClipTimestamp = timestamp
         launch {
             mutex.withLock {
                 val bean = DatabaseBean.fromClipData(clip) ?: return@withLock
