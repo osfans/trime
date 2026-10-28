@@ -30,6 +30,7 @@ import com.osfans.trime.util.buildDocumentsProviderIntent
 import com.osfans.trime.util.customFormatTimeInDefault
 import com.osfans.trime.util.toast
 import io.github.whiredplanck.storageaccess.StorageAccess
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -108,39 +109,34 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
 
     private fun pickDataPath() {
         lifecycleScope.launch {
-            val picked = storageAccess.pickDirectory()
-            if (picked == null) {
-                // Cancelling the picker never nags: the current folder stays as it is, and a
-                // storage mode switch the user did not finish setting up is undone silently.
-                if (pendingExternalSyncSetup) {
-                    pendingExternalSyncSetup = false
-                    cancelExternalSyncSetup()
-                }
-                return@launch
-            }
-            val ctx = requireContext()
             val externalSyncSetup = pendingExternalSyncSetup
             pendingExternalSyncSetup = false
-            lifecycleScope.launch {
+            runCatching {
+                val picked = storageAccess.pickDirectory()
+                if (picked == null) {
+                    // Cancelling the picker never nags: the current folder stays as it is, and a
+                    // storage mode switch the user did not finish setting up is undone silently.
+                    if (externalSyncSetup) cancelExternalSyncSetup()
+                    return@launch
+                }
+                val ctx = requireContext()
                 withLoadingDialog(ctx) {
-                    runCatching {
-                        withContext(Dispatchers.IO) {
-                            UserDataManager.persistTreeUri(picked.uri)
-                            viewModel.rime.runOnReady { deploy() }
-                        }
-                    }.onSuccess {
-                        updateDataPathSummary()
-                        ctx.toast(R.string.setup__data_path_imported)
-                    }.onFailure {
-                        if (externalSyncSetup) {
-                            fallbackToAppStorage()
-                        } else {
-                            // Keep the picked folder: it stays the user's choice, and a folder
-                            // that keeps failing makes the deploy path fall back on its own.
-                            updateDataPathSummary()
-                            ctx.toast(R.string.setup__data_path_import_failed)
-                        }
+                    withContext(Dispatchers.IO) {
+                        UserDataManager.persistTreeUri(picked.uri)
+                        viewModel.rime.runOnReady { deploy() }
                     }
+                }
+                updateDataPathSummary()
+                ctx.toast(R.string.setup__data_path_imported)
+            }.onFailure {
+                if (it is CancellationException) throw it
+                if (externalSyncSetup) {
+                    fallbackToAppStorage()
+                } else {
+                    // Keep the picked folder: it stays the user's choice, and a folder
+                    // that keeps failing makes the deploy path fall back on its own.
+                    updateDataPathSummary()
+                    requireContext().toast(R.string.setup__data_path_import_failed)
                 }
             }
         }
