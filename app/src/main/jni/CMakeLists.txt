@@ -6,8 +6,8 @@ cmake_minimum_required(VERSION 3.18.0)
 
 project(trime VERSION 3.0.0)
 
-# for reproducible build
-add_link_options("LINKER:--hash-style=both,--build-id=none")
+# for reproducible build; GNU hash is enough above API 22
+add_link_options("LINKER:--build-id=none")
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 

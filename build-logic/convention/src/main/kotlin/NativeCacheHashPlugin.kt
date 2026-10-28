@@ -2,6 +2,7 @@
  * SPDX-FileCopyrightText: 2015 - 2025 Rime community
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
+import com.android.build.api.dsl.ApplicationExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -33,6 +34,7 @@ class NativeCacheHashPlugin : Plugin<Project> {
                         appendLine(cmakeVersion)
                         appendLine(ndkVersion)
                         appendLine(buildAbiOverride)
+                        appendLine(extensions.getByType(ApplicationExtension::class.java).defaultConfig.minSdk)
                         appendLine(runCmd("git submodule status"))
                         fileTree("src/main/jni/cmake").forEach { module ->
                             appendLine(sha256(module))
