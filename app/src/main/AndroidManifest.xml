@@ -16,6 +16,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <intent>
             <action android:name="android.intent.action.TTS_SERVICE" />
         </intent>
+        <intent>
+            <action android:name="android.view.InputMethod" />
+        </intent>
     </queries>
 
     <application
