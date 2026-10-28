@@ -135,7 +135,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.autofill)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core)
     implementation(libs.androidx.navigation.fragment)
     implementation(libs.androidx.navigation.ui)
     implementation(libs.androidx.paging.runtime.ktx)
