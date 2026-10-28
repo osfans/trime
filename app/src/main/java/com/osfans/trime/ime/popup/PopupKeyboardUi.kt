@@ -196,13 +196,7 @@ class PopupKeyboardUi(
             if (label.length == 1 && label[0].code < 128) {
                 label
             } else {
-                theme.resolveAction(label).getLabel(KeyboardWindow.currentKeyboard).let {
-                    when {
-                        it.isIconFont -> it
-                        it.isNotEmpty() -> String(Character.toChars(it.codePointAt(0)))
-                        else -> ""
-                    }
-                }
+                theme.resolveAction(label).getLabel(KeyboardWindow.currentKeyboard)
             }
 
         PopupKeyUi(displayLabel)
