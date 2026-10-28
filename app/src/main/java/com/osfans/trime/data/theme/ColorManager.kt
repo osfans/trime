@@ -8,7 +8,6 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.graphics.NinePatch
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
@@ -189,9 +188,14 @@ object ColorManager {
         value: String,
     ): Drawable? {
         if (value.isEmpty()) return null
-        if (ColorTable.isImageValue(value)) return imageDrawable(scope, value)
-        val color = runCatching { ColorUtils.parseColor(value) }.getOrDefault(Color.TRANSPARENT)
-        return GradientDrawable().apply { setColor(color) }
+        val parsed = ColorTable.parseValue(value) {
+            runCatching { ColorUtils.parseColor(it) }.getOrNull()
+        }
+        return when (parsed) {
+            is ColorTable.Value.Color -> GradientDrawable().apply { setColor(parsed.argb) }
+            is ColorTable.Value.Image -> imageDrawable(scope, parsed.path)
+            ColorTable.Value.None -> null
+        }
     }
 
     private fun imageDrawable(

@@ -45,6 +45,15 @@ internal class ColorTable private constructor(
         /** Whether a scheme value names an image file instead of a color. */
         fun isImageValue(value: String): Boolean = IMAGE_SUFFIXES.any { value.endsWith(it) }
 
+        /** Invalid values stay distinct from an explicitly transparent color. */
+        fun parseValue(
+            value: String,
+            parseColor: (String) -> Int?,
+        ): Value = when {
+            isImageValue(value) -> Value.Image(value)
+            else -> parseColor(value)?.let { Value.Color(it) } ?: Value.None
+        }
+
         /**
          * The first non-empty value for [key] together with the key that
          * carries it, walking scheme colors -> theme fallback_colors ->
@@ -113,18 +122,9 @@ internal class ColorTable private constructor(
                     unresolvedKeys += key
                     continue
                 }
-                val parsed = parseColor(raw)
-                entries[key] =
-                    when {
-                        isImageValue(raw) -> Value.Image(raw)
-
-                        parsed != null -> Value.Color(parsed)
-
-                        else -> {
-                            invalidValues += key
-                            Value.None
-                        }
-                    }
+                val value = parseValue(raw, parseColor)
+                if (value == Value.None) invalidValues += key
+                entries[key] = value
             }
             return ColorTable(entries, unresolvedKeys, invalidValues)
         }
