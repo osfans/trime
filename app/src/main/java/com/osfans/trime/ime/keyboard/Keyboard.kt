@@ -119,7 +119,7 @@ class Keyboard(
         if (selfConfig != null) {
 
             val keys = selfConfig.keys
-            val keyboardKeyWidth = selfConfig.width
+            val keyboardKeyWidth = selfConfig.width.takeIf { it > 0f } ?: theme.style.keyWidth
 
             val maxColumns = if (selfConfig.columns == -1) Int.MAX_VALUE else selfConfig.columns
 
