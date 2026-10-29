@@ -120,7 +120,7 @@ class OpenCCDataPlugin : Plugin<Project> {
         val sourceFiles: FileTree
             get() =
                 sourceDir.get().asFileTree.matching {
-                    exclude(".git", ".git/**", "**/.git", "**/.git/**")
+                    exclude(".git", ".git/**", "**/.git", "**/.git/**", "**/__pycache__/**", "**/*.pyc")
                 }
 
         @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -172,6 +172,7 @@ class OpenCCDataPlugin : Plugin<Project> {
             check(!build.exists() || build.deleteRecursively()) { "Cannot clean OpenCC host build: $build" }
             val cmake = cmakeExecutable.get()
             execOperations.exec {
+                environment("PYTHONDONTWRITEBYTECODE", "1")
                 commandLine(
                     listOf(
                         cmake,
@@ -184,6 +185,7 @@ class OpenCCDataPlugin : Plugin<Project> {
                 )
             }.assertNormalExitValue()
             execOperations.exec {
+                environment("PYTHONDONTWRITEBYTECODE", "1")
                 commandLine(cmake, "--build", build.absolutePath, "--config", "Release", "--target", "Dictionaries", "--parallel", "1")
             }.assertNormalExitValue()
             val generated = build.resolve("opencc/data/STPhrases_GeneratedFromRegionalPhrases.txt")
@@ -203,11 +205,18 @@ class OpenCCDataPlugin : Plugin<Project> {
         @get:Inject
         abstract val execOperations: ExecOperations
 
+        @get:Internal
+        abstract val inputDir: DirectoryProperty
+
         // relative paths plus content hashes: updating OpenCC's configs or
         // dictionaries alone must re-run this task after a submodule bump
         @get:PathSensitive(PathSensitivity.RELATIVE)
-        @get:InputDirectory
-        abstract val inputDir: DirectoryProperty
+        @get:InputFiles
+        val sourceFiles: FileTree
+            get() =
+                inputDir.get().asFileTree.matching {
+                    exclude(".git", ".git/**", "**/.git", "**/.git/**", "**/__pycache__/**", "**/*.pyc")
+                }
 
         @get:OutputDirectory
         abstract val outputDir: DirectoryProperty
@@ -302,6 +311,7 @@ class OpenCCDataPlugin : Plugin<Project> {
                 workingDir = output
                 commandLine = listOf(
                     "python3",
+                    "-B",
                     input.resolve("scripts/${generated.script}").absolutePath,
                     dictionary.resolve("${generated.source}.txt").absolutePath,
                     "$name.txt",
