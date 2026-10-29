@@ -31,7 +31,10 @@ import javax.inject.Inject
 
 /** Select a runnable host architecture, independently of Android's target ABI. */
 private fun openccHostCmakeArguments(osName: String, osArch: String, generator: String): List<String> {
-    val args = mutableListOf("-DCMAKE_BUILD_TYPE=Release")
+    val args = mutableListOf<String>()
+    if (!osName.startsWith("Windows", ignoreCase = true) && generator !in listOf("Xcode", "Ninja Multi-Config")) {
+        args += "-DCMAKE_BUILD_TYPE=Release"
+    }
     if (osName.startsWith("Windows", ignoreCase = true)) {
         check(generator.isEmpty() || generator.startsWith("Visual Studio")) {
             "OpenCC host data generation requires a native Visual Studio CMake generator on Windows"
