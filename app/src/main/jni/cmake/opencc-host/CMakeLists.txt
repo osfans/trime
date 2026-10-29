@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2015 - 2026 Rime community
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+cmake_minimum_required(VERSION 3.18)
+project(trime_opencc_data LANGUAGES CXX)
+
+get_filename_component(_OPENCC_COMPILER_NAME "${CMAKE_CXX_COMPILER}" NAME)
+if(CMAKE_CROSSCOMPILING OR NOT CMAKE_SYSTEM_NAME STREQUAL CMAKE_HOST_SYSTEM_NAME
+   OR CMAKE_SYSTEM_NAME STREQUAL "Android"
+   OR _OPENCC_COMPILER_NAME MATCHES "android"
+   OR CMAKE_CXX_COMPILER_TARGET MATCHES "android"
+   OR CMAKE_CXX_COMPILER_ARG1 MATCHES "android"
+   OR CMAKE_CXX_FLAGS MATCHES "android")
+  message(FATAL_ERROR "OpenCC data generation requires a native host compiler")
+endif()
+
+if(NOT IS_DIRECTORY "${TRIME_OPENCC_SOURCE_DIR}/src")
+  message(FATAL_ERROR "TRIME_OPENCC_SOURCE_DIR must name the pinned OpenCC source")
+endif()
+
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(ENABLE_GTEST OFF CACHE BOOL "" FORCE)
+set(ENABLE_BENCHMARK OFF CACHE BOOL "" FORCE)
+set(BUILD_DOCUMENTATION OFF CACHE BOOL "" FORCE)
+set(BUILD_PYTHON OFF CACHE BOOL "" FORCE)
+set(BUILD_OPENCC_JIEBA_PLUGIN OFF CACHE BOOL "" FORCE)
+set(OPENCC_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+set(OPENCC_DICT_FORMAT text CACHE STRING "" FORCE)
+set(USE_SYSTEM_MARISA OFF CACHE BOOL "" FORCE)
+# Repository-local tags do not affect the generated dictionary contents.
+set(CMAKE_DISABLE_FIND_PACKAGE_Git TRUE)
+
+add_subdirectory("${TRIME_OPENCC_SOURCE_DIR}" opencc)
