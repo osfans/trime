@@ -33,6 +33,7 @@ import com.osfans.trime.util.createNotificationChannel
 import com.osfans.trime.util.startActivity
 import com.osfans.trime.util.toast
 import io.github.whiredplanck.storageaccess.StorageAccess
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -49,8 +50,8 @@ class SetupActivity : FragmentActivity() {
 
     fun pickDataPath() {
         lifecycleScope.launch {
-            val picked = storageAccess.pickDirectory() ?: return@launch
             runCatching {
+                val picked = storageAccess.pickDirectory() ?: return@launch
                 UserDataManager.persistTreeUri(picked.uri)
                 check(UserDataManager.sync())
                 refreshCurrentFragment()
@@ -58,6 +59,7 @@ class SetupActivity : FragmentActivity() {
                 toast(R.string.setup__data_path_imported)
                 skipButton.visibility = View.VISIBLE
             }.onFailure {
+                if (it is CancellationException) throw it
                 // Keep the picked folder: the user is not forced to pick again, and a folder that
                 // keeps failing makes the deploy path fall back to app-specific storage on its own.
                 refreshCurrentFragment()
