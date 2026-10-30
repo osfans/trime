@@ -10,6 +10,7 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
 import android.graphics.drawable.GradientDrawable
 import android.view.ViewOutlineProvider
+import android.widget.Space
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.view.isVisible
 import com.mikepenz.iconics.IconicsDrawable
@@ -30,8 +31,6 @@ import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.verticalLayout
 import splitties.views.dsl.core.view
 import splitties.views.gravityCenter
-import splitties.views.gravityEnd
-import splitties.views.gravityStart
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToInt
@@ -132,7 +131,7 @@ class PopupKeyboardUi(
     init {
         val keyCount: Float = keys.size.toFloat()
         rowCount = ceil(keyCount / 5).toInt()
-        columnCount = (keyCount / rowCount).roundToInt()
+        columnCount = ceil(keyCount / rowCount).toInt()
 
         focusRow = 0
         focusColumn = calcInitialFocusedColumn(columnCount, keyWidth, outerBounds, triggerBounds)
@@ -223,14 +222,7 @@ class PopupKeyboardUi(
                 horizontalLayout row@{
                     for (j in 0 until columnCount) {
                         val keyUi = keyUis.getOrNull(order[j])
-                        if (keyUi == null) {
-                            // align columns to right (end) when first column is empty, eg.
-                            // |   | 6 | 5 | 4 |(no free space)
-                            // | 3 | 2 | 1 | 0 |(no free space)
-                            gravity = if (j == 0) gravityEnd else gravityStart
-                        } else {
-                            add(keyUi.root, lParams(keyWidth, keyHeight))
-                        }
+                        add(keyUi?.root ?: Space(ctx), lParams(keyWidth, keyHeight))
                     }
                 },
                 lParams(width = matchParent),
