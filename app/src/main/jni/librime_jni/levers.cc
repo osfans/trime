@@ -30,7 +30,7 @@ class SwitcherSettings {
       result = SchemaItem::fromCList(list);
       levers->schema_list_destroy(&list);
     }
-    return std::move(result);
+    return result;
   }
 
   std::vector<SchemaItem> selectedSchemas() {
@@ -40,7 +40,7 @@ class SwitcherSettings {
       result = SchemaItem::fromCList(list);
       levers->schema_list_destroy(&list);
     }
-    return std::move(result);
+    return result;
   }
 
   bool selectSchemas(const std::vector<std::string>& schemas) {
@@ -112,8 +112,10 @@ extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_selectRimeSchemas(JNIEnv* env,
                                                   jclass /* thiz */,
                                                   jobjectArray array) {
+  auto schemas = stringArrayToStringVector(env, array);
+  if (env->ExceptionCheck()) return JNI_FALSE;
   SwitcherSettings switcher;
-  return switcher.selectSchemas(stringArrayToStringVector(env, array));
+  return switcher.selectSchemas(schemas);
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL
@@ -126,29 +128,39 @@ Java_com_osfans_trime_data_userdict_UserDictManager_getUserDictList(
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_data_userdict_UserDictManager_backupUserDict(
     JNIEnv* env, jclass clazz, jstring dict_name) {
+  CString name(env, dict_name);
+  if (env->ExceptionCheck()) return JNI_FALSE;
   SwitcherSettings switcher;
-  return switcher.backupUserDict(*CString(env, dict_name));
+  return switcher.backupUserDict(*name);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_data_userdict_UserDictManager_restoreUserDict(
     JNIEnv* env, jclass clazz, jstring snapshot_file) {
+  CString file(env, snapshot_file);
+  if (env->ExceptionCheck()) return JNI_FALSE;
   SwitcherSettings switcher;
-  return switcher.restoreUserDict(*CString(env, snapshot_file));
+  return switcher.restoreUserDict(*file);
 }
 
 extern "C" JNIEXPORT jint JNICALL
 Java_com_osfans_trime_data_userdict_UserDictManager_exportUserDict(
     JNIEnv* env, jclass clazz, jstring dict_name, jstring text_file) {
+  CString name(env, dict_name);
+  if (env->ExceptionCheck()) return -1;
+  CString file(env, text_file);
+  if (env->ExceptionCheck()) return -1;
   SwitcherSettings switcher;
-  return switcher.exportUserDict(*CString(env, dict_name),
-                                 *CString(env, text_file));
+  return switcher.exportUserDict(*name, *file);
 }
 
 extern "C" JNIEXPORT jint JNICALL
 Java_com_osfans_trime_data_userdict_UserDictManager_importUserDict(
     JNIEnv* env, jclass clazz, jstring dict_name, jstring text_file) {
+  CString name(env, dict_name);
+  if (env->ExceptionCheck()) return -1;
+  CString file(env, text_file);
+  if (env->ExceptionCheck()) return -1;
   SwitcherSettings switcher;
-  return switcher.importUserDict(*CString(env, dict_name),
-                                 *CString(env, text_file));
+  return switcher.importUserDict(*name, *file);
 }

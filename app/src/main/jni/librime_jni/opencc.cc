@@ -16,11 +16,16 @@ extern "C" JNIEXPORT jstring JNICALL
 Java_com_osfans_trime_data_opencc_OpenCCDictManager_openCCLineConv(
     JNIEnv* env, jclass clazz, jstring input, jstring config_file_name) {
   try {
-    opencc::SimpleConverter converter(CString(env, config_file_name));
-    return env->NewStringUTF(converter.Convert(*CString(env, input)).data());
+    auto config = CString(env, config_file_name);
+    if (env->ExceptionCheck()) return nullptr;
+    auto text = CString(env, input);
+    if (env->ExceptionCheck()) return nullptr;
+    opencc::SimpleConverter converter(config);
+    return makeJavaString(env,
+                          converter.Convert(static_cast<std::string>(text)));
   } catch (const opencc::Exception& e) {
     throwJavaException(env, e.what());
-    return env->NewStringUTF("");
+    return nullptr;
   }
 }
 
@@ -28,7 +33,9 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_osfans_trime_data_opencc_OpenCCDictManager_openCCDictConv(
     JNIEnv* env, jclass clazz, jstring src, jstring dest, jboolean mode) {
   auto src_file = CString(env, src);
+  if (env->ExceptionCheck()) return;
   auto dest_file = CString(env, dest);
+  if (env->ExceptionCheck()) return;
   try {
     if (mode) {
       opencc::ConvertDictionary(src_file, dest_file, "ocd2", "text");
