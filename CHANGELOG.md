@@ -2,6 +2,144 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.13] - 2026-11-01
+
+### 🚀 Features
+
+- Read `sync_dir` from `installation.yaml`
+- *(theme)* Report presets with an unresolvable send at activation
+- *(theme)* Expand the librime config DSL used by theme files
+- *(theme)* Read themes from source instead of the deployed artifact
+- *(theme)* Lint themes when they are loaded
+- *(theme)* Keep the theme findings with the loaded theme
+- *(settings)* List theme diagnostics with copy and share
+- *(storage)* Initialize StorageAccess
+- Support direct boot mode
+- *(keyboard)* Reset shift when switching back to Chinese mode
+- *(keyboard)* Support double tap shift to lock caps
+- *(data)* Implement UserDataManager sync from external tree
+- Use librime's bundled opencc
+
+### 🐛 Bug Fixes
+
+- Match Room migration parameter name
+- Remove redundant keyboard listener safe calls
+- Use non-deprecated locale factory
+- Declare FileUtils delete return type
+- Declare explicit dependency for lint report model tasks on data checksums task
+- Fix deprecated usage in installOpenCCData
+- Import & export according to installation id
+- Add missing zh-TW translation
+- *(theme)* Restore full scheme refresh coverage
+- *(theme)* Restyle board windows on scheme switches
+- *(keyboard)* Report presets whose send value resolves to nothing
+- *(popup)* Restyle key bubbles on scheme changes
+- Delete previous nightly release
+- *(theme)* Refuse a theme that defines no color scheme
+- Suppress mixed-condition-operators on Key.kt
+- Fix the ktlint error
+- Fix the setup android step
+- Recover app dirs and setup after late media
+- Retry Rime and wait for ThemeScope after reboot
+- *(storage)* Stop forgetting the picked folder and its grant
+- *(symbol)* Correct ascii_punct option name
+- *(ime)* Forward modified Return as a key chord
+- *(opencc)* Package t2s dictionary
+- Defer WorkManager startup until device unlock
+- Fix deprecated SHOW_IMPLICIT usage
+- Match native library license versions to pinned sources
+- Release JNI local references while converting string arrays
+- Detach only JNI thread attachments owned by the guard
+- Keep setup pages above visible navigation buttons
+- Keep setup content reachable in short viewports
+- Constrain clipboard editor height above action buttons
+- Keep Return labels consistent with editor actions
+- *(theme)* Avoid java.nio.file APIs on API < 26
+- *(build)* Fall back to the default when a git command fails
+- *(build)* Disable glog unwind support
+- *(theme)* Send only the symbol for tongwenfeng symbol keys
+- *(ime)* Ignore toolbar actions after candidates replace it
+- *(ime)* Declare package visibility for voice input methods
+
+### 🚜 Refactor
+
+- Better dependency retrieval
+- *(ci)* Polish release job
+- Migrate keyboard switcher state
+- *(theme)* Unify theme loading pipeline and async theme switching
+- *(theme)* Type color keys and pre-compile color tables
+- *(theme)* Make GeneralStyle defaults a single source of truth
+- *(theme)* Introduce ThemeScope as the runtime theme state
+- *(theme)* Restyle views in place on scheme switches
+- *(theme)* Inject ThemeScope into the UI tree
+- *(theme)* Move LiquidData to the data layer
+- *(theme)* Make TextKeyboard defaults a single source of truth
+- *(theme)* Resolve keyboard geometry cascade explicitly
+- *(keyboard)* Decouple key action parsing from the runtime
+- *(theme)* Keep the source reader faithful to librime
+- Parse YAML with kaml instead of a hand-written node model
+- *(soundeffect)* Decode sound effect descriptors with kotlinx.serialization
+- *(theme)* Scope the font cache to each theme
+- *(theme)* Cache key actions per theme
+- *(theme)* Build liquid keyboard data lazily on the model
+- *(theme)* Model color schemes as plain maps
+- *(theme)* Model text key actions as tokens
+- *(theme)* Decode theme configuration with kotlinx.serialization
+- *(sync)* Drive SAF access through StorageAccess
+- *(sync)* Consolidate the sync helpers into RimeDataSync
+- *(storage)* Improve display for external data path in Preference
+- Apply StorageAccess for creating and picking file from SAF
+- *(data)* Move default custom config bootstrap into UserDataManager
+- *(data)* Move DataManager to core/data
+- *(ime)* Call AutoScaleTextView setter before invalidating caches (#2187)
+
+### 📚 Documentation
+
+- Fix typo of style-lint in pull request template
+
+### ⚡ Performance
+
+- Resolve theme files in the external tree by name lookup
+- *(data)* Reuse content digests and widen hash buffer in UserDataManager
+- Initialize input feedback resources on demand
+
+### 🧪 Testing
+
+- *(keyboard)* Restore key name lookup after each spec
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version to 3.3.13
+- Upgrade gralde to 9.7.1
+- Warn invalid sync_dir too
+- Replace obsoleted nightly release action
+- Upgrade ktlint to 1.8.0
+- Upgrade spotless to 8.10.2
+- Apply ktlint with spotless
+- Upgrade boost to 1.92.0
+- Remove the gradle workaround
+- Install StorageAccess from JitPack
+- Update StorageAccess to 2.0.0
+- Upgrade gradle to 9.8.1
+- Upgrade opencc to 1.4.2
+- Upgrade snappy to 1.3.1
+- Gate builds on style, lint, and unit test checks
+- Remove redundant submodule fetch
+- Install CMake via setup-android
+- Upgrade librime to latest commit
+- Upgrade cmake to 4.1.2
+- Upgrade librime-lua and bundled lua
+- Add 3.3.13 changelog
+
+### Build
+
+- Use mutable JNI source directories API
+- Add a make target for checks
+- Update Android NDK and build tools
+- Update Android Gradle Plugin to 9.4.1
+- *(spotless)* Exclude included build outputs
+- *(deps)* Update spotless to 8.10.3
+
 ## [3.3.12] - 2026-09-01
 
 ### 🚀 Features
