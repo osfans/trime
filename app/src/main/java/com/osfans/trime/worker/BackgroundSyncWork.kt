@@ -73,7 +73,12 @@ class BackgroundSyncWork(
             context: Context,
             policy: ExistingPeriodicWorkPolicy,
         ) {
-            WorkManager.initialize(context, Configuration.Builder().build())
+            // WorkManager can only be initialized once per process. start() is called from
+            // TrimeApplication#onCreate and forceStart() from MainActivity#onPause, so a second
+            // call would throw "WorkManager is already initialized".
+            if (!WorkManager.isInitialized()) {
+                WorkManager.initialize(context, Configuration.Builder().build())
+            }
             val instance = WorkManager.getInstance(context)
             if (!enable) {
                 instance.cancelUniqueWork(PERIODIC_BACKGROUND_SYNC_KEY)
