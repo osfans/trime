@@ -1,14 +1,13 @@
 /*
- * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-FileCopyrightText: 2015 - 2026 Rime community
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-package com.osfans.trime.data.db
+package com.osfans.trime.data.clip
 
 import android.content.ClipboardManager
 import android.content.Context
 import androidx.annotation.Keep
-import androidx.room.Room
 import androidx.room.withTransaction
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.prefs.PreferenceDelegate
@@ -27,11 +26,11 @@ import timber.log.Timber
 object ClipboardHelper :
     ClipboardManager.OnPrimaryClipChangedListener,
     CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
-    private lateinit var clbDb: Database
-    private lateinit var clbDao: DatabaseDao
+    private val database: ClipDatabase get() = ClipDatabaseHolder.get()
+    private val dao: ClipboardDao get() = database.clipboardDao()
 
     fun interface OnClipboardUpdateListener {
-        fun onUpdate(bean: DatabaseBean)
+        fun onUpdate(entity: ClipboardEntity)
     }
 
     private val mutex = Mutex()
@@ -40,7 +39,7 @@ object ClipboardHelper :
         private set
 
     private suspend fun updateItemCount() {
-        itemCount = clbDao.itemCount()
+        itemCount = dao.itemCount()
     }
 
     private val onUpdateListeners = WeakHashSet<OnClipboardUpdateListener>()
@@ -89,21 +88,16 @@ object ClipboardHelper :
             .toSet()
     }
 
-    var lastBean: DatabaseBean? = null
+    var lastEntity: ClipboardEntity? = null
 
-    private fun updateLastBean(bean: DatabaseBean) {
-        lastBean = bean
-        onUpdateListeners.forEach { it.onUpdate(bean) }
+    private fun updateLastEntity(entity: ClipboardEntity) {
+        lastEntity = entity
+        onUpdateListeners.forEach { it.onUpdate(entity) }
     }
 
     fun init(context: Context) {
+        ClipDatabaseHolder.init(context)
         clipboardManager.addPrimaryClipChangedListener(this)
-        clbDb =
-            Room
-                .databaseBuilder(context, Database::class.java, "clipboard.db")
-                .addMigrations(Database.MIGRATION_3_4)
-                .build()
-        clbDao = clbDb.databaseDao()
         enabledListener.onChange(enabledPref.key, enabledPref.getValue())
         enabledPref.registerOnChangeListener(enabledListener)
         limitListener.onChange(limitPref.key, limitPref.getValue())
@@ -111,36 +105,36 @@ object ClipboardHelper :
         launch { updateItemCount() }
     }
 
-    suspend fun get(id: Int) = clbDao.get(id)
+    suspend fun get(id: Int) = dao.get(id)
 
-    suspend fun haveUnpinned() = clbDao.haveUnpinned()
+    suspend fun haveUnpinned() = dao.haveUnpinned()
 
-    fun allBeans() = clbDao.allBeans()
+    fun allEntities() = dao.all()
 
-    suspend fun pin(id: Int) = clbDao.updatePinned(id, true)
+    suspend fun pin(id: Int) = dao.updatePinned(id, true)
 
-    suspend fun unpin(id: Int) = clbDao.updatePinned(id, false)
+    suspend fun unpin(id: Int) = dao.updatePinned(id, false)
 
     suspend fun updateText(
         id: Int,
         text: String,
     ) {
-        lastBean?.let {
-            if (id == it.id) updateLastBean(it.copy(text = text))
+        lastEntity?.let {
+            if (id == it.id) updateLastEntity(it.copy(text = text))
         }
-        clbDao.updateText(id, text)
+        dao.updateText(id, text)
     }
 
     suspend fun delete(id: Int) {
-        clbDao.delete(id)
+        dao.delete(id)
         updateItemCount()
     }
 
     suspend fun deleteAll(skipUnpinned: Boolean = true) {
         if (skipUnpinned) {
-            clbDao.deleteAllUnpinned()
+            dao.deleteAllUnpinned()
         } else {
-            clbDao.deleteAll()
+            dao.deleteAll()
         }
         updateItemCount()
     }
@@ -162,31 +156,31 @@ object ClipboardHelper :
         lastClipTimestamp = timestamp
         launch {
             mutex.withLock {
-                val bean = DatabaseBean.fromClipData(clip) ?: return@withLock
-                if (bean.text.isNullOrBlank()) return@withLock
-                if (bean.text.matchesAny(outputRules) ||
-                    bean.text.removeRegexSet(compareRules).isEmpty()
+                val entity = ClipboardEntity.fromClipData(clip) ?: return@withLock
+                if (entity.text.isBlank()) return@withLock
+                if (entity.text.matchesAny(outputRules) ||
+                    entity.text.removeRegexSet(compareRules).isEmpty()
                 ) {
                     return@withLock
                 }
                 try {
-                    clbDao.find(bean.text)?.let {
-                        updateLastBean(it.copy(time = bean.time))
-                        clbDao.updateTime(it.id, bean.time)
+                    dao.find(entity.text, entity.sensitive)?.let {
+                        updateLastEntity(it.copy(timestamp = entity.timestamp))
+                        dao.updateTimestamp(it.id, entity.timestamp)
                         return@withLock
                     }
-                    val insertedBean =
-                        clbDb.withTransaction {
-                            val rowId = clbDao.insert(bean)
+                    val insertedEntity =
+                        database.withTransaction {
+                            val rowId = dao.insert(entity)
                             removeOutdated()
                             updateItemCount()
-                            clbDao.get(rowId) ?: bean
+                            dao.get(rowId) ?: entity
                         }
-                    updateLastBean(insertedBean)
+                    updateLastEntity(insertedEntity)
                     updateItemCount()
                 } catch (exception: Exception) {
                     Timber.w("Failed to update clipboard database: $exception")
-                    updateLastBean(bean)
+                    updateLastEntity(entity)
                 }
             }
         }
@@ -194,13 +188,13 @@ object ClipboardHelper :
 
     private suspend fun removeOutdated() {
         val limit = limitPref.getValue()
-        val unpinned = clbDao.getAllUnpinned()
+        val unpinned = dao.getAllUnpinned()
         if (unpinned.size > limit) {
             val outdated =
                 unpinned
                     .sortedBy { it.id }
                     .getOrNull(unpinned.size - limit)
-            clbDao.deletedUnpinnedEarlierThan(outdated?.time ?: System.currentTimeMillis())
+            dao.deleteUnpinnedEarlierThan(outdated?.timestamp ?: System.currentTimeMillis())
         }
     }
 }

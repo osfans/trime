@@ -24,7 +24,8 @@ import com.osfans.trime.core.Candidates
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
-import com.osfans.trime.data.db.ClipboardHelper
+import com.osfans.trime.data.clip.ClipboardEntity
+import com.osfans.trime.data.clip.ClipboardHelper
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
@@ -58,6 +59,7 @@ import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import java.util.concurrent.Executor
 import kotlin.coroutines.resume
+import kotlin.math.min
 
 class InputBarDelegate(override val di: DI) :
     DIAware,
@@ -81,6 +83,8 @@ class InputBarDelegate(override val di: DI) :
 
     private val clipboardSuggestionTimeout by prefs.clipboard.clipboardSuggestionTimeout
 
+    private val clipboardMaskSensitive by prefs.clipboard.clipboardMaskSensitive
+
     private var clipboardTimeoutJob: Job? = null
 
     private var isClipboardFresh: Boolean = false
@@ -90,10 +94,14 @@ class InputBarDelegate(override val di: DI) :
     private val onClipboardUpdateListener = ClipboardHelper.OnClipboardUpdateListener {
         if (!clipboardSuggestion) return@OnClipboardUpdateListener
         service.lifecycleScope.launch {
-            if (it.text.isNullOrEmpty()) {
+            if (it.text.isEmpty()) {
                 isClipboardFresh = false
             } else {
-                alwaysUi.clipboardUi.text.text = it.text.take(42)
+                alwaysUi.clipboardUi.text.text = if (it.sensitive && clipboardMaskSensitive) {
+                    ClipboardEntity.BULLET.repeat(min(42, it.text.length))
+                } else {
+                    it.text.take(42)
+                }
                 isClipboardFresh = true
                 launchClipboardTimeoutJob()
             }
@@ -147,12 +155,12 @@ class InputBarDelegate(override val di: DI) :
             }
             clipboardUi.suggestionView.apply {
                 setOnClickListener {
-                    val content = ClipboardHelper.lastBean?.text
+                    val content = ClipboardHelper.lastEntity?.text
                     content?.let { service.commitText(it) }
                     dismissClipboardSuggestion()
                 }
                 setOnLongClickListener {
-                    ClipboardHelper.lastBean?.let {
+                    ClipboardHelper.lastEntity?.let {
                         AppUtils.launchClipEdit(context, it.id, ClipEditActivity.FROM_CLIPBOARD)
                     }
                     true

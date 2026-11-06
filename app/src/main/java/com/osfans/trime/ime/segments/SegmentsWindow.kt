@@ -16,7 +16,8 @@ import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayout
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.osfans.trime.R
-import com.osfans.trime.data.db.CollectionHelper
+import com.osfans.trime.data.clip.FavoriteHelper
+import com.osfans.trime.data.clip.markSensitive
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.ime.core.TrimeInputMethodService
@@ -31,7 +32,11 @@ import org.kodein.di.instance
 import splitties.dimensions.dp
 import splitties.systemservices.clipboardManager
 
-class SegmentsWindow(di: DI, private val source: String) : BoardWindow.BarBoardWindow(di) {
+class SegmentsWindow(
+    di: DI,
+    private val source: String,
+    private val sensitive: Boolean = false,
+) : BoardWindow.BarBoardWindow(di) {
     private val service: TrimeInputMethodService by instance()
     private val scope: ThemeScope by instance()
     private val theme: Theme get() = scope.theme
@@ -97,9 +102,11 @@ class SegmentsWindow(di: DI, private val source: String) : BoardWindow.BarBoardW
             starButton.apply {
                 isEnabled = false
                 setOnClickListener {
+                    // Favorites are stored as plain text, so a sensitive clip must never get there.
+                    if (sensitive) return@setOnClickListener
                     val text = adapter.joinedSegments
                     service.lifecycleScope.launch {
-                        CollectionHelper.addNewBean(text)
+                        FavoriteHelper.addNewEntity(text)
                     }
                     ctx.toast(R.string.star_success)
                 }
@@ -108,7 +115,10 @@ class SegmentsWindow(di: DI, private val source: String) : BoardWindow.BarBoardW
                 isEnabled = false
                 setOnClickListener {
                     val text = adapter.joinedSegments
-                    clipboardManager.setPrimaryClip(ClipData.newPlainText("", text))
+                    val clip = ClipData.newPlainText("", text)
+                    // Keep the flag, or the copy would be recorded as a new plaintext row.
+                    if (sensitive) clip.markSensitive()
+                    clipboardManager.setPrimaryClip(clip)
                     windowManager.attachWindow(KeyboardWindow)
                 }
             }
@@ -120,7 +130,14 @@ class SegmentsWindow(di: DI, private val source: String) : BoardWindow.BarBoardW
         FlexboxLayout(context).apply {
             flexDirection = FlexDirection.ROW_REVERSE
             alignItems = AlignItems.CENTER
-            val buttons = listOf(ui.selectButton, ui.copyButton, ui.starButton, ui.searchButton, ui.shareButton)
+            val buttons =
+                buildList {
+                    add(ui.selectButton)
+                    add(ui.copyButton)
+                    if (!sensitive) add(ui.starButton)
+                    add(ui.searchButton)
+                    add(ui.shareButton)
+                }
             val size = theme.style.run { candidateViewHeight + commentHeight }
             buttons.forEachIndexed { index, button ->
                 val lParams = FlexboxLayout.LayoutParams(dp(size), dp(size))
