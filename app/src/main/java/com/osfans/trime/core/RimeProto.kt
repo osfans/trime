@@ -5,6 +5,40 @@
 
 package com.osfans.trime.core
 
+/** Original-input span and spelling used by the bounded T9 state snapshot. */
+data class T9SpanProto(
+    val start: Int,
+    val end: Int,
+    val spelling: String,
+    val completion: Boolean,
+    val locked: Boolean,
+    /** Independent source bits, zero for the original exact/completion choices. */
+    val sources: Int = 0,
+)
+
+/** Revision-bound spelling panel state, read on the same dispatcher as the candidate response. */
+class T9StateProto(
+    val enabled: Boolean = false,
+    val revision: Int = 0,
+    val input: String = "",
+    val focus: Int = 0,
+    val canUndo: Boolean = false,
+    val segments: Array<T9SpanProto> = emptyArray(),
+    val choices: Array<T9SpanProto> = emptyArray(),
+)
+
+/** Native action IDs; append entries rather than changing their order. */
+enum class T9Action {
+    Focus,
+    Lock,
+    Unlock,
+    Undo,
+    Cancel,
+}
+
+/** Cursor is a UTF-16 offset; null means the preview has no encoding mapping. */
+data class InlinePreeditProto(val text: String, val cursor: Int? = null)
+
 data class CommitProto(
     val text: String?,
 )

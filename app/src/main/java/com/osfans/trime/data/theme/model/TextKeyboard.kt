@@ -39,6 +39,7 @@ data class TextKeyboard(
     val keyPressOffsetY: Float = 0f,
     val importPreset: String = "",
     val keys: List<TextKey> = emptyList(),
+    val t9Layout: Boolean = false,
 ) {
     enum class LabelTransform {
         NONE,

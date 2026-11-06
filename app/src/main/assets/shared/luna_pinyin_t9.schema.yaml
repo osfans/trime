@@ -1,0 +1,128 @@
+# Rime schema
+# encoding: utf-8
+
+schema:
+  schema_id: luna_pinyin_t9
+  name: 朙月拼音九键
+  version: '0.3'
+  author:
+    - Rime community
+  description: |
+    基于朙月拼音的九键输入方案。
+    使用 2-9 输入拼音，键位映射为 ABC=2、DEF=3、GHI=4、JKL=5、MNO=6、PQRS=7、TUV=8、WXYZ=9。
+  dependencies:
+    - stroke
+
+trime:
+  t9: true
+  keyboard: luna_pinyin_t9
+  # Optional, single-rule suggestions. Applied to letters BEFORE speller/algebra.
+  # They never enter the main prism or the recognizer's punctuation/number paths.
+  t9_fuzzy:
+    nl: [ 'derive/^n/l/', 'derive/^l/n/' ]
+    z_zh: [ 'derive/^z([aeiouv])/zh$1/', 'derive/^zh/z/' ]
+    c_ch: [ 'derive/^c([aeiouv])/ch$1/', 'derive/^ch/c/' ]
+    s_sh: [ 'derive/^s([aeiouv])/sh$1/', 'derive/^sh/s/' ]
+    en_eng: [ 'derive/en$/eng/', 'derive/eng$/en/' ]
+    in_ing: [ 'derive/in$/ing/', 'derive/ing$/in/' ]
+
+
+switches:
+  - name: ascii_mode
+    reset: 0
+    states: [ 中文, 西文 ]
+  - name: full_shape
+    states: [ 半角, 全角 ]
+  - name: simplification
+    states: [ 漢字, 汉字 ]
+  - name: ascii_punct
+    states: [ 。，, ．， ]
+
+engine:
+  processors:
+    - ascii_composer
+    - recognizer
+    - key_binder
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - matcher
+    - abc_segmentor
+    - punct_segmentor
+    - fallback_segmentor
+  translators:
+    - punct_translator
+    - table_translator@custom_phrase
+    - reverse_lookup_translator
+    - script_translator
+  filters:
+    - simplifier
+    - uniquifier
+
+speller:
+  alphabet: zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA987654321~
+  initials: zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA987654321~
+  delimiter: " '"
+  algebra:
+    - derive/^([nl])ve$/$1ue/
+    - derive/^([jqxy])u/$1v/
+    - derive/^(.*)$/\U$1/
+    - xlit/ABCDEFGHIJKLMNOPQRSTUVWXYZ/22233344455566677778889999/
+    # Atomic exact syllables for the disambiguation UI; not a candidate protocol.
+    - derive/^([a-z]+)$/~$1~/
+
+translator:
+  dictionary: luna_pinyin
+  prism: luna_pinyin_t9
+  enable_completion: true
+  enable_sentence: true
+  spelling_hints: 30
+  always_show_comments: true
+  preedit_format:
+    - xform/~//
+    - xform/([nl])v/$1ü/
+    - xform/([nl])ue/$1üe/
+    - xform/([jqxy])v/$1u/
+  comment_format:
+    - xform/([nl])v/$1ü/
+    - xform/([nl])ue/$1üe/
+    - xform/([jqxy])v/$1u/
+
+custom_phrase:
+  dictionary: ""
+  user_dict: custom_phrase
+  db_class: stabledb
+  enable_completion: false
+  enable_sentence: false
+  initial_quality: 1
+
+reverse_lookup:
+  dictionary: stroke
+  enable_completion: true
+  prefix: "`"
+  suffix: "'"
+  tips: 〔筆畫〕
+  preedit_format:
+    - xlit/hspnz/一丨丿丶乙/
+  comment_format:
+    - xform/([nl])v/$1ü/
+
+punctuator:
+  import_preset: symbols
+
+key_binder:
+  import_preset: default
+
+recognizer:
+  import_preset: default
+  patterns:
+    punct: '^/([0-9]0?|[A-Za-z]+)$'
+    reverse_lookup: "`[a-z]*'?$"
+
+__patch:
+  - grammar:/hant?
+  - luna_pinyin_t9.custom:/patch?

@@ -74,8 +74,8 @@ sealed class RimeMessage<T>(
     }
 
     data class InlinePreeditMessage(
-        override val data: String,
-    ) : RimeMessage<String>(data) {
+        override val data: InlinePreeditProto,
+    ) : RimeMessage<InlinePreeditProto>(data) {
         override val messageType = MessageType.InlinePreedit
     }
 
@@ -115,6 +115,10 @@ sealed class RimeMessage<T>(
         )
     }
 
+    data class T9Message(override val data: T9StateProto) : RimeMessage<T9StateProto>(data) {
+        override val messageType = MessageType.T9
+    }
+
     enum class MessageType {
         Unknown,
         Schema,
@@ -127,6 +131,7 @@ sealed class RimeMessage<T>(
         Status,
         Candidate,
         Key,
+        T9,
     }
 
     companion object {
@@ -161,7 +166,7 @@ sealed class RimeMessage<T>(
                 CommitTextMessage(params[0] as CommitProto)
 
             MessageType.InlinePreedit ->
-                InlinePreeditMessage(params[0] as String)
+                InlinePreeditMessage(params[0] as InlinePreeditProto)
 
             MessageType.Composition ->
                 CompositionMessage(params[0] as CompositionProto)
@@ -183,6 +188,8 @@ sealed class RimeMessage<T>(
                         params[2] as Boolean,
                     ),
                 )
+
+            MessageType.T9 -> T9Message(params[0] as T9StateProto)
 
             else -> UnknownMessage(params)
         }

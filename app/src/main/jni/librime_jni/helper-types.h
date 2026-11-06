@@ -20,11 +20,11 @@ class SchemaItem {
   static std::vector<SchemaItem> fromCList(const RimeSchemaList& list) {
     std::vector<SchemaItem> result;
     result.reserve(list.size);
-    for (int i = 0; i < list.size; ++i) {
+    for (size_t i = 0; i < list.size; ++i) {
       const SchemaItem item{list.list[i]};
       result.emplace_back(item);
     }
-    return std::move(result);
+    return result;
   }
 };
 
@@ -70,7 +70,10 @@ class MenuProto {
 };
 
 static inline int distance(const char* start, const char* end) {
-  return static_cast<int>(utf8::unchecked::distance(start, end));
+  // Android selection and Kotlin String indices count UTF-16 code units.
+  int units = 0;
+  while (start < end) units += utf8::unchecked::next(start) > 0xffff ? 2 : 1;
+  return units;
 }
 
 class ContextProto {
@@ -111,7 +114,7 @@ class ContextProto {
         std::string label;
         if (i < m.page_size && RIME_PROVIDED(context, select_labels)) {
           label = context->select_labels[i];
-        } else if (i < selectKeysSize) {
+        } else if (static_cast<size_t>(i) < selectKeysSize) {
           label = std::string(1, m.select_keys[i]);
         } else {
           label = std::to_string((i + 1) % 10);
