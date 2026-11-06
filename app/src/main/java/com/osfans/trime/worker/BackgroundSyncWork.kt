@@ -6,7 +6,6 @@
 package com.osfans.trime.worker
 
 import android.content.Context
-import androidx.work.Configuration
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -73,7 +72,8 @@ class BackgroundSyncWork(
             context: Context,
             policy: ExistingPeriodicWorkPolicy,
         ) {
-            WorkManager.initialize(context, Configuration.Builder().build())
+            // WorkManager is initialized on demand by TrimeApplication (a Configuration.Provider).
+            // Calling WorkManager.initialize() here would throw if it is already initialized.
             val instance = WorkManager.getInstance(context)
             if (!enable) {
                 instance.cancelUniqueWork(PERIODIC_BACKGROUND_SYNC_KEY)
