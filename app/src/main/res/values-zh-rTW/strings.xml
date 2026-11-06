@@ -235,6 +235,7 @@
     <string name="restore">還原</string>
     <string name="clipboard_listening">監聽剪貼簿</string>
     <string name="clipboard_return_after_paste">貼上後返回</string>
+    <string name="clipboard_mask_sensitive">隱藏敏感內容（例如密碼）</string>
     <string name="source_code">原始碼</string>
     <string name="git_repo">Git 儲存庫</string>
     <string name="light">亮色</string>

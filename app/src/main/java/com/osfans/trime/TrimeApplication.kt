@@ -17,8 +17,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.osfans.trime.daemon.RimeDaemon
-import com.osfans.trime.data.db.ClipboardHelper
-import com.osfans.trime.data.db.CollectionHelper
+import com.osfans.trime.data.clip.ClipboardHelper
+import com.osfans.trime.data.clip.FavoriteHelper
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
@@ -192,7 +192,7 @@ class TrimeApplication :
                 setValue(currentPid)
             }
             ClipboardHelper.init(ctx)
-            CollectionHelper.init(ctx)
+            FavoriteHelper.init(ctx)
             if (!isDirectBootMode) {
                 AppPrefs.defaultInstance().syncToDeviceEncryptedStorage()
                 ThemeManager.syncToDeviceEncryptedStorage()

@@ -12,7 +12,7 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.osfans.trime.R
-import com.osfans.trime.data.db.DatabaseBean
+import com.osfans.trime.data.clip.ClipboardEntity
 import com.osfans.trime.data.theme.ThemeScope
 import com.osfans.trime.util.DeviceUtils
 import com.osfans.trime.util.item
@@ -21,23 +21,25 @@ import kotlin.math.min
 
 abstract class ClipboardAdapter(
     private val scope: ThemeScope,
-) : PagingDataAdapter<DatabaseBean, ClipboardAdapter.ViewHolder>(diffCallback) {
+    private val maskSensitive: Boolean,
+) : PagingDataAdapter<ClipboardItem, ClipboardAdapter.ViewHolder>(diffCallback) {
     companion object {
         private val diffCallback =
-            object : DiffUtil.ItemCallback<DatabaseBean>() {
+            object : DiffUtil.ItemCallback<ClipboardItem>() {
                 override fun areItemsTheSame(
-                    oldItem: DatabaseBean,
-                    newItem: DatabaseBean,
+                    oldItem: ClipboardItem,
+                    newItem: ClipboardItem,
                 ): Boolean = oldItem.id == newItem.id
 
                 override fun areContentsTheSame(
-                    oldItem: DatabaseBean,
-                    newItem: DatabaseBean,
+                    oldItem: ClipboardItem,
+                    newItem: ClipboardItem,
                 ): Boolean = oldItem == newItem
             }
 
         private fun excerptText(
             str: String,
+            mask: Boolean,
             lines: Int = 4,
             chars: Int = 128,
         ): String = buildString {
@@ -49,12 +51,20 @@ abstract class ClipboardAdapter(
                 lineBreak = str.indexOf('\n', start)
                 if (lineBreak < 0) {
                     // no line breaks remaining, substring to end of text
-                    append(str.substring(start, excerptEnd))
+                    if (mask) {
+                        append(ClipboardEntity.BULLET.repeat(excerptEnd - start))
+                    } else {
+                        append(str.substring(start, excerptEnd))
+                    }
                     break
                 } else {
                     val end = min(excerptEnd, lineBreak)
                     // append one line exactly
-                    appendLine(str.substring(start, end))
+                    if (mask) {
+                        append(ClipboardEntity.BULLET.repeat(end - start))
+                    } else {
+                        appendLine(str.substring(start, end))
+                    }
                 }
             }
         }
@@ -75,43 +85,46 @@ abstract class ClipboardAdapter(
         holder: ViewHolder,
         position: Int,
     ) {
-        val bean = getItem(position) ?: return
+        val item = getItem(position) ?: return
         with(holder.ui) {
             refreshColors()
-            setBean(excerptText(bean.text ?: ""), bean.pinned)
+            setBean(excerptText(item.text, item.mask && maskSensitive), item.pinned)
             root.setOnClickListener {
-                onPaste(bean)
+                onPaste(item)
             }
             root.setOnLongClickListener {
                 val popup = PopupMenu(ctx, it)
                 val menu = popup.menu
                 val iconTint = ctx.styledColor(android.R.attr.colorControlNormal)
                 menu.item(R.string.edit, R.drawable.ic_baseline_edit_24, iconTint) {
-                    onEdit(bean.id)
+                    onEdit(item.id)
                 }
                 menu.item(R.string.share, R.drawable.ic_baseline_share_24, iconTint) {
-                    onShare(bean)
+                    onShare(item)
                 }
                 menu.item(R.string.word_segment, R.drawable.ic_baseline_view_comfy_24, iconTint) {
-                    onSegment(bean)
+                    onSegment(item)
                 }
 
-                if (enableCollection) {
-                    menu.item(R.string.collect, R.drawable.ic_baseline_star_24, iconTint) {
-                        onCollect(bean)
+                if (enableClipActions) {
+                    // Favorites are plain text once stored, so a sensitive clip must never get there.
+                    if (!item.mask) {
+                        menu.item(R.string.collect, R.drawable.ic_baseline_star_24, iconTint) {
+                            onFavorite(item)
+                        }
                     }
-                    if (bean.pinned) {
+                    if (item.pinned) {
                         menu.item(R.string.simple_key_unpin, R.drawable.ic_outline_push_pin_24, iconTint) {
-                            onUnpin(bean.id)
+                            onUnpin(item.id)
                         }
                     } else {
                         menu.item(R.string.simple_key_pin, R.drawable.ic_baseline_push_pin_24, iconTint) {
-                            onPin(bean.id)
+                            onPin(item.id)
                         }
                     }
                 }
                 menu.item(R.string.delete, R.drawable.ic_baseline_delete_24, iconTint) {
-                    onDelete(bean.id)
+                    onDelete(item.id)
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !DeviceUtils.isSamsungOneUI) {
                     popup.setForceShowIcon(true)
@@ -127,7 +140,7 @@ abstract class ClipboardAdapter(
         }
     }
 
-    abstract fun onPaste(bean: DatabaseBean)
+    abstract fun onPaste(item: ClipboardItem)
 
     open fun onPin(id: Int) {}
 
@@ -135,15 +148,15 @@ abstract class ClipboardAdapter(
 
     abstract fun onEdit(id: Int)
 
-    abstract fun onShare(bean: DatabaseBean)
+    abstract fun onShare(item: ClipboardItem)
 
-    abstract fun onSegment(bean: DatabaseBean)
+    abstract fun onSegment(item: ClipboardItem)
 
-    open fun onCollect(bean: DatabaseBean) {}
+    open fun onFavorite(item: ClipboardItem) {}
 
     abstract fun onDelete(id: Int)
 
-    abstract val enableCollection: Boolean
+    abstract val enableClipActions: Boolean
 
     fun dismissPopupMenu() {
         popupMenu?.dismiss()

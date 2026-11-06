@@ -11,9 +11,8 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
-import com.osfans.trime.data.db.ClipboardHelper
-import com.osfans.trime.data.db.CollectionHelper
-import com.osfans.trime.data.db.DatabaseBean
+import com.osfans.trime.data.clip.ClipboardHelper
+import com.osfans.trime.data.clip.FavoriteHelper
 import com.osfans.trime.databinding.ActivityClipEditBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
@@ -47,16 +46,19 @@ class ClipEditActivity : Activity() {
         scope.launch {
             when (clipType) {
                 FROM_CLIPBOARD -> ClipboardHelper.updateText(beanId, str)
-                FROM_COLLECTION -> CollectionHelper.updateText(beanId, str)
+                FROM_COLLECTION -> FavoriteHelper.updateText(beanId, str)
                 else -> {}
             }
         }
         finish()
     }
 
-    private fun setBean(bean: DatabaseBean) {
-        beanId = bean.id
-        editText.setText(bean.text)
+    private fun setBean(
+        id: Int,
+        text: String,
+    ) {
+        beanId = id
+        editText.setText(text)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -71,12 +73,17 @@ class ClipEditActivity : Activity() {
                 val beanId = getIntExtra(BEAN_ID, -1)
                 Timber.d("processIntent: id=$beanId, type=$clipType")
                 when (clipType) {
-                    FROM_CLIPBOARD -> ClipboardHelper.get(beanId)
-                    FROM_COLLECTION -> CollectionHelper.get(beanId)
-                    else -> null
-                }?.also {
-                    this@ClipEditActivity.clipType = clipType
-                    setBean(it)
+                    FROM_CLIPBOARD ->
+                        ClipboardHelper.get(beanId)?.let {
+                            this@ClipEditActivity.clipType = clipType
+                            setBean(it.id, it.text)
+                        }
+
+                    FROM_COLLECTION ->
+                        FavoriteHelper.get(beanId)?.let {
+                            this@ClipEditActivity.clipType = clipType
+                            setBean(it.id, it.text)
+                        }
                 }
             }
         }
