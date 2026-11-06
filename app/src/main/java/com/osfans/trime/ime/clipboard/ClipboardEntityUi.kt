@@ -29,7 +29,7 @@ import splitties.views.dsl.core.wrapContent
 import splitties.views.imageDrawable
 import splitties.views.setPaddingDp
 
-class ClipboardBeanUi(
+class ClipboardEntityUi(
     override val ctx: Context,
     private val scope: ThemeScope,
 ) : Ui {
@@ -87,7 +87,7 @@ class ClipboardBeanUi(
             layoutParams = lParams(matchParent, wrapContent)
         }
 
-    fun setBean(
+    fun setEntity(
         text: String,
         pinned: Boolean,
     ) {
