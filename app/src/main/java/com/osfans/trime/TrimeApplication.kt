@@ -34,6 +34,7 @@ import splitties.systemservices.userManager
 import timber.log.Timber
 import java.io.File
 import kotlin.system.exitProcess
+import androidx.work.Configuration as WorkConfiguration
 
 /**
  * Custom Application class.
@@ -41,8 +42,19 @@ import kotlin.system.exitProcess
  * so you can init a "global" class here, whose methods serve other
  * classes everywhere.
  */
-class TrimeApplication : Application() {
+class TrimeApplication :
+    Application(),
+    WorkConfiguration.Provider {
     val coroutineScope = MainScope() + CoroutineName("TrimeApplication")
+
+    /**
+     * WorkManager is initialized on demand instead of via its default startup initializer,
+     * which is removed in AndroidManifest.xml. The default initializer runs even in direct
+     * boot mode, where WorkManager cannot be initialized, so initialization is deferred until
+     * the first real use (see [startWorkManager]).
+     */
+    override val workManagerConfiguration: WorkConfiguration
+        get() = WorkConfiguration.Builder().build()
 
     private val rimeIntentReceiver = RimeIntentReceiver()
 

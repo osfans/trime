@@ -72,7 +72,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
             android:directBootAware="true"
             android:exported="false"
             tools:node="merge">
-            <!-- remove WorkManager default initializer -->
+            <!-- Do NOT add this initializer back. This provider is directBootAware so
+                 the IME can start before the first unlock (#1937), which makes every
+                 initializer below it run pre-unlock too. WorkManager cannot run then:
+                 its database lives in credential-encrypted storage that does not exist
+                 yet (#2167). Instead, TrimeApplication implements Configuration.Provider
+                 and WorkManager is initialized on demand by getInstance() after unlock. -->
             <meta-data
                 android:name="androidx.work.WorkManagerInitializer"
                 android:value="androidx.startup"
