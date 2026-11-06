@@ -143,6 +143,9 @@
     <string name="licenses_of_third_party_libraries">Licenses of third-party libraries</string>
     <string name="clipboard">Clipboard</string>
     <string name="collection">Collection</string>
+    <string name="search_clipboard">Search clipboard</string>
+    <string name="clipboard_search_empty">No matching clips</string>
+
     <string name="simple_key_unpin">Unpin</string>
     <string name="simple_key_pin">Pin</string>
     <string name="delete_all">Delete all</string>

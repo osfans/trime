@@ -142,6 +142,9 @@
     <string name="licenses_of_third_party_libraries">第三方软件库许可证</string>
     <string name="clipboard">剪贴板</string>
     <string name="collection">收藏夹</string>
+    <string name="search_clipboard">搜索剪贴板</string>
+    <string name="clipboard_search_empty">无匹配的剪贴板记录</string>
+
     <string name="simple_key_unpin">取消置顶</string>
     <string name="simple_key_pin">置顶</string>
     <string name="delete_all">删除全部</string>

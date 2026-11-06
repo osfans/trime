@@ -117,6 +117,16 @@ object ClipboardHelper :
 
     fun allBeans() = clbDao.allBeans()
 
+    suspend fun filterBeans(
+        keyword: String,
+        limit: Int = FILTER_BEANS_LIMIT,
+    ): List<DatabaseBean> = clbDao.filterBeans(escapeLikeKeyword(keyword), limit)
+
+    private fun escapeLikeKeyword(keyword: String): String = keyword
+        .replace("\\", "\\\\")
+        .replace("%", "\\%")
+        .replace("_", "\\_")
+
     suspend fun pin(id: Int) = clbDao.updatePinned(id, true)
 
     suspend fun unpin(id: Int) = clbDao.updatePinned(id, false)
@@ -203,4 +213,5 @@ object ClipboardHelper :
             clbDao.deletedUnpinnedEarlierThan(outdated?.time ?: System.currentTimeMillis())
         }
     }
+    private const val FILTER_BEANS_LIMIT = 100
 }

@@ -168,6 +168,14 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
             tabLayout.onConfigureTab(viewPager) { tabUi, position ->
                 configureTab(tabUi, position)
             }
+            searchButton.setOnClickListener {
+                ClipboardSearchDialog(context, service, scope) { text ->
+                    service.commitText(text)
+                    if (clipboardReturnAfterPaste) {
+                        windowManager.attachWindow(KeyboardWindow)
+                    }
+                }.show()
+            }
             deleteAllButton.setOnClickListener {
                 val currentItem = viewPager.currentItem
                 when (currentItem) {
@@ -248,6 +256,7 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
 
     override fun refreshColors() {
         if (!wasAttached) return
+        clipboardLayout.titleUi.searchButton.refreshColors()
         clipboardLayout.titleUi.deleteAllButton.refreshColors()
         clipboardLayout.titleUi.tabLayout.reconfigureTabs { tabUi, position ->
             configureTab(tabUi, position)
