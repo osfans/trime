@@ -73,13 +73,13 @@ abstract class ClipboardAdapter(
     private var popupMenu: PopupMenu? = null
 
     class ViewHolder(
-        val ui: ClipboardBeanUi,
+        val ui: ClipboardEntityUi,
     ) : RecyclerView.ViewHolder(ui.root)
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): ViewHolder = ViewHolder(ClipboardBeanUi(parent.context, scope))
+    ): ViewHolder = ViewHolder(ClipboardEntityUi(parent.context, scope))
 
     override fun onBindViewHolder(
         holder: ViewHolder,
@@ -88,7 +88,7 @@ abstract class ClipboardAdapter(
         val item = getItem(position) ?: return
         with(holder.ui) {
             refreshColors()
-            setBean(excerptText(item.text, item.mask && maskSensitive), item.pinned)
+            setEntity(excerptText(item.text, item.mask && maskSensitive), item.pinned)
             root.setOnClickListener {
                 onPaste(item)
             }

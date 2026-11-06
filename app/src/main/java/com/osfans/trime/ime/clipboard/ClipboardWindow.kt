@@ -49,16 +49,16 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
     private val clipboardReturnAfterPaste by prefs.clipboardReturnAfterPaste
     private val clipboardMaskSensitive by prefs.clipboardMaskSensitive
 
-    private val clipboardBeansPager by lazy {
+    private val clipboardEntitiesPager by lazy {
         Pager(PagingConfig(pageSize = 16)) { ClipboardHelper.allEntities() }
     }
-    private val favoriteBeansPager by lazy {
+    private val favoriteEntitiesPager by lazy {
         Pager(PagingConfig(pageSize = 16)) { FavoriteHelper.allEntities() }
     }
-    private var clipboardBeansSubmitJob: Job? = null
-    private var favoriteBeansSubmitJob: Job? = null
+    private var clipboardEntitiesSubmitJob: Job? = null
+    private var favoriteEntitiesSubmitJob: Job? = null
 
-    private val clipboardBeansAdapter by lazy {
+    private val clipboardEntitiesAdapter by lazy {
         object : ClipboardAdapter(scope, clipboardMaskSensitive) {
             override fun onPaste(item: ClipboardItem) {
                 service.commitText(item.text)
@@ -99,7 +99,7 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
         }
     }
 
-    private val favoriteBeansAdapter by lazy {
+    private val favoriteEntitiesAdapter by lazy {
         object : ClipboardAdapter(scope, false) {
             override fun onPaste(item: ClipboardItem) {
                 service.commitText(item.text)
@@ -132,7 +132,7 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
         ClipboardPageUi(context).apply {
             recyclerView.apply {
                 layoutManager = verticalLayoutManager()
-                adapter = clipboardBeansAdapter
+                adapter = clipboardEntitiesAdapter
             }
         }
     }
@@ -141,7 +141,7 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
         ClipboardPageUi(context).apply {
             recyclerView.apply {
                 layoutManager = verticalLayoutManager()
-                adapter = favoriteBeansAdapter
+                adapter = favoriteEntitiesAdapter
             }
         }
     }
@@ -221,27 +221,27 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
     override fun onAttached() {
         wasAttached = true
         clipboardLayout.viewPager.setCurrentItem(initialTab, false)
-        clipboardBeansSubmitJob = service.lifecycleScope.launch {
-            clipboardBeansPager.flow
+        clipboardEntitiesSubmitJob = service.lifecycleScope.launch {
+            clipboardEntitiesPager.flow
                 .map { pagingData -> pagingData.map { it.toClipboardItem() } }
                 .collect {
-                    clipboardBeansAdapter.submitData(it)
+                    clipboardEntitiesAdapter.submitData(it)
                 }
         }
-        favoriteBeansSubmitJob = service.lifecycleScope.launch {
-            favoriteBeansPager.flow
+        favoriteEntitiesSubmitJob = service.lifecycleScope.launch {
+            favoriteEntitiesPager.flow
                 .map { pagingData -> pagingData.map { it.toClipboardItem() } }
                 .collect {
-                    favoriteBeansAdapter.submitData(it)
+                    favoriteEntitiesAdapter.submitData(it)
                 }
         }
     }
 
     override fun onDetached() {
-        clipboardBeansAdapter.dismissPopupMenu()
-        favoriteBeansAdapter.dismissPopupMenu()
-        clipboardBeansSubmitJob?.cancel()
-        favoriteBeansSubmitJob?.cancel()
+        clipboardEntitiesAdapter.dismissPopupMenu()
+        favoriteEntitiesAdapter.dismissPopupMenu()
+        clipboardEntitiesSubmitJob?.cancel()
+        favoriteEntitiesSubmitJob?.cancel()
     }
 
     override fun refreshColors() {
@@ -250,8 +250,8 @@ class ClipboardWindow(di: DI, private val initialTab: Int = 0) : BoardWindow.Bar
         clipboardLayout.titleUi.tabLayout.reconfigureTabs { tabUi, position ->
             configureTab(tabUi, position)
         }
-        clipboardBeansAdapter.refreshColors()
-        favoriteBeansAdapter.refreshColors()
+        clipboardEntitiesAdapter.refreshColors()
+        favoriteEntitiesAdapter.refreshColors()
     }
 
     override fun onCreateBarView(): View = clipboardLayout.titleUi.root

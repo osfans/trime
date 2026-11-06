@@ -23,7 +23,7 @@ import timber.log.Timber
 
 class ClipEditActivity : Activity() {
     private val scope: CoroutineScope = MainScope()
-    private var beanId: Int = -1
+    private var entityId: Int = -1
     private lateinit var editText: EditText
     private var clipType: String? = null
 
@@ -45,19 +45,19 @@ class ClipEditActivity : Activity() {
         val str = editText.editableText.toString()
         scope.launch {
             when (clipType) {
-                FROM_CLIPBOARD -> ClipboardHelper.updateText(beanId, str)
-                FROM_COLLECTION -> FavoriteHelper.updateText(beanId, str)
+                FROM_CLIPBOARD -> ClipboardHelper.updateText(entityId, str)
+                FROM_COLLECTION -> FavoriteHelper.updateText(entityId, str)
                 else -> {}
             }
         }
         finish()
     }
 
-    private fun setBean(
+    private fun setEntity(
         id: Int,
         text: String,
     ) {
-        beanId = id
+        entityId = id
         editText.setText(text)
     }
 
@@ -70,19 +70,19 @@ class ClipEditActivity : Activity() {
         scope.launch {
             intent.run {
                 val clipType = intent.getStringExtra(CLIP_TYPE) ?: return@launch
-                val beanId = getIntExtra(BEAN_ID, -1)
-                Timber.d("processIntent: id=$beanId, type=$clipType")
+                val entityId = getIntExtra(ENTITY_ID, -1)
+                Timber.d("processIntent: id=$entityId, type=$clipType")
                 when (clipType) {
                     FROM_CLIPBOARD ->
-                        ClipboardHelper.get(beanId)?.let {
+                        ClipboardHelper.get(entityId)?.let {
                             this@ClipEditActivity.clipType = clipType
-                            setBean(it.id, it.text)
+                            setEntity(it.id, it.text)
                         }
 
                     FROM_COLLECTION ->
-                        FavoriteHelper.get(beanId)?.let {
+                        FavoriteHelper.get(entityId)?.let {
                             this@ClipEditActivity.clipType = clipType
-                            setBean(it.id, it.text)
+                            setEntity(it.id, it.text)
                         }
                 }
             }
@@ -100,7 +100,7 @@ class ClipEditActivity : Activity() {
     }
 
     companion object {
-        const val BEAN_ID = "id"
+        const val ENTITY_ID = "id"
         const val CLIP_TYPE = "clip_type"
         const val FROM_CLIPBOARD = "from_clipboard"
         const val FROM_COLLECTION = "from_collection"

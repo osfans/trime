@@ -75,7 +75,7 @@ object AppUtils {
     ) {
         context.startActivity<ClipEditActivity> {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            putExtra(ClipEditActivity.BEAN_ID, id)
+            putExtra(ClipEditActivity.ENTITY_ID, id)
             putExtra(ClipEditActivity.CLIP_TYPE, type)
         }
     }
