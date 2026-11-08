@@ -97,6 +97,8 @@ object UserDataManager {
 
     private val externalFilesDir get() = TrimeApplication.getInstance().externalFilesDir
 
+    private val isDirectBootMode get() = TrimeApplication.getInstance().isDirectBootMode
+
     val userDataDir = File(externalFilesDir, "rime")
 
     private val dataStorageMode by AppPrefs.defaultInstance().profile.dataStorageMode
@@ -112,7 +114,14 @@ object UserDataManager {
         it.uri == externalRimeDir && it.read && it.write
     }
 
-    fun isStorageAvailable(): Boolean = !useExternalSync() || hasExternalAccess()
+    fun isStorageAvailable(): Boolean = isDirectBootMode || !useExternalSync() || hasExternalAccess()
+
+    /**
+     * Human-readable snapshot of what decides [isStorageAvailable], for logs that must
+     * explain a refused startup without a debugger attached.
+     */
+    fun storageStateDescription(): String = "directBoot=$isDirectBootMode, mode=$dataStorageMode, " +
+        "hasExternalUri=${externalRimeTreeUri.isNotEmpty()}, hasExternalAccess=${hasExternalAccess()}"
 
     fun isStorageChoiceDone(): Boolean = when (dataStorageMode) {
         DataStorageMode.APP_STORAGE -> true
@@ -151,6 +160,9 @@ object UserDataManager {
     }
 
     suspend fun sync(): Boolean = lock.withLock {
+        // The external tree lives on credential-encrypted storage and is unreachable
+        // before the first unlock; direct boot works from a device-protected copy instead.
+        if (isDirectBootMode) return@withLock true
         if (!useExternalSync()) return@withLock true
         if (!hasExternalAccess()) {
             DeployNotification.promptDataPathPermissionRevoked()

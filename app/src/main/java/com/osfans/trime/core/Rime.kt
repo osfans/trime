@@ -441,7 +441,9 @@ class Rime :
      */
     fun startup(): Boolean {
         if (!UserDataManager.isStorageAvailable()) {
-            Timber.w("Skip starting rime: storage not available!")
+            Timber.w(
+                "Skip starting rime: storage not available! (${UserDataManager.storageStateDescription()})",
+            )
             return false
         }
         if (lifecycle.currentState != RimeLifecycle.State.STOPPED) {
