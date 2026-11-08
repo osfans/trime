@@ -55,8 +55,8 @@ class ThemeGoldenTest :
                     enterLabel.default shouldBe "Enter"
                 }
 
-                Then("all 50 preset keyboards are decoded") {
-                    theme.presetKeyboards.size shouldBe 50
+                Then("all 53 preset keyboards are decoded") {
+                    theme.presetKeyboards.size shouldBe 53
                     theme.presetKeyboards shouldContainKey "default"
                     theme.presetKeyboards shouldContainKey "letter"
                     theme.presetKeyboards shouldContainKey "number"
@@ -101,7 +101,7 @@ class ThemeGoldenTest :
             }
         }
 
-        Given("the built-in trime.yaml (with its two __include entries expanded)") {
+        Given("the built-in trime.yaml (with its same-file __include entries expanded)") {
             val theme = ThemeTestSupport.decodeBuiltinTheme("trime.yaml")
 
             When("the whole file is decoded") {
@@ -115,14 +115,14 @@ class ThemeGoldenTest :
 
                 Then("color schemes and preset keys are decoded") {
                     theme.presetColorSchemes.size shouldBe 37
-                    theme.presetKeys.size shouldBe 106
+                    theme.presetKeys.size shouldBe 123
                     val brightnessDown = theme.presetKeys.getValue("BRIGHTNESS_DOWN")
                     brightnessDown.label shouldBe "亮度-"
                     brightnessDown.send shouldBe "BRIGHTNESS_DOWN"
                 }
 
                 Then("all 18 plain keyboards are decoded with their keys") {
-                    theme.presetKeyboards.size shouldBe 18
+                    theme.presetKeyboards.size shouldBe 21
                     theme.presetKeyboards shouldContainKey "default"
                     theme.presetKeyboards shouldContainKey "qwerty0"
                     theme.presetKeyboards shouldContainKey "cangjie5"

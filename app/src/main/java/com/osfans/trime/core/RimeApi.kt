@@ -18,6 +18,21 @@ interface RimeApi {
 
     val compositionCached: CompositionProto
 
+    /** Latest nine-key spelling state; offsets refer to the original input. */
+    val t9Cached: T9StateProto
+
+    /** Publish current engine and nine-key state on the Rime dispatcher. */
+    suspend fun refreshT9Options()
+
+    /** Apply a spelling action only if its displayed [revision] still matches native state. */
+    suspend fun t9Action(
+        revision: Int,
+        action: T9Action,
+        start: Int = 0,
+        end: Int = 0,
+        spelling: String = "",
+    ): Boolean
+
     val hasMenu: Boolean
 
     val paging: Boolean
@@ -52,7 +67,8 @@ interface RimeApi {
 
     suspend fun changeCandidatePage(backward: Boolean): Boolean
 
-    suspend fun moveCursorPos(position: Int)
+    /** Move to a UTF-8 display offset, rejecting a stale [expectedPreedit] when supplied. */
+    suspend fun moveCursorPos(position: Int, expectedPreedit: String? = null)
 
     suspend fun availableSchemata(): Array<SchemaItem>
 
@@ -69,6 +85,9 @@ interface RimeApi {
     suspend fun currentSchema(): RimeSchema
 
     suspend fun commitComposition(): Boolean
+
+    /** Finish pending raw input and commit a literal digit, without selecting a candidate. */
+    suspend fun commitT9Digit(digit: Char): Boolean
 
     suspend fun clearComposition()
 

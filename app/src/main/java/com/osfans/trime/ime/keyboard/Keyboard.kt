@@ -6,6 +6,7 @@
 package com.osfans.trime.ime.keyboard
 
 import android.content.Context
+import android.content.res.Configuration
 import android.view.KeyEvent
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.Theme
@@ -81,6 +82,7 @@ class Keyboard(
 
     /** Keyboard default ascii mode  */
     val asciiMode = selfConfig?.asciiMode == 1
+    val isT9Layout = selfConfig?.t9Layout == true
     val resetAsciiMode = selfConfig?.resetAsciiMode ?: true
     var lastAsciiMode: Boolean = asciiMode
 
@@ -103,7 +105,11 @@ class Keyboard(
     val keyboardHeight: Int =
         resolvePositive(
             selfConfig?.let {
-                pickLandscape(it.keyboardHeight, it.keyboardHeightLand, context.isLandscapeMode())
+                pickLandscape(
+                    it.keyboardHeight,
+                    it.keyboardHeightLand,
+                    context.isLandscapeMode() || (isT9Layout && context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE),
+                )
             },
             pickLandscape(
                 theme.style.keyboardHeight,
@@ -123,7 +129,7 @@ class Keyboard(
 
             val maxColumns = if (selfConfig.columns == -1) Int.MAX_VALUE else selfConfig.columns
 
-            val isSplit = context.isLandscapeMode() && landscapePercent > 0
+            val isSplit = !isT9Layout && context.isLandscapeMode() && landscapePercent > 0
             val splitRatio = if (isSplit) landscapePercent / 100f else 0f
 
             val oneWeightWidthPx =

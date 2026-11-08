@@ -52,6 +52,22 @@ class Rime :
     override var compositionCached = CompositionProto()
         private set
 
+    override var t9Cached = T9StateProto()
+        private set
+
+    override suspend fun refreshT9Options() = withRimeContext { emitResponse() }
+
+    override suspend fun t9Action(
+        revision: Int,
+        action: T9Action,
+        start: Int,
+        end: Int,
+        spelling: String,
+    ): Boolean = withRimeContext {
+        performRimeT9Action(revision, action.ordinal, start, end, spelling, 0)
+            .also { emitResponse() }
+    }
+
     override var hasMenu: Boolean = false
         private set
 
@@ -198,10 +214,17 @@ class Rime :
                 emitResponse(commit)
                 true
             } else {
-                emitResponse(CommitProto(sequence))
-                false
+                val literal = literalKeySequenceFallback(sequence)
+                if (literal != null) {
+                    emitResponse(CommitProto(literal))
+                    false
+                } else {
+                    emitResponse()
+                    true
+                }
             }
         } else {
+            emitResponse()
             false
         }.also { Timber.d("simulateKeySequence ${if (it) "success" else "failed"}") }
     }
@@ -218,7 +241,8 @@ class Rime :
         changeRimeCandidatePage(backward).also { emitResponse() }
     }
 
-    override suspend fun moveCursorPos(position: Int) = withRimeContext {
+    override suspend fun moveCursorPos(position: Int, expectedPreedit: String?) = withRimeContext {
+        if (expectedPreedit != null && getRimeContext().composition.preedit != expectedPreedit) return@withRimeContext
         setRimeCaretPos(position)
         emitResponse()
     }
@@ -233,13 +257,33 @@ class Rime :
 
     override suspend fun selectedSchemaId(): String = withRimeContext { getCurrentRimeSchema() }
 
-    override suspend fun selectSchema(schemaId: String) = withRimeContext { selectRimeSchema(schemaId) }
+    override suspend fun selectSchema(schemaId: String) = withRimeContext {
+        selectRimeSchema(schemaId).also { if (it) emitResponse() }
+    }
 
     override suspend fun currentSchema(): RimeSchema = withRimeContext {
         RimeSchema(getCurrentRimeSchema())
     }
 
     override suspend fun commitComposition(): Boolean = withRimeContext { commitRimeComposition().also { if (it) emitResponse() } }
+
+    override suspend fun commitT9Digit(digit: Char): Boolean = withRimeContext {
+        require(digit in '0'..'9')
+        var pending = ""
+        if (getRimeRawInput().isNotEmpty()) {
+            // Return commits the complete raw input, even with a caret inside a locked syllable.
+            processRimeKey(RimeKeyMapping.RimeKey_Return, 0)
+            // Consume the commit before a snapshot discards its private-to-raw spelling map.
+            pending = getRimeCommit().text.orEmpty()
+            if (getRimeRawInput().isNotEmpty()) {
+                emitResponse(CommitProto(pending))
+                return@withRimeContext false
+            }
+        }
+        clearRimeComposition()
+        emitResponse(CommitProto(pending + digit))
+        true
+    }
 
     override suspend fun clearComposition() = withRimeContext {
         clearRimeComposition()
@@ -255,6 +299,7 @@ class Rime :
         value: Boolean,
     ): Unit = withRimeContext {
         setRimeOption(option, value)
+        if (option == "ascii_mode") emitResponse()
     }
 
     override suspend fun getRuntimeOption(option: String): Boolean = withRimeContext {
@@ -322,8 +367,9 @@ class Rime :
 
     private fun emitResponse(commit: CommitProto? = null) {
         val response = getRimeResponse(pagingMode)
+        val t9 = getRimeT9State(0)
         handleRimeMessage(4, arrayOf(commit ?: response.commit))
-        handlePreedit(response.composition)
+        handlePreedit(response.composition, t9.enabled)
         if (response.composition.length <= 0 && lastAsciiTipsText != asciiTipsText(response.status)) {
             showAsciiSwitchTips(response.status)
         }
@@ -332,31 +378,20 @@ class Rime :
             is Candidates.Bulk -> handleRimeMessage(9, arrayOf(candidates))
         }
         handleRimeMessage(8, arrayOf(response.status))
+        handleRimeMessage(11, arrayOf(t9))
     }
 
-    private fun handlePreedit(composition: CompositionProto) {
-        val mode = if (isNullInputType) {
-            InlinePreeditMode.DISABLE
-        } else {
-            inlinePreeditMode
-        }
-        val inlinePreedit = when (mode) {
-            InlinePreeditMode.DISABLE -> ""
-            InlinePreeditMode.COMPOSING_TEXT -> composition.preedit ?: ""
-            InlinePreeditMode.COMMIT_TEXT_PREVIEW -> composition.commitTextPreview ?: ""
-        }
-        val composition = if (mode == InlinePreeditMode.COMPOSING_TEXT) {
-            CompositionProto()
-        } else {
-            composition
-        }
-        handleRimeMessage(5, arrayOf(inlinePreedit))
-        handleRimeMessage(6, arrayOf(composition))
+    private fun handlePreedit(composition: CompositionProto, t9: Boolean) {
+        val mode = if (isNullInputType) InlinePreeditMode.DISABLE else inlinePreeditMode
+        val response = editorPreeditResponse(composition, mode, t9)
+        handleRimeMessage(5, arrayOf(response.inlinePreedit))
+        handleRimeMessage(6, arrayOf(response.composition))
     }
 
     private fun handleRimeMessage(it: RimeMessage<*>) {
         when (it) {
             is RimeMessage.SchemaMessage -> {
+                t9Cached = T9StateProto()
                 statusCached = getRimeStatus()
                 schemaCached = RimeSchema(it.data.id)
             }
@@ -376,6 +411,8 @@ class Rime :
                     OpenCCDictManager.buildOpenCCDict()
                 }
             }
+
+            is RimeMessage.T9Message -> t9Cached = it.data
 
             is RimeMessage.CompositionMessage -> {
                 val composition = it.data
@@ -428,8 +465,10 @@ class Rime :
         asciiSwitchTipsJob?.cancel()
         asciiSwitchTipsJob = lifecycleScope.launch {
             delay(1000L)
-            val ctx = getRimeContext()
-            handleRimeMessage(6, arrayOf(ctx.composition))
+            withRimeContext {
+                val ctx = getRimeContext()
+                handleRimeMessage(6, arrayOf(ctx.composition))
+            }
         }
     }
 
@@ -506,6 +545,19 @@ class Rime :
 
         @JvmStatic
         external fun syncRimeUserData(): Boolean
+
+        @JvmStatic
+        external fun getRimeT9State(assistOptions: Int): T9StateProto
+
+        @JvmStatic
+        external fun performRimeT9Action(
+            revision: Int,
+            action: Int,
+            start: Int,
+            end: Int,
+            spelling: String,
+            assistOptions: Int,
+        ): Boolean
 
         // input
         @JvmStatic
