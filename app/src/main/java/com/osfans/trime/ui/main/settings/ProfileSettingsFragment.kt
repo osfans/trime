@@ -18,6 +18,7 @@ import com.osfans.trime.R
 import com.osfans.trime.core.data.DataManager
 import com.osfans.trime.core.data.DataStorageMode
 import com.osfans.trime.core.data.UserDataManager
+import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.prefs.PreferenceDelegate
 import com.osfans.trime.ui.common.PaddingPreferenceFragment
@@ -126,6 +127,10 @@ class ProfileSettingsFragment : PaddingPreferenceFragment() {
                     runCatching {
                         withContext(Dispatchers.IO) {
                             UserDataManager.persistTreeUri(picked.uri)
+                            // Rime may have refused to start before this grant existed.
+                            check(RimeDaemon.ensureRimeStarted()) {
+                                "Rime is not running and cannot be started yet"
+                            }
                             viewModel.rime.runOnReady { deploy() }
                         }
                     }.onSuccess {
