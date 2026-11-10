@@ -37,35 +37,27 @@ class ThemeFonts(private val theme: Theme) {
             }
         }
 
-    val hanb: Typeface
-        get() = getTypeface(style.hanbFont.toList())
+    // Font names only change with the theme, so resolve each role once instead of
+    // touching the font files on every access.
+    val hanb: Typeface by lazy { getTypeface(style.hanbFont.toList()) }
 
-    val latin: Typeface
-        get() = getTypeface(style.latinFont.toList())
+    val latin: Typeface by lazy { getTypeface(style.latinFont.toList()) }
 
-    val candidate: Typeface
-        get() = getTypeface(style.candidateFont.toList())
+    val candidate: Typeface by lazy { getTypeface(style.candidateFont.toList()) }
 
-    val comment: Typeface
-        get() = getTypeface(style.commentFont.toList())
+    val comment: Typeface by lazy { getTypeface(style.commentFont.toList()) }
 
-    val key: Typeface
-        get() = getTypeface(style.keyFont.toList())
+    val key: Typeface by lazy { getTypeface(style.keyFont.toList()) }
 
-    val label: Typeface
-        get() = getTypeface(style.labelFont.toList())
+    val label: Typeface by lazy { getTypeface(style.labelFont.toList()) }
 
-    val popup: Typeface
-        get() = getTypeface(style.popupFont.toList())
+    val popup: Typeface by lazy { getTypeface(style.popupFont.toList()) }
 
-    val symbol: Typeface
-        get() = getTypeface(style.symbolFont.toList())
+    val symbol: Typeface by lazy { getTypeface(style.symbolFont.toList()) }
 
-    val text: Typeface
-        get() = getTypeface(style.textFont.toList())
+    val text: Typeface by lazy { getTypeface(style.textFont.toList()) }
 
-    val toolbar: Typeface
-        get() = getTypeface(theme.toolBar.buttonFont.toList())
+    val toolbar: Typeface by lazy { getTypeface(theme.toolBar.buttonFont.toList()) }
 
     private fun makeFileStateList(names: List<String>): List<FileState> = names.asSequence()
         .map { File(fontDir, it) }
@@ -84,8 +76,7 @@ class ThemeFonts(private val theme: Theme) {
 
     private fun getTypeface(fonts: List<String>): Typeface {
         val key = resolveKey(fonts)
-        val typeface = typefaceCache[key]
-        return if (typeface == null) {
+        return typefaceCache[key] ?: run {
             Timber.d("getTypeface: key=$key")
             val newTypeface = if (key.files.isEmpty()) {
                 Typeface.DEFAULT
@@ -105,8 +96,6 @@ class ThemeFonts(private val theme: Theme) {
             }
             typefaceCache.put(key, newTypeface)
             newTypeface
-        } else {
-            typeface
         }
     }
 
