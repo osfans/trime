@@ -8,11 +8,13 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
 import android.graphics.NinePatch
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.NinePatchDrawable
+import android.os.Build
 import androidx.annotation.ColorInt
 import androidx.collection.LruCache
 import androidx.core.graphics.drawable.toDrawable
@@ -22,6 +24,7 @@ import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.NinePatchBitmapFactory
 import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.isNightMode
+import java.io.File
 
 /**
  * Global entry point for the colors and drawables of the active theme.
@@ -34,6 +37,9 @@ import com.osfans.trime.util.isNightMode
  * and the scope's [ThemeScope.colors] expose the typed view for UI code.
  */
 object ColorManager {
+    /** Lower bound for [bitmapCache] in KiB, so the background still fits on small heaps. */
+    private const val MIN_BITMAP_CACHE_SIZE = 8 * 1024
+
     private var scope: ThemeScope? = null
     private val prefs = ThemeManager.prefs
 
@@ -75,8 +81,10 @@ object ColorManager {
         isNightMode = configuration.isNightMode()
         activateScheme(notify = false)
 
+        // Entries are decoded at their drawn size now, so a smaller cap is
+        // enough; the floor keeps the background from being evicted on small heaps.
         val maxMemory = Runtime.getRuntime().maxMemory() / 1024
-        val cacheSize = maxMemory / 8
+        val cacheSize = maxOf(maxMemory / 16, MIN_BITMAP_CACHE_SIZE.toLong())
         bitmapCache =
             object : LruCache<String, Bitmap>(cacheSize.toInt()) {
                 override fun sizeOf(
@@ -168,24 +176,28 @@ object ColorManager {
     internal fun resolveDrawable(
         scope: ThemeScope,
         key: String,
+        targetWidth: Int = 0,
+        targetHeight: Int = 0,
     ): Drawable? {
         val tableEntry = ColorKey.from(key)?.let { scope.colorTable?.get(it) }
         if (tableEntry != null) {
             return when (tableEntry) {
                 is ColorTable.Value.Color -> GradientDrawable().apply { setColor(tableEntry.argb) }
-                is ColorTable.Value.Image -> imageDrawable(scope, tableEntry.path)
-                ColorTable.Value.None -> parseDrawable(scope, key)
+                is ColorTable.Value.Image -> imageDrawable(scope, tableEntry.path, targetWidth, targetHeight)
+                ColorTable.Value.None -> parseDrawable(scope, key, targetWidth, targetHeight)
             }
         }
         // Keys defined only by a theme resolve through the same chain rules.
         val scheme = requireNotNull(scope.activeColorScheme)
         val raw = ColorTable.resolveRaw(key, scheme, scope.theme.fallbackColors)
-        return parseDrawable(scope, raw ?: key)
+        return parseDrawable(scope, raw ?: key, targetWidth, targetHeight)
     }
 
     private fun parseDrawable(
         scope: ThemeScope,
         value: String,
+        targetWidth: Int,
+        targetHeight: Int,
     ): Drawable? {
         if (value.isEmpty()) return null
         val parsed = ColorTable.parseValue(value) {
@@ -193,7 +205,7 @@ object ColorManager {
         }
         return when (parsed) {
             is ColorTable.Value.Color -> GradientDrawable().apply { setColor(parsed.argb) }
-            is ColorTable.Value.Image -> imageDrawable(scope, parsed.path)
+            is ColorTable.Value.Image -> imageDrawable(scope, parsed.path, targetWidth, targetHeight)
             ColorTable.Value.None -> null
         }
     }
@@ -201,14 +213,20 @@ object ColorManager {
     private fun imageDrawable(
         scope: ThemeScope,
         value: String,
+        targetWidth: Int,
+        targetHeight: Int,
     ): Drawable? {
         val path = resolveImageFilePath(scope, value)
+        val isNinePatch = path.endsWith(".9.png")
+        // A nine-patch carries its slice geometry in the PNG itself, so it has
+        // to keep its original resolution; sampling it would break the chunks.
         val bitmap =
-            bitmapCache?.get(path)
-                ?: BitmapFactory.decodeFile(path)?.also {
-                    bitmapCache?.put(path, it)
-                } ?: return null
-        if (path.endsWith(".9.png")) {
+            loadBitmap(
+                path,
+                if (isNinePatch) 0 else targetWidth,
+                if (isNinePatch) 0 else targetHeight,
+            ) ?: return null
+        if (isNinePatch) {
             val chunk = bitmap.ninePatchChunk
             return if (NinePatch.isNinePatchChunk(chunk)) {
                 // for compiled nine patch image
@@ -219,6 +237,65 @@ object ColorManager {
             }
         }
         return bitmap.toDrawable(Resources.getSystem())
+    }
+
+    /**
+     * The decoded [path], sampled down to [targetWidth] x [targetHeight] when both
+     * are positive. The cache key includes the size, so one file used as both the
+     * background and a key background does not thrash a single entry.
+     */
+    private fun loadBitmap(
+        path: String,
+        targetWidth: Int,
+        targetHeight: Int,
+    ): Bitmap? {
+        val scaled = targetWidth > 0 && targetHeight > 0
+        val cacheKey = if (scaled) "$path@${targetWidth}x$targetHeight" else path
+        bitmapCache?.get(cacheKey)?.let { return it }
+        val file = File(path)
+        if (!file.isFile) return null
+        val bitmap =
+            if (scaled) {
+                runCatching { decodeScaledBitmap(file, targetWidth, targetHeight) }.getOrNull()
+            } else {
+                BitmapFactory.decodeFile(path)
+            }
+        if (bitmap == null) return null
+        bitmapCache?.put(cacheKey, bitmap)
+        return bitmap
+    }
+
+    /** Decodes [file] so that it still covers the target, matching `CENTER_CROP`; never upscales. */
+    private fun decodeScaledBitmap(
+        file: File,
+        targetWidth: Int,
+        targetHeight: Int,
+    ): Bitmap? {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(file.path, bounds)
+        val srcWidth = bounds.outWidth
+        val srcHeight = bounds.outHeight
+        if (srcWidth <= 0 || srcHeight <= 0) return null
+        val (width, height) = BitmapSampling.coverSize(srcWidth, srcHeight, targetWidth, targetHeight)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            ImageDecoder.decodeBitmap(ImageDecoder.createSource(file)) { decoder, _, _ ->
+                decoder.setTargetSize(width, height)
+            }
+        } else {
+            val options =
+                BitmapFactory.Options().apply {
+                    inSampleSize =
+                        BitmapSampling.calculateSampleSize(srcWidth, srcHeight, targetWidth, targetHeight)
+                }
+            val sampled = BitmapFactory.decodeFile(file.path, options) ?: return null
+            if (sampled.width == width && sampled.height == height) {
+                sampled
+            } else {
+                Bitmap.createScaledBitmap(sampled, width, height, true).also { scaled ->
+                    if (scaled !== sampled) sampled.recycle()
+                }
+            }
+        }
     }
 
     private fun resolveImageFilePath(
