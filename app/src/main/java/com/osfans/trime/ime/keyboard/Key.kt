@@ -113,8 +113,11 @@ class Key(
         src: TextKeyboard.TextKey.() -> String,
         fallback: String,
     ) = keyDef?.let {
-        if (src(it).isEmpty()) null else ColorManager.getDrawable(src(it))
-    } ?: ColorManager.getDrawable(fallback)
+        if (src(it).isEmpty()) null else getDrawable(src(it))
+    } ?: getDrawable(fallback)
+
+    /** Resolves a background image for this key's own drawing size. */
+    private fun getDrawable(key: String): Drawable? = ColorManager.getDrawable(key, width, height)
 
     // Colors are cached per color-scheme generation: the cache re-resolves
     // when the active scheme changes, so an invalidated keyboard view picks up
@@ -140,11 +143,11 @@ class Key(
     private fun <T> schemeColor(resolve: () -> T) = SchemeColorCache(resolve)
 
     private val keyBackground by schemeColor { getDrawable({ keyBackColor }, "key_back_color") }
-    private val offKeyBackground by schemeColor { ColorManager.getDrawable("off_key_back_color") ?: keyBackground }
-    private val onKeyBackground by schemeColor { ColorManager.getDrawable("on_key_back_color") ?: keyBackground }
+    private val offKeyBackground by schemeColor { getDrawable("off_key_back_color") ?: keyBackground }
+    private val onKeyBackground by schemeColor { getDrawable("on_key_back_color") ?: keyBackground }
     private val hlKeyBackground by schemeColor { getDrawable({ hilitedKeyBackColor }, "hilited_key_back_color") }
-    private val hlOffKeyBackground by schemeColor { ColorManager.getDrawable("hilited_off_key_back_color") ?: hlKeyBackground }
-    private val hlOnKeyBackground by schemeColor { ColorManager.getDrawable("hilited_on_key_back_color") ?: hlKeyBackground }
+    private val hlOffKeyBackground by schemeColor { getDrawable("hilited_off_key_back_color") ?: hlKeyBackground }
+    private val hlOnKeyBackground by schemeColor { getDrawable("hilited_on_key_back_color") ?: hlKeyBackground }
 
     private val keyBorderColor by schemeColor { getColor({ keyBorderColor }, "key_border_color") }
     private val offKeyBorderColor by schemeColor { getColor("off_key_border_color", keyBorderColor) }

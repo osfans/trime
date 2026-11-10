@@ -313,7 +313,15 @@ object ColorManager {
     @ColorInt
     fun getColor(key: String): Int = resolveColor(requireScope(), key)
 
-    fun getDrawable(key: String): Drawable? = resolveDrawable(requireScope(), key)
+    /**
+     * Resolves [key], decoding an image asset at [targetWidth] x [targetHeight]
+     * when the caller knows the size it will be drawn at.
+     */
+    fun getDrawable(
+        key: String,
+        targetWidth: Int = 0,
+        targetHeight: Int = 0,
+    ): Drawable? = resolveDrawable(requireScope(), key, targetWidth, targetHeight)
 
     internal fun resolveDecorDrawable(
         scope: ThemeScope,
