@@ -145,6 +145,9 @@ class InputView(
 
     private var lastAppearanceState = Triple(false, false, false)
 
+    private var lastKeyboardWidth = 0
+    private var lastKeyboardHeight = 0
+
     private fun broadcastKeyAppearanceUpdate() {
         val composing = rime.run { statusCached.isComposing }
         val hasMenu = rime.run { hasMenu }
@@ -167,12 +170,20 @@ class InputView(
 
     /** Restyles colors after a scheme switch without rebuilding the view tree. */
     fun refreshColors() {
-        keyboardBackground.imageDrawable = scope.drawable("keyboard_background")
+        refreshKeyboardBackground()
         popup.refreshColors()
         keyboardWindow.refreshColors()
         inputBar.refreshColors()
         preedit.refreshColors()
         windowManager.refreshColors()
+    }
+
+    /** Samples `keyboard_background` for the current keyboard size. */
+    private fun refreshKeyboardBackground() {
+        val width = keyboardView.width
+        val height = keyboardView.height
+        if (width <= 0 || height <= 0) return
+        keyboardBackground.imageDrawable = scope.drawable("keyboard_background", width, height)
     }
 
     init {
@@ -185,14 +196,12 @@ class InputView(
         // show KeyboardWindow by default
         windowManager.attachWindow(KeyboardWindow)
 
-        keyboardBackground.imageDrawable = scope.drawable("keyboard_background")
-
         keyboardView =
             constraintLayout {
                 isMotionEventSplittingEnabled = true
                 add(
                     keyboardBackground,
-                    lParams {
+                    lParams(matchParent, matchParent) {
                         centerInParent()
                     },
                 )
@@ -235,6 +244,16 @@ class InputView(
                     },
                 )
             }
+
+        // The background can only be sampled once the keyboard has a size, which
+        // rotation and height changes alter.
+        keyboardView.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
+            if (v.width != lastKeyboardWidth || v.height != lastKeyboardHeight) {
+                lastKeyboardWidth = v.width
+                lastKeyboardHeight = v.height
+                refreshKeyboardBackground()
+            }
+        }
 
         updateWindowViewHeightJob =
             service.lifecycleScope.launch {

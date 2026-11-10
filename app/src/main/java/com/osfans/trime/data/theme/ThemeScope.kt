@@ -56,8 +56,15 @@ class ThemeScope internal constructor(
     /** Resolves a color key through this scope; theme-only keys resolve via the fallback chain. */
     fun color(key: String): Int = ColorManager.resolveColor(this, key)
 
-    /** Resolves a drawable key (a color or an image asset) through this scope. */
-    fun drawable(key: String): Drawable? = ColorManager.resolveDrawable(this, key)
+    /**
+     * Resolves a drawable key (a color or an image asset) through this scope,
+     * decoding image assets for a view of the given size.
+     */
+    fun drawable(
+        key: String,
+        targetWidth: Int = 0,
+        targetHeight: Int = 0,
+    ): Drawable? = ColorManager.resolveDrawable(this, key, targetWidth, targetHeight)
 
     /**
      * Builds a decorated drawable (rounded corners, optional border) from the
