@@ -59,6 +59,21 @@ class KeyView(
     private val cachedBounds = Rect()
     private var boundsValid = false
 
+    private val minTextSize: Float = sp(8f)
+
+    private val contentLeft: Float
+        get() = paddingLeft.toFloat()
+    private val contentTop: Float
+        get() = paddingTop.toFloat()
+    private val contentRight: Float
+        get() = (width - paddingRight).toFloat()
+    private val contentBottom: Float
+        get() = (height - paddingBottom).toFloat()
+    private val contentWidth: Float
+        get() = (contentRight - contentLeft).coerceAtLeast(0f)
+    private val contentHeight: Float
+        get() = (contentBottom - contentTop).coerceAtLeast(0f)
+
     val bounds: Rect
         get() = cachedBounds.also {
             if (!boundsValid) updateBounds()
@@ -269,6 +284,10 @@ class KeyView(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
+        canvas.save()
+        // 所有内容严格限制在可见按键区域内，避免极端字号或 offset 画出按键
+        canvas.clipRect(contentLeft, contentTop, contentRight, contentBottom)
+
         drawBackground(canvas, key)
 
         val label = key.getLabel().let {
@@ -288,6 +307,8 @@ class KeyView(
         if (hint.isNotEmpty()) {
             drawSymbol(canvas, hint, isTop = false)
         }
+
+        canvas.restore()
     }
 
     private fun drawBackground(canvas: Canvas, k: Key) {
@@ -309,25 +330,84 @@ class KeyView(
 
     private fun drawLabel(canvas: Canvas, label: String) {
         val textColor = key.getTextColor()
-        val textSize = sp(key.keyTextSize.takeIf { it > 0 } ?: if (label.length > 1 && !label.isIconFont) keyboardView.keyLongTextSize else keyboardView.keyTextSize)
+        val desiredSize = sp(key.keyTextSize.takeIf { it > 0 } ?: if (label.length > 1 && !label.isIconFont) keyboardView.keyLongTextSize else keyboardView.keyTextSize)
 
         if (label.isIconFont) {
-            drawIcon(canvas, label, textSize.toInt(), textColor, key.keyTextOffsetX, key.keyTextOffsetY)
-        } else {
-            textPaint.apply {
-                color = textColor
-                this.textSize = textSize
-                typeface = theme.fonts.key
-                clearShadowLayer()
-            }
-
-            val centerX = (width - paddingLeft - paddingRight) / 2f + paddingLeft
-            val centerY = (height - paddingTop - paddingBottom) / 2f + paddingTop
-            val fontMetrics = textPaint.fontMetrics
-            val adjustmentY = -(fontMetrics.ascent + fontMetrics.descent) / 2f
-
-            canvas.drawText(label, centerX + sp(key.keyTextOffsetX), centerY + adjustmentY + sp(key.keyTextOffsetY), textPaint)
+            drawIcon(canvas, label, desiredSize.toInt(), textColor, key.keyTextOffsetX, key.keyTextOffsetY)
+            return
         }
+
+        textPaint.apply {
+            color = textColor
+            typeface = theme.fonts.key
+            clearShadowLayer()
+            textSize = desiredSize
+            textScaleX = 1f
+        }
+
+        val rawWidth = textPaint.measureText(label)
+        val rawMetrics = textPaint.fontMetrics
+        val rawHeight = rawMetrics.descent - rawMetrics.ascent
+
+        // 上下有符号/hint 且总高度放不下时，给它们预留空间，主标签居中在剩余区域
+        val reserveTop = topSymbolReserve()
+        val reserveBottom = bottomHintReserve()
+        val needsBand = rawHeight + reserveTop + reserveBottom > contentHeight
+        val maxHeight = if (needsBand) {
+            (contentHeight - reserveTop - reserveBottom).coerceAtLeast(minTextSize)
+        } else {
+            contentHeight
+        }
+
+        val fit = KeyTextFitter.fit(
+            desiredSize = desiredSize,
+            textWidth = rawWidth,
+            textHeight = rawHeight,
+            maxWidth = contentWidth,
+            maxHeight = maxHeight,
+            minSize = minTextSize,
+        )
+        textPaint.textSize = fit.textSize
+        textPaint.textScaleX = fit.textScaleX
+
+        val metrics = textPaint.fontMetrics
+        val fittedWidth = textPaint.measureText(label)
+        val fittedHeight = metrics.descent - metrics.ascent
+        val bandTop = if (needsBand) contentTop + reserveTop else contentTop
+        val bandBottom = if (needsBand) contentBottom - reserveBottom else contentBottom
+
+        val centerX = clampCenter(
+            (contentLeft + contentRight) / 2f + sp(key.keyTextOffsetX),
+            fittedWidth,
+            contentLeft,
+            contentRight,
+        )
+        val centerY = clampCenter(
+            (contentTop + contentBottom) / 2f + sp(key.keyTextOffsetY),
+            fittedHeight,
+            bandTop,
+            bandBottom,
+        )
+
+        canvas.drawText(label, centerX, centerY - (metrics.ascent + metrics.descent) / 2f, textPaint)
+    }
+
+    private fun topSymbolReserve(): Float {
+        if (key.symbolLabel.isEmpty() || keyboardView.hideKeySymbol) return 0f
+        return symbolDesiredSize() * 1.2f
+    }
+
+    private fun bottomHintReserve(): Float {
+        if (key.hint.isEmpty() || keyboardView.hideKeyHint) return 0f
+        return symbolDesiredSize() * 1.2f
+    }
+
+    private fun symbolDesiredSize(): Float = sp(key.symbolTextSize.takeIf { it > 0f } ?: keyboardView.symbolTextSize)
+
+    private fun clampCenter(value: Float, size: Float, min: Float, max: Float): Float {
+        val span = max - min
+        if (span <= 0f || size >= span) return (min + max) / 2f
+        return value.coerceIn(min + size / 2f, max - size / 2f)
     }
 
     private fun drawIcon(
@@ -339,14 +419,17 @@ class KeyView(
         offsetY: Float = 0f,
         isTop: Boolean? = null,
     ) {
-        val halfSize = size / 2
+        val maxSize = minOf(contentWidth, contentHeight).toInt()
+        val iconSize = size.coerceAtMost(maxSize)
+        if (iconSize <= 0) return
+        val halfSize = iconSize / 2f
 
         val cmdName = iconName.toIconName()
         val icon = if (cachedIconName == cmdName) {
             cachedIcon!!
         } else {
             IconicsDrawable(context, cmdName).apply {
-                sizeDp = size
+                sizeDp = iconSize
             }.also {
                 cachedIcon = it
                 cachedIconName = cmdName
@@ -355,13 +438,22 @@ class KeyView(
 
         icon.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
 
-        val centerX = (width - paddingLeft - paddingRight) / 2f + paddingLeft + sp(offsetX)
-
-        val centerY = when (isTop) {
-            true -> paddingTop + halfSize + sp(offsetY)
-            false -> height - paddingBottom - size + sp(offsetY)
-            null -> (height - paddingTop - paddingBottom) / 2f + paddingTop + sp(offsetY)
-        }
+        val centerX = clampCenter(
+            (contentLeft + contentRight) / 2f + sp(offsetX),
+            iconSize.toFloat(),
+            contentLeft,
+            contentRight,
+        )
+        val centerY = clampCenter(
+            when (isTop) {
+                true -> contentTop + halfSize + sp(offsetY)
+                false -> contentBottom - halfSize + sp(offsetY)
+                null -> (contentTop + contentBottom) / 2f + sp(offsetY)
+            },
+            iconSize.toFloat(),
+            contentTop,
+            contentBottom,
+        )
 
         icon.setBounds(
             (centerX - halfSize).toInt(),
@@ -377,35 +469,72 @@ class KeyView(
         if (!isTop && keyboardView.hideKeyHint) return
 
         val textColor = key.getSymbolColor()
-        val textSize = sp(key.symbolTextSize.takeIf { it > 0f } ?: keyboardView.symbolTextSize)
+        val desiredSize = symbolDesiredSize()
         val offsetX = if (isTop) key.keySymbolOffsetX else key.keyHintOffsetX
         val offsetY = if (isTop) key.keySymbolOffsetY else key.keyHintOffsetY
 
         if (text.isIconFont) {
-            drawIcon(canvas, text, textSize.toInt(), textColor, offsetX, offsetY, isTop)
+            drawIcon(canvas, text, desiredSize.toInt(), textColor, offsetX, offsetY, isTop)
+            return
+        }
+
+        symbolPaint.apply {
+            color = textColor
+            typeface = theme.fonts.symbol
+            textSize = desiredSize
+            textScaleX = 1f
+        }
+
+        val lines = text.split("\n")
+        val rawWidth = lines.maxOf { symbolPaint.measureText(it) }
+        val rawMetrics = symbolPaint.fontMetrics
+        val rawLineHeight = rawMetrics.descent - rawMetrics.ascent
+        val rawHeight = rawLineHeight * lines.size
+
+        val fit = KeyTextFitter.fit(
+            desiredSize = desiredSize,
+            textWidth = rawWidth,
+            textHeight = rawHeight,
+            maxWidth = contentWidth,
+            maxHeight = contentHeight,
+            minSize = minTextSize,
+        )
+        symbolPaint.textSize = fit.textSize
+        symbolPaint.textScaleX = fit.textScaleX
+
+        val metrics = symbolPaint.fontMetrics
+        val lineHeight = metrics.descent - metrics.ascent
+        val totalHeight = lineHeight * lines.size
+        val maxWidth = lines.maxOf { symbolPaint.measureText(it) }
+
+        val centerX = clampCenter(
+            (contentLeft + contentRight) / 2f + sp(offsetX),
+            maxWidth,
+            contentLeft,
+            contentRight,
+        )
+
+        var startY = if (isTop) {
+            contentTop - metrics.top + sp(offsetY) - (totalHeight - lineHeight) / 2f
         } else {
-            symbolPaint.apply {
-                color = textColor
-                this.textSize = textSize
-                typeface = theme.fonts.symbol
-            }
+            contentBottom - metrics.bottom + sp(offsetY) - (totalHeight - lineHeight) / 2f
+        }
 
-            val lines = text.split("\n")
-            val fontMetrics = symbolPaint.fontMetrics
-            val lineHeight = fontMetrics.descent - fontMetrics.ascent
-            val totalHeight = lineHeight * lines.size
-
-            val centerX = (width - paddingLeft - paddingRight) / 2f + paddingLeft + sp(offsetX)
-            val startY = if (isTop) {
-                paddingTop - fontMetrics.top + sp(offsetY) - (totalHeight - lineHeight) / 2
-            } else {
-                height - paddingBottom - fontMetrics.bottom + sp(offsetY) - (totalHeight - lineHeight) / 2
+        if (totalHeight <= contentHeight) {
+            val blockTop = startY + metrics.ascent
+            if (blockTop < contentTop) {
+                startY += contentTop - blockTop
             }
-
-            for (i in lines.indices) {
-                val lineY = startY + lineHeight * i
-                canvas.drawText(lines[i], centerX, lineY, symbolPaint)
+            val adjustedTop = startY + metrics.ascent
+            if (adjustedTop + totalHeight > contentBottom) {
+                startY -= adjustedTop + totalHeight - contentBottom
             }
+        } else {
+            startY = contentTop - metrics.ascent
+        }
+
+        for (i in lines.indices) {
+            canvas.drawText(lines[i], centerX, startY + lineHeight * i, symbolPaint)
         }
     }
 }
