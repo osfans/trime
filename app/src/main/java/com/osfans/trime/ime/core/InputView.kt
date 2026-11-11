@@ -186,6 +186,11 @@ class InputView(
         keyboardBackground.imageDrawable = scope.drawable("keyboard_background", width, height)
     }
 
+    /** Releases the built keyboards that are not currently shown. */
+    fun trimMemory() {
+        keyboardWindow.trimCache()
+    }
+
     init {
         // MUST call before any operation
         val receivers: List<InputBroadcastReceiver> by allInstances()

@@ -373,6 +373,13 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         updateInputViewShown()
     }
 
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        // Built keyboards are rebuildable at any time, so any memory pressure is a good
+        // moment to drop the ones that are not currently shown.
+        inputView?.trimMemory()
+    }
+
     override fun onDestroy() {
         InputFeedbackManager.destroy()
         inputView = null

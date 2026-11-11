@@ -73,6 +73,8 @@ class KeyboardWindow(di: DI) :
 
     companion object : ResidentWindow.Key {
         lateinit var currentKeyboard: Keyboard
+
+        private const val MAX_CACHED_KEYBOARDS = 3
     }
 
     override val key: ResidentWindow.Key
@@ -83,7 +85,21 @@ class KeyboardWindow(di: DI) :
     private var lastKeyboardId = ""
     private var lastLockKeyboardId = ""
     private var tempAsciiMode: Boolean? = null
-    private val cachedKeyboards = mutableMapOf<String, Pair<Keyboard, KeyboardView>>()
+
+    /**
+     * Built keyboards are expensive: one [Keyboard] with all its keys plus one [KeyboardView]
+     * with a view per key. Keep a few of them so switching between the common layouts stays
+     * instant, but never unbounded — a theme can define dozens of keyboards.
+     *
+     * Access order so the least recently used entry is evicted first; the current keyboard is
+     * always the most recently used one and is additionally excluded from eviction.
+     */
+    private val cachedKeyboards =
+        object : LinkedHashMap<String, Pair<Keyboard, KeyboardView>>(4, 0.75f, true) {}
+
+    /** ASCII mode survives eviction, since a rebuilt keyboard would otherwise forget it. */
+    private val lastAsciiModes = mutableMapOf<String, Boolean>()
+
     private val activeKeyboard: Keyboard? get() = cachedKeyboards[currentKeyboardId]?.first
     private val currentKeyboardView: KeyboardView? get() = cachedKeyboards[currentKeyboardId]?.second
 
@@ -167,12 +183,15 @@ class KeyboardWindow(di: DI) :
         lastKeyboardId = target
 
         val config = selectKeyboardConfig(target)
-        val keyboard = activeKeyboard ?: Keyboard(context, theme, computeAllowedWidth(), config)
-        val view = currentKeyboardView ?: KeyboardView(context, theme, keyboard, popup, service, keyboardActionListener, enterKeyDisplay)
+        val cached = cachedKeyboards[target]
+        val keyboard = cached?.first ?: Keyboard(context, theme, computeAllowedWidth(), config)
+        val view =
+            cached?.second
+                ?: KeyboardView(context, theme, keyboard, popup, service, keyboardActionListener, enterKeyDisplay)
 
-        if (activeKeyboard == null) {
-            cachedKeyboards[target] = keyboard to view
-            keyboard.lastAsciiMode = keyboard.asciiMode
+        if (cached == null) {
+            keyboard.lastAsciiMode = lastAsciiModes[target] ?: keyboard.asciiMode
+            cacheKeyboard(target, keyboard to view)
         }
 
         keyboard.also {
@@ -263,26 +282,49 @@ class KeyboardWindow(di: DI) :
         return final
     }
 
+    private fun cacheKeyboard(id: String, entry: Pair<Keyboard, KeyboardView>) {
+        cachedKeyboards[id] = entry
+        while (cachedKeyboards.size > MAX_CACHED_KEYBOARDS) {
+            val eldest = cachedKeyboards.entries.firstOrNull { it.key != currentKeyboardId } ?: break
+            lastAsciiModes[eldest.key] = eldest.value.first.lastAsciiMode
+            cachedKeyboards.remove(eldest.key)
+        }
+    }
+
+    private fun clearKeyboardCache() {
+        cachedKeyboards.forEach { (id, entry) -> lastAsciiModes[id] = entry.first.lastAsciiMode }
+        cachedKeyboards.clear()
+    }
+
+    /**
+     * Drops every built keyboard but the current one, e.g. when the system is short on memory.
+     */
+    fun trimCache() {
+        val current = cachedKeyboards[currentKeyboardId] ?: return
+        if (cachedKeyboards.size <= 1) return
+        clearKeyboardCache()
+        cachedKeyboards[currentKeyboardId] = current
+    }
+
     fun switchKeyboard(to: String) {
         val target = evalKeyboard(to)
         ContextCompat.getMainExecutor(service).execute {
-            if (cachedKeyboards.containsKey(target)) {
-                if (target == currentKeyboardId) return@execute
-            }
+            if (target == currentKeyboardId) return@execute
             detachCurrentView()
             attachKeyboard(target)
         }
         Timber.d("Switched to keyboard: $target")
     }
 
-    fun refreshKeyboards(isAll: Boolean = false) {
+    /**
+     * Drops every built keyboard and rebuilds the current one. Needed when the available width
+     * changes, because keys are laid out with absolute pixel sizes: keeping the other entries
+     * would leave them at the previous width.
+     */
+    fun refreshKeyboards() {
         val id = currentKeyboardId.ifEmpty { return }
         detachCurrentView()
-        if (isAll) {
-            cachedKeyboards.clear()
-        } else {
-            cachedKeyboards.remove(id)
-        }
+        clearKeyboardCache()
         attachKeyboard(id)
     }
 
