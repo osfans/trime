@@ -13,6 +13,7 @@ import android.graphics.Rect
 import android.os.Build
 import android.view.ContextThemeWrapper
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
@@ -78,11 +79,12 @@ import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.view
 import splitties.views.dsl.core.wrapContent
 import splitties.views.imageDrawable
+import kotlin.math.roundToInt
 
 /**
  * Successor of the old InputRoot
  */
-@SuppressLint("ViewConstructor")
+@SuppressLint("ViewConstructor", "ClickableViewAccessibility")
 class InputView(
     service: TrimeInputMethodService,
     rime: RimeSession,
@@ -128,6 +130,7 @@ class InputView(
             id = R.id.floating_keyboard_handle
             visibility = View.GONE
             contentDescription = context.getString(R.string.floating_keyboard_drag_handle)
+            setOnTouchListener { _, event -> handleFloatingDrag(event) }
             // The button must stay clear of the rounded corners of the card.
             setPadding(
                 dp(FLOATING_CARD_CONTENT_PADDING_DP),
@@ -157,6 +160,23 @@ class InputView(
     private val preeditHost =
         FrameLayout(context).apply {
             id = R.id.floating_preedit_host
+        }
+
+    private val floatingResizeHandle =
+        ImageView(context).apply {
+            setImageResource(R.drawable.ic_baseline_open_in_full_24)
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
+            setPadding(
+                dp(FLOATING_HANDLE_BUTTON_PADDING_DP),
+                dp(FLOATING_HANDLE_BUTTON_PADDING_DP),
+                dp(FLOATING_HANDLE_BUTTON_PADDING_DP),
+                dp(FLOATING_HANDLE_BUTTON_PADDING_DP),
+            )
+            contentDescription = context.getString(R.string.floating_keyboard_resize)
+            imageTintList = ColorStateList.valueOf(scope.colors.keyTextColor)
+            alpha = 0.6f
+            visibility = View.GONE
+            setOnTouchListener { _, event -> handleFloatingResize(event) }
         }
 
     private val floatingOutlineProvider =
@@ -197,7 +217,17 @@ class InputView(
     private val navBarBottomInset: Int
         get() = if (floatingActive) floatingSystemInsets.bottom else dockedBottomInset
 
+    private var floatingDragging = false
+
     private var keyboardRefreshPosted = false
+
+    private var dragStartRawX = 0f
+    private var dragStartRawY = 0f
+    private var dragStartTranslationX = 0f
+    private var dragStartTranslationY = 0f
+
+    private var resizeStartRawX = 0f
+    private var resizeStartWidth = 0
 
     private val leftPaddingSpace =
         view(::View) {
@@ -395,6 +425,18 @@ class InputView(
                         bottomOfParent()
                     },
                 )
+                add(
+                    floatingResizeHandle,
+                    lParams(
+                        dp(FLOATING_HANDLE_BUTTON_SIZE_DP),
+                        dp(FLOATING_HANDLE_BUTTON_SIZE_DP),
+                    ) {
+                        // In the top control row, so it never covers a key.
+                        endOfParent()
+                        topOfParent()
+                        marginEnd = dp(FLOATING_CARD_CONTENT_PADDING_DP)
+                    },
+                )
             }
 
         // The background can only be sampled once the keyboard has a size, which
@@ -474,6 +516,7 @@ class InputView(
         val color = ColorStateList.valueOf(scope.colors.keyTextColor)
         floatingDragPill.setBackgroundColor(scope.colors.keyTextColor)
         floatingCollapseButton.imageTintList = color
+        floatingResizeHandle.imageTintList = color
     }
 
     /**
@@ -504,6 +547,14 @@ class InputView(
             prefs.floatingKeyboard.scaleLandscape.getValue()
         } else {
             prefs.floatingKeyboard.scalePortrait.getValue()
+        }
+    }
+
+    private fun setFloatingScalePreference(percent: Int) {
+        if (isLandscapeWindow()) {
+            prefs.floatingKeyboard.scaleLandscape.setValue(percent)
+        } else {
+            prefs.floatingKeyboard.scalePortrait.setValue(percent)
         }
     }
 
@@ -601,6 +652,7 @@ class InputView(
     }
 
     private fun resetFloatingGeometry() {
+        floatingDragging = false
         keyboardView.updateLayoutParams<LayoutParams> {
             width = LayoutParams.MATCH_PARENT
             bottomMargin = 0
@@ -619,6 +671,8 @@ class InputView(
     private fun applyFloatingCollapsedState() {
         val collapsed = floatingActive && floatingCollapsed
         windowManager.view.visibility = if (collapsed) View.GONE else View.VISIBLE
+        floatingResizeHandle.visibility =
+            if (floatingActive && !collapsed) View.VISIBLE else View.GONE
         floatingCollapseButton.setImageResource(
             if (collapsed) R.drawable.ic_baseline_expand_more_24 else R.drawable.ic_baseline_expand_less_24,
         )
@@ -680,6 +734,16 @@ class InputView(
         if (cardWidth <= 0 || cardHeight <= 0) return
         val baseX = keyboardView.left
         val baseY = keyboardView.top
+        if (floatingDragging) {
+            // The layout may change while the card is being dragged (for example when
+            // the keyboard height is updated). Keep the finger-anchored position and
+            // only clamp it, instead of restoring the previously saved position.
+            keyboardView.translationX = clampFloatingX(keyboardView.translationX, cardWidth, baseX)
+            keyboardView.translationY = clampFloatingY(keyboardView.translationY, cardHeight, baseY)
+            updateDragHandlePosition()
+            updatePreeditTranslation()
+            return
+        }
         val (savedX, savedY) = savedFloatingPosition()
         keyboardView.translationX =
             if (savedX == UNSET_FLOATING_POSITION) {
@@ -742,6 +806,154 @@ class InputView(
         preeditView.translationX = 0f
         preeditView.translationY = 0f
         preedit.updateTouchWindowPosition()
+    }
+
+    private fun handleFloatingDrag(event: MotionEvent): Boolean {
+        if (!floatingActive) return false
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                floatingDragging = true
+                dragStartRawX = event.rawX
+                dragStartRawY = event.rawY
+                dragStartTranslationX = keyboardView.translationX
+                dragStartTranslationY = keyboardView.translationY
+                parent?.requestDisallowInterceptTouchEvent(true)
+                return true
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                keyboardView.translationX =
+                    clampFloatingX(
+                        translation = dragStartTranslationX + (event.rawX - dragStartRawX),
+                        cardWidth = keyboardView.width,
+                        baseX = keyboardView.left,
+                    )
+                keyboardView.translationY =
+                    clampFloatingY(
+                        translation = dragStartTranslationY + (event.rawY - dragStartRawY),
+                        cardHeight = keyboardView.height,
+                        baseY = keyboardView.top,
+                    )
+                updatePreeditTranslation()
+                return true
+            }
+
+            MotionEvent.ACTION_UP -> {
+                floatingDragging = false
+                parent?.requestDisallowInterceptTouchEvent(false)
+                snapFloatingCard()
+                saveFloatingPosition()
+                service.requestInputViewInsetsUpdate()
+                return true
+            }
+
+            MotionEvent.ACTION_CANCEL -> {
+                // The gesture was interrupted, so the card goes back to the
+                // position it was saved at instead of a half finished drag.
+                floatingDragging = false
+                parent?.requestDisallowInterceptTouchEvent(false)
+                positionFloatingCard()
+                return true
+            }
+        }
+        return false
+    }
+
+    /**
+     * Resizes the card by dragging the grip in its top control row.
+     *
+     * Only the width changes: the height follows the keyboard theme, and the
+     * position is kept by the regular layout listener.
+     */
+    private fun handleFloatingResize(event: MotionEvent): Boolean {
+        if (!floatingActive || floatingCollapsed) return false
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                resizeStartRawX = event.rawX
+                resizeStartWidth = keyboardView.width
+                parent?.requestDisallowInterceptTouchEvent(true)
+                return true
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                val baseWidth = floatingBaseWidth()
+                val minWidth = dp(FLOATING_CARD_MIN_WIDTH_DP).coerceAtMost(baseWidth)
+                val width =
+                    (resizeStartWidth + (event.rawX - resizeStartRawX))
+                        .roundToInt()
+                        .coerceIn(minWidth, baseWidth)
+                if (width != keyboardView.layoutParams.width) {
+                    keyboardWindow.floatingScalePercent =
+                        FloatingKeyboardGeometry.percentFor(baseWidth, width)
+                    keyboardView.updateLayoutParams { this.width = width }
+                }
+                return true
+            }
+
+            MotionEvent.ACTION_UP -> {
+                parent?.requestDisallowInterceptTouchEvent(false)
+                setFloatingScalePreference(
+                    FloatingKeyboardGeometry.percentFor(
+                        floatingBaseWidth(),
+                        keyboardView.width,
+                    ),
+                )
+                applyFloatingGeometry()
+                // Wait for the new width to be laid out before remembering
+                // where the card is.
+                keyboardView.post {
+                    saveFloatingPosition()
+                    service.requestInputViewInsetsUpdate()
+                }
+                return true
+            }
+
+            MotionEvent.ACTION_CANCEL -> {
+                parent?.requestDisallowInterceptTouchEvent(false)
+                applyFloatingGeometry()
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun snapFloatingCard() {
+        val cardWidth = keyboardView.width
+        val cardHeight = keyboardView.height
+        if (cardWidth <= 0 || cardHeight <= 0) return
+        val threshold = dp(FLOATING_SNAP_THRESHOLD_DP)
+        keyboardView.translationX =
+            FloatingKeyboardGeometry.snapTranslation(
+                translation = keyboardView.translationX,
+                containerStart = floatingSystemInsets.left,
+                containerEnd = (width - floatingSystemInsets.right).coerceAtLeast(floatingSystemInsets.left),
+                viewSize = cardWidth,
+                basePosition = keyboardView.left,
+                threshold = threshold,
+                includeCentre = true,
+            )
+        keyboardView.translationY =
+            FloatingKeyboardGeometry.snapTranslation(
+                translation = keyboardView.translationY,
+                containerStart = floatingSystemInsets.top,
+                containerEnd = (height - floatingSystemInsets.bottom).coerceAtLeast(floatingSystemInsets.top),
+                viewSize = cardHeight,
+                basePosition = keyboardView.top,
+                threshold = threshold,
+            )
+        updatePreeditTranslation()
+    }
+
+    private fun saveFloatingPosition() {
+        val x = (keyboardView.left + keyboardView.translationX).roundToInt()
+        val y = (keyboardView.top + keyboardView.translationY).roundToInt()
+        if (isLandscapeWindow()) {
+            prefs.floatingKeyboard.xLandscape.setValue(x)
+            prefs.floatingKeyboard.yLandscape.setValue(y)
+        } else {
+            prefs.floatingKeyboard.xPortrait.setValue(x)
+            prefs.floatingKeyboard.yPortrait.setValue(y)
+        }
     }
 
     /**
@@ -991,6 +1203,9 @@ class InputView(
         updateWindowViewHeightJob.cancel()
         popup.root.removeAllViews()
         broadcaster.clear()
+        // A drag may be interrupted by the window going away; the next layout
+        // must not treat the card as still being dragged.
+        floatingDragging = false
         super.onDetachedFromWindow()
     }
 
@@ -1011,6 +1226,8 @@ class InputView(
         /** The narrowest the card may get, so the keys stay readable. */
         private const val FLOATING_CARD_MIN_WIDTH_DP = 260
 
+        /** How close the card must be to an edge to snap to it. */
+        private const val FLOATING_SNAP_THRESHOLD_DP = 24
         private const val UNSET_FLOATING_POSITION = -1
     }
 }
