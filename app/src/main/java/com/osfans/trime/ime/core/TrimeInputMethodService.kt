@@ -10,6 +10,7 @@ import android.app.Dialog
 import android.content.IntentFilter
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.graphics.Rect
 import android.graphics.RectF
 import android.inputmethodservice.InputMethodService
 import android.os.Build
@@ -443,7 +444,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private fun updateDecorLocation() {
         contentSize[0] = contentView.width.toFloat()
         contentSize[1] =
-            if (inputDeviceManager.useVirtualKeyboard) {
+            if (inputDeviceManager.useVirtualKeyboard && inputView?.isFloatingKeyboardActive != true) {
                 inputViewLocation[1].toFloat()
             } else {
                 contentView.height.toFloat()
@@ -540,6 +541,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     private val inputViewLocation = intArrayOf(0, 0)
+    private val floatingKeyboardBounds = Rect()
 
     val isFloatingKeyboardActive: Boolean
         get() = inputView?.isFloatingKeyboardActive == true
@@ -558,8 +560,20 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onComputeInsets(outInsets: Insets) {
-        if (inputDeviceManager.useVirtualKeyboard) {
-            inputView?.keyboardView?.getLocationInWindow(inputViewLocation)
+        val view = inputView
+        if (inputDeviceManager.useVirtualKeyboard && view?.isFloatingKeyboardActive == true) {
+            view.getFloatingKeyboardBounds(floatingKeyboardBounds)
+            // The card is an overlay: reporting no covered area keeps the app
+            // from panning while the card is dragged, but only the card itself
+            // is touchable.
+            outInsets.apply {
+                contentTopInsets = decorView.height
+                visibleTopInsets = decorView.height
+                touchableInsets = Insets.TOUCHABLE_INSETS_REGION
+                touchableRegion.set(floatingKeyboardBounds)
+            }
+        } else if (inputDeviceManager.useVirtualKeyboard) {
+            view?.keyboardView?.getLocationInWindow(inputViewLocation)
             outInsets.apply {
                 contentTopInsets = inputViewLocation[1]
                 visibleTopInsets = inputViewLocation[1]
