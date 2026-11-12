@@ -134,6 +134,18 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             themeScope?.let { replaceCandidateView(it) }
         }
 
+    /**
+     * The floating keyboard is switched in place, so the view does not have to
+     * be rebuilt when the portrait preference changes.
+     */
+    @Keep
+    private val floatingKeyboardListener =
+        PreferenceDelegate.OnChangeListener<Boolean> { _, _ ->
+            ContextCompat.getMainExecutor(this).execute {
+                inputView?.updateFloatingMode()
+            }
+        }
+
     @Keep
     private val onThemeChangeListener =
         ThemeManager.OnThemeChangeListener {
@@ -208,6 +220,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         recreateInputViewPrefs.forEach {
             it.registerOnChangeListener(recreateInputViewListener)
         }
+        prefs.floatingKeyboard.portraitFloat.registerOnChangeListener(floatingKeyboardListener)
         prefs.candidates.registerOnChangeListener(recreateCandidatesViewListener)
         // ensure theme and color managers are initialized after rime is ready
         lifecycleScope.launch {
@@ -387,6 +400,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         recreateInputViewPrefs.forEach {
             it.unregisterOnChangeListener(recreateInputViewListener)
         }
+        prefs.floatingKeyboard.portraitFloat.unregisterOnChangeListener(floatingKeyboardListener)
         prefs.candidates.unregisterOnChangeListener(recreateCandidatesViewListener)
         ThemeManager.removeOnChangedListener(onThemeChangeListener)
         ColorManager.removeOnChangedListener(onColorChangeListener)
@@ -526,6 +540,22 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     private val inputViewLocation = intArrayOf(0, 0)
+
+    val isFloatingKeyboardActive: Boolean
+        get() = inputView?.isFloatingKeyboardActive == true
+
+    /**
+     * Re-evaluates the IME window insets. A floating keyboard moves without
+     * changing the window size, so a layout pass is needed for the system to
+     * pick up the new touchable region.
+     */
+    fun requestInputViewInsetsUpdate() {
+        inputView?.requestLayout()
+    }
+
+    fun requestFloatingMode(floating: Boolean) {
+        inputView?.setFloatingMode(floating)
+    }
 
     override fun onComputeInsets(outInsets: Insets) {
         if (inputDeviceManager.useVirtualKeyboard) {
