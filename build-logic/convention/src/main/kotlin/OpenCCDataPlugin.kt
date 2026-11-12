@@ -4,46 +4,122 @@
  */
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Delete
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.register
-import org.gradle.process.ExecOperations
 import java.io.File
-import java.util.regex.Pattern
-import javax.inject.Inject
+import java.io.IOException
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import java.time.Duration
 
 class OpenCCDataPlugin : Plugin<Project> {
     companion object {
+        const val DOWNLOAD_TASK = "downloadOpenCCData"
         const val INSTALL_TASK = "installOpenCCData"
         const val CLEAN_TASK = "cleanOpenCCData"
     }
 
-    private val Project.dataBaseDir
-        get() = file("src/main/jni/librime/deps/opencc/data")
+    private val Project.openccDir
+        get() = file("src/main/jni/librime/deps/opencc")
+
+    private val Project.dataConfigDir
+        get() = openccDir.resolve("data/config")
 
     private val Project.dataInstallDir
         get() = assetsDir.resolve("shared/opencc")
 
+    private val Project.openccResourcesZip
+        get() = layout.buildDirectory.file("opencc/opencc-resources.zip").get().asFile
+
+    private fun Project.openccGit(vararg args: String): Provider<String> = providers
+        .exec {
+            commandLine("git", "-C", openccDir.absolutePath, *args)
+            setIgnoreExitValue(true)
+        }.standardOutput.asText
+        .map { it.trim() }
+
+    private val Project.openccTag
+        get() = openccGit("describe", "--tags", "--abbrev=0", "--match", "ver.*")
+
+    /** The web URL of the repository the OpenCC submodule was cloned from. */
+    private val Project.openccRepositoryUrl
+        get() =
+            openccGit("config", "--get", "remote.origin.url").map { remote ->
+                when {
+                    remote.isEmpty() -> ""
+
+                    remote.startsWith("git@") ->
+                        "https://" + remote.removePrefix("git@").replaceFirst(':', '/').removeSuffix(".git")
+
+                    else -> remote.removeSuffix(".git")
+                }
+            }
+
     override fun apply(target: Project) {
-        registerInstallTask(target)
+        val download = registerDownloadTask(target)
+        registerInstallTask(target, download)
         registerCleanTask(target)
     }
 
-    private fun registerInstallTask(project: Project) {
-        val task =
-            project.tasks.register<InstallOpenCCDataTask>(INSTALL_TASK) {
-                inputDir.set(project.dataBaseDir)
-                outputDir.set(project.dataInstallDir)
+    private fun registerDownloadTask(project: Project): TaskProvider<DownloadOpenCCDataTask> {
+        // Offline/F-Droid builds can use a local copy.
+        val localZipOverride =
+            project.providers.gradleProperty("openccDataZip")
+                .orElse(project.providers.environmentVariable("OPENCC_DATA_ZIP"))
+        return project.tasks.register<DownloadOpenCCDataTask>(DOWNLOAD_TASK) {
+            releaseTag.set(project.openccTag)
+            repositoryUrl.set(project.openccRepositoryUrl)
+            outputZip.set(project.openccResourcesZip)
+            localZipOverride.orNull
+                ?.takeIf { it.isNotBlank() }
+                ?.let { localZip.set(project.rootProject.file(it)) }
+        }
+    }
+
+    private fun registerInstallTask(
+        project: Project,
+        download: TaskProvider<DownloadOpenCCDataTask>,
+    ) {
+        val install =
+            project.tasks.register<Sync>(INSTALL_TASK) {
+                dependsOn(download)
+                from(project.dataConfigDir) {
+                    include("*.json")
+                    exclude("*.schema.json")
+                }
+                from(project.zipTree(project.openccResourcesZip)) {
+                    include("*.txt")
+                }
+                into(project.dataInstallDir)
+                doLast {
+                    val dir = project.dataInstallDir
+                    val configs = dir.listFiles { f -> f.extension == "json" }.orEmpty()
+                    val dictionaries = dir.listFiles { f -> f.extension == "txt" }.orEmpty()
+                    logger.lifecycle(
+                        "Installed ${configs.size} OpenCC configs and ${dictionaries.size} dictionaries to $dir",
+                    )
+                }
             }
-        // make sure OpenCC data have been installed before generating data checksums
-        project.tasks.getByName(DataChecksumsPlugin.TASK).dependsOn(task)
+        project.tasks.getByName(DataChecksumsPlugin.TASK).dependsOn(install)
     }
 
     private fun registerCleanTask(project: Project) {
@@ -55,108 +131,85 @@ class OpenCCDataPlugin : Plugin<Project> {
             }
     }
 
-    abstract class InstallOpenCCDataTask : DefaultTask() {
-        @get:Inject
-        abstract val execOperations: ExecOperations
+    abstract class DownloadOpenCCDataTask : DefaultTask() {
+        @get:Input
+        abstract val releaseTag: Property<String>
 
-        // relative paths plus content hashes: updating OpenCC's configs or
-        // dictionaries alone must re-run this task after a submodule bump
-        @get:PathSensitive(PathSensitivity.RELATIVE)
-        @get:InputDirectory
-        abstract val inputDir: DirectoryProperty
+        @get:Input
+        abstract val repositoryUrl: Property<String>
 
-        @get:OutputDirectory
-        abstract val outputDir: DirectoryProperty
+        @get:Optional
+        @get:InputFile
+        @get:PathSensitive(PathSensitivity.NONE)
+        abstract val localZip: RegularFileProperty
 
-        private val input by lazy { inputDir.get().asFile }
-        private val output by lazy { outputDir.get().asFile }
-
-        /** A dictionary derived from [source] by running [script] from OpenCC's data/scripts. */
-        private data class GeneratedDict(val source: String, val script: String)
-
-        companion object {
-            // Dictionaries that cannot be copied verbatim but have to be generated;
-            // keyed by the name OpenCC configs refer to them by
-            private val GENERATED_DICTS = mapOf(
-                "TWVariantsRev" to GeneratedDict("TWVariants", "reverse.py"),
-                "HKVariantsRev" to GeneratedDict("HKVariants", "reverse.py"),
-                "JPShinjitaiCharactersRev" to GeneratedDict("JPShinjitaiCharacters", "reverse.py"),
-                "TSCharactersExt" to GeneratedDict("TSCharacters", "extract_tofu_risk.py"),
-            )
-
-            // Dicts referenced by OpenCC configs that cannot be generated at build time
-            // (STPhrases_GeneratedFromRegionalPhrases needs a host opencc CLI).
-            // Configs using them (s2t, s2tw, s2twp, s2hk, s2hkp) stay broken.
-            private val UNAVAILABLE_DICTS = setOf("STPhrases_GeneratedFromRegionalPhrases")
-
-            // Regex to find "file": "xxx.ocd2" in config JSON
-            private val OCD2_FILE_PATTERN = Pattern.compile("\"file\"\\s*:\\s*\"([^\"]+\\.ocd2)\"")
-        }
+        @get:OutputFile
+        abstract val outputZip: RegularFileProperty
 
         @TaskAction
         fun execute() {
-            // Gradle does no per-file cleanup for a whole-@OutputDirectory task, so
-            // dictionaries dropped by an OpenCC bump (e.g. JPVariants*) would
-            // otherwise linger in the assets forever.
-            output.deleteRecursively()
-
-            val dictionary = input.resolve("dictionary")
-            val configs =
-                input.resolve("config")
-                    // the config schema is a test artifact; librime ships its own copy
-                    .listFiles { f -> f.extension == "json" && !f.name.endsWith(".schema.json") }
-                    .orEmpty()
-                    .toList()
-            check(configs.isNotEmpty()) { "No OpenCC configs found in ${input.resolve("config")}" }
-            configs.forEach { it.copyTo(output.resolve(it.name), overwrite = true) }
-
-            // Package exactly the dictionaries the installed configs ask for: the
-            // app compiles them to .ocd2 at runtime, and a missing one makes opencc
-            // fail to load the whole config, silently disabling conversion in
-            // librime. Deriving the set from the configs keeps it from drifting
-            // after an OpenCC bump.
-            val unpackaged = mutableListOf<String>()
-            referencedDicts(configs).forEach { name ->
-                val generated = GENERATED_DICTS[name]
-                val source = dictionary.resolve("$name.txt")
-                when {
-                    generated != null -> generate(name, generated, dictionary)
-                    source.isFile -> source.copyTo(output.resolve("$name.txt"), overwrite = true)
-                    name in UNAVAILABLE_DICTS -> Unit
-                    else -> unpackaged += name
+            val target = outputZip.get().asFile
+            target.parentFile?.mkdirs()
+            val temp = File(target.parentFile, "${target.name}.part")
+            temp.delete()
+            try {
+                val source = localZip.orNull?.asFile
+                if (source != null) {
+                    logger.lifecycle("Using local OpenCC resource archive: $source")
+                    source.copyTo(temp, overwrite = true)
+                } else {
+                    val url = releaseArchiveUrl()
+                    logger.lifecycle("Downloading OpenCC resource archive: $url")
+                    download(url, temp)
                 }
-            }
-            check(unpackaged.isEmpty()) {
-                "OpenCC configs refer to dictionaries which are not packaged:\n" +
-                    unpackaged.joinToString("\n") { "  $it" } +
-                    "\nAdd a generator to GENERATED_DICTS, drop the text dictionary into " +
-                    "OpenCC's data/dictionary, or allow-list the name in UNAVAILABLE_DICTS " +
-                    "when it cannot be produced at build time."
+                Files.move(temp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
+                logger.lifecycle("OpenCC resource archive ready: $target")
+            } finally {
+                temp.delete()
             }
         }
 
-        /** Every dictionary referenced as `file` by the given configs. */
-        private fun referencedDicts(configs: List<File>): Set<String> {
-            val referenced = sortedSetOf<String>()
-            configs.forEach { config ->
-                val matcher = OCD2_FILE_PATTERN.matcher(config.readText())
-                while (matcher.find()) {
-                    referenced += matcher.group(1).removeSuffix(".ocd2")
-                }
+        /** The release archive of the OpenCC version the submodule is tagged with. */
+        private fun releaseArchiveUrl(): String {
+            val tag = releaseTag.get()
+            check(tag.isNotEmpty()) {
+                "Unable to determine the OpenCC release tag from the submodule; " +
+                    "provide the official resource archive with -PopenccDataZip."
             }
-            return referenced
+            val repository = repositoryUrl.get()
+            check(repository.isNotEmpty()) {
+                "Unable to determine the OpenCC repository URL from the submodule; " +
+                    "provide the official resource archive with -PopenccDataZip."
+            }
+            val version = tag.removePrefix("ver.")
+            return "$repository/releases/download/$tag/opencc-v$version-resources.zip"
         }
 
-        private fun generate(name: String, generated: GeneratedDict, dictionary: File) {
-            execOperations.exec {
-                workingDir = output
-                commandLine = listOf(
-                    "python3",
-                    input.resolve("scripts/${generated.script}").absolutePath,
-                    dictionary.resolve("${generated.source}.txt").absolutePath,
-                    "$name.txt",
-                )
-            }.assertNormalExitValue()
+        private fun download(
+            url: String,
+            destination: File,
+        ) {
+            val client =
+                HttpClient
+                    .newBuilder()
+                    .followRedirects(HttpClient.Redirect.NORMAL)
+                    .connectTimeout(Duration.ofSeconds(30))
+                    .build()
+            val request =
+                HttpRequest
+                    .newBuilder(URI(url))
+                    .timeout(Duration.ofMinutes(5))
+                    .GET()
+                    .build()
+            val response =
+                try {
+                    client.send(request, HttpResponse.BodyHandlers.ofFile(destination.toPath()))
+                } catch (e: IOException) {
+                    throw GradleException("Failed to download OpenCC resources from $url: ${e.message}", e)
+                }
+            check(response.statusCode() == 200) {
+                "Failed to download OpenCC resources from $url: HTTP ${response.statusCode()}"
+            }
         }
     }
 }
