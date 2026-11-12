@@ -71,6 +71,17 @@ class KeyboardWindow(di: DI) :
 
     private lateinit var keyboardView: FrameLayout
 
+    /**
+     * Whether the keyboard is laid out for the floating card.
+     *
+     * Set by the input view before this window is created: the service still
+     * points at the previous view while the new one is being constructed.
+     */
+    var isFloating: Boolean = false
+
+    /** Scale of the floating card's key area, chosen by the user. */
+    var floatingScalePercent: Int = 100
+
     companion object : ResidentWindow.Key {
         lateinit var currentKeyboard: Keyboard
 
@@ -117,6 +128,8 @@ class KeyboardWindow(di: DI) :
                 lastIsPortrait = isPortrait
                 containerWidth = width
                 allowedWidth = width
+                // Cached keyboards were laid out for the old width, and the
+                // floating flag applies to every cached layout.
                 v.post { refreshKeyboards() }
             }
         }
@@ -145,7 +158,12 @@ class KeyboardWindow(di: DI) :
         }
 
         val padding = theme.style.run {
-            if (context.isLandscapeMode()) keyboardPaddingLand else keyboardPadding
+            // The card uses the portrait padding even in landscape.
+            if (!isFloating && context.isLandscapeMode()) {
+                keyboardPaddingLand
+            } else {
+                keyboardPadding
+            }
         }
 
         val safeWidth = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -184,7 +202,16 @@ class KeyboardWindow(di: DI) :
 
         val config = selectKeyboardConfig(target)
         val cached = cachedKeyboards[target]
-        val keyboard = cached?.first ?: Keyboard(context, theme, computeAllowedWidth(), config)
+        val keyboard =
+            cached?.first
+                ?: Keyboard(
+                    context,
+                    theme,
+                    computeAllowedWidth(),
+                    config,
+                    floating = isFloating,
+                    floatingScalePercent = floatingScalePercent,
+                )
         val view =
             cached?.second
                 ?: KeyboardView(context, theme, keyboard, popup, service, keyboardActionListener, enterKeyDisplay)
@@ -273,8 +300,8 @@ class KeyboardWindow(di: DI) :
             }
         var final = dot.ifEmpty { smartMatchKeyboard() }
 
-        // 切换到横屏布局
-        if (service.isLandscapeMode()) {
+        // 切换到横屏布局；悬浮键盘始终使用竖屏布局。
+        if (!isFloating && service.isLandscapeMode()) {
             val landscape =
                 theme.presetKeyboards[final]?.landscapeKeyboard ?: ""
             if (landscape.isNotEmpty() && presetKeyboardIds.contains(landscape)) final = landscape
