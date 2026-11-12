@@ -14,6 +14,7 @@ import android.os.Build
 import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import android.view.WindowInsets
 import android.view.inputmethod.EditorInfo
@@ -150,6 +151,12 @@ class InputView(
                     Gravity.START or Gravity.CENTER_VERTICAL,
                 ),
             )
+        }
+
+    /** Hosts the composer text inside the floating card so it never splits the input bar. */
+    private val preeditHost =
+        FrameLayout(context).apply {
+            id = R.id.floating_preedit_host
         }
 
     private val floatingOutlineProvider =
@@ -344,9 +351,16 @@ class InputView(
                     },
                 )
                 add(
+                    preeditHost,
+                    lParams(matchParent, wrapContent) {
+                        below(floatingDragHandle)
+                        centerHorizontally()
+                    },
+                )
+                add(
                     inputBar.view,
                     lParams(matchParent, dp(inputBar.themedHeight)) {
-                        below(floatingDragHandle)
+                        below(preeditHost)
                         centerHorizontally()
                     },
                 )
@@ -691,6 +705,37 @@ class InputView(
         updatePreeditTranslation()
     }
 
+    /**
+     * The composer text belongs above the candidate bar. Inside the floating
+     * card it is hosted below the drag strip, so the drag strip never splits
+     * the two; in docked mode it stays directly above the keyboard.
+     */
+    private fun updatePreeditParent() {
+        val preeditView = preedit.ui.root
+        val target: ViewGroup = if (floatingActive) preeditHost else this
+        if (preeditView.parent === target) return
+        (preeditView.parent as? ViewGroup)?.removeView(preeditView)
+        if (target === preeditHost) {
+            preeditHost.addView(
+                preeditView,
+                FrameLayout.LayoutParams(
+                    wrapContent,
+                    wrapContent,
+                    Gravity.TOP or Gravity.START,
+                ),
+            )
+        } else {
+            val params =
+                lParams(wrapContent, wrapContent) {
+                    above(keyboardView)
+                    startOfParent()
+                }
+            // Keep the preedit below the popup layer, which is added last.
+            val popupIndex = indexOfChild(popup.root)
+            addView(preeditView, if (popupIndex >= 0) popupIndex else childCount, params)
+        }
+    }
+
     /** Re-anchors the preedit touch receiver after the card or composer moves. */
     private fun updatePreeditTranslation() {
         val preeditView = preedit.ui.root
@@ -808,6 +853,7 @@ class InputView(
     }
 
     private fun updateKeyboardSize() {
+        updatePreeditParent()
         bottomPaddingSpace.updateLayoutParams {
             height = if (floatingActive) dp(FloatingKeyboardGeometry.CARD_BOTTOM_PADDING_DP) else keyboardBottomPaddingPx
         }
