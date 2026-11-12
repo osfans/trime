@@ -150,6 +150,12 @@
     <string name="custom_sound_effect_enabled">使用自定义按键音效</string>
     <string name="enable_landscape_mode">启用横屏模式</string>
     <string name="split_space_percent">自动分割键盘比例</string>
+    <string name="floating_keyboard_drag_handle">拖动键盘</string>
+    <string name="floating_keyboard_collapse">收起键盘</string>
+    <string name="floating_keyboard_expand">展开键盘</string>
+    <string name="floating_keyboard_float">将键盘移入悬浮窗口</string>
+    <string name="floating_keyboard_dock">将键盘放回原位</string>
+    <string name="floating_keyboard_resize">调整键盘大小</string>
     <string name="setup__step_three">第 3 步</string>
     <string name="setup__select_data_path_hint">选择<b>同文输入法</b>如何存储 Rime 数据</string>
     <string name="setup__select_data_path">选择外部数据目录…</string>
