@@ -144,7 +144,7 @@ class KeyboardWindow(di: DI) :
                 allowedWidth = width
                 // Cached keyboards were laid out for the old width, and the
                 // floating flag applies to every cached layout.
-                v.post { refreshKeyboards() }
+                if (!layoutRefreshSuspended) v.post { refreshKeyboards() }
             }
         }
 

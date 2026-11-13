@@ -27,6 +27,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.doOnLayout
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
@@ -231,6 +232,7 @@ class InputView(
 
     private var resizeStartRawX = 0f
     private var resizeStartWidth = 0
+    private var resizeChanged = false
 
     private val leftPaddingSpace =
         view(::View) {
@@ -633,7 +635,7 @@ class InputView(
         return (targetY - keyboardView.top).toFloat()
     }
 
-    private fun applyFloatingGeometry() {
+    private fun applyFloatingGeometry(rebuildKeyboard: Boolean = true) {
         if (!floatingActive || width <= 0) return
         val baseWidth = floatingBaseWidth()
         val targetWidth =
@@ -881,6 +883,8 @@ class InputView(
             MotionEvent.ACTION_DOWN -> {
                 resizeStartRawX = event.rawX
                 resizeStartWidth = keyboardView.width
+                resizeChanged = false
+                keyboardWindow.setLayoutRefreshSuspended(true)
                 parent?.requestDisallowInterceptTouchEvent(true)
                 return true
             }
@@ -893,6 +897,7 @@ class InputView(
                         .roundToInt()
                         .coerceIn(minWidth, baseWidth)
                 if (width != keyboardView.layoutParams.width) {
+                    resizeChanged = true
                     keyboardWindow.floatingScalePercent =
                         FloatingKeyboardGeometry.percentFor(baseWidth, width)
                     keyboardView.updateLayoutParams { this.width = width }
@@ -908,7 +913,8 @@ class InputView(
                         keyboardView.width,
                     ),
                 )
-                applyFloatingGeometry()
+                applyFloatingGeometry(rebuildKeyboard = false)
+                finishFloatingResize()
                 // Wait for the new width to be laid out before remembering
                 // where the card is.
                 keyboardView.post {
@@ -920,11 +926,32 @@ class InputView(
 
             MotionEvent.ACTION_CANCEL -> {
                 parent?.requestDisallowInterceptTouchEvent(false)
-                applyFloatingGeometry()
+                applyFloatingGeometry(rebuildKeyboard = false)
+                finishFloatingResize()
                 return true
             }
         }
         return false
+    }
+
+    /**
+     * Rebuilds the keys once after a resize gesture.
+     *
+     * The card width changes on every touch move, but rebuilding all key
+     * views for each intermediate width is expensive and the keys are only
+     * valid for the final width anyway. The width listener stays suspended
+     * until the final width is laid out so it cannot start another rebuild.
+     */
+    private fun finishFloatingResize() {
+        if (!resizeChanged) {
+            keyboardWindow.setLayoutRefreshSuspended(false)
+            return
+        }
+        resizeChanged = false
+        keyboardView.doOnLayout {
+            keyboardWindow.setLayoutRefreshSuspended(false)
+            keyboardView.post { keyboardWindow.refreshKeyboards() }
+        }
     }
 
     private fun snapFloatingCard() {
@@ -1212,9 +1239,11 @@ class InputView(
         updateWindowViewHeightJob.cancel()
         popup.root.removeAllViews()
         broadcaster.clear()
-        // A drag may be interrupted by the window going away; the next layout
-        // must not treat the card as still being dragged.
+        // A drag or resize may be interrupted by the window going away; the
+        // next layout must not treat the card as still being changed.
         floatingDragging = false
+        resizeChanged = false
+        keyboardWindow.setLayoutRefreshSuspended(false)
         super.onDetachedFromWindow()
     }
 
