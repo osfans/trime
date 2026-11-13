@@ -654,7 +654,7 @@ class InputView(
         val effectiveScale = FloatingKeyboardGeometry.percentFor(baseWidth, targetWidth)
         if (keyboardWindow.floatingScalePercent != effectiveScale) {
             keyboardWindow.floatingScalePercent = effectiveScale
-            scheduleKeyboardRefresh()
+            if (rebuildKeyboard) scheduleKeyboardRefresh()
         }
         keyboardView.updateLayoutParams<LayoutParams> {
             width = targetWidth
