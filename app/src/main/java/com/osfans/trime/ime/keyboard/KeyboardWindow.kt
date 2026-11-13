@@ -93,6 +93,13 @@ class KeyboardWindow(di: DI) :
 
     private val presetKeyboardIds = theme.presetKeyboards.keys.toList()
     private var currentKeyboardId = ""
+
+    /**
+     * The keyboard requested by the user, before the landscape variant is
+     * applied for the current floating mode. It lets a mode change resolve the
+     * layout again without losing the original selection.
+     */
+    private var currentKeyboardBaseId = ""
     private var lastKeyboardId = ""
     private var lastLockKeyboardId = ""
     private var tempAsciiMode: Boolean? = null
@@ -120,6 +127,13 @@ class KeyboardWindow(di: DI) :
     private var containerWidth: Int = 0
     private var allowedWidth: Int = 0
 
+    /**
+     * While the floating card is being resized, its width changes on every
+     * touch move. Building keys for each of those widths is expensive, so the
+     * width is recorded but the rebuild is left to the caller's final refresh.
+     */
+    private var layoutRefreshSuspended = false
+
     private val onKeyboardViewLayoutChangeListener =
         View.OnLayoutChangeListener { v, left, _, right, _, _, _, _, _ ->
             val width = right - left
@@ -137,7 +151,8 @@ class KeyboardWindow(di: DI) :
     override fun onCreateView(): View {
         keyboardView = context.frameLayout(R.id.keyboard_view)
         keyboardView.addOnLayoutChangeListener(onKeyboardViewLayoutChangeListener)
-        attachKeyboard(evalKeyboard(".default"))
+        val baseId = resolveBaseKeyboard(".default")
+        attachKeyboard(resolveKeyboardId(baseId), baseId)
         return keyboardView
     }
 
@@ -196,9 +211,14 @@ class KeyboardWindow(di: DI) :
         return config
     }
 
-    private fun attachKeyboard(target: String) {
+    private fun attachKeyboard(
+        target: String,
+        baseId: String = target,
+        resetInputState: Boolean = true,
+    ) {
         currentKeyboardId = target
-        lastKeyboardId = target
+        currentKeyboardBaseId = baseId
+        lastKeyboardId = baseId
 
         val config = selectKeyboardConfig(target)
         val cached = cachedKeyboards[target]
@@ -223,16 +243,21 @@ class KeyboardWindow(di: DI) :
 
         keyboard.also {
             runBlocking { _currentKeyboardHeight.emit(it.keyboardHeight) }
-            if (it.isLock) lastLockKeyboardId = target
+            if (it.isLock) lastLockKeyboardId = baseId
             dispatchCapsState(it::setShifted)
 
-            val currentMode = rime.run { statusCached }.isAsciiMode
-            val targetMode = if (it.resetAsciiMode) it.asciiMode else it.lastAsciiMode
+            // Only a real keyboard switch may reset ASCII mode. Rebuilding the
+            // same keyboard for a width or floating-mode change must keep the
+            // live mode and composition untouched.
+            if (resetInputState) {
+                val currentMode = rime.run { statusCached }.isAsciiMode
+                val targetMode = if (it.resetAsciiMode) it.asciiMode else it.lastAsciiMode
 
-            if (currentMode != targetMode) {
-                service.postRimeJob {
-                    commitComposition()
-                    setRuntimeOption("ascii_mode", targetMode)
+                if (currentMode != targetMode) {
+                    service.postRimeJob {
+                        commitComposition()
+                        setRuntimeOption("ascii_mode", targetMode)
+                    }
                 }
             }
 
@@ -270,15 +295,16 @@ class KeyboardWindow(di: DI) :
         return if (presetKeyboardIds.contains(layout)) layout else "default"
     }
 
-    private fun evalKeyboard(id: String): String {
-        val currentIdx = presetKeyboardIds.indexOfFirst { currentKeyboardId == it }
+    /** Resolves aliases such as `.next` while keeping the keyboard's logical ID. */
+    private fun resolveBaseKeyboard(id: String): String {
+        val currentIdx = presetKeyboardIds.indexOf(currentKeyboardBaseId)
         val dot =
             when (id) {
                 ".default" -> smartMatchKeyboard()
 
-                ".prior" -> presetKeyboardIds.getOrNull(currentIdx - 1) ?: currentKeyboardId
+                ".prior" -> presetKeyboardIds.getOrNull(currentIdx - 1) ?: currentKeyboardBaseId
 
-                ".next" -> presetKeyboardIds.getOrNull(currentIdx + 1) ?: currentKeyboardId
+                ".next" -> presetKeyboardIds.getOrNull(currentIdx + 1) ?: currentKeyboardBaseId
 
                 ".last" -> lastKeyboardId
 
@@ -289,17 +315,28 @@ class KeyboardWindow(di: DI) :
                     if (ascii.isNullOrEmpty()) {
                         ascii = lastLockKeyboardId
                     }
-                    if (presetKeyboardIds.contains(ascii)) ascii else currentKeyboardId
+                    if (presetKeyboardIds.contains(ascii)) ascii else currentKeyboardBaseId
                 }
 
                 else -> {
                     id.ifEmpty {
-                        if (activeKeyboard?.isLock == true) currentKeyboardId else lastLockKeyboardId
+                        if (activeKeyboard?.isLock == true) currentKeyboardBaseId else lastLockKeyboardId
                     }
                 }
             }
-        var final = dot.ifEmpty { smartMatchKeyboard() }
+        val base = dot.ifEmpty { smartMatchKeyboard() }
+        return portraitBaseKeyboard(base)
+    }
 
+    /**
+     * Maps an explicitly selected landscape variant back to the keyboard it
+     * belongs to, so switching to the floating card can use the portrait one.
+     */
+    private fun portraitBaseKeyboard(id: String): String = theme.presetKeyboards.entries.firstOrNull { it.value.landscapeKeyboard == id }?.key ?: id
+
+    /** Applies the landscape variant; the floating card always uses the portrait layout. */
+    private fun resolveKeyboardId(baseId: String): String {
+        var final = baseId
         // 切换到横屏布局；悬浮键盘始终使用竖屏布局。
         if (!isFloating && service.isLandscapeMode()) {
             val landscape =
@@ -334,25 +371,60 @@ class KeyboardWindow(di: DI) :
     }
 
     fun switchKeyboard(to: String) {
-        val target = evalKeyboard(to)
+        val baseId = resolveBaseKeyboard(to)
+        val target = resolveKeyboardId(baseId)
         ContextCompat.getMainExecutor(service).execute {
-            if (target == currentKeyboardId) return@execute
+            if (target == currentKeyboardId && baseId == currentKeyboardBaseId) return@execute
             detachCurrentView()
-            attachKeyboard(target)
+            attachKeyboard(target, baseId)
         }
         Timber.d("Switched to keyboard: $target")
+    }
+
+    /**
+     * Suspends the rebuild triggered by the keyboard view's width changing.
+     *
+     * The floating card is resized on every touch move, but rebuilding all key
+     * views for every intermediate width is wasteful. The caller must resume
+     * the listener and call [refreshKeyboards] once the final width is laid
+     * out.
+     */
+    fun setLayoutRefreshSuspended(suspended: Boolean) {
+        layoutRefreshSuspended = suspended
     }
 
     /**
      * Drops every built keyboard and rebuilds the current one. Needed when the available width
      * changes, because keys are laid out with absolute pixel sizes: keeping the other entries
      * would leave them at the previous width.
+     *
+     * This is a geometry-only rebuild: it must not run the keyboard-switch ASCII reset.
      */
     fun refreshKeyboards() {
-        val id = currentKeyboardId.ifEmpty { return }
+        val target = currentKeyboardId.ifEmpty { return }
+        rebuildKeyboard(target, currentKeyboardBaseId.ifEmpty { target })
+    }
+
+    /**
+     * Rebuilds the current keyboard after the floating mode changed.
+     *
+     * Scaled or docked keyboards use different dimensions depending on whether
+     * they are floating, and the landscape variant must be re-evaluated while
+     * keeping the user's original keyboard selection and input state.
+     */
+    fun refreshKeyboardsForFloatingMode() {
+        val baseId = currentKeyboardBaseId.ifEmpty { currentKeyboardId.ifEmpty { return } }
+        rebuildKeyboard(resolveKeyboardId(baseId), baseId)
+    }
+
+    private fun rebuildKeyboard(target: String, baseId: String) {
+        val liveAsciiMode = rime.run { statusCached }.isAsciiMode
         detachCurrentView()
         clearKeyboardCache()
-        attachKeyboard(id)
+        // A landscape variant may not have been cached under the new target.
+        // Carry the live mode over so the rebuilt keyboard starts in sync.
+        lastAsciiModes[target] = liveAsciiMode
+        attachKeyboard(target, baseId, resetInputState = false)
     }
 
     /** Repaints the keyboard after a color-scheme switch; keys re-resolve their colors. */

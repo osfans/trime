@@ -221,6 +221,9 @@ class InputView(
 
     private var keyboardRefreshPosted = false
 
+    /** Whether the posted rebuild also has to re-evaluate the landscape variant. */
+    private var keyboardRefreshReevaluatesKeyboard = false
+
     private var dragStartRawX = 0f
     private var dragStartRawY = 0f
     private var dragStartTranslationX = 0f
@@ -559,12 +562,19 @@ class InputView(
     }
 
     /** Coalesces rebuilds requested while a layout pass is still running. */
-    private fun scheduleKeyboardRefresh() {
+    private fun scheduleKeyboardRefresh(reevaluateKeyboard: Boolean = false) {
+        keyboardRefreshReevaluatesKeyboard = keyboardRefreshReevaluatesKeyboard || reevaluateKeyboard
         if (keyboardRefreshPosted) return
         keyboardRefreshPosted = true
         keyboardView.post {
             keyboardRefreshPosted = false
-            keyboardWindow.refreshKeyboards()
+            val reevaluate = keyboardRefreshReevaluatesKeyboard
+            keyboardRefreshReevaluatesKeyboard = false
+            if (reevaluate) {
+                keyboardWindow.refreshKeyboardsForFloatingMode()
+            } else {
+                keyboardWindow.refreshKeyboards()
+            }
         }
     }
 
@@ -970,9 +980,14 @@ class InputView(
         portraitPreference = prefs.floatingKeyboard.portraitFloat.getValue(),
     )
 
-    private fun applyEffectiveFloatingMode() {
+    private fun applyEffectiveFloatingMode(reevaluateKeyboard: Boolean = false) {
         val shouldFloat = shouldUseFloatingMode()
-        if (shouldFloat == floatingActive) return
+        if (shouldFloat == floatingActive) {
+            // The mode did not change, but a docked keyboard can still need
+            // another landscape variant after an orientation change.
+            if (reevaluateKeyboard) scheduleKeyboardRefresh(reevaluateKeyboard = true)
+            return
+        }
         floatingActive = shouldFloat
         keyboardWindow.isFloating = shouldFloat
         if (!shouldFloat) {
@@ -983,7 +998,8 @@ class InputView(
         // The layout depends on the floating flag (a card is never split), and
         // the card width differs from the docked width. Rebuild the keyboards
         // after the new size has been laid out instead of using the old width.
-        scheduleKeyboardRefresh()
+        // The landscape variant also depends on the new floating mode.
+        scheduleKeyboardRefresh(reevaluateKeyboard = true)
         service.requestInputViewInsetsUpdate()
     }
 
@@ -997,7 +1013,7 @@ class InputView(
         if (prefs.floatingKeyboard.portraitFloat.getValue()) {
             landscapeDockOverride = false
         }
-        applyEffectiveFloatingMode()
+        applyEffectiveFloatingMode(reevaluateKeyboard = true)
     }
 
     /**
@@ -1010,10 +1026,10 @@ class InputView(
     fun setFloatingMode(floating: Boolean) {
         if (isLandscapeWindow()) {
             landscapeDockOverride = !floating
-            applyEffectiveFloatingMode()
+            applyEffectiveFloatingMode(reevaluateKeyboard = true)
         } else {
             prefs.floatingKeyboard.portraitFloat.setValue(floating)
-            applyEffectiveFloatingMode()
+            applyEffectiveFloatingMode(reevaluateKeyboard = true)
         }
     }
 
@@ -1037,21 +1053,13 @@ class InputView(
                 landscapeDockOverride = false
             }
             // On the first layout, replace the configuration guess with the
-            // measured window shape.
-            applyEffectiveFloatingMode()
+            // measured window shape. Later orientation changes also need to
+            // re-resolve the keyboard layout while the card stays docked.
+            applyEffectiveFloatingMode(reevaluateKeyboard = previousLandscape != null)
         }
         // The window shape is known here, so the card is placed again for the
         // new size and the position of the new orientation is restored.
         if (floatingActive) {
-            applyFloatingGeometry()
-        }
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        // The window still has the old size at this point; onSizeChanged()
-        // places the card once the new layout is known.
-        if (floatingActive && (width <= 0 || height <= 0)) {
             applyFloatingGeometry()
         }
     }
