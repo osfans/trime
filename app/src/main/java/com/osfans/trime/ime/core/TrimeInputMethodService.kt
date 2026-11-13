@@ -564,8 +564,8 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         if (inputDeviceManager.useVirtualKeyboard && view?.isFloatingKeyboardActive == true) {
             view.getFloatingKeyboardBounds(floatingKeyboardBounds)
             // The card is an overlay: reporting no covered area keeps the app
-            // from panning while the card is dragged, but only the card itself
-            // is touchable.
+            // from panning while the card is dragged. Only the card and any
+            // visible popup are touchable.
             outInsets.apply {
                 contentTopInsets = decorView.height
                 visibleTopInsets = decorView.height

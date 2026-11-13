@@ -197,6 +197,7 @@ class InputView(
         }
 
     private val floatingKeyboardBoundsLocation = IntArray(2)
+    private val floatingPopupBounds = Rect()
 
     private var floatingSystemInsets = Insets.NONE
 
@@ -514,6 +515,11 @@ class InputView(
             floatingKeyboardBoundsLocation[0] + keyboardView.width,
             floatingKeyboardBoundsLocation[1] + keyboardView.height,
         )
+        // The popup layer is full-screen and can extend past the card. Those
+        // parts still belong to the IME window and must stay touchable.
+        if (popup.getVisibleBounds(floatingPopupBounds)) {
+            out.union(floatingPopupBounds)
+        }
         return true
     }
 
