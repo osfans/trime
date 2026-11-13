@@ -10,6 +10,7 @@ import android.app.Dialog
 import android.content.IntentFilter
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.graphics.Rect
 import android.graphics.RectF
 import android.inputmethodservice.InputMethodService
 import android.os.Build
@@ -134,6 +135,18 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             themeScope?.let { replaceCandidateView(it) }
         }
 
+    /**
+     * The floating keyboard is switched in place, so the view does not have to
+     * be rebuilt when the portrait preference changes.
+     */
+    @Keep
+    private val floatingKeyboardListener =
+        PreferenceDelegate.OnChangeListener<Boolean> { _, _ ->
+            ContextCompat.getMainExecutor(this).execute {
+                inputView?.updateFloatingMode()
+            }
+        }
+
     @Keep
     private val onThemeChangeListener =
         ThemeManager.OnThemeChangeListener {
@@ -208,6 +221,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         recreateInputViewPrefs.forEach {
             it.registerOnChangeListener(recreateInputViewListener)
         }
+        prefs.floatingKeyboard.portraitFloat.registerOnChangeListener(floatingKeyboardListener)
         prefs.candidates.registerOnChangeListener(recreateCandidatesViewListener)
         // ensure theme and color managers are initialized after rime is ready
         lifecycleScope.launch {
@@ -387,6 +401,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         recreateInputViewPrefs.forEach {
             it.unregisterOnChangeListener(recreateInputViewListener)
         }
+        prefs.floatingKeyboard.portraitFloat.unregisterOnChangeListener(floatingKeyboardListener)
         prefs.candidates.unregisterOnChangeListener(recreateCandidatesViewListener)
         ThemeManager.removeOnChangedListener(onThemeChangeListener)
         ColorManager.removeOnChangedListener(onColorChangeListener)
@@ -429,7 +444,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private fun updateDecorLocation() {
         contentSize[0] = contentView.width.toFloat()
         contentSize[1] =
-            if (inputDeviceManager.useVirtualKeyboard) {
+            if (inputDeviceManager.useVirtualKeyboard && inputView?.isFloatingKeyboardActive != true) {
                 inputViewLocation[1].toFloat()
             } else {
                 contentView.height.toFloat()
@@ -526,10 +541,39 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     private val inputViewLocation = intArrayOf(0, 0)
+    private val floatingKeyboardBounds = Rect()
+
+    val isFloatingKeyboardActive: Boolean
+        get() = inputView?.isFloatingKeyboardActive == true
+
+    /**
+     * Re-evaluates the IME window insets. A floating keyboard moves without
+     * changing the window size, so a layout pass is needed for the system to
+     * pick up the new touchable region.
+     */
+    fun requestInputViewInsetsUpdate() {
+        inputView?.requestLayout()
+    }
+
+    fun requestFloatingMode(floating: Boolean) {
+        inputView?.setFloatingMode(floating)
+    }
 
     override fun onComputeInsets(outInsets: Insets) {
-        if (inputDeviceManager.useVirtualKeyboard) {
-            inputView?.keyboardView?.getLocationInWindow(inputViewLocation)
+        val view = inputView
+        if (inputDeviceManager.useVirtualKeyboard && view?.isFloatingKeyboardActive == true) {
+            view.getFloatingKeyboardBounds(floatingKeyboardBounds)
+            // The card is an overlay: reporting no covered area keeps the app
+            // from panning while the card is dragged. Only the card and any
+            // visible popup are touchable.
+            outInsets.apply {
+                contentTopInsets = decorView.height
+                visibleTopInsets = decorView.height
+                touchableInsets = Insets.TOUCHABLE_INSETS_REGION
+                touchableRegion.set(floatingKeyboardBounds)
+            }
+        } else if (inputDeviceManager.useVirtualKeyboard) {
+            view?.keyboardView?.getLocationInWindow(inputViewLocation)
             outInsets.apply {
                 contentTopInsets = inputViewLocation[1]
                 visibleTopInsets = inputViewLocation[1]

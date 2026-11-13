@@ -151,6 +151,12 @@
     <string name="custom_sound_effect_enabled">使用自訂按鍵音</string>
     <string name="enable_landscape_mode">啟用橫屏模式</string>
     <string name="split_space_percent">自動分割鍵盤比例</string>
+    <string name="floating_keyboard_drag_handle">拖動鍵盤</string>
+    <string name="floating_keyboard_collapse">收合鍵盤</string>
+    <string name="floating_keyboard_expand">展開鍵盤</string>
+    <string name="floating_keyboard_float">以懸浮卡片顯示鍵盤</string>
+    <string name="floating_keyboard_dock">將鍵盤放回原位</string>
+    <string name="floating_keyboard_resize">調整鍵盤大小</string>
     <string name="setup__step_three">第 3 步</string>
     <string name="setup__select_data_path_hint">選擇<b>同文輸入法</b>如何儲存 Rime 資料</string>
     <string name="setup__select_data_path">選擇外部資料夾…</string>

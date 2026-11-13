@@ -153,6 +153,12 @@ class InputBarDelegate(override val di: DI) :
                 setOnClickListener { service.requestHideSelf(0) }
                 onSwipe = swipeDownHideKeyboardCallback
             }
+            floatingToggleButton.apply {
+                contentDescription = context.getString(R.string.floating_keyboard_float)
+                setOnClickListener {
+                    service.requestFloatingMode(!service.isFloatingKeyboardActive)
+                }
+            }
             clipboardUi.suggestionView.apply {
                 setOnClickListener {
                     val content = ClipboardHelper.lastEntity?.text
@@ -275,6 +281,10 @@ class InputBarDelegate(override val di: DI) :
             ClipboardHelper.addOnUpdateListener(onClipboardUpdateListener)
             syncToolbarOptionStates()
         }
+    }
+
+    fun setFloatingActive(active: Boolean) {
+        alwaysUi.setFloatingActive(active)
     }
 
     /** Restyles the bar after a scheme switch without rebuilding its views. */

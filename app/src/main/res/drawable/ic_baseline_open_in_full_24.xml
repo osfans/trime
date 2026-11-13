@@ -1,0 +1,14 @@
+<!--
+  ~ SPDX-FileCopyrightText: 2015 - 2026 Rime community
+  ~ SPDX-License-Identifier: GPL-3.0-or-later
+  -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M3,21v-8h2v4.6L17.6,5H13V3h8v8h-2V6.4L6.4,19H11v2z" />
+</vector>

@@ -56,7 +56,6 @@ class KeyView(
 
     private val cachedLocation = intArrayOf(0, 0)
     private val cachedBounds = Rect()
-    private var boundsValid = false
 
     private val labelFontMetrics = Paint.FontMetrics()
     private var labelMetricsSize = Float.NaN
@@ -67,15 +66,9 @@ class KeyView(
     private var iconColorFilter: PorterDuffColorFilter? = null
     private var iconColorFilterColor = 0
 
-    val bounds: Rect
-        get() = cachedBounds.also {
-            if (!boundsValid) updateBounds()
-        }
-
     fun updateBounds() {
         val (x, y) = cachedLocation.also { getLocationInWindow(it) }
         cachedBounds.set(x + key.extraWidthLeft, y, x + width - key.extraWidthRight, y + height)
-        boundsValid = true
     }
 
     init {
@@ -233,7 +226,7 @@ class KeyView(
         if (popupKeys.isEmpty()) return
 
         popup.listener.onPopupAction(
-            PopupAction.ShowKeyboardAction(id, popupKeys, bounds),
+            PopupAction.ShowKeyboardAction(id, popupKeys, popupBounds()),
         )
     }
 
@@ -245,8 +238,18 @@ class KeyView(
             } else {
                 String(Character.toChars(previewText.codePointAt(0)))
             }
-            popup.listener.onPopupAction(PopupAction.PreviewAction(id, context, bounds))
+            popup.listener.onPopupAction(PopupAction.PreviewAction(id, context, popupBounds()))
         }
+    }
+
+    /**
+     * Refreshes the bounds instead of reusing the last popup position: moving
+     * the floating card translates an ancestor without laying the keys out
+     * again.
+     */
+    private fun popupBounds(): Rect {
+        updateBounds()
+        return cachedBounds
     }
 
     private fun dismissPopupPreview() {
@@ -264,11 +267,6 @@ class KeyView(
             resolveSize(desiredWidth, widthMeasureSpec),
             resolveSize(desiredHeight, heightMeasureSpec),
         )
-    }
-
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        super.onLayout(changed, left, top, right, bottom)
-        boundsValid = false
     }
 
     override fun onDraw(canvas: Canvas) {

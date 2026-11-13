@@ -1,0 +1,16 @@
+<!--
+  ~ SPDX-FileCopyrightText: 2015 - 2026 Rime community
+  ~ SPDX-License-Identifier: GPL-3.0-or-later
+  -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+    <group android:translateY="960">
+        <path
+            android:fillColor="@android:color/white"
+            android:pathData="M200,-120q-33,0 -56.5,-23.5T120,-200v-560q0,-33 23.5,-56.5T200,-840h560q33,0 56.5,23.5T840,-760v560q0,33 -23.5,56.5T760,-120H200ZM200,-320v120h560v-120H200ZM200,-400h560v-360H200v360Z" />
+    </group>
+</vector>
