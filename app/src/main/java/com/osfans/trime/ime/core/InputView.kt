@@ -100,6 +100,7 @@ class InputView(
     private val placeholderListener = OnClickListener { }
 
     private val prefs = AppPrefs.defaultInstance()
+    private val hideInputBar by prefs.keyboard.hideInputBar
 
     private val floatingDragPill =
         view(::View) {
@@ -124,6 +125,28 @@ class InputView(
             isClickable = true
             isFocusable = true
             setOnClickListener { toggleFloatingCollapsed() }
+        }
+
+    /**
+     * Docking control for users who hide the input bar. The bar toggle is not
+     * visible then, so the floating card keeps its own control.
+     */
+    private val floatingDockButton =
+        ImageView(context).apply {
+            setImageResource(R.drawable.ic_baseline_dock_to_bottom_24)
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
+            setPadding(
+                dp(FLOATING_HANDLE_BUTTON_PADDING_DP),
+                dp(FLOATING_HANDLE_BUTTON_PADDING_DP),
+                dp(FLOATING_HANDLE_BUTTON_PADDING_DP),
+                dp(FLOATING_HANDLE_BUTTON_PADDING_DP),
+            )
+            contentDescription = context.getString(R.string.floating_keyboard_dock)
+            imageTintList = ColorStateList.valueOf(scope.colors.keyTextColor)
+            isClickable = true
+            isFocusable = true
+            visibility = if (hideInputBar) View.VISIBLE else View.GONE
+            setOnClickListener { service.requestFloatingMode(false) }
         }
 
     private val floatingDragHandle =
@@ -154,6 +177,16 @@ class InputView(
                     dp(FLOATING_HANDLE_BUTTON_SIZE_DP),
                     Gravity.START or Gravity.CENTER_VERTICAL,
                 ),
+            )
+            addView(
+                floatingDockButton,
+                FrameLayout.LayoutParams(
+                    dp(FLOATING_HANDLE_BUTTON_SIZE_DP),
+                    dp(FLOATING_HANDLE_BUTTON_SIZE_DP),
+                    Gravity.START or Gravity.CENTER_VERTICAL,
+                ).apply {
+                    marginStart = dp(FLOATING_HANDLE_BUTTON_SIZE_DP)
+                },
             )
         }
 
@@ -527,6 +560,7 @@ class InputView(
         val color = ColorStateList.valueOf(scope.colors.keyTextColor)
         floatingDragPill.setBackgroundColor(scope.colors.keyTextColor)
         floatingCollapseButton.imageTintList = color
+        floatingDockButton.imageTintList = color
         floatingResizeHandle.imageTintList = color
     }
 
