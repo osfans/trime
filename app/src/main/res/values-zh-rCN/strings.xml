@@ -153,7 +153,7 @@
     <string name="floating_keyboard_drag_handle">拖动键盘</string>
     <string name="floating_keyboard_collapse">收起键盘</string>
     <string name="floating_keyboard_expand">展开键盘</string>
-    <string name="floating_keyboard_float">将键盘移入悬浮窗口</string>
+    <string name="floating_keyboard_float">以悬浮卡片显示键盘</string>
     <string name="floating_keyboard_dock">将键盘放回原位</string>
     <string name="floating_keyboard_resize">调整键盘大小</string>
     <string name="setup__step_three">第 3 步</string>

@@ -154,7 +154,7 @@
     <string name="floating_keyboard_drag_handle">Drag keyboard</string>
     <string name="floating_keyboard_collapse">Collapse keyboard</string>
     <string name="floating_keyboard_expand">Expand keyboard</string>
-    <string name="floating_keyboard_float">Move the keyboard into a floating window</string>
+    <string name="floating_keyboard_float">Show keyboard as a floating card</string>
     <string name="floating_keyboard_dock">Move the keyboard back</string>
     <string name="floating_keyboard_resize">Resize keyboard</string>
     <string name="setup__step_three">Setup 3</string>

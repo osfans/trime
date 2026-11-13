@@ -154,7 +154,7 @@
     <string name="floating_keyboard_drag_handle">拖動鍵盤</string>
     <string name="floating_keyboard_collapse">收合鍵盤</string>
     <string name="floating_keyboard_expand">展開鍵盤</string>
-    <string name="floating_keyboard_float">將鍵盤移入懸浮視窗</string>
+    <string name="floating_keyboard_float">以懸浮卡片顯示鍵盤</string>
     <string name="floating_keyboard_dock">將鍵盤放回原位</string>
     <string name="floating_keyboard_resize">調整鍵盤大小</string>
     <string name="setup__step_three">第 3 步</string>
