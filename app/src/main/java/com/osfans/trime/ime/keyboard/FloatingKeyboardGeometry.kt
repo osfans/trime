@@ -76,22 +76,18 @@ internal object FloatingKeyboardGeometry {
      * The width of the card, as a percentage of the available space.
      *
      * [minWidth] keeps the keys readable on a narrow screen; it is ignored
-     * when it does not fit. [maxWidth] keeps the card a comfortable size on
-     * large screens, where half of the screen would be more than a keyboard
-     * needs.
+     * when it does not fit.
      */
     fun widthFor(
         containerWidth: Int,
         percent: Int,
         minWidth: Int = 0,
-        maxWidth: Int = Int.MAX_VALUE,
     ): Int {
         if (containerWidth <= 0) return 0
         val clampedPercent = percent.coerceIn(MIN_WIDTH_PERCENT, MAX_WIDTH_PERCENT)
         val width = (containerWidth.toFloat() * clampedPercent / 100f).roundToInt()
-        val max = maxWidth.coerceAtMost(containerWidth)
-        val min = minWidth.coerceIn(0, max)
-        return width.coerceIn(min, max)
+        val min = minWidth.coerceIn(0, containerWidth)
+        return width.coerceIn(min, containerWidth)
     }
 
     /**

@@ -48,44 +48,6 @@ class FloatingKeyboardGeometryTest :
                     FloatingKeyboardGeometry.widthFor(500, 40, minWidth = 800) shouldBe 500
                 }
             }
-
-            When("the container is a large tablet") {
-                Then("the card is not wider than a comfortable maximum") {
-                    FloatingKeyboardGeometry.widthFor(
-                        containerWidth = 2560,
-                        percent = 50,
-                        minWidth = 520,
-                        maxWidth = 1440,
-                    ) shouldBe 1280
-                    FloatingKeyboardGeometry.widthFor(
-                        containerWidth = 2560,
-                        percent = 100,
-                        minWidth = 520,
-                        maxWidth = 1440,
-                    ) shouldBe 1440
-                }
-            }
-
-            When("the maximum width does not fit the container") {
-                Then("the container is the limit") {
-                    FloatingKeyboardGeometry.widthFor(
-                        containerWidth = 1000,
-                        percent = 100,
-                        maxWidth = 1440,
-                    ) shouldBe 1000
-                }
-            }
-
-            When("the maximum width is narrower than the minimum") {
-                Then("the maximum wins") {
-                    FloatingKeyboardGeometry.widthFor(
-                        containerWidth = 1000,
-                        percent = 50,
-                        minWidth = 520,
-                        maxWidth = 400,
-                    ) shouldBe 400
-                }
-            }
         }
 
         Given("a floating keyboard height budget") {
