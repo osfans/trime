@@ -13,6 +13,7 @@ import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.osfans.trime.R
 import com.osfans.trime.ime.broadcast.InputBroadcaster
+import com.osfans.trime.ime.keyboard.KeyboardWindow
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -76,13 +77,12 @@ class BoardWindowManager(override val di: DI) : DIAware {
             Timber.d("Skip attaching $window")
         }
         val newView =
-            if (window is ResidentWindow) {
-                cachedResidentWindows[window.key]?.second ?: window
-                    .onCreateView()
-                    .also { cachedResidentWindows[window.key] = window to it }
-            } else {
-                broadcaster.addReceiver(window)
-                window.onCreateView()
+            try {
+                createWindowView(window)
+            } catch (e: Exception) {
+                if (window !is ResidentWindow) broadcaster.removeReceiver(window)
+                Timber.e(e, "Failed to create the view of $window, staying on $currentWindow")
+                return
             }
         if (currentWindow != null) {
             val oldWindow = currentWindow!!
@@ -106,10 +106,38 @@ class BoardWindowManager(override val di: DI) : DIAware {
         }
         view.apply { add(newView, lParams(matchParent, matchParent)) }
         currentView = newView
-        Timber.d("Attach $window")
-        window.onAttached()
         currentWindow = window
+        Timber.d("Attach $window")
+        try {
+            window.onAttached()
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to attach $window")
+            recoverFromAttachFailure(window, newView)
+            return
+        }
         broadcaster.onWindowAttached(window)
+    }
+
+    private fun createWindowView(window: BoardWindow): View = if (window is ResidentWindow) {
+        cachedResidentWindows[window.key]?.second ?: window
+            .onCreateView()
+            .also { cachedResidentWindows[window.key] = window to it }
+    } else {
+        broadcaster.addReceiver(window)
+        window.onCreateView()
+    }
+
+    /** A window that failed right after being added leaves no view on screen, so put the keyboard back. */
+    private fun recoverFromAttachFailure(failedWindow: BoardWindow, failedView: View) {
+        view.removeView(failedView)
+        currentView = null
+        currentWindow = null
+        if (failedWindow !is ResidentWindow) {
+            broadcaster.removeReceiver(failedWindow)
+        }
+        if (failedWindow !is KeyboardWindow) {
+            attachWindow(KeyboardWindow)
+        }
     }
 
     /** Restyles the window currently on screen after a scheme switch. */
