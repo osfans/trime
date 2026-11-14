@@ -26,11 +26,16 @@ import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.BoardWindowManager
 import com.osfans.trime.util.NativeTokenizer
 import com.osfans.trime.util.toast
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.instance
 import splitties.dimensions.dp
 import splitties.systemservices.clipboardManager
+import timber.log.Timber
 
 class SegmentsWindow(
     di: DI,
@@ -152,9 +157,6 @@ class SegmentsWindow(
     override fun onCreateBarView(): View = toolbarButtons
 
     private fun onSelectionChanged() {
-        val joined = adapter.joinedSegments
-        service.updateComposingText(joined)
-
         if (adapter.isAllSelected) {
             ui.setSelectButtonToDeselect()
         } else {
@@ -163,9 +165,32 @@ class SegmentsWindow(
 
         val hasSelection = adapter.selectionSnapshot.isNotEmpty()
         ui.updateButtons(hasSelection)
+        previewSelection(hasSelection)
+    }
+
+    /** Writes the selection into the editor, debounced so a drag previews once instead of on every touch move. */
+    private fun previewSelection(hasSelection: Boolean) {
+        previewJob?.cancel()
+        previewJob =
+            service.lifecycleScope.launch {
+                delay(PREVIEW_DEBOUNCE_MS)
+                val joined = if (hasSelection) adapter.joinedSegments else ""
+                if (joined == previewedText) return@launch
+                try {
+                    if (!service.updateComposingText(joined)) return@launch
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to preview the selected segments")
+                    return@launch
+                }
+                previewedText = joined
+            }
     }
 
     private var viewCreated = false
+    private var previewJob: Job? = null
+
+    /** Last text written into the editor, to skip no-op updates. */
+    private var previewedText = ""
 
     override fun onCreateView(): View {
         viewCreated = true
@@ -179,15 +204,26 @@ class SegmentsWindow(
     }
 
     override fun onAttached() {
-        val segments = NativeTokenizer.tokenize(source)
+        ui.recyclerView.addOnItemTouchListener(touchListener)
         service.lifecycleScope.launch {
+            val segments = withContext(Dispatchers.Default) { NativeTokenizer.tokenize(source) }
+            if (!windowManager.isAttached(this@SegmentsWindow)) return@launch
             adapter.submitList(segments)
         }
-        ui.recyclerView.addOnItemTouchListener(touchListener)
     }
 
     override fun onDetached() {
+        previewJob?.cancel()
+        previewJob = null
         ui.recyclerView.removeOnItemTouchListener(touchListener)
-        service.currentInputConnection?.finishComposingText()
+        try {
+            service.currentInputConnection?.finishComposingText()
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to finish the previewed composition")
+        }
+    }
+
+    private companion object {
+        const val PREVIEW_DEBOUNCE_MS = 150L
     }
 }

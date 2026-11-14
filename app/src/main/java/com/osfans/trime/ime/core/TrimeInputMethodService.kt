@@ -1002,8 +1002,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    internal fun updateComposingText(text: String) {
-        val ic = currentInputConnection ?: return
+    /** Returns false when there is no editor to write to, so a caller can retry later. */
+    internal fun updateComposingText(text: String): Boolean {
+        val ic = currentInputConnection ?: return false
         ic.beginBatchEdit()
         if (composingText.isNotEmpty() || text.isNotEmpty()) {
             if (!ic.getSelectedText(0).isNullOrEmpty()) {
@@ -1016,6 +1017,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
         composingText = text
         ic.endBatchEdit()
+        return true
     }
 
     fun getActiveText(type: Int): String {

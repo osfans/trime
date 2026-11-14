@@ -31,15 +31,13 @@ class SegmentsAdapter(
         var idx = 0
         for (item in items) {
             val sb = StringBuilder()
-            var pos = idx + item.length
-            while (pos < rawText.length) {
-                val c = rawText[pos]
-                if (c == ' ' || c == '\n' || c == '\t' || c == '\r') {
-                    sb.append(c)
-                    pos++
-                } else {
-                    break
-                }
+            // Tokens are sequential slices of the source, but the first one need not start at 0,
+            // since the tokenizer drops leading whitespace.
+            val start = rawText.indexOf(item, idx)
+            var pos = if (start < 0) idx + item.length else start + item.length
+            while (pos < rawText.length && rawText[pos].isWhitespace()) {
+                sb.append(rawText[pos])
+                pos++
             }
             result.add(sb.toString())
             idx = pos
