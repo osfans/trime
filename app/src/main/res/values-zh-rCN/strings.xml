@@ -215,8 +215,12 @@
     <string name="undo">撤销</string>
     <string name="added_x">已添加 %1$s</string>
     <string name="removed_x">已移除 %1$s</string>
-    <string name="added_n_items">已添加 %1$d 个项目</string>
-    <string name="removed_n_items">已移除 %1$d 个项目</string>
+    <plurals name="added_n_items">
+        <item quantity="other">已添加 %1$d 个项目</item>
+    </plurals>
+    <plurals name="removed_n_items">
+        <item quantity="other">已移除 %1$d 个项目</item>
+    </plurals>
     <string name="candidates_layout">候选词列表布局</string>
     <string name="automatic">自动</string>
     <string name="horizontal">横向</string>
@@ -232,11 +236,15 @@
     <string name="max_span_count">每行最大候选词数</string>
     <string name="max_span_count_landscape">每行最大候选词数（横屏）</string>
     <string name="user_dictionary">用户词典</string>
-    <string name="exported_n_entries">已导出 %1$d 个词条</string>
+    <plurals name="exported_n_entries">
+        <item quantity="other">已导出 %1$d 个词条</item>
+    </plurals>
     <string name="backed_up_x_to_sync_dir">已备份 %1$s 到同步目录</string>
     <string name="import_">导入</string>
     <string name="import_error">导入错误</string>
-    <string name="import_n_entries">已导入 %1$d 个词条</string>
+    <plurals name="import_n_entries">
+        <item quantity="other">已导入 %1$d 个词条</item>
+    </plurals>
     <string name="restored_from_x">已从 %1$s 还原</string>
     <string name="backup">备份</string>
     <string name="restore">还原</string>

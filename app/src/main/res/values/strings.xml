@@ -215,8 +215,14 @@
     <string name="undo">Undo</string>
     <string name="added_x">Added %1$s</string>
     <string name="removed_x">Removed %1$s</string>
-    <string name="added_n_items">Added %1$d item(s)</string>
-    <string name="removed_n_items">Removed %1$d item(s)</string>
+    <plurals name="added_n_items">
+        <item quantity="one">Added %1$d item</item>
+        <item quantity="other">Added %1$d items</item>
+    </plurals>
+    <plurals name="removed_n_items">
+        <item quantity="one">Removed %1$d item</item>
+        <item quantity="other">Removed %1$d items</item>
+    </plurals>
     <string name="candidates_layout">Candidate list layout</string>
     <string name="automatic">Automatic</string>
     <string name="horizontal">Horizontal</string>
@@ -234,8 +240,14 @@
     <string name="user_dictionary">User dictionary</string>
     <string name="import_">Import</string>
     <string name="import_error">Import error</string>
-    <string name="import_n_entries">Imported %1$d entry(-ies)</string>
-    <string name="exported_n_entries">Exported %1$d entry(-ies)</string>
+    <plurals name="import_n_entries">
+        <item quantity="one">Imported %1$d entry</item>
+        <item quantity="other">Imported %1$d entries</item>
+    </plurals>
+    <plurals name="exported_n_entries">
+        <item quantity="one">Exported %1$d entry</item>
+        <item quantity="other">Exported %1$d entries</item>
+    </plurals>
     <string name="backed_up_x_to_sync_dir">Backed up %1$s to the sync folder</string>
     <string name="restored_from_x">Restored from %1$s</string>
     <string name="backup">Backup</string>
