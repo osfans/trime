@@ -36,6 +36,21 @@ val Project.cleanTask: Task
 val Project.cmakeVersion
     get() = envOrProp("CMAKE_VERSION", "cmakeVersion") { Versions.DEFAULT_CMAKE }
 
+/** Android SDK location, as used by the Android Gradle plugin. */
+val Project.androidSdkDirectory: String?
+    get() =
+        System.getenv("ANDROID_HOME")?.takeIf { it.isNotBlank() }
+            ?: System.getenv("ANDROID_SDK_ROOT")?.takeIf { it.isNotBlank() }
+            ?: rootProject
+                .file("local.properties")
+                .takeIf { it.isFile }
+                ?.let { file ->
+                    Properties()
+                        .apply { file.inputStream().use { load(it) } }
+                        .getProperty("sdk.dir")
+                        ?.takeIf { it.isNotBlank() }
+                }
+
 val Project.ndkVersion
     get() = envOrProp("NDK_VERSION", "ndkVersion") { Versions.DEFAULT_NDK }
 
