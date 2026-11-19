@@ -24,6 +24,8 @@ class Keyboard(
     private val theme: Theme,
     private val allowedWidth: Int,
     selfConfig: TextKeyboard? = null,
+    private val floating: Boolean = false,
+    private val floatingScalePercent: Int = 100,
 ) {
 
     /** 按鍵默認水平間距  */
@@ -100,17 +102,39 @@ class Keyboard(
     val isLock = selfConfig?.lock ?: false // 切換程序時記憶鍵盤
     val asciiKeyboard: String? = selfConfig?.asciiKeyboard // 英文鍵盤
 
-    val keyboardHeight: Int =
+    /**
+     * The floating card always uses the portrait variant, in both orientations,
+     * so its default layout matches the docked portrait keyboard.
+     */
+    private val useLandscapeLayout = !floating && context.isLandscapeMode()
+
+    private val resolvedKeyboardHeight: Int =
         resolvePositive(
             selfConfig?.let {
-                pickLandscape(it.keyboardHeight, it.keyboardHeightLand, context.isLandscapeMode())
+                pickLandscape(it.keyboardHeight, it.keyboardHeightLand, useLandscapeLayout)
             },
             pickLandscape(
                 theme.style.keyboardHeight,
                 theme.style.keyboardHeightLand,
-                context.isLandscapeMode(),
+                useLandscapeLayout,
             ),
         ) { context.dp(it) }
+
+    /** Whether this keyboard was laid out for the floating card. */
+    val isFloatingLayout: Boolean get() = floating
+
+    /** Key area height before the floating scale is applied. */
+    val unscaledKeyboardHeight: Int get() = resolvedKeyboardHeight
+
+    val keyboardHeight: Int =
+        if (floating) {
+            FloatingKeyboardGeometry.floatingKeyHeight(
+                keyboardHeight = resolvedKeyboardHeight,
+                scalePercent = floatingScalePercent,
+            )
+        } else {
+            resolvedKeyboardHeight
+        }
 
     private val expandKeypressArea: Boolean by AppPrefs.defaultInstance().keyboard.expandKeypressArea
 
@@ -123,7 +147,10 @@ class Keyboard(
 
             val maxColumns = if (selfConfig.columns == -1) Int.MAX_VALUE else selfConfig.columns
 
-            val isSplit = context.isLandscapeMode() && landscapePercent > 0
+            // Only the docked landscape keyboard is split. The floating card
+            // uses the portrait layout, so it stays unsplit in both
+            // orientations.
+            val isSplit = !floating && context.isLandscapeMode() && landscapePercent > 0
             val splitRatio = if (isSplit) landscapePercent / 100f else 0f
 
             val oneWeightWidthPx =
