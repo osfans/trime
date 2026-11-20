@@ -13,7 +13,6 @@ import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
-import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
@@ -199,7 +198,9 @@ class SetupActivity : FragmentActivity() {
         override fun getItemCount(): Int = SetupPage.entries.size
 
         override fun createFragment(position: Int): Fragment = SetupFragment().apply {
-            arguments = bundleOf("page" to SetupPage.entries[position])
+            arguments = Bundle(1).apply {
+                putSerializable("page", SetupPage.entries[position])
+            }
         }
     }
 }

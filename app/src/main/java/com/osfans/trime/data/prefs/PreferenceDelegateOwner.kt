@@ -27,7 +27,7 @@ abstract class PreferenceDelegateOwner(
     protected fun float(
         key: String,
         defaultValue: Float,
-    ) = PreferenceDelegate(sharedPreferences, key, defaultValue)
+    ) = PreferenceDelegate(sharedPreferences, key, defaultValue).apply { register() }
 
     protected fun bool(
         key: String,

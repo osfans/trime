@@ -17,6 +17,7 @@ import com.osfans.trime.ime.candidates.popup.PopupCandidatesLayout
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.composition.PopupPosition
 import com.osfans.trime.ime.core.InlinePreeditMode
+import com.osfans.trime.ime.keyboard.FloatingKeyboardPrefs
 import com.osfans.trime.util.InputMethodUtils
 import com.osfans.trime.util.appContext
 import java.lang.ref.WeakReference
@@ -45,6 +46,7 @@ class AppPrefs(
     val general = General(shared).register()
     val profile = Profile(shared).register()
     val keyboard = Keyboard(shared).register()
+    val floatingKeyboard = registerProvider(::FloatingKeyboardPrefs)
     val candidates = Candidates(shared).register()
     val clipboard = Clipboard(shared).register()
     val advanced = Advanced(shared).register()
@@ -472,6 +474,7 @@ class AppPrefs(
         sp.edit {
             listOf(
                 keyboard,
+                floatingKeyboard,
                 candidates,
                 clipboard,
             ).forEach { category ->
