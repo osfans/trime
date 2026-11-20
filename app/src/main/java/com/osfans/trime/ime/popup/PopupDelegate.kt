@@ -54,7 +54,39 @@ class PopupDelegate(override val di: DI) : DIAware {
     private val hideThreshold = 100L
 
     private val rootLocation = intArrayOf(0, 0)
+    private val visibleBoundsLocation = intArrayOf(0, 0)
     private val rootBounds: Rect = Rect()
+
+    /** Popup views are pooled, so layout listeners must be removed on dismiss. */
+    private val insetUpdateListeners = mutableMapOf<View, View.OnLayoutChangeListener>()
+
+    private fun requestInsetsAfterLayout(view: View) {
+        clearInsetsAfterLayout(view)
+        val listener =
+            object : View.OnLayoutChangeListener {
+                override fun onLayoutChange(
+                    v: View,
+                    left: Int,
+                    top: Int,
+                    right: Int,
+                    bottom: Int,
+                    oldLeft: Int,
+                    oldTop: Int,
+                    oldRight: Int,
+                    oldBottom: Int,
+                ) {
+                    v.removeOnLayoutChangeListener(this)
+                    insetUpdateListeners.remove(v)
+                    service.requestInputViewInsetsUpdate()
+                }
+            }
+        insetUpdateListeners[view] = listener
+        view.addOnLayoutChangeListener(listener)
+    }
+
+    private fun clearInsetsAfterLayout(view: View) {
+        insetUpdateListeners.remove(view)?.let { view.removeOnLayoutChangeListener(it) }
+    }
 
     val root by lazy {
         context.frameLayout {
@@ -90,6 +122,7 @@ class PopupDelegate(override val di: DI) : DIAware {
         }
         placePopup(popup, bounds)
         showingEntryUi[viewId] = popup
+        requestInsetsAfterLayout(popup.root)
     }
 
     private fun placePopup(ui: PopupEntryUi, bounds: Rect) {
@@ -148,6 +181,7 @@ class PopupDelegate(override val di: DI) : DIAware {
             )
         }
         showingContainerUi[viewId] = ui
+        requestInsetsAfterLayout(ui.root)
     }
 
     private fun changeFocus(viewId: Int, x: Float, y: Float): Boolean = showingContainerUi[viewId]?.changeFocus(x, y) ?: false
@@ -173,14 +207,18 @@ class PopupDelegate(override val di: DI) : DIAware {
     private fun dismissPopupContainer(viewId: Int) {
         showingContainerUi[viewId]?.also {
             showingContainerUi.remove(viewId)
+            clearInsetsAfterLayout(it.root)
             root.removeView(it.root)
+            service.requestInputViewInsetsUpdate()
         }
     }
 
     private fun dismissPopupEntry(viewId: Int, popup: PopupEntryUi) {
         showingEntryUi.remove(viewId)
+        clearInsetsAfterLayout(popup.root)
         root.removeView(popup.root)
         freeEntryUi.add(popup)
+        service.requestInputViewInsetsUpdate()
     }
 
     fun dismissAll() {
@@ -191,15 +229,43 @@ class PopupDelegate(override val di: DI) : DIAware {
         dismissJobs.clear()
         // too
         showingContainerUi.forEach { (_, container) ->
+            clearInsetsAfterLayout(container.root)
             root.removeView(container.root)
         }
         showingContainerUi.clear()
         // too too
         showingEntryUi.forEach { (_, entry) ->
+            clearInsetsAfterLayout(entry.root)
             root.removeView(entry.root)
             freeEntryUi.add(entry)
         }
         showingEntryUi.clear()
+        service.requestInputViewInsetsUpdate()
+    }
+
+    /**
+     * The union of the currently visible popups in window coordinates.
+     * Returns false when no popup is shown.
+     */
+    fun getVisibleBounds(out: Rect): Boolean {
+        var hasBounds = false
+
+        fun union(view: View) {
+            if (view.visibility != View.VISIBLE || view.width <= 0 || view.height <= 0) return
+            view.getLocationInWindow(visibleBoundsLocation)
+            val left = visibleBoundsLocation[0]
+            val top = visibleBoundsLocation[1]
+            if (hasBounds) {
+                out.union(left, top, left + view.width, top + view.height)
+            } else {
+                out.set(left, top, left + view.width, top + view.height)
+                hasBounds = true
+            }
+        }
+
+        showingEntryUi.values.forEach { union(it.root) }
+        showingContainerUi.values.forEach { union(it.root) }
+        return hasBounds
     }
 
     /** Re-applies the scheme colors to all popups, pooled or showing. */
