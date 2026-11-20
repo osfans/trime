@@ -277,6 +277,10 @@ class InputBarDelegate(override val di: DI) :
         }
     }
 
+    fun setFloatingActive(active: Boolean) {
+        alwaysUi.setFloatingActive(active)
+    }
+
     /** Restyles the bar after a scheme switch without rebuilding its views. */
     fun refreshColors() {
         view.background =

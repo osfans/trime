@@ -12,6 +12,7 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.model.TextKeyboard
 import com.osfans.trime.data.theme.model.orAbsent
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
+import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeModeInPortrait
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import kotlin.math.abs
@@ -24,6 +25,8 @@ class Keyboard(
     private val theme: Theme,
     private val allowedWidth: Int,
     selfConfig: TextKeyboard? = null,
+    private val floating: Boolean = false,
+    private val floatingScalePercent: Int = 100,
 ) {
 
     /** 按鍵默認水平間距  */
@@ -100,17 +103,44 @@ class Keyboard(
     val isLock = selfConfig?.lock ?: false // 切換程序時記憶鍵盤
     val asciiKeyboard: String? = selfConfig?.asciiKeyboard // 英文鍵盤
 
-    val keyboardHeight: Int =
+    /**
+     * The floating card always uses the portrait layout. Its key area scales
+     * with the card width, so the card keeps the keyboard's proportions.
+     */
+    private val useLandscapeLayout =
+        if (floating) context.isLandscapeModeInPortrait() else context.isLandscapeMode()
+
+    private val resolvedKeyboardHeight: Int =
         resolvePositive(
             selfConfig?.let {
-                pickLandscape(it.keyboardHeight, it.keyboardHeightLand, context.isLandscapeMode())
+                pickLandscape(it.keyboardHeight, it.keyboardHeightLand, useLandscapeLayout)
             },
             pickLandscape(
                 theme.style.keyboardHeight,
                 theme.style.keyboardHeightLand,
-                context.isLandscapeMode(),
+                useLandscapeLayout,
             ),
         ) { context.dp(it) }
+
+    private val portraitBottomPadding =
+        if (context.isLandscapeModeInPortrait()) {
+            theme.style.keyboardPaddingLandBottom
+        } else {
+            theme.style.keyboardPaddingBottom
+        }
+
+    val keyboardHeight: Int =
+        if (floating) {
+            FloatingKeyboardGeometry.floatingKeyHeight(
+                portraitKeyboardHeight = resolvedKeyboardHeight,
+                portraitBottomPadding = context.dp(portraitBottomPadding),
+                dragHandleHeight = context.dp(FloatingKeyboardGeometry.DRAG_HANDLE_HEIGHT_DP),
+                cardBottomPadding = context.dp(FloatingKeyboardGeometry.CARD_BOTTOM_PADDING_DP),
+                scalePercent = floatingScalePercent,
+            )
+        } else {
+            resolvedKeyboardHeight
+        }
 
     private val expandKeypressArea: Boolean by AppPrefs.defaultInstance().keyboard.expandKeypressArea
 
@@ -123,7 +153,9 @@ class Keyboard(
 
             val maxColumns = if (selfConfig.columns == -1) Int.MAX_VALUE else selfConfig.columns
 
-            val isSplit = context.isLandscapeMode() && landscapePercent > 0
+            // A split layout needs the full width of a tablet. The card can be
+            // narrow even when the device is wide, so it is never split.
+            val isSplit = !floating && context.isLandscapeMode() && landscapePercent > 0
             val splitRatio = if (isSplit) landscapePercent / 100f else 0f
 
             val oneWeightWidthPx =

@@ -73,6 +73,16 @@ class PreeditDelegate(override val di: DI) :
 
     private val touchEventReceiverWindow = TouchEventReceiverWindow(ui.root)
 
+    /**
+     * Re-anchors the preedit touch receiver after the view has been moved,
+     * for example while dragging the floating keyboard.
+     */
+    fun updateTouchWindowPosition() {
+        if (ui.root.isAttachedToWindow && ui.root.visibility == View.VISIBLE) {
+            touchEventReceiverWindow.show()
+        }
+    }
+
     override fun onCompositionUpdate(data: CompositionProto) {
         ui.update(data)
         ui.root.visibility = if (ui.visible) View.VISIBLE else View.INVISIBLE
