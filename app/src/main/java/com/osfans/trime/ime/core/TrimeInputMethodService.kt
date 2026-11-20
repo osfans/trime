@@ -527,6 +527,15 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     private val inputViewLocation = intArrayOf(0, 0)
 
+    /**
+     * Re-evaluates the IME window insets. A floating keyboard moves without
+     * changing the window size, so a layout pass is needed for the system to
+     * pick up the new touchable region.
+     */
+    fun requestInputViewInsetsUpdate() {
+        inputView?.requestLayout()
+    }
+
     override fun onComputeInsets(outInsets: Insets) {
         if (inputDeviceManager.useVirtualKeyboard) {
             inputView?.keyboardView?.getLocationInWindow(inputViewLocation)
