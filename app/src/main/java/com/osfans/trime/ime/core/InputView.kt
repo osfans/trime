@@ -6,6 +6,7 @@
 package com.osfans.trime.ime.core
 
 import android.annotation.SuppressLint
+import android.graphics.Rect
 import android.os.Build
 import android.view.ContextThemeWrapper
 import android.view.View
@@ -32,6 +33,8 @@ import com.osfans.trime.ime.candidates.compact.CompactCandidateDelegate
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.composition.PreeditDelegate
 import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
+import com.osfans.trime.ime.keyboard.FloatingKeyboardDelegate
+import com.osfans.trime.ime.keyboard.FloatingKeyboardGeometry
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.popup.PopupDelegate
@@ -68,7 +71,7 @@ import splitties.views.imageDrawable
 /**
  * Successor of the old InputRoot
  */
-@SuppressLint("ViewConstructor")
+@SuppressLint("ViewConstructor", "ClickableViewAccessibility")
 class InputView(
     service: TrimeInputMethodService,
     rime: RimeSession,
@@ -80,6 +83,13 @@ class InputView(
             scaleType = ImageView.ScaleType.CENTER_CROP
         }
     private val placeholderListener = OnClickListener { }
+
+    private val prefs = AppPrefs.defaultInstance()
+
+    private var dockedBottomInset = 0
+
+    private val navBarBottomInset: Int
+        get() = if (floatingKeyboard.isActive) floatingKeyboard.systemInsets.bottom else dockedBottomInset
 
     private val leftPaddingSpace =
         view(::View) {
@@ -109,6 +119,7 @@ class InputView(
         bindInstance<TrimeInputMethodService> { service }
         bindInstance<RimeSession> { rime }
         bindSingleton { InputBroadcaster() }
+        bindSingleton { FloatingKeyboardDelegate(di) }
         bindSingleton { PopupDelegate(di) }
         bindSingleton { EnterKeyDisplayDelegate(di) }
         bindSingleton { PreeditDelegate(di) }
@@ -121,6 +132,7 @@ class InputView(
     }
 
     private val broadcaster: InputBroadcaster by instance()
+    private val floatingKeyboard: FloatingKeyboardDelegate by instance()
     private val popup: PopupDelegate by instance()
     private val enterKeyDisplay: EnterKeyDisplayDelegate by instance()
     private val preedit: PreeditDelegate by instance()
@@ -138,9 +150,15 @@ class InputView(
 
     private val keyboardSidePaddingPx: Int
         get() {
+            // The floating card uses the portrait padding and zooms with it.
             val value =
-                if (context.isLandscapeMode()) keyboardSidePaddingLandscape else keyboardSidePadding
-            return dp(value)
+                if (!floatingKeyboard.isActive && context.isLandscapeMode()) {
+                    keyboardSidePaddingLandscape
+                } else {
+                    keyboardSidePadding
+                }
+            val base = dp(value)
+            return if (floatingKeyboard.isActive) floatingKeyboard.scaledPx(base) else base
         }
 
     private var lastAppearanceState = Triple(false, false, false)
@@ -161,9 +179,23 @@ class InputView(
 
     private val keyboardBottomPaddingPx: Int
         get() {
+            // The floating card uses the portrait padding and zooms with it.
             val value =
-                if (context.isLandscapeMode()) keyboardBottomPaddingLandscape else keyboardBottomPadding
-            return dp(value)
+                if (!floatingKeyboard.isActive && context.isLandscapeMode()) {
+                    keyboardBottomPaddingLandscape
+                } else {
+                    keyboardBottomPadding
+                }
+            val base = dp(value)
+            return if (floatingKeyboard.isActive) floatingKeyboard.scaledPx(base) else base
+        }
+
+    /** The floating card's chrome height at 100%, before the key area. */
+    private val floatingBaseFixedHeightPx: Int
+        get() {
+            val dragHandle = dp(FloatingKeyboardGeometry.DRAG_HANDLE_HEIGHT_DP)
+            val inputBar = if (inputBar.view.visibility == View.VISIBLE) dp(inputBar.themedHeight) else 0
+            return dragHandle + inputBar + dp(keyboardBottomPadding)
         }
 
     val keyboardView: View
@@ -171,6 +203,7 @@ class InputView(
     /** Restyles colors after a scheme switch without rebuilding the view tree. */
     fun refreshColors() {
         refreshKeyboardBackground()
+        floatingKeyboard.refreshColors()
         popup.refreshColors()
         keyboardWindow.refreshColors()
         inputBar.refreshColors()
@@ -192,6 +225,8 @@ class InputView(
     }
 
     init {
+        floatingKeyboard.initialize()
+
         // MUST call before any operation
         val receivers: List<InputBroadcastReceiver> by allInstances()
         receivers.forEach { broadcaster.addReceiver(it) }
@@ -211,9 +246,23 @@ class InputView(
                     },
                 )
                 add(
+                    floatingKeyboard.dragHandle,
+                    lParams(matchParent, floatingKeyboard.dragHandleHeight) {
+                        topOfParent()
+                        centerHorizontally()
+                    },
+                )
+                add(
+                    floatingKeyboard.preeditHost,
+                    lParams(matchParent, wrapContent) {
+                        below(floatingKeyboard.dragHandle)
+                        centerHorizontally()
+                    },
+                )
+                add(
                     inputBar.view,
                     lParams(matchParent, dp(inputBar.themedHeight)) {
-                        topOfParent()
+                        below(floatingKeyboard.preeditHost)
                         centerHorizontally()
                     },
                 )
@@ -248,6 +297,25 @@ class InputView(
                         bottomOfParent()
                     },
                 )
+                add(
+                    floatingKeyboard.heightLimitHint,
+                    lParams(wrapContent, wrapContent) {
+                        below(floatingKeyboard.dragHandle)
+                        centerHorizontally()
+                    },
+                )
+                add(
+                    floatingKeyboard.resizeHandle,
+                    lParams(
+                        floatingKeyboard.resizeHandleSize,
+                        floatingKeyboard.resizeHandleSize,
+                    ) {
+                        // In the top control row, so it never covers a key.
+                        endOfParent()
+                        topOfParent()
+                        marginEnd = floatingKeyboard.cardContentPadding
+                    },
+                )
             }
 
         // The background can only be sampled once the keyboard has a size, which
@@ -269,8 +337,6 @@ class InputView(
                 }
             }
 
-        updateKeyboardSize()
-
         add(
             preedit.ui.root,
             lParams(wrapContent, wrapContent) {
@@ -287,6 +353,13 @@ class InputView(
             },
         )
 
+        floatingKeyboard.attach(this, keyboardView) { updateKeyboardSize() }
+        floatingKeyboard.setOnFloatingScaleChanged { applyFloatingChrome() }
+
+        // Must run after keyboardView has layout params; it may reset the
+        // floating geometry of the card.
+        updateKeyboardSize()
+
         add(
             popup.root,
             lParams(matchParent, matchParent) {
@@ -295,10 +368,52 @@ class InputView(
         )
     }
 
-    private fun updateKeyboardSize() {
+    val isFloatingKeyboardActive: Boolean
+        get() = floatingKeyboard.isActive
+
+    fun getFloatingKeyboardBounds(out: Rect): Boolean = floatingKeyboard.getBounds(out)
+
+    /** Re-applies the floating mode after the persisted preference changed. */
+    fun updateFloatingMode() = floatingKeyboard.updateFloatingMode()
+
+    /** Moves the keyboard into a floating window or back. */
+    fun setFloatingMode(floating: Boolean) = floatingKeyboard.setFloatingMode(floating)
+
+    override fun onSizeChanged(
+        w: Int,
+        h: Int,
+        oldw: Int,
+        oldh: Int,
+    ) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        floatingKeyboard.onSizeChanged(w, h, oldw, oldh)
+    }
+
+    private fun updateBottomPaddingMargin() {
+        bottomPaddingSpace.updateLayoutParams<LayoutParams> {
+            // The floating card is lifted above the navigation bar by its own
+            // bottom margin; the docked keyboard reserves the inset here.
+            bottomMargin = if (floatingKeyboard.isActive) 0 else navBarBottomInset
+        }
+    }
+
+    /** Scales the bar and paddings; the keys are rebuilt after the gesture. */
+    private fun applyFloatingChrome() {
+        floatingKeyboard.applyChromeScale()
+        floatingKeyboard.setBaseFixedCardHeight(floatingBaseFixedHeightPx)
+        val inputBarHeight = dp(inputBar.themedHeight)
+        inputBar.view.updateLayoutParams {
+            height =
+                if (floatingKeyboard.isActive) {
+                    floatingKeyboard.scaledPx(inputBarHeight)
+                } else {
+                    inputBarHeight
+                }
+        }
         bottomPaddingSpace.updateLayoutParams {
             height = keyboardBottomPaddingPx
         }
+        updateBottomPaddingMargin()
         val sidePadding = keyboardSidePaddingPx
         val unset = LayoutParams.UNSET
         if (sidePadding == 0) {
@@ -331,10 +446,22 @@ class InputView(
         inputBar.view.setPadding(sidePadding, 0, sidePadding, 0)
     }
 
-    override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {
-        bottomPaddingSpace.updateLayoutParams<LayoutParams> {
-            bottomMargin = getNavBarBottomInset(insets)
+    private fun updateKeyboardSize() {
+        floatingKeyboard.updatePreeditParent()
+        applyFloatingChrome()
+        inputBar.setFloatingActive(floatingKeyboard.isActive)
+        floatingKeyboard.applyFloatingCollapsedState()
+        if (floatingKeyboard.isActive) {
+            floatingKeyboard.applyFloatingGeometry()
+        } else {
+            floatingKeyboard.resetFloatingGeometry()
         }
+    }
+
+    override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {
+        dockedBottomInset = getNavBarBottomInset(insets)
+        floatingKeyboard.onApplyWindowInsets(insets, dockedBottomInset)
+        updateBottomPaddingMargin()
         return insets
     }
 
@@ -347,6 +474,13 @@ class InputView(
         if (!restarting) {
             windowManager.attachWindow(KeyboardWindow)
         }
+        // A manual landscape dock only lasts while the card is visible.
+        floatingKeyboard.onInputViewShown()
+    }
+
+    /** Forgets a manual landscape dock once the input view is hidden. */
+    fun onInputViewHidden() {
+        floatingKeyboard.onInputViewHidden()
     }
 
     fun updateEnterKeyLabel(info: EditorInfo) {
@@ -407,6 +541,9 @@ class InputView(
         updateWindowViewHeightJob.cancel()
         popup.root.removeAllViews()
         broadcaster.clear()
+        // A drag or resize may be interrupted by the window going away; the
+        // next layout must not treat the card as still being changed.
+        floatingKeyboard.onDetachedFromWindow()
         super.onDetachedFromWindow()
     }
 }
