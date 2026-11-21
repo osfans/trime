@@ -25,6 +25,7 @@ import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.register
 import org.gradle.process.ExecOperations
+import java.io.ByteArrayOutputStream
 import java.io.File
 import javax.inject.Inject
 
@@ -382,10 +383,20 @@ class OpenCCDataPlugin : Plugin<Project> {
             cmake: String,
             args: List<String>,
         ) {
-            execOperations
-                .exec {
+            val output = ByteArrayOutputStream()
+            val exitValue =
+                execOperations.exec {
                     commandLine = listOf(cmake) + args
-                }.assertNormalExitValue()
+                    standardOutput = output
+                    errorOutput = output
+                    isIgnoreExitValue = true
+                }.exitValue
+            if (exitValue != 0) {
+                throw GradleException(
+                    "OpenCC host build failed with exit code $exitValue:\n" +
+                        output.toString(Charsets.UTF_8),
+                )
+            }
         }
     }
 }
