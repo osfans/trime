@@ -50,7 +50,6 @@
     <string name="user_data_dir">使用者資料夾</string>
     <string name="periodic_background_sync">背景定時同步</string>
     <string name="periodic_background_sync_status">上次同步：%1$s（%2$s）</string>
-    <string name="effects">效果</string>
     <string name="only_available_on_some_roms">此選項僅對部分 ROM 有效</string>
     <string name="show_app_icon">在啟動器中顯示圖示</string>
     <string name="browse_app_data_dir">瀏覽應用程式資料夾</string>
@@ -89,7 +88,6 @@
     <string name="key_swipe_velocity">最小滑動速度</string>
     <string name="build_info">建構資訊</string>
     <string name="telegram">Telegram</string>
-    <string name="quick_bar">快捷欄</string>
     <string name="copy_done">已複製到剪貼簿</string>
     <string name="hook_shift_space">按空白鍵時忽略 Shift 鎖定</string>
     <string name="test_input">測試輸入</string>
@@ -165,7 +163,6 @@
     <string name="setup__data_path_import_failed">資料夾匯入失敗</string>
     <string name="select_another_directory_to_sync">要改用其他資料夾同步嗎？</string>
     <string name="select_another_directory">變更</string>
-    <string name="data_path_not_selected">未選擇資料夾</string>
     <string name="sync_user_data_success">使用者資料同步成功</string>
     <string name="sync_user_data_success_external">使用者資料已同步到外部資料夾</string>
     <string name="sync_user_data_failure">使用者資料同步失敗</string>
@@ -178,7 +175,6 @@
     <string name="select_current_schema">選擇目前方案</string>
     <string name="enable_schemata">啟用方案</string>
     <string name="no_schema_to_select">目前沒有可用的方案，請先在「方案」設定中啟用。</string>
-    <string name="no_schema_to_enable">沒有可啟用的方案。請確保使用者資料夾中包含前置檔案和方案檔案。</string>
     <string name="schemata">方案</string>
     <string name="navbar_background">導覽列背景</string>
     <string name="no_theme_to_select">目前沒有可用的主題。</string>
@@ -194,7 +190,6 @@
     <string name="general">一般</string>
     <string name="composing_text">正在編輯的文字</string>
     <string name="commit_text_preview">上屏文字預覽</string>
-    <string name="raw_input">原始輸入碼</string>
     <string name="inline_preedit_mode">嵌入式預編輯模式</string>
     <string name="depends_on_input_device">視輸入裝置而定</string>
     <string name="always_show">始終顯示</string>
@@ -247,7 +242,6 @@
     </plurals>
     <string name="restored_from_x">已從 %1$s 還原</string>
     <string name="backup">備份</string>
-    <string name="restore">還原</string>
     <string name="clipboard_listening">記錄剪貼簿歷史</string>
     <string name="clipboard_return_after_paste">貼上後返回</string>
     <string name="clipboard_mask_sensitive">隱藏敏感資料（例如密碼）</string>
