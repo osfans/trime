@@ -71,6 +71,9 @@ class AlwaysUi(
     val inlineSuggestionsUi = InlineSuggestionsUi(ctx)
 
     val hideKeyboardButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_drop_down_24, scope)
+
+    val floatingToggleButton = ToolButton(ctx, R.drawable.ic_baseline_picture_in_picture_alt_24, scope)
+
     private val rightMostButton =
         ViewAnimator(ctx).apply {
             add(hideKeyboardButton, lParams(matchParent, matchParent))
@@ -101,6 +104,13 @@ class AlwaysUi(
             },
         )
         add(
+            floatingToggleButton,
+            lParams(rightWidth, rightHeight) {
+                before(rightMostButton)
+                centerVertically()
+            },
+        )
+        add(
             rightMostButton,
             lParams(rightWidth, rightHeight) {
                 endOfParent()
@@ -111,7 +121,7 @@ class AlwaysUi(
             animator,
             lParams(matchConstraints, matchParent) {
                 after(leftMostButton)
-                before(rightMostButton)
+                before(floatingToggleButton)
                 endOfParent()
                 centerVertically()
             },
@@ -144,8 +154,29 @@ class AlwaysUi(
     fun refreshColors() {
         leftMostButton.refreshColors()
         hideKeyboardButton.refreshColors()
+        floatingToggleButton.refreshColors()
         buttonsUi.refreshColors()
         clipboardUi.refreshColors()
+    }
+
+    /**
+     * The toggle stays in the same place in both modes and switches between
+     * floating the docked keyboard and docking the floating card.
+     */
+    fun setFloatingActive(active: Boolean) {
+        floatingToggleButton.apply {
+            setIcon(
+                if (active) {
+                    R.drawable.ic_baseline_dock_to_bottom_24
+                } else {
+                    R.drawable.ic_baseline_picture_in_picture_alt_24
+                },
+            )
+            contentDescription =
+                ctx.getString(
+                    if (active) R.string.floating_keyboard_dock else R.string.floating_keyboard_float,
+                )
+        }
     }
 
     private fun updateRightMostButton(state: State) {
