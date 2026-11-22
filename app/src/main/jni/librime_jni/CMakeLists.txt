@@ -4,11 +4,13 @@
 
 find_package(Opencc REQUIRED)
 
-aux_source_directory(. RIME_JNI_SOURCES)
+file(GLOB RIME_JNI_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cc")
 add_library(rime_jni SHARED ${RIME_JNI_SOURCES})
-target_link_libraries(rime_jni rime-static ${Opencc_LIBRARY})
+target_link_libraries(rime_jni PRIVATE rime-static ${Opencc_LIBRARY})
+
 target_include_directories(rime_jni PRIVATE
   "${CMAKE_BINARY_DIR}/librime/src"
   "${CMAKE_SOURCE_DIR}/librime/src"
+  "${X11Keysym}"
   "${Opencc_INCLUDE_PATH}"
 )

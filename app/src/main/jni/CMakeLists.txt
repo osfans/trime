@@ -2,58 +2,63 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-cmake_minimum_required(VERSION 3.18.0)
+cmake_minimum_required(VERSION 4.1)
 
 project(trime VERSION 3.0.0)
 
 # for reproducible build; GNU hash is enough above API 22
 add_link_options("LINKER:--build-id=none")
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # general options
-option(BUILD_SHARED_LIBS "" OFF)
-option(BUILD_TESTING "" OFF)
+option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+option(BUILD_TESTING "Build tests" OFF)
 option(ENABLE_LOGGING "Enable logging with spdlog library" ON)
 
 include(Boost)
 
 # spdlog is owned by librime and is linked statically into rime-static.
 if(ENABLE_LOGGING)
-  set(SPDLOG_BUILD_SHARED OFF CACHE BOOL "" FORCE)
-  set(SPDLOG_BUILD_PIC ON CACHE BOOL "" FORCE)
-  set(SPDLOG_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
-  set(SPDLOG_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-  set(SPDLOG_INSTALL OFF CACHE BOOL "" FORCE)
-  set(SPDLOG_FMT_EXTERNAL OFF CACHE BOOL "" FORCE)
+  set(SPDLOG_BUILD_SHARED OFF)
+  set(SPDLOG_BUILD_PIC ON)
+  set(SPDLOG_BUILD_EXAMPLE OFF)
+  set(SPDLOG_BUILD_TESTS OFF)
+  set(SPDLOG_INSTALL OFF)
+  set(SPDLOG_FMT_EXTERNAL OFF)
   add_subdirectory(librime/deps/spdlog EXCLUDE_FROM_ALL)
   target_compile_options(
     spdlog PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.")
 endif()
 
-option(YAML_CPP_BUILD_TOOLS "" OFF)
-option(YAML_CPP_BUILD_TESTS "" OFF)
-option(YAML_CPP_INSTALL "" OFF)
+# yaml-cpp
+option(YAML_CPP_BUILD_TOOLS "Build yaml-cpp tools" OFF)
+option(YAML_CPP_BUILD_TESTS "Build yaml-cpp tests" OFF)
+option(YAML_CPP_INSTALL "Install yaml-cpp" OFF)
 add_subdirectory(librime/deps/yaml-cpp)
 
-# enable compress for leveldb
-option(SNAPPY_BUILD_TESTS "" OFF)
-option(SNAPPY_BUILD_BENCHMARKS "" OFF)
-option(SNAPPY_INSTALL "" OFF)
+# snappy: compression for leveldb
+option(SNAPPY_BUILD_TESTS "Build snappy tests" OFF)
+option(SNAPPY_BUILD_BENCHMARKS "Build snappy benchmarks" OFF)
+option(SNAPPY_INSTALL "Install snappy" OFF)
 add_subdirectory(snappy)
 
+# leveldb
 set(HAVE_SNAPPY TRUE)
-option(LEVELDB_BUILD_TESTS "" OFF)
-option(LEVELDB_BUILD_BENCHMARKS "" OFF)
-option(LEVELDB_INSTALL "" OFF)
+option(LEVELDB_BUILD_TESTS "Build leveldb tests" OFF)
+option(LEVELDB_BUILD_BENCHMARKS "Build leveldb benchmarks" OFF)
+option(LEVELDB_INSTALL "Install leveldb" OFF)
 add_subdirectory(librime/deps/leveldb)
 
+# marisa
 add_subdirectory(librime/deps/marisa-trie)
 target_compile_options(
   marisa PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.")
 
 set(LIBMARISA marisa)
-option(USE_SYSTEM_MARISA "" ON)
+option(USE_SYSTEM_MARISA "Use the system marisa library" ON)
+
+# opencc
 add_subdirectory(librime/deps/opencc)
 # OpenCC's data/ builds its dictionaries by running the freshly built
 # opencc_dict, which is an Android executable and cannot run on the build
@@ -64,8 +69,8 @@ set_property(
   PROPERTY EXCLUDE_FROM_ALL TRUE)
 include(OpenccWorkarounds)
 
+# keysym.h is shipped in librime/include for cross-compilation.
 set(X11Keysym "${CMAKE_SOURCE_DIR}/librime/include")
-include_directories("${X11Keysym}")
 
 include(Rime)
 
