@@ -320,7 +320,7 @@ class FloatingKeyboardDelegate(override val di: DI) :
                 positionFloatingCard()
                 service.requestInputViewInsetsUpdate()
                 if (!floatingCollapsed && !floatingDragging && !resizeChanged) {
-                    keyboardView.post { if (host != null) clampFloatingScaleToScreen() }
+                    keyboardView.post { if (this@FloatingKeyboardDelegate.host != null) clampFloatingScaleToScreen() }
                 }
             }
         }
@@ -1024,7 +1024,7 @@ class FloatingKeyboardDelegate(override val di: DI) :
                 // Wait for the new width to be laid out before remembering
                 // where the card is.
                 keyboardView.post {
-                    if (host == null) return@post
+                    if (this@FloatingKeyboardDelegate.host == null) return@post
                     saveFloatingPosition()
                     service.requestInputViewInsetsUpdate()
                 }
