@@ -6,10 +6,14 @@ cmake_minimum_required(VERSION 4.1)
 
 project(trime VERSION 3.0.0)
 
-# for reproducible build; GNU hash is enough above API 22
-add_link_options("LINKER:--build-id=none")
-
 list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+# strip absolute source paths from debug info for reproducible builds
+add_library(trime-reproducible-build INTERFACE IMPORTED)
+set_target_properties(
+  trime-reproducible-build
+  PROPERTIES INTERFACE_COMPILE_OPTIONS
+             "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.")
 
 # general options
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
@@ -27,8 +31,7 @@ if(ENABLE_LOGGING)
   set(SPDLOG_INSTALL OFF)
   set(SPDLOG_FMT_EXTERNAL OFF)
   add_subdirectory(librime/deps/spdlog EXCLUDE_FROM_ALL)
-  target_compile_options(
-    spdlog PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.")
+  target_link_libraries(spdlog PRIVATE trime-reproducible-build)
 endif()
 
 # yaml-cpp
@@ -52,11 +55,9 @@ add_subdirectory(librime/deps/leveldb)
 
 # marisa
 add_subdirectory(librime/deps/marisa-trie)
-target_compile_options(
-  marisa PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.")
-
 set(LIBMARISA marisa)
 option(USE_SYSTEM_MARISA "Use the system marisa library" ON)
+target_link_libraries(marisa PRIVATE trime-reproducible-build)
 
 # opencc
 add_subdirectory(librime/deps/opencc)

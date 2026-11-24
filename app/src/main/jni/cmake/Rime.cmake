@@ -25,8 +25,7 @@ option(BUILD_TEST "Build librime tests" OFF)
 option(BUILD_STATIC "Build librime statically" ON)
 add_subdirectory(librime)
 target_compile_options(
-  rime-static PRIVATE "-Wno-error=deprecated-declarations" "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.")
-target_compile_options(
-  rime-lua-objs PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.")
-target_compile_options(
-  rime-octagram-objs PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.")
+  rime-static PRIVATE "-Wno-error=deprecated-declarations")
+target_link_libraries(rime-static PRIVATE trime-reproducible-build)
+target_link_libraries(rime-lua-objs PRIVATE trime-reproducible-build)
+target_link_libraries(rime-octagram-objs PRIVATE trime-reproducible-build)
