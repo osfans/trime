@@ -86,3 +86,7 @@ jobs:
           path: app/build/outputs/apk/debug/
           # keep 30 days
           retention-days: 30
+
+      - name: Stop Gradle daemon
+        if: always()
+        run: ./gradlew --stop

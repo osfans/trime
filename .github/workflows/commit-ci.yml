@@ -98,3 +98,7 @@ jobs:
           path: app/build/intermediates/merged_native_libs/debug/mergeDebugNativeLibs/out/lib/*
           # keep 90 days
           retention-days: 90
+
+      - name: Stop Gradle daemon
+        if: always()
+        run: ./gradlew --stop
