@@ -81,7 +81,7 @@ class OpenCCDataPlugin : Plugin<Project> {
         extension.ninjaExecutable.convention(target.envOrPropOrNull("HOST_NINJA", "hostNinja"))
         extension.pythonExecutable.convention(target.envOrPropOrNull("HOST_PYTHON", "hostPython"))
         extension.dictFormat.convention(
-            target.envOrPropOrNull("OPENCC_DICT_FORMAT", "openccDictFormat") ?: "ocd2",
+            target.envOrPropOrNull("OPENCC_DICT_FORMAT", "openccDictFormat").orEmpty().ifBlank { "ocd2" },
         )
         extension.extraArgs.convention(emptyList())
 
@@ -98,8 +98,8 @@ class OpenCCDataPlugin : Plugin<Project> {
         val sdkDirectory = project.androidSdkDirectory
         return project.tasks.register<BuildHostOpenCCDataTask>(BUILD_TASK) {
             sourceDir.set(project.openccSourceDir)
-            // the files configure, the build and the generators read; the
-            // bindings, docs and unused test frameworks are not among them
+            // everything configure, the build and the generators read; the
+            // bindings, docs and unused test frameworks are not part of it
             sources.from(
                 project.fileTree(project.openccSourceDir) {
                     exclude(
@@ -140,13 +140,16 @@ class OpenCCDataPlugin : Plugin<Project> {
                 from(buildTask.flatMap { it.installPrefix.dir("share/opencc") })
                 into(project.dataInstallDir)
             }
-        project.tasks.getByName(DataChecksumsPlugin.TASK).dependsOn(installTask)
+        // generateDataChecksums indexes the assets, so it must see the data
+        project.tasks.matching { it.name == DataChecksumsPlugin.TASK }.configureEach {
+            dependsOn(installTask)
+        }
     }
 
     private fun registerCleanTask(project: Project) {
         project
             .tasks.register<Delete>(CLEAN_TASK) {
-                // the host build tree sits in the build directory and goes with it
+                // only the assets need removing, the host build tree goes with build/
                 delete(project.dataInstallDir)
             }.also {
                 project.cleanTask.dependsOn(it)
@@ -207,11 +210,21 @@ class OpenCCDataPlugin : Plugin<Project> {
             val build = hostBuildDir.get().asFile
             val prefix = installPrefix.get().asFile
             val cmake = resolveCmake()
+            // Ninja is preferred everywhere: the Android SDK ships it next to
+            // cmake, and unlike the default Visual Studio generator it does not
+            // depend on which Visual Studio instances the host happens to have.
+            val ninja = resolveNinja(cmake)
+            // Without it, Windows falls back to that generator, which picks the
+            // configuration while building instead of while configuring.
+            val multiConfig = ninja == null && isWindows
             val python = resolvePython()
+            logger.info(
+                "OpenCC host build: cmake=$cmake ninja=$ninja python=$python multiConfig=$multiConfig",
+            )
 
-            configure(cmake, source, build, prefix, python)
-            buildDictionaries(cmake, build)
-            installData(cmake, build, prefix)
+            configure(cmake, source, build, prefix, ninja, python, multiConfig)
+            buildDictionaries(cmake, build, multiConfig)
+            installData(cmake, build, prefix, multiConfig)
             verifyInstalled(prefix.resolve("share/opencc"))
         }
 
@@ -220,16 +233,15 @@ class OpenCCDataPlugin : Plugin<Project> {
             source: File,
             build: File,
             prefix: File,
+            ninja: String?,
             python: String?,
+            multiConfig: Boolean,
         ) {
-            val ninja = resolveNinja(cmake)
-            logger.info("OpenCC host build: cmake=$cmake ninja=$ninja python=$python")
+            prepareBuildDir(build, ninja)
 
-            val buildType = if (isWindows) emptyList() else listOf("-DCMAKE_BUILD_TYPE=Release")
-            // Ninja is missing on some build hosts, the fallback is whatever
-            // generator CMake picks by default
             val generator =
                 ninja?.let { listOf("-G", "Ninja", "-DCMAKE_MAKE_PROGRAM=$it") }.orEmpty()
+            val buildType = if (multiConfig) emptyList() else listOf("-DCMAKE_BUILD_TYPE=Release")
             val pythonArg = python?.let { listOf("-DPython3_EXECUTABLE=$it") }.orEmpty()
             run(
                 cmake,
@@ -238,14 +250,9 @@ class OpenCCDataPlugin : Plugin<Project> {
                     generator +
                     listOf(
                         "-DCMAKE_INSTALL_PREFIX=${prefix.absolutePath}",
-                        // macOS enables the first two for a top level project, and
-                        // only the data is wanted here
+                        // macOS enables both by default for a top level project
                         "-DBUILD_SHARED_LIBS=OFF",
                         "-DBUILD_OPENCC_JIEBA_PLUGIN=OFF",
-                        "-DBUILD_DOCUMENTATION=OFF",
-                        "-DBUILD_PYTHON=OFF",
-                        "-DENABLE_GTEST=OFF",
-                        "-DENABLE_BENCHMARK=OFF",
                         "-DOPENCC_ENABLE_INSTALL=ON",
                         "-DOPENCC_DICT_FORMAT=${dictFormat.get()}",
                     ) +
@@ -254,17 +261,44 @@ class OpenCCDataPlugin : Plugin<Project> {
             )
         }
 
+        /**
+         * CMake refuses to change the generator of an existing tree, and keeps
+         * using the build tool recorded in it after that tool is gone, so drop
+         * the tree when either no longer fits.
+         */
+        private fun prepareBuildDir(
+            build: File,
+            ninja: String?,
+        ) {
+            val cache = build.resolve("CMakeCache.txt")
+            if (!cache.isFile) return
+
+            val entries = cache.readLines().associate { it.substringBefore(':') to it.substringAfter('=', "") }
+            val tool = entries["CMAKE_MAKE_PROGRAM"]
+            // a bare name, such as the msbuild.exe of a Visual Studio generator,
+            // is resolved by that generator and cannot be checked here
+            val toolUsable =
+                tool.isNullOrBlank() || !File(tool).isAbsolute || File(tool).canExecute()
+            val generatorUsable = ninja == null || entries["CMAKE_GENERATOR"] == "Ninja"
+            if (!generatorUsable || !toolUsable) {
+                logger.lifecycle("Recreating ${build.path}: its CMake toolchain changed")
+                build.deleteRecursively()
+            }
+        }
+
         private fun buildDictionaries(
             cmake: String,
             build: File,
+            multiConfig: Boolean,
         ) {
+            val format = dictFormat.get()
             // opencc_dict compiles the dictionaries, opencc itself converts the
-            // phrases they are derived from
+            // phrases they are derived from; a format other than ocd2 needs its
+            // configs rewritten to reference it
             val targets =
                 listOf("opencc_dict", "Dictionaries") +
-                    // another format needs its configs rewritten to reference it
-                    if (dictFormat.get() == "ocd2") emptyList() else listOf("ConvertedConfigs")
-            val release = if (isWindows) listOf("--config", "Release") else emptyList()
+                    if (format == "ocd2") emptyList() else listOf("ConvertedConfigs")
+            val release = if (multiConfig) listOf("--config", "Release") else emptyList()
             run(
                 cmake,
                 listOf("--build", build.absolutePath, "--target") +
@@ -278,6 +312,7 @@ class OpenCCDataPlugin : Plugin<Project> {
             cmake: String,
             build: File,
             prefix: File,
+            multiConfig: Boolean,
         ) {
             // this script installs the dictionaries and configs only, while
             // `--target install` would install the command line tools too
@@ -290,7 +325,7 @@ class OpenCCDataPlugin : Plugin<Project> {
             // Gradle does not clean an @OutputDirectory per file, so dictionaries
             // dropped by an OpenCC bump would otherwise reach the assets
             prefix.deleteRecursively()
-            val release = if (isWindows) listOf("-DCMAKE_INSTALL_CONFIG_NAME=Release") else emptyList()
+            val release = if (multiConfig) listOf("-DCMAKE_INSTALL_CONFIG_NAME=Release") else emptyList()
             run(
                 cmake,
                 listOf("-DCMAKE_INSTALL_PREFIX=${prefix.absolutePath}") +
@@ -339,7 +374,7 @@ class OpenCCDataPlugin : Plugin<Project> {
 
         private fun resolveNinja(cmake: String): String? = ninjaExecutable.orNotBlank()
             // the SDK, and CMake's own builds, ship ninja next to cmake
-            ?: File(cmake).resolveSibling(executableName("ninja")).takeIf { it.isFile }?.absolutePath
+            ?: File(cmake).resolveSibling(executableName("ninja")).takeIf { it.canExecute() }?.absolutePath
             ?: findOnPath("ninja")
 
         private fun resolvePython(): String? = pythonExecutable.orNotBlank() ?: findOnPath("python3") ?: findOnPath("python")
@@ -355,13 +390,28 @@ class OpenCCDataPlugin : Plugin<Project> {
                     root.listFiles { file -> file.isDirectory }
                         ?.map { it.name }
                         ?.filterNot { it == preferred }
-                        ?.sorted()
+                        ?.sortedWith { a, b -> compareVersions(b, a) }
                         .orEmpty()
             return versions
                 .asSequence()
                 .map { File(File(root, it), "bin/${executableName(name)}") }
-                .firstOrNull { it.isFile }
+                .firstOrNull { it.canExecute() }
                 ?.absolutePath
+        }
+
+        /** Compares dotted versions such as `4.1.2` or `3.6.4111459`. */
+        private fun compareVersions(
+            a: String,
+            b: String,
+        ): Int {
+            fun parts(version: String) = version.split('.', '-').map { it.toIntOrNull() ?: 0 }
+            val left = parts(a)
+            val right = parts(b)
+            for (index in 0 until maxOf(left.size, right.size)) {
+                val result = left.getOrElse(index) { 0 }.compareTo(right.getOrElse(index) { 0 })
+                if (result != 0) return result
+            }
+            return 0
         }
 
         private fun findOnPath(name: String): String? {
@@ -371,7 +421,7 @@ class OpenCCDataPlugin : Plugin<Project> {
                 ?.asSequence()
                 ?.filter { it.isNotBlank() }
                 ?.map { File(it, executable) }
-                ?.firstOrNull { it.isFile }
+                ?.firstOrNull { it.canExecute() }
                 ?.absolutePath
         }
 
@@ -383,17 +433,20 @@ class OpenCCDataPlugin : Plugin<Project> {
             cmake: String,
             args: List<String>,
         ) {
+            val command = listOf(cmake) + args
+            logger.info("OpenCC host build: ${command.joinToString(" ")}")
+
             val output = ByteArrayOutputStream()
             val exitValue =
                 execOperations.exec {
-                    commandLine = listOf(cmake) + args
+                    commandLine = command
                     standardOutput = output
                     errorOutput = output
                     isIgnoreExitValue = true
                 }.exitValue
             if (exitValue != 0) {
                 throw GradleException(
-                    "OpenCC host build failed with exit code $exitValue:\n" +
+                    "CMake failed with exit code $exitValue: ${command.joinToString(" ")}\n" +
                         output.toString(Charsets.UTF_8),
                 )
             }

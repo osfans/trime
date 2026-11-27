@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+# opencc.cc converts user text dictionaries, which needs the headers and the
+# library of the bundled OpenCC
 find_package(Opencc REQUIRED)
 
 file(GLOB RIME_JNI_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cc")
