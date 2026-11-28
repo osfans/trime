@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2026 Rime community
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# Rime custom patch: pinyin_simp
+#
+# Trime ships no stroke dictionary, so drop the optional stroke reverse lookup.
+# Keeping it would make this schema depend on the stroke recipe, which in turn
+# pulls in the essay vocabulary just for character weights.
+#
+# `key/=: null` overwrites the node with null, i.e. removes it. A plain null
+# under `patch` is a no-op in librime's config compiler.
+
+patch:
+  schema/dependencies/=: null
+  engine/translators:
+    - punct_translator
+    - script_translator
+  reverse_lookup/=: null
+  recognizer/patterns/reverse_lookup/=: null
