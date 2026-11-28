@@ -10,7 +10,6 @@ import android.net.Uri
 import android.util.Base64
 import androidx.core.util.AtomicFile
 import com.osfans.trime.TrimeApplication
-import com.osfans.trime.core.data.UserDataManager.sync
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.util.DeployNotification
 import com.osfans.trime.util.FileUtils
@@ -43,8 +42,7 @@ object UserDataManager {
     private const val SCHEMA_LIST_CUSTOM_PATCH = """
       patch:
         schema_list:
-          - schema: luna_pinyin
-          - schema: luna_pinyin_simp
+          - schema: pinyin_simp
     """
 
     private val lock = Mutex()

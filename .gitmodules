@@ -26,12 +26,6 @@
 [submodule "prelude"]
 	path = app/data/rime/prelude
 	url = https://github.com/rime/rime-prelude
-[submodule "luna-pinyin"]
-	path = app/data/rime/luna-pinyin
-	url = https://github.com/rime/rime-luna-pinyin
-[submodule "stroke"]
-	path = app/data/rime/stroke
-	url = https://github.com/rime/rime-stroke
-[submodule "essay"]
-	path = app/data/rime/essay
-	url = https://github.com/rime/rime-essay
+[submodule "pinyin-simp"]
+	path = app/data/rime/pinyin-simp
+	url = https://github.com/rime/rime-pinyin-simp
